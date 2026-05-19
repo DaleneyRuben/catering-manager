@@ -1,0 +1,34 @@
+{
+  "name": "catering-manager",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "frontend",
+    "backend"
+  ],
+  "scripts": {
+    "dev": "concurrently \"yarn workspace catering-manager-frontend dev\" \"yarn workspace catering-manager-backend dev\"",
+    "build": "yarn workspace catering-manager-frontend build && yarn workspace catering-manager-backend build",
+    "test": "yarn workspace catering-manager-frontend test && yarn workspace catering-manager-backend test",
+    "lint": "yarn workspace catering-manager-frontend lint && yarn workspace catering-manager-backend lint",
+    "lint:fix": "yarn workspace catering-manager-frontend lint:fix && yarn workspace catering-manager-backend lint:fix",
+    "format": "prettier --write \"**/*.{ts,tsx,json,css,md}\" --ignore-path .gitignore",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "husky": "^9.0.11",
+    "lint-staged": "^15.2.2",
+    "prettier": "^3.2.5",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3"
+  },
+  "lint-staged": {
+    "**/*.{ts,tsx}": [
+      "eslint --fix"
+    ],
+    "**/*.{ts,tsx,json,css,md}": [
+      "prettier --write"
+    ]
+  }
+}
