@@ -1,0 +1,35 @@
+import { NextFunction, Request, Response } from 'express';
+import subscriptionService from '../services/subscription.service';
+import { sendSuccess, sendError } from '../utils/response';
+
+const create = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const subscription = await subscriptionService.create(Number(req.params.clientId), req.body);
+    if (!subscription) {
+      sendError(res, 'Client not found', 404);
+      return;
+    }
+    sendSuccess(res, subscription, 201);
+  } catch (err) {
+    next(err);
+  }
+};
+
+const update = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const subscription = await subscriptionService.update(
+      Number(req.params.clientId),
+      Number(req.params.id),
+      req.body,
+    );
+    if (!subscription) {
+      sendError(res, 'Subscription not found', 404);
+      return;
+    }
+    sendSuccess(res, subscription);
+  } catch (err) {
+    next(err);
+  }
+};
+
+export default { create, update };
