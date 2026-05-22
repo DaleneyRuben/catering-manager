@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import clientService from '../services/client.service';
-import { sendSuccess } from '../utils/response';
+import { sendSuccess, sendError } from '../utils/response';
 
 const create = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -11,4 +11,26 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
-export default { create };
+const getAll = async (_req: Request, res: Response, next: NextFunction) => {
+  try {
+    const clients = await clientService.findAll();
+    sendSuccess(res, clients);
+  } catch (err) {
+    next(err);
+  }
+};
+
+const getById = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const client = await clientService.findById(Number(req.params.id));
+    if (!client) {
+      sendError(res, 'Client not found', 404);
+      return;
+    }
+    sendSuccess(res, client);
+  } catch (err) {
+    next(err);
+  }
+};
+
+export default { create, getAll, getById };
