@@ -36,5 +36,9 @@ module.exports = {
       env: { jest: true },
       parserOptions: { project: './tsconfig.eslint.json', tsconfigRootDir: __dirname },
     },
+    {
+      files: ['src/models/*.ts'],
+      rules: { 'import/no-cycle': 'off' },
+    },
   ],
 };
