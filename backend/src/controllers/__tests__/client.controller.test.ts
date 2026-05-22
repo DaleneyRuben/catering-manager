@@ -27,6 +27,53 @@ const validPayload = {
   allergies: ['gluten'],
 };
 
+describe('GET /api/clients', () => {
+  it('returns 200 with list of clients', async () => {
+    (clientService.findAll as jest.Mock).mockResolvedValue([mockClient]);
+
+    const res = await request(app).get('/api/clients');
+
+    expect(res.status).toBe(200);
+    expect(res.body.data).toHaveLength(1);
+    expect(res.body.data[0]).toMatchObject({ name: 'John Doe' });
+  });
+
+  it('returns 500 when service throws', async () => {
+    (clientService.findAll as jest.Mock).mockRejectedValue(new Error('db error'));
+
+    const res = await request(app).get('/api/clients');
+
+    expect(res.status).toBe(500);
+  });
+});
+
+describe('GET /api/clients/:id', () => {
+  it('returns 200 with client when found', async () => {
+    (clientService.findById as jest.Mock).mockResolvedValue(mockClient);
+
+    const res = await request(app).get('/api/clients/1');
+
+    expect(res.status).toBe(200);
+    expect(res.body.data).toMatchObject({ id: 1, name: 'John Doe' });
+  });
+
+  it('returns 404 when client not found', async () => {
+    (clientService.findById as jest.Mock).mockResolvedValue(null);
+
+    const res = await request(app).get('/api/clients/999');
+
+    expect(res.status).toBe(404);
+  });
+
+  it('returns 500 when service throws', async () => {
+    (clientService.findById as jest.Mock).mockRejectedValue(new Error('db error'));
+
+    const res = await request(app).get('/api/clients/1');
+
+    expect(res.status).toBe(500);
+  });
+});
+
 describe('POST /api/clients', () => {
   it('returns 201 with created client', async () => {
     (clientService.create as jest.Mock).mockResolvedValue(mockClient);
