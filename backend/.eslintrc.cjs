@@ -20,6 +20,7 @@ module.exports = {
   plugins: ['@typescript-eslint'],
   rules: {
     '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+    'import/prefer-default-export': 'off',
     'import/no-extraneous-dependencies': [
       'error',
       { devDependencies: ['**/*.test.ts', '**/jest.config.ts'] },
