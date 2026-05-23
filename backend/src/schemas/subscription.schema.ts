@@ -5,7 +5,6 @@ const dateField = z.string().regex(dateRegex, 'must be YYYY-MM-DD');
 
 export const createSubscriptionSchema = z.object({
   planId: z.number().int().positive(),
-  planPrice: z.number().positive(),
   contractDate: dateField,
   startDate: dateField,
   contractEndDate: dateField,
