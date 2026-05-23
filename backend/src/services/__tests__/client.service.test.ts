@@ -10,9 +10,13 @@ const mockClient = {
   dateOfBirth: '1990-05-15',
   phoneNumber: '+1234567890',
   address: '123 Main St',
-  deliveryZone: 'Zone A',
+  zone: 'Centro',
+  delivery: 'La Oliva',
+  nit: null,
+  businessName: null,
   underlyingDiseases: ['diabetes'],
-  allergies: ['gluten'],
+  restrictions: ['gluten'],
+  isPaused: false,
 };
 
 describe('clientService.create', () => {
@@ -25,13 +29,14 @@ describe('clientService.create', () => {
       dateOfBirth: '1990-05-15',
       phoneNumber: '+1234567890',
       address: '123 Main St',
-      deliveryZone: 'Zone A',
+      zone: 'Centro',
+      delivery: 'La Oliva',
       underlyingDiseases: ['diabetes'],
-      allergies: ['gluten'],
+      restrictions: ['gluten'],
     });
 
     expect(Client.create).toHaveBeenCalledTimes(1);
-    expect(result).toMatchObject({ name: 'John Doe', sex: 'male' });
+    expect(result).toMatchObject({ name: 'John Doe', zone: 'Centro' });
   });
 
   it('propagates db errors', async () => {
@@ -44,9 +49,10 @@ describe('clientService.create', () => {
         dateOfBirth: '1990-05-15',
         phoneNumber: '+1234567890',
         address: '123 Main St',
-        deliveryZone: 'Zone A',
+        zone: 'Centro',
+        delivery: 'La Oliva',
         underlyingDiseases: [],
-        allergies: [],
+        restrictions: [],
       }),
     ).rejects.toThrow('db error');
   });
