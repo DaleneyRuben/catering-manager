@@ -8,6 +8,8 @@ const mockPlan = {
   name: 'Full Plan',
   meals: ['breakfast', 'lunch', 'dinner'],
   description: 'Three meals a day',
+  price: 150.0,
+  discount: 0,
 };
 
 describe('planService.create', () => {
@@ -18,17 +20,25 @@ describe('planService.create', () => {
       name: 'Full Plan',
       meals: ['breakfast', 'lunch', 'dinner'],
       description: 'Three meals a day',
+      price: 150.0,
+      discount: 0,
     });
 
     expect(Plan.create).toHaveBeenCalledTimes(1);
-    expect(result).toMatchObject({ name: 'Full Plan', meals: ['breakfast', 'lunch', 'dinner'] });
+    expect(result).toMatchObject({ name: 'Full Plan', price: 150.0 });
   });
 
   it('propagates db errors', async () => {
     (Plan.create as jest.Mock).mockRejectedValue(new Error('db error'));
 
     await expect(
-      planService.create({ name: 'Full Plan', meals: ['breakfast'], description: '' }),
+      planService.create({
+        name: 'Full Plan',
+        meals: ['breakfast'],
+        description: '',
+        price: 100,
+        discount: 0,
+      }),
     ).rejects.toThrow('db error');
   });
 });
