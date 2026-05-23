@@ -58,6 +58,18 @@ describe('Layout', () => {
     expect(aside.className).not.toContain('-translate-x-full');
   });
 
+  it('active nav link has the olive accent border', () => {
+    render(
+      <MemoryRouter initialEntries={['/clientes']}>
+        <Layout>
+          <span />
+        </Layout>
+      </MemoryRouter>,
+    );
+    const clientesLink = screen.getByRole('link', { name: /clientes/i });
+    expect(clientesLink.className).toContain('border-olive-400');
+  });
+
   it('closes the sidebar when the backdrop is clicked', async () => {
     const user = userEvent.setup();
     render(
