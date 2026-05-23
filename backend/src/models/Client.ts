@@ -19,13 +19,25 @@ class Client extends Model {
   declare address: string;
 
   @Column({ type: DataType.STRING, allowNull: false })
-  declare deliveryZone: string;
+  declare zone: string;
+
+  @Column({ type: DataType.STRING, allowNull: false })
+  declare delivery: string;
+
+  @Column({ type: DataType.STRING, allowNull: true })
+  declare nit: string | null;
+
+  @Column({ type: DataType.STRING, allowNull: true })
+  declare businessName: string | null;
 
   @Column({ type: DataType.ARRAY(DataType.STRING), allowNull: false, defaultValue: [] })
   declare underlyingDiseases: string[];
 
   @Column({ type: DataType.ARRAY(DataType.STRING), allowNull: false, defaultValue: [] })
-  declare allergies: string[];
+  declare restrictions: string[];
+
+  @Column({ type: DataType.BOOLEAN, allowNull: false, defaultValue: false })
+  declare isPaused: boolean;
 
   @HasMany(() => Subscription)
   declare subscriptions: Subscription[];
