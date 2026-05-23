@@ -8,16 +8,16 @@ const mockSubscription = {
   id: 1,
   clientId: 1,
   planId: 2,
-  contractDate: '2026-05-01',
-  startDate: '2026-05-01',
-  contractEndDate: '2026-05-31',
+  contractDate: '2026-05-23',
+  startDate: '2026-05-26',
+  contractEndDate: '2026-06-22',
 };
 
 const validPayload = {
   planId: 2,
-  contractDate: '2026-05-01',
-  startDate: '2026-05-01',
-  contractEndDate: '2026-05-31',
+  startDate: '2026-05-26',
+  contractDate: '2026-05-23',
+  contractEndDate: '2026-06-22',
 };
 
 describe('POST /api/clients/:clientId/subscriptions', () => {
@@ -46,10 +46,34 @@ describe('POST /api/clients/:clientId/subscriptions', () => {
     expect(res.status).toBe(400);
   });
 
-  it('returns 400 when date format is invalid', async () => {
+  it('returns 400 when startDate format is invalid', async () => {
     const res = await request(app)
       .post('/api/clients/1/subscriptions')
-      .send({ ...validPayload, startDate: '01-05-2026' });
+      .send({ ...validPayload, startDate: '26-05-2026' });
+
+    expect(res.status).toBe(400);
+  });
+
+  it('returns 400 when contractDate does not match', async () => {
+    (subscriptionService.create as jest.Mock).mockRejectedValue(
+      Object.assign(new Error('contractDate must be today'), { statusCode: 400 }),
+    );
+
+    const res = await request(app)
+      .post('/api/clients/1/subscriptions')
+      .send({ ...validPayload, contractDate: '2026-01-01' });
+
+    expect(res.status).toBe(400);
+  });
+
+  it('returns 400 when contractEndDate does not match', async () => {
+    (subscriptionService.create as jest.Mock).mockRejectedValue(
+      Object.assign(new Error('contractEndDate must be ...'), { statusCode: 400 }),
+    );
+
+    const res = await request(app)
+      .post('/api/clients/1/subscriptions')
+      .send({ ...validPayload, contractEndDate: '2026-12-31' });
 
     expect(res.status).toBe(400);
   });
@@ -89,7 +113,7 @@ describe('PATCH /api/clients/:clientId/subscriptions/:id', () => {
   it('returns 400 when date format is invalid', async () => {
     const res = await request(app)
       .patch('/api/clients/1/subscriptions/1')
-      .send({ startDate: '01-05-2026' });
+      .send({ contractEndDate: '30-06-2026' });
 
     expect(res.status).toBe(400);
   });
