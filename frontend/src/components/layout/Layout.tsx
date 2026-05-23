@@ -52,7 +52,7 @@ export function Layout({ children }: LayoutProps) {
           <div className="brand-mark rounded-full w-9 h-9" aria-hidden="true" />
           <span className="font-serif text-xl text-ink leading-none">La Oliva</span>
         </div>
-        <nav className="flex-1 px-3 py-4 flex flex-col gap-0.5">
+        <nav className="flex-1 py-4 flex flex-col">
           {NAV_ITEMS.map(({ to, label, icon }) => (
             <NavLink
               key={to}
@@ -60,10 +60,10 @@ export function Layout({ children }: LayoutProps) {
               end={to === '/'}
               className={({ isActive }) =>
                 [
-                  'relative flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors',
+                  'flex items-center gap-3 pl-[13px] pr-4 py-2 text-sm transition-colors border-l-[3px]',
                   isActive
-                    ? 'nav-item-active font-semibold text-ink bg-olive-50'
-                    : 'text-muted hover:text-ink hover:bg-cream',
+                    ? 'border-olive-400 bg-olive-50 text-ink font-semibold'
+                    : 'border-transparent text-muted hover:text-ink hover:bg-cream-2',
                 ].join(' ')
               }
             >
