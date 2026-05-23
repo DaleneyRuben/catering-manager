@@ -9,3 +9,14 @@ describe('GET /api/health', () => {
     expect(res.body).toEqual({ status: 'ok' });
   });
 });
+
+describe('CORS', () => {
+  it('allows requests from the configured origin', async () => {
+    const res = await request(app)
+      .options('/api/health')
+      .set('Origin', 'http://localhost:3000')
+      .set('Access-Control-Request-Method', 'GET');
+
+    expect(res.headers['access-control-allow-origin']).toBe('http://localhost:3000');
+  });
+});
