@@ -18,9 +18,6 @@ class Subscription extends Model {
   @BelongsTo(() => Plan)
   declare plan: Plan;
 
-  @Column({ type: DataType.DECIMAL(10, 2), allowNull: false })
-  declare planPrice: number;
-
   @Column({ type: DataType.DATEONLY, allowNull: false })
   declare contractDate: string;
 
