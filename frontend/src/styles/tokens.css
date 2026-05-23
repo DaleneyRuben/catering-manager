@@ -1,0 +1,36 @@
+@theme {
+  /* Olive palette */
+  --color-olive-50: #f3f6ec;
+  --color-olive-100: #e6ecd5;
+  --color-olive-200: #cdd9aa;
+  --color-olive-300: #a8c374;
+  --color-olive-400: #6cc118;
+  --color-olive-500: #5b9c31;
+  --color-olive-600: #5d8a2c;
+  --color-olive-700: #357e1c;
+  --color-olive-800: #1e3c0a;
+  --color-olive-900: #142806;
+
+  /* Semantic colors */
+  --color-cream: #f7f6f1;
+  --color-cream-2: #efece2;
+  --color-paper: #fbfaf5;
+  --color-ink: #1a1f15;
+  --color-ink-2: #3d4234;
+  --color-muted: #7b806d;
+  --color-rule: #dcd9c8;
+  --color-rule-2: #c8c4ad;
+
+  /* Status colors */
+  --color-alert: #c4341a;
+  --color-alert-bg: #fae6dd;
+  --color-warn: #a87f10;
+  --color-warn-bg: #f4ead0;
+  --color-ok: #357e1c;
+  --color-ok-bg: #dee9c8;
+
+  /* Fonts */
+  --font-sans: 'Manrope', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+  --font-serif: 'Cormorant Garamond', Georgia, serif;
+}
