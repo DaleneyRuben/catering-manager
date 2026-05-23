@@ -13,7 +13,6 @@ const mockSubscription = {
   id: 1,
   clientId: 1,
   planId: 2,
-  planPrice: 150.0,
   contractDate: '2026-05-01',
   startDate: '2026-05-01',
   contractEndDate: '2026-05-31',
@@ -21,7 +20,6 @@ const mockSubscription = {
 
 const createData = {
   planId: 2,
-  planPrice: 150.0,
   contractDate: '2026-05-01',
   startDate: '2026-05-01',
   contractEndDate: '2026-05-31',
@@ -57,21 +55,21 @@ describe('subscriptionService.create', () => {
 
 describe('subscriptionService.update', () => {
   it('updates a subscription and returns the updated instance', async () => {
-    const updated = { ...mockSubscription, planPrice: 200.0 };
+    const updated = { ...mockSubscription, contractEndDate: '2026-06-30' };
     const mockInstance = { update: jest.fn().mockResolvedValue(updated) };
     (Subscription.findOne as jest.Mock).mockResolvedValue(mockInstance);
 
-    const result = await subscriptionService.update(1, 1, { planPrice: 200.0 });
+    const result = await subscriptionService.update(1, 1, { contractEndDate: '2026-06-30' });
 
     expect(Subscription.findOne).toHaveBeenCalledWith({ where: { id: 1, clientId: 1 } });
-    expect(mockInstance.update).toHaveBeenCalledWith({ planPrice: 200.0 });
-    expect(result).toMatchObject({ planPrice: 200.0 });
+    expect(mockInstance.update).toHaveBeenCalledWith({ contractEndDate: '2026-06-30' });
+    expect(result).toMatchObject({ contractEndDate: '2026-06-30' });
   });
 
   it('returns null when subscription not found', async () => {
     (Subscription.findOne as jest.Mock).mockResolvedValue(null);
 
-    const result = await subscriptionService.update(1, 999, { planPrice: 200.0 });
+    const result = await subscriptionService.update(1, 999, { contractEndDate: '2026-06-30' });
 
     expect(result).toBeNull();
   });
@@ -80,8 +78,8 @@ describe('subscriptionService.update', () => {
     const mockInstance = { update: jest.fn().mockRejectedValue(new Error('db error')) };
     (Subscription.findOne as jest.Mock).mockResolvedValue(mockInstance);
 
-    await expect(subscriptionService.update(1, 1, { planPrice: 200.0 })).rejects.toThrow(
-      'db error',
-    );
+    await expect(
+      subscriptionService.update(1, 1, { contractEndDate: '2026-06-30' }),
+    ).rejects.toThrow('db error');
   });
 });

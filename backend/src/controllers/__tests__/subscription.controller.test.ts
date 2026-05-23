@@ -8,7 +8,6 @@ const mockSubscription = {
   id: 1,
   clientId: 1,
   planId: 2,
-  planPrice: 150.0,
   contractDate: '2026-05-01',
   startDate: '2026-05-01',
   contractEndDate: '2026-05-31',
@@ -16,7 +15,6 @@ const mockSubscription = {
 
 const validPayload = {
   planId: 2,
-  planPrice: 150.0,
   contractDate: '2026-05-01',
   startDate: '2026-05-01',
   contractEndDate: '2026-05-31',
@@ -56,14 +54,6 @@ describe('POST /api/clients/:clientId/subscriptions', () => {
     expect(res.status).toBe(400);
   });
 
-  it('returns 400 when planPrice is not positive', async () => {
-    const res = await request(app)
-      .post('/api/clients/1/subscriptions')
-      .send({ ...validPayload, planPrice: -10 });
-
-    expect(res.status).toBe(400);
-  });
-
   it('returns 500 when service throws', async () => {
     (subscriptionService.create as jest.Mock).mockRejectedValue(new Error('db error'));
 
@@ -75,15 +65,15 @@ describe('POST /api/clients/:clientId/subscriptions', () => {
 
 describe('PATCH /api/clients/:clientId/subscriptions/:id', () => {
   it('returns 200 with updated subscription', async () => {
-    const updated = { ...mockSubscription, planPrice: 200.0 };
+    const updated = { ...mockSubscription, contractEndDate: '2026-06-30' };
     (subscriptionService.update as jest.Mock).mockResolvedValue(updated);
 
     const res = await request(app)
       .patch('/api/clients/1/subscriptions/1')
-      .send({ planPrice: 200.0 });
+      .send({ contractEndDate: '2026-06-30' });
 
     expect(res.status).toBe(200);
-    expect(res.body.data).toMatchObject({ planPrice: 200.0 });
+    expect(res.body.data).toMatchObject({ contractEndDate: '2026-06-30' });
   });
 
   it('returns 404 when subscription not found', async () => {
@@ -91,7 +81,7 @@ describe('PATCH /api/clients/:clientId/subscriptions/:id', () => {
 
     const res = await request(app)
       .patch('/api/clients/1/subscriptions/999')
-      .send({ planPrice: 200.0 });
+      .send({ contractEndDate: '2026-06-30' });
 
     expect(res.status).toBe(404);
   });
@@ -109,7 +99,7 @@ describe('PATCH /api/clients/:clientId/subscriptions/:id', () => {
 
     const res = await request(app)
       .patch('/api/clients/1/subscriptions/1')
-      .send({ planPrice: 200.0 });
+      .send({ contractEndDate: '2026-06-30' });
 
     expect(res.status).toBe(500);
   });
