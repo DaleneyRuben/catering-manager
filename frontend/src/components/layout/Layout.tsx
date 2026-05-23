@@ -42,15 +42,15 @@ export function Layout({ children }: LayoutProps) {
 
       <aside
         className={[
-          'fixed inset-y-0 left-0 z-40 w-56 flex flex-col bg-paper border-r border-rule',
+          'fixed inset-y-0 left-0 z-40 w-56 flex flex-col bg-olive-900 border-r border-olive-800',
           'transition-transform duration-200',
           'md:relative md:translate-x-0',
           menuOpen ? 'translate-x-0' : '-translate-x-full',
         ].join(' ')}
       >
-        <div className="px-5 py-5 flex items-center gap-3 border-b border-rule">
+        <div className="px-5 py-5 flex items-center gap-3 border-b border-olive-800">
           <div className="brand-mark rounded-full w-9 h-9" aria-hidden="true" />
-          <span className="font-serif text-xl text-ink leading-none">La Oliva</span>
+          <span className="font-serif text-xl text-cream leading-none">La Oliva</span>
         </div>
         <nav className="flex-1 py-4 flex flex-col">
           {NAV_ITEMS.map(({ to, label, icon }) => (
@@ -62,8 +62,8 @@ export function Layout({ children }: LayoutProps) {
                 [
                   'flex items-center gap-3 pl-[13px] pr-4 py-2 text-sm transition-colors border-l-[3px]',
                   isActive
-                    ? 'border-olive-400 bg-olive-50 text-ink font-semibold'
-                    : 'border-transparent text-muted hover:text-ink hover:bg-cream-2',
+                    ? 'border-olive-400 bg-olive-800 text-cream font-semibold'
+                    : 'border-transparent text-olive-300 hover:text-cream hover:bg-olive-800',
                 ].join(' ')
               }
             >
@@ -75,16 +75,16 @@ export function Layout({ children }: LayoutProps) {
       </aside>
 
       <div className="flex flex-col flex-1 min-w-0">
-        <header className="flex items-center gap-3 px-4 h-12 bg-paper border-b border-rule md:hidden shrink-0">
+        <header className="flex items-center gap-3 px-4 h-12 bg-olive-900 border-b border-olive-800 md:hidden shrink-0">
           <button
             type="button"
             aria-label="Abrir menú"
-            className="text-muted hover:text-ink"
+            className="text-olive-300 hover:text-cream"
             onClick={() => setMenuOpen(true)}
           >
             <Icon name="menu" size={20} />
           </button>
-          <span className="font-serif text-lg text-ink leading-none">La Oliva</span>
+          <span className="font-serif text-lg text-cream leading-none">La Oliva</span>
         </header>
         <main className="flex-1 min-w-0 overflow-auto">{children}</main>
       </div>
