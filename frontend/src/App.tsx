@@ -6,6 +6,7 @@ import { PlansPage } from './pages/PlansPage';
 import { MenuImportPage } from './pages/MenuImportPage';
 import { ReportsPage } from './pages/ReportsPage';
 import { RenewalsPage } from './pages/RenewalsPage';
+import { HealthPage } from './pages/HealthPage';
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
         <Route path="/menu" element={<MenuImportPage />} />
         <Route path="/informes" element={<ReportsPage />} />
         <Route path="/renovaciones" element={<RenewalsPage />} />
+        <Route path="/health" element={<HealthPage />} />
       </Routes>
     </Layout>
   );
