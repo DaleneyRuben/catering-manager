@@ -6,9 +6,12 @@ export const createClientSchema = z.object({
   dateOfBirth: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'dateOfBirth must be YYYY-MM-DD'),
   phoneNumber: z.string().min(1),
   address: z.string().min(1),
-  deliveryZone: z.string().min(1),
+  zone: z.enum(['Centro', 'Sur']),
+  delivery: z.enum(['La Oliva', 'Otro']),
+  nit: z.string().optional(),
+  businessName: z.string().optional(),
   underlyingDiseases: z.array(z.string()).default([]),
-  allergies: z.array(z.string()).default([]),
+  restrictions: z.array(z.string()).default([]),
 });
 
 export type CreateClientDto = z.infer<typeof createClientSchema>;
