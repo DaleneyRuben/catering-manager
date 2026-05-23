@@ -1,5 +1,7 @@
 import { Sequelize } from 'sequelize-typescript';
-import path from 'path';
+import Client from '../models/Client';
+import Plan from '../models/Plan';
+import Subscription from '../models/Subscription';
 
 const sequelize = new Sequelize(process.env.DATABASE_URL as string, {
   dialect: 'postgres',
@@ -9,7 +11,7 @@ const sequelize = new Sequelize(process.env.DATABASE_URL as string, {
       rejectUnauthorized: false,
     },
   },
-  models: [path.join(__dirname, '../models')],
+  models: [Client, Plan, Subscription],
   logging: process.env.NODE_ENV === 'development' ? console.log : false,
 });
 
