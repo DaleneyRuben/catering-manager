@@ -11,9 +11,13 @@ const mockClient = {
   dateOfBirth: '1990-05-15',
   phoneNumber: '+1234567890',
   address: '123 Main St',
-  deliveryZone: 'Zone A',
+  zone: 'Centro',
+  delivery: 'La Oliva',
+  nit: null,
+  businessName: null,
   underlyingDiseases: ['diabetes'],
-  allergies: ['gluten'],
+  restrictions: ['gluten'],
+  isPaused: false,
 };
 
 const validPayload = {
@@ -22,9 +26,10 @@ const validPayload = {
   dateOfBirth: '1990-05-15',
   phoneNumber: '+1234567890',
   address: '123 Main St',
-  deliveryZone: 'Zone A',
+  zone: 'Centro',
+  delivery: 'La Oliva',
   underlyingDiseases: ['diabetes'],
-  allergies: ['gluten'],
+  restrictions: ['gluten'],
 };
 
 describe('GET /api/clients', () => {
@@ -104,6 +109,22 @@ describe('POST /api/clients', () => {
     const res = await request(app)
       .post('/api/clients')
       .send({ ...validPayload, dateOfBirth: '15-05-1990' });
+
+    expect(res.status).toBe(400);
+  });
+
+  it('returns 400 when zone is invalid', async () => {
+    const res = await request(app)
+      .post('/api/clients')
+      .send({ ...validPayload, zone: 'Norte' });
+
+    expect(res.status).toBe(400);
+  });
+
+  it('returns 400 when delivery is invalid', async () => {
+    const res = await request(app)
+      .post('/api/clients')
+      .send({ ...validPayload, delivery: 'Unknown' });
 
     expect(res.status).toBe(400);
   });
