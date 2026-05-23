@@ -5,12 +5,16 @@ const dateField = z.string().regex(dateRegex, 'must be YYYY-MM-DD');
 
 export const createSubscriptionSchema = z.object({
   planId: z.number().int().positive(),
-  contractDate: dateField,
   startDate: dateField,
+  contractDate: dateField,
   contractEndDate: dateField,
 });
 
-export const updateSubscriptionSchema = createSubscriptionSchema.partial();
+export const updateSubscriptionSchema = z.object({
+  planId: z.number().int().positive().optional(),
+  startDate: dateField.optional(),
+  contractEndDate: dateField.optional(),
+});
 
 export type CreateSubscriptionDto = z.infer<typeof createSubscriptionSchema>;
 export type UpdateSubscriptionDto = z.infer<typeof updateSubscriptionSchema>;
