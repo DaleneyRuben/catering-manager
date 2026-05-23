@@ -1,6 +1,15 @@
 import { z } from 'zod';
 
-const meals = ['breakfast', 'snack', 'lunch', 'dinner'] as const;
+const meals = [
+  'breakfast',
+  'morning_snack',
+  'salad',
+  'lunch',
+  'afternoon_snack',
+  'dinner',
+  'juice',
+  'extra',
+] as const;
 
 export const createPlanSchema = z.object({
   name: z.string().min(1),
