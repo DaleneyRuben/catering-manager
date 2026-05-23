@@ -72,6 +72,22 @@ export function Layout({ children }: LayoutProps) {
             </NavLink>
           ))}
         </nav>
+        <div className="border-t border-olive-800">
+          <NavLink
+            to="/health"
+            className={({ isActive }) =>
+              [
+                'flex items-center gap-3 pl-[13px] pr-4 py-3 text-sm transition-colors border-l-[3px]',
+                isActive
+                  ? 'border-olive-400 bg-olive-800 text-white font-semibold'
+                  : 'border-transparent text-white/60 hover:text-white hover:bg-olive-800',
+              ].join(' ')
+            }
+          >
+            <Icon name="stethoscope" size={16} />
+            Health
+          </NavLink>
+        </div>
       </aside>
 
       <div className="flex flex-col flex-1 min-w-0">
