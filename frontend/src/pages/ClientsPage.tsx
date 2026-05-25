@@ -224,6 +224,7 @@ export function ClientsPage() {
                   return (
                     <tr
                       key={c.id}
+                      onClick={() => navigate(`/clientes/${c.id}`)}
                       className="border-b border-rule last:border-0 hover:bg-cream-2 cursor-pointer transition-colors"
                     >
                       <td className="px-4 py-3">

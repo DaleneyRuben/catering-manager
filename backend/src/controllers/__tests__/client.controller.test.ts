@@ -79,6 +79,66 @@ describe('GET /api/clients/:id', () => {
   });
 });
 
+describe('PATCH /api/clients/:id', () => {
+  it('returns 200 when toggling isActive', async () => {
+    (clientService.update as jest.Mock).mockResolvedValue({ ...mockClient, isActive: false });
+
+    const res = await request(app).patch('/api/clients/1').send({ isActive: false });
+
+    expect(res.status).toBe(200);
+    expect(res.body.data).toMatchObject({ isActive: false });
+  });
+
+  it('returns 200 when updating identity fields', async () => {
+    (clientService.update as jest.Mock).mockResolvedValue({
+      ...mockClient,
+      name: 'Jane Doe',
+      phoneNumber: '+9876543210',
+    });
+
+    const res = await request(app)
+      .patch('/api/clients/1')
+      .send({ name: 'Jane Doe', phoneNumber: '+9876543210' });
+
+    expect(res.status).toBe(200);
+    expect(res.body.data).toMatchObject({ name: 'Jane Doe', phoneNumber: '+9876543210' });
+  });
+
+  it('returns 400 when sex is invalid', async () => {
+    const res = await request(app).patch('/api/clients/1').send({ sex: 'alien' });
+
+    expect(res.status).toBe(400);
+  });
+
+  it('returns 400 when zone is invalid', async () => {
+    const res = await request(app).patch('/api/clients/1').send({ zone: 'Norte' });
+
+    expect(res.status).toBe(400);
+  });
+
+  it('returns 404 when client not found', async () => {
+    (clientService.update as jest.Mock).mockResolvedValue(null);
+
+    const res = await request(app).patch('/api/clients/999').send({ isActive: false });
+
+    expect(res.status).toBe(404);
+  });
+
+  it('returns 400 with invalid body', async () => {
+    const res = await request(app).patch('/api/clients/1').send({ isActive: 'yes' });
+
+    expect(res.status).toBe(400);
+  });
+
+  it('returns 500 when service throws', async () => {
+    (clientService.update as jest.Mock).mockRejectedValue(new Error('db error'));
+
+    const res = await request(app).patch('/api/clients/1').send({ isActive: false });
+
+    expect(res.status).toBe(500);
+  });
+});
+
 describe('POST /api/clients', () => {
   it('returns 201 with created client', async () => {
     (clientService.create as jest.Mock).mockResolvedValue(mockClient);
