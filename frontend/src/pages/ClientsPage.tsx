@@ -1,7 +1,273 @@
+import { useState, useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { format, parseISO } from 'date-fns';
+import { es } from 'date-fns/locale';
+import { Icon } from '../components/ui/Icon';
+import api from '../services/api';
+import { Client, ClientStatus, clientStatus } from '../types/client';
+
+const MONTHS = [
+  'Enero',
+  'Febrero',
+  'Marzo',
+  'Abril',
+  'Mayo',
+  'Junio',
+  'Julio',
+  'Agosto',
+  'Septiembre',
+  'Octubre',
+  'Noviembre',
+  'Diciembre',
+];
+
+const STATUS_LABELS: Record<ClientStatus, string> = {
+  active: 'Activo',
+  paused: 'Pausado',
+  expiring: 'Por vencer',
+  ended: 'Finalizado',
+};
+
+const STATUS_CLASSES: Record<ClientStatus, string> = {
+  active: 'bg-ok-bg text-ok',
+  paused: 'bg-warn-bg text-warn',
+  expiring: 'bg-warn-bg text-warn',
+  ended: 'bg-rule text-muted',
+};
+
+function initials(name: string) {
+  return name
+    .split(' ')
+    .slice(0, 2)
+    .map((s) => s[0])
+    .join('');
+}
+
+function formatDateShort(iso: string) {
+  return format(parseISO(iso), 'dd/MM/yy');
+}
+
+function formatMonthDay(iso: string) {
+  return format(parseISO(iso), 'd MMM', { locale: es });
+}
+
+type FilterValue = 'active' | 'expiring' | 'paused' | 'ended' | 'all';
+
 export function ClientsPage() {
+  const navigate = useNavigate();
+  const [clients, setClients] = useState<Client[]>([]);
+  const [q, setQ] = useState('');
+  const [filter, setFilter] = useState<FilterValue>('active');
+  const [birthMonth, setBirthMonth] = useState('all');
+
+  useEffect(() => {
+    const load = async () => {
+      const res = await api.get('/clients');
+      setClients(res.data.data);
+    };
+    load();
+  }, []);
+
+  const counts = useMemo(() => {
+    const today = new Date();
+    return {
+      active: clients.filter((c) => clientStatus(c, today) === 'active').length,
+      paused: clients.filter((c) => clientStatus(c, today) === 'paused').length,
+      expiring: clients.filter((c) => clientStatus(c, today) === 'expiring').length,
+      ended: clients.filter((c) => clientStatus(c, today) === 'ended').length,
+    };
+  }, [clients]);
+
+  const filtered = useMemo(() => {
+    const today = new Date();
+    let list = clients;
+
+    if (filter !== 'all') {
+      list = list.filter((c) => clientStatus(c, today) === filter);
+    }
+    if (birthMonth !== 'all') {
+      const m = Number(birthMonth);
+      list = list.filter((c) => new Date(c.dateOfBirth).getMonth() + 1 === m);
+    }
+    if (q) {
+      const Q = q.toLowerCase();
+      list = list.filter(
+        (c) =>
+          c.name.toLowerCase().includes(Q) ||
+          c.address.toLowerCase().includes(Q) ||
+          (c.nit || '').toLowerCase().includes(Q),
+      );
+    }
+    return list;
+  }, [clients, filter, birthMonth, q]);
+
   return (
-    <div className="p-8">
-      <h1 className="font-serif text-3xl text-ink mb-1">Clientes</h1>
+    <div className="p-6 max-w-7xl mx-auto">
+      {/* Header */}
+      <div className="flex items-start gap-4 mb-6 flex-wrap">
+        <div>
+          <p className="text-xs font-mono uppercase tracking-widest text-muted mb-1">Directorio</p>
+          <h1 className="font-serif text-3xl text-ink">Clientes</h1>
+          <p className="text-sm text-muted mt-1">
+            {counts.active} activos · {clients.length} totales · {counts.expiring} vencen pronto
+          </p>
+        </div>
+        <div className="ml-auto flex gap-2 flex-wrap">
+          <button
+            type="button"
+            className="flex items-center gap-1.5 px-3 py-2 text-sm border border-rule rounded-md text-ink-2 hover:bg-paper transition-colors"
+          >
+            <Icon name="download" size={14} />
+            Exportar
+          </button>
+          <button
+            type="button"
+            onClick={() => navigate('/clientes/nuevo')}
+            className="flex items-center gap-1.5 px-3 py-2 text-sm bg-olive-900 text-white rounded-md hover:bg-olive-800 transition-colors"
+          >
+            <Icon name="plus" size={14} />
+            Alta de cliente
+          </button>
+        </div>
+      </div>
+
+      {/* Filter bar */}
+      <div className="bg-paper border border-rule rounded-lg p-3 mb-4 flex flex-wrap gap-3 items-center">
+        <div className="relative flex-1 min-w-[200px]">
+          <input
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            placeholder="Buscar por nombre, NIT, dirección…"
+            className="w-full pl-8 pr-3 py-2 text-sm border border-rule rounded-md bg-cream focus:outline-none focus:border-olive-600"
+          />
+          <Icon
+            name="search"
+            size={14}
+            className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted"
+          />
+        </div>
+
+        <div className="flex rounded-md border border-rule overflow-hidden text-sm">
+          {(
+            [
+              { v: 'active', l: `Activos · ${counts.active}` },
+              { v: 'expiring', l: `Por vencer · ${counts.expiring}` },
+              { v: 'paused', l: `Pausados · ${counts.paused}` },
+              { v: 'ended', l: `Finalizados · ${counts.ended}` },
+              { v: 'all', l: 'Todos' },
+            ] as { v: FilterValue; l: string }[]
+          ).map(({ v, l }) => (
+            <button
+              type="button"
+              key={v}
+              onClick={() => setFilter(v)}
+              className={`px-3 py-1.5 transition-colors ${
+                filter === v ? 'bg-olive-900 text-white' : 'bg-paper text-ink-2 hover:bg-cream'
+              }`}
+            >
+              {l}
+            </button>
+          ))}
+        </div>
+
+        <select
+          value={birthMonth}
+          onChange={(e) => setBirthMonth(e.target.value)}
+          className="py-2 px-2.5 text-sm border border-rule rounded-md bg-paper"
+        >
+          <option value="all">Mes de nacimiento · todos</option>
+          {MONTHS.map((m, i) => (
+            <option key={m} value={i + 1}>
+              {m}
+            </option>
+          ))}
+        </select>
+
+        <span className="text-xs font-mono text-muted ml-auto">{filtered.length} resultados</span>
+      </div>
+
+      {/* Table */}
+      <div className="bg-paper border border-rule rounded-lg overflow-hidden">
+        {filtered.length === 0 ? (
+          <div className="py-16 text-center">
+            <div className="w-12 h-12 rounded-full bg-cream mx-auto mb-3 flex items-center justify-center text-olive-700">
+              <Icon name="users" size={22} />
+            </div>
+            <p className="font-semibold text-ink">Sin resultados</p>
+            <p className="text-sm text-muted mt-1">Probá con otra búsqueda o quitá los filtros.</p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-rule text-xs font-mono uppercase tracking-wide text-muted">
+                  <th className="text-left px-4 py-3">Cliente</th>
+                  <th className="text-left px-4 py-3">Plan</th>
+                  <th className="text-left px-4 py-3">Zona</th>
+                  <th className="text-left px-4 py-3">Nacimiento</th>
+                  <th className="text-left px-4 py-3">Contrato</th>
+                  <th className="text-left px-4 py-3">Estado</th>
+                  <th className="text-right px-4 py-3">Precio</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filtered.map((c) => {
+                  const sub = c.subscriptions[0];
+                  const status = clientStatus(c);
+                  return (
+                    <tr
+                      key={c.id}
+                      className="border-b border-rule last:border-0 hover:bg-cream cursor-pointer transition-colors"
+                    >
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-2.5">
+                          <div className="w-8 h-8 rounded-full bg-olive-800 text-white flex items-center justify-center font-serif text-sm font-semibold shrink-0">
+                            {initials(c.name)}
+                          </div>
+                          <div>
+                            <p className="font-semibold text-ink">{c.name}</p>
+                            <p className="text-xs font-mono text-muted">
+                              {c.zone} · {c.sex}
+                            </p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-4 py-3">
+                        {sub ? (
+                          <span className="px-2 py-0.5 rounded-full text-xs bg-olive-800 text-white font-mono">
+                            {sub.plan.name}
+                          </span>
+                        ) : (
+                          <span className="text-muted">—</span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3 font-mono text-xs">{c.zone}</td>
+                      <td className="px-4 py-3 font-mono text-xs">
+                        {formatMonthDay(c.dateOfBirth)}
+                      </td>
+                      <td className="px-4 py-3 font-mono text-xs text-ink-2">
+                        {sub
+                          ? `${formatDateShort(sub.startDate)} → ${formatDateShort(sub.contractEndDate)}`
+                          : '—'}
+                      </td>
+                      <td className="px-4 py-3">
+                        <span
+                          className={`px-2 py-0.5 rounded-full text-xs font-mono ${STATUS_CLASSES[status]}`}
+                        >
+                          {STATUS_LABELS[status]}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-right font-mono text-sm">
+                        {sub ? `$${sub.plan.price}` : '—'}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
