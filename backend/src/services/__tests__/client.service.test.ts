@@ -86,3 +86,32 @@ describe('clientService.findById', () => {
     expect(result).toBeNull();
   });
 });
+
+describe('clientService.update', () => {
+  it('updates a client and returns the updated instance', async () => {
+    const mockInstance = {
+      update: jest.fn().mockResolvedValue({ ...mockClient, isActive: false }),
+    };
+    (Client.findByPk as jest.Mock).mockResolvedValue(mockInstance);
+
+    const result = await clientService.update(1, { isActive: false });
+
+    expect(mockInstance.update).toHaveBeenCalledWith({ isActive: false });
+    expect(result).toMatchObject({ isActive: false });
+  });
+
+  it('returns null when client not found', async () => {
+    (Client.findByPk as jest.Mock).mockResolvedValue(null);
+
+    const result = await clientService.update(999, { isActive: false });
+
+    expect(result).toBeNull();
+  });
+
+  it('propagates db errors', async () => {
+    const mockInstance = { update: jest.fn().mockRejectedValue(new Error('db error')) };
+    (Client.findByPk as jest.Mock).mockResolvedValue(mockInstance);
+
+    await expect(clientService.update(1, { isActive: false })).rejects.toThrow('db error');
+  });
+});

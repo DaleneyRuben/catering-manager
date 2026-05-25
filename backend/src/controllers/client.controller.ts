@@ -33,4 +33,17 @@ const getById = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
-export default { create, getAll, getById };
+const update = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const client = await clientService.update(Number(req.params.id), req.body);
+    if (!client) {
+      sendError(res, 'Client not found', 404);
+      return;
+    }
+    sendSuccess(res, client);
+  } catch (err) {
+    next(err);
+  }
+};
+
+export default { create, getAll, getById, update };
