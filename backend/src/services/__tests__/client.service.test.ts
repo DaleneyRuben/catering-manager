@@ -16,7 +16,7 @@ const mockClient = {
   businessName: null,
   underlyingDiseases: ['diabetes'],
   restrictions: ['gluten'],
-  isPaused: false,
+  isActive: true,
 };
 
 describe('clientService.create', () => {
