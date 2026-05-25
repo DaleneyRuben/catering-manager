@@ -149,27 +149,29 @@ export function ClientsPage() {
           />
         </div>
 
-        <div className="inline-flex p-[3px] bg-cream-2 border border-rule rounded-[7px] text-[12px]">
-          {(
-            [
-              { v: 'active', l: `Activos · ${counts.active}` },
-              { v: 'expiring', l: `Por vencer · ${counts.expiring}` },
-              { v: 'paused', l: `Pausados · ${counts.paused}` },
-              { v: 'ended', l: `Finalizados · ${counts.ended}` },
-              { v: 'all', l: 'Todos' },
-            ] as { v: FilterValue; l: string }[]
-          ).map(({ v, l }) => (
-            <button
-              type="button"
-              key={v}
-              onClick={() => setFilter(v)}
-              className={`px-3 py-1.5 rounded-[5px] font-medium transition-all ${
-                filter === v ? 'bg-paper text-ink shadow-sm' : 'text-muted hover:text-ink-2'
-              }`}
-            >
-              {l}
-            </button>
-          ))}
+        <div className="w-full overflow-x-auto sm:w-auto">
+          <div className="inline-flex p-[3px] bg-cream-2 border border-rule rounded-[7px] text-[12px]">
+            {(
+              [
+                { v: 'active', l: 'Activos' },
+                { v: 'expiring', l: 'Por vencer' },
+                { v: 'paused', l: 'Pausados' },
+                { v: 'ended', l: 'Finalizados' },
+                { v: 'all', l: 'Todos' },
+              ] as { v: FilterValue; l: string }[]
+            ).map(({ v, l }) => (
+              <button
+                type="button"
+                key={v}
+                onClick={() => setFilter(v)}
+                className={`px-3 py-1.5 rounded-[5px] font-medium whitespace-nowrap transition-all ${
+                  filter === v ? 'bg-paper text-ink shadow-sm' : 'text-muted hover:text-ink-2'
+                }`}
+              >
+                {l}
+              </button>
+            ))}
+          </div>
         </div>
 
         <div className="relative shrink-0">
