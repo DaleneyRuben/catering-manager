@@ -172,18 +172,26 @@ export function ClientsPage() {
           ))}
         </div>
 
-        <select
-          value={birthMonth}
-          onChange={(e) => setBirthMonth(e.target.value)}
-          className="py-[7px] px-2.5 text-[13px] border border-rule rounded-md bg-paper"
-        >
-          <option value="all">Mes de nacimiento · todos</option>
-          {MONTHS.map((m, i) => (
-            <option key={m} value={i + 1}>
-              {m}
-            </option>
-          ))}
-        </select>
+        <div className="relative shrink-0">
+          <select
+            value={birthMonth}
+            onChange={(e) => setBirthMonth(e.target.value)}
+            style={{ fontSize: 13 }}
+            className="appearance-none py-[7px] pl-2.5 pr-7 border border-rule rounded-[5px] bg-paper cursor-pointer"
+          >
+            <option value="all">Mes de nacimiento · todos</option>
+            {MONTHS.map((m, i) => (
+              <option key={m} value={i + 1}>
+                {m}
+              </option>
+            ))}
+          </select>
+          <Icon
+            name="chevron-down"
+            size={12}
+            className="absolute right-2 top-1/2 -translate-y-1/2 text-muted pointer-events-none"
+          />
+        </div>
 
         <span className="text-[11px] font-mono text-muted ml-auto">
           {filtered.length} resultados
