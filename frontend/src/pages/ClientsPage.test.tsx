@@ -62,10 +62,10 @@ describe('ClientsPage', () => {
     await waitFor(() => expect(screen.getByText('Sin resultados')).toBeInTheDocument());
   });
 
-  it('has an alta de cliente button', async () => {
+  it('has an add client button', async () => {
     mockGet.mockResolvedValue({ data: { data: [] } });
     renderPage();
-    expect(screen.getByRole('button', { name: /alta de cliente/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /agregar cliente/i })).toBeInTheDocument();
   });
 
   it('filters clients by search query', async () => {
