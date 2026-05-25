@@ -113,6 +113,12 @@ export function Icon({ name, size = 16, stroke = 1.5, className }: IconProps) {
           <path d="M5 12h14M13 6l6 6-6 6" />
         </svg>
       );
+    case 'arrow-left':
+      return (
+        <svg {...props}>
+          <path d="M19 12H5M11 6l-6 6 6 6" />
+        </svg>
+      );
     case 'arrow-up':
       return (
         <svg {...props}>

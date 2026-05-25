@@ -2,7 +2,12 @@ import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import App from './App';
 
-jest.mock('./services/api', () => ({ default: { get: jest.fn() } }));
+jest.mock('./services/api', () => ({
+  default: {
+    get: jest.fn().mockResolvedValue({ data: { data: [] } }),
+    post: jest.fn(),
+  },
+}));
 
 describe('App', () => {
   it('renders the dashboard at root', () => {
