@@ -102,20 +102,22 @@ export function ClientsPage() {
   }, [clients, filter, birthMonth, q]);
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
+    <div className="p-7 max-w-[1320px] mx-auto">
       {/* Header */}
-      <div className="flex items-start gap-4 mb-6 flex-wrap">
+      <div className="flex items-end gap-6 mb-7 flex-wrap">
         <div>
-          <p className="text-xs font-mono uppercase tracking-widest text-muted mb-1">Directorio</p>
-          <h1 className="font-serif text-3xl text-ink">Clientes</h1>
-          <p className="text-sm text-muted mt-1">
+          <p className="text-[10.5px] font-mono uppercase tracking-[.14em] text-muted mb-2">
+            Directorio
+          </p>
+          <h1 className="font-serif text-[44px] leading-none text-ink">Clientes</h1>
+          <p className="text-[13px] text-muted mt-2.5">
             {counts.active} activos · {clients.length} totales · {counts.expiring} vencen pronto
           </p>
         </div>
         <div className="ml-auto flex gap-2 flex-wrap">
           <button
             type="button"
-            className="flex items-center gap-1.5 px-3 py-2 text-sm border border-rule rounded-md text-ink-2 hover:bg-paper transition-colors"
+            className="flex items-center gap-2 px-3.5 py-2.5 text-[13px] font-semibold border border-rule rounded-md text-ink hover:bg-paper transition-colors"
           >
             <Icon name="download" size={14} />
             Exportar
@@ -123,7 +125,7 @@ export function ClientsPage() {
           <button
             type="button"
             onClick={() => navigate('/clientes/nuevo')}
-            className="flex items-center gap-1.5 px-3 py-2 text-sm bg-olive-900 text-white rounded-md hover:bg-olive-800 transition-colors"
+            className="flex items-center gap-2 px-3.5 py-2.5 text-[13px] font-semibold bg-olive-800 text-white rounded-md hover:bg-olive-700 transition-colors"
           >
             <Icon name="plus" size={14} />
             Alta de cliente
@@ -132,13 +134,13 @@ export function ClientsPage() {
       </div>
 
       {/* Filter bar */}
-      <div className="bg-paper border border-rule rounded-lg p-3 mb-4 flex flex-wrap gap-3 items-center">
-        <div className="relative flex-1 min-w-[200px]">
+      <div className="bg-paper border border-rule rounded-lg px-4 py-3.5 mb-4 flex flex-wrap gap-3.5 items-center">
+        <div className="relative flex-1 min-w-[240px]">
           <input
             value={q}
             onChange={(e) => setQ(e.target.value)}
             placeholder="Buscar por nombre, NIT, dirección…"
-            className="w-full pl-8 pr-3 py-2 text-sm border border-rule rounded-md bg-cream focus:outline-none focus:border-olive-600"
+            className="w-full pl-8 pr-3 py-2 text-[13px] border border-rule rounded-md bg-cream focus:outline-none focus:border-olive-600"
           />
           <Icon
             name="search"
@@ -147,7 +149,7 @@ export function ClientsPage() {
           />
         </div>
 
-        <div className="inline-flex p-1 bg-cream-2 border border-rule rounded-lg text-xs">
+        <div className="inline-flex p-[3px] bg-cream-2 border border-rule rounded-[7px] text-[12px]">
           {(
             [
               { v: 'active', l: `Activos · ${counts.active}` },
@@ -161,7 +163,7 @@ export function ClientsPage() {
               type="button"
               key={v}
               onClick={() => setFilter(v)}
-              className={`px-3 py-1.5 rounded-md font-medium transition-all ${
+              className={`px-3 py-1.5 rounded-[5px] font-medium transition-all ${
                 filter === v ? 'bg-paper text-ink shadow-sm' : 'text-muted hover:text-ink-2'
               }`}
             >
@@ -173,7 +175,7 @@ export function ClientsPage() {
         <select
           value={birthMonth}
           onChange={(e) => setBirthMonth(e.target.value)}
-          className="py-2 px-2.5 text-sm border border-rule rounded-md bg-paper"
+          className="py-[7px] px-2.5 text-[13px] border border-rule rounded-md bg-paper"
         >
           <option value="all">Mes de nacimiento · todos</option>
           {MONTHS.map((m, i) => (
@@ -183,7 +185,9 @@ export function ClientsPage() {
           ))}
         </select>
 
-        <span className="text-xs font-mono text-muted ml-auto">{filtered.length} resultados</span>
+        <span className="text-[11px] font-mono text-muted ml-auto">
+          {filtered.length} resultados
+        </span>
       </div>
 
       {/* Table */}
