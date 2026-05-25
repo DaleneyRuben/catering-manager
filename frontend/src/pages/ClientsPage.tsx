@@ -147,7 +147,7 @@ export function ClientsPage() {
           />
         </div>
 
-        <div className="flex rounded-md border border-rule overflow-hidden text-sm">
+        <div className="inline-flex p-1 bg-cream-2 border border-rule rounded-lg text-xs">
           {(
             [
               { v: 'active', l: `Activos · ${counts.active}` },
@@ -161,8 +161,8 @@ export function ClientsPage() {
               type="button"
               key={v}
               onClick={() => setFilter(v)}
-              className={`px-3 py-1.5 transition-colors ${
-                filter === v ? 'bg-olive-900 text-white' : 'bg-paper text-ink-2 hover:bg-cream'
+              className={`px-3 py-1.5 rounded-md font-medium transition-all ${
+                filter === v ? 'bg-paper text-ink shadow-sm' : 'text-muted hover:text-ink-2'
               }`}
             >
               {l}
@@ -200,14 +200,14 @@ export function ClientsPage() {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-rule text-xs font-mono uppercase tracking-wide text-muted">
-                  <th className="text-left px-4 py-3">Cliente</th>
-                  <th className="text-left px-4 py-3">Plan</th>
-                  <th className="text-left px-4 py-3">Zona</th>
-                  <th className="text-left px-4 py-3">Nacimiento</th>
-                  <th className="text-left px-4 py-3">Contrato</th>
-                  <th className="text-left px-4 py-3">Estado</th>
-                  <th className="text-right px-4 py-3">Precio</th>
+                <tr className="bg-cream-2 border-b border-rule text-[10.5px] font-mono uppercase tracking-widest text-muted">
+                  <th className="text-left px-4 py-2.5 font-medium">Cliente</th>
+                  <th className="text-left px-4 py-2.5 font-medium">Plan</th>
+                  <th className="text-left px-4 py-2.5 font-medium">Zona</th>
+                  <th className="text-left px-4 py-2.5 font-medium">Nacimiento</th>
+                  <th className="text-left px-4 py-2.5 font-medium">Contrato</th>
+                  <th className="text-left px-4 py-2.5 font-medium">Estado</th>
+                  <th className="text-right px-4 py-2.5 font-medium">Precio</th>
                 </tr>
               </thead>
               <tbody>
@@ -217,7 +217,7 @@ export function ClientsPage() {
                   return (
                     <tr
                       key={c.id}
-                      className="border-b border-rule last:border-0 hover:bg-cream cursor-pointer transition-colors"
+                      className="border-b border-rule last:border-0 hover:bg-cream-2 cursor-pointer transition-colors"
                     >
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-2.5">
