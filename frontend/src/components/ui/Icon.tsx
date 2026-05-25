@@ -200,6 +200,12 @@ export function Icon({ name, size = 16, stroke = 1.5, className }: IconProps) {
           <path d="M3 21c4-8 9-12 15-12" />
         </svg>
       );
+    case 'chevron-down':
+      return (
+        <svg {...props}>
+          <path d="M6 9l6 6 6-6" />
+        </svg>
+      );
     default:
       return null;
   }
