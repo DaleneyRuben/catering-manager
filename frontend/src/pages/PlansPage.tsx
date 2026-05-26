@@ -28,72 +28,39 @@ const MEAL_LABELS: Record<MealKey, string> = {
   extra: 'Extra',
 };
 
-type MealCounts = Partial<Record<MealKey, number>>;
-
 interface PlanDraft {
   name: string;
-  mealCounts: MealCounts;
+  meals: MealKey[];
   price: string;
-}
-
-function arrayToMealCounts(meals: string[]): MealCounts {
-  return meals.reduce<MealCounts>((counts, m) => {
-    const key = m as MealKey;
-    return { ...counts, [key]: (counts[key] ?? 0) + 1 };
-  }, {});
-}
-
-function mealCountsToArray(counts: MealCounts): string[] {
-  return MEAL_KEYS.flatMap((key) => Array<string>(counts[key] ?? 0).fill(key));
-}
-
-function updateMealCount(counts: MealCounts, key: MealKey, delta: number): MealCounts {
-  const cur = counts[key] ?? 0;
-  const next = Math.max(0, Math.min(4, cur + delta));
-  const result = { ...counts };
-  if (next === 0) {
-    delete result[key];
-  } else {
-    result[key] = next;
-  }
-  return result;
 }
 
 function MealRow({
   mealKey,
-  count,
-  onUpdate,
+  included,
+  onToggle,
 }: {
   mealKey: MealKey;
-  count: number;
-  onUpdate: (key: MealKey, delta: number) => void;
+  included: boolean;
+  onToggle: (key: MealKey) => void;
 }) {
   return (
-    <div className="flex items-center gap-2.5 px-3 py-2.5 bg-cream-2 rounded-md border border-rule">
-      <span className="w-2 h-2 rounded-[2px] bg-olive-600 shrink-0" />
+    <button
+      type="button"
+      onClick={() => onToggle(mealKey)}
+      className={`flex items-center gap-2.5 px-3 py-2.5 rounded-md border text-left w-full transition-colors ${
+        included
+          ? 'bg-olive-800 border-olive-800 text-white'
+          : 'bg-cream-2 border-rule text-muted hover:border-olive-600'
+      }`}
+    >
       <span
-        className={`flex-1 text-[13px] ${count > 0 ? 'font-semibold text-ink' : 'font-normal text-muted'}`}
-      >
+        className={`w-2 h-2 rounded-[2px] shrink-0 ${included ? 'bg-white' : 'bg-olive-600'}`}
+      />
+      <span className={`flex-1 text-[13px] ${included ? 'font-semibold' : 'font-normal'}`}>
         {MEAL_LABELS[mealKey]}
       </span>
-      <div className="flex items-center gap-1">
-        <button
-          type="button"
-          onClick={() => onUpdate(mealKey, -1)}
-          className="w-6 h-6 flex items-center justify-center border border-rule rounded bg-paper hover:bg-cream-2 text-[14px] leading-none transition-colors"
-        >
-          −
-        </button>
-        <span className="w-5 text-center font-mono text-[13px] font-semibold">{count}</span>
-        <button
-          type="button"
-          onClick={() => onUpdate(mealKey, 1)}
-          className="w-6 h-6 flex items-center justify-center border border-rule rounded bg-paper hover:bg-cream-2 text-[14px] leading-none transition-colors"
-        >
-          +
-        </button>
-      </div>
-    </div>
+      {included && <Icon name="check" size={12} />}
+    </button>
   );
 }
 
@@ -110,10 +77,13 @@ function PlanEditorForm({
   setDraft: (d: PlanDraft) => void;
   namePlaceholder?: string;
 }) {
-  const onMeal = (key: MealKey, delta: number) => {
-    setDraft({ ...draft, mealCounts: updateMealCount(draft.mealCounts, key, delta) });
+  const onToggle = (key: MealKey) => {
+    const included = draft.meals.includes(key);
+    setDraft({
+      ...draft,
+      meals: included ? draft.meals.filter((m) => m !== key) : [...draft.meals, key],
+    });
   };
-  const totalMeals = Object.values(draft.mealCounts).reduce((a, b) => a + (b ?? 0), 0);
 
   return (
     <>
@@ -136,39 +106,28 @@ function PlanEditorForm({
       <div className="grid grid-cols-2 gap-2">
         <div className="flex flex-col gap-2">
           {COL1.map((m) => (
-            <MealRow key={m} mealKey={m} count={draft.mealCounts[m] ?? 0} onUpdate={onMeal} />
+            <MealRow key={m} mealKey={m} included={draft.meals.includes(m)} onToggle={onToggle} />
           ))}
         </div>
         <div className="flex flex-col gap-2">
           {COL2.map((m) => (
-            <MealRow key={m} mealKey={m} count={draft.mealCounts[m] ?? 0} onUpdate={onMeal} />
+            <MealRow key={m} mealKey={m} included={draft.meals.includes(m)} onToggle={onToggle} />
           ))}
         </div>
       </div>
 
       <div className="h-px bg-rule my-4" />
 
-      <div className="grid grid-cols-2 gap-3.5">
-        <Field label="Precio ($/mes)" htmlFor="pef-price" required>
-          <input
-            id="pef-price"
-            type="number"
-            min={0}
-            value={draft.price}
-            onChange={(e) => setDraft({ ...draft, price: e.target.value })}
-            className={inputCls()}
-          />
-        </Field>
-        <Field label="Total comidas/día" htmlFor="pef-total">
-          <input
-            id="pef-total"
-            type="number"
-            value={totalMeals}
-            readOnly
-            className={`${inputCls()} bg-cream-2`}
-          />
-        </Field>
-      </div>
+      <Field label="Precio ($/mes)" htmlFor="pef-price" required>
+        <input
+          id="pef-price"
+          type="number"
+          min={0}
+          value={draft.price}
+          onChange={(e) => setDraft({ ...draft, price: e.target.value })}
+          className={inputCls()}
+        />
+      </Field>
     </>
   );
 }
@@ -180,7 +139,7 @@ function CreatePlanModal({
   onClose: () => void;
   onSave: (draft: PlanDraft) => void;
 }) {
-  const [draft, setDraft] = useState<PlanDraft>({ name: '', mealCounts: {}, price: '0' });
+  const [draft, setDraft] = useState<PlanDraft>({ name: '', meals: [], price: '0' });
 
   return (
     <>
@@ -246,7 +205,7 @@ function PlanCard({
   clientCount: number;
   onClick: () => void;
 }) {
-  const mealCounts = arrayToMealCounts(plan.meals);
+  const includedMeals = MEAL_KEYS.filter((m) => plan.meals.includes(m));
   return (
     <div
       role="button"
@@ -285,7 +244,7 @@ function PlanCard({
         </span>
       </p>
       <div className="flex flex-wrap gap-1.5 mt-3.5">
-        {MEAL_KEYS.filter((m) => mealCounts[m]).map((m) => (
+        {includedMeals.map((m) => (
           <span
             key={m}
             className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-mono"
@@ -296,7 +255,6 @@ function PlanCard({
           >
             <span className="w-2 h-2 rounded-[2px] bg-olive-600 shrink-0" />
             {MEAL_LABELS[m]}
-            {(mealCounts[m] ?? 0) > 1 ? ` ×${mealCounts[m]}` : ''}
           </span>
         ))}
       </div>
@@ -318,7 +276,7 @@ export function PlansPage() {
   const [plans, setPlans] = useState<Plan[]>([]);
   const [clientCounts, setClientCounts] = useState<Record<number, number>>({});
   const [selectedId, setSelectedId] = useState<number | null>(null);
-  const [draft, setDraft] = useState<PlanDraft>({ name: '', mealCounts: {}, price: '' });
+  const [draft, setDraft] = useState<PlanDraft>({ name: '', meals: [], price: '' });
   const [createOpen, setCreateOpen] = useState(false);
 
   const load = async () => {
@@ -344,21 +302,19 @@ export function PlansPage() {
   useEffect(() => {
     if (selectedId === null || plans.length === 0) return;
     const p = plans.find((plan) => plan.id === selectedId);
-    if (p)
-      setDraft({ name: p.name, mealCounts: arrayToMealCounts(p.meals), price: String(p.price) });
+    if (p) setDraft({ name: p.name, meals: p.meals as MealKey[], price: String(p.price) });
   }, [selectedId, plans]);
 
   const handleDiscard = () => {
     const p = plans.find((plan) => plan.id === selectedId);
-    if (p)
-      setDraft({ name: p.name, mealCounts: arrayToMealCounts(p.meals), price: String(p.price) });
+    if (p) setDraft({ name: p.name, meals: p.meals as MealKey[], price: String(p.price) });
   };
 
   const handleSave = async () => {
     if (selectedId === null) return;
     await api.patch(`/plans/${selectedId}`, {
       name: draft.name,
-      meals: mealCountsToArray(draft.mealCounts),
+      meals: draft.meals,
       price: Number(draft.price),
     });
     await load();
@@ -367,7 +323,7 @@ export function PlansPage() {
   const handleCreate = async (newDraft: PlanDraft) => {
     await api.post('/plans', {
       name: newDraft.name,
-      meals: mealCountsToArray(newDraft.mealCounts),
+      meals: newDraft.meals,
       price: Number(newDraft.price),
     });
     setCreateOpen(false);

@@ -133,7 +133,7 @@ describe('PlansPage', () => {
     await userEvent.type(nameInput, 'Ligero');
 
     const priceInputs = screen.getAllByRole('spinbutton');
-    const modalPriceInput = priceInputs[priceInputs.length - 2];
+    const modalPriceInput = priceInputs[priceInputs.length - 1];
     fireEvent.change(modalPriceInput, { target: { value: '500' } });
 
     const submitBtn = screen.getByRole('button', { name: /^crear plan$/i });
