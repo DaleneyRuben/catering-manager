@@ -56,8 +56,9 @@ export function usePlans() {
     clientCounts,
     isLoading: plansQuery.isLoading || clientsQuery.isLoading,
     isSaving: saveMutation.isPending,
-    save: (id: number, draft: PlanDraft) => saveMutation.mutateAsync({ id, draft }),
-    create: (draft: PlanDraft) => createMutation.mutateAsync(draft),
-    remove: (id: number) => removeMutation.mutateAsync(id),
+    save: (id: number, draft: PlanDraft): Promise<void> =>
+      saveMutation.mutateAsync({ id, draft }).then(() => {}),
+    create: (draft: PlanDraft): Promise<void> => createMutation.mutateAsync(draft).then(() => {}),
+    remove: (id: number): Promise<void> => removeMutation.mutateAsync(id).then(() => {}),
   };
 }
