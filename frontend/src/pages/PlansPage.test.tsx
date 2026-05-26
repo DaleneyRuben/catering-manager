@@ -145,18 +145,26 @@ describe('PlansPage', () => {
     await waitFor(() => expect(saveBtn).toBeDisabled());
   });
 
-  it('Eliminar button is disabled while DELETE is in flight', async () => {
-    mockDelete.mockReturnValue(new Promise(() => {}));
-
+  it('clicking Eliminar opens a confirmation modal', async () => {
     renderPage();
     await screen.findByText('Completo');
-    const deleteBtn = screen.getByRole('button', { name: /eliminar/i });
-    fireEvent.click(deleteBtn);
+    fireEvent.click(screen.getByRole('button', { name: /eliminar/i }));
 
-    await waitFor(() => expect(deleteBtn).toBeDisabled());
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+    expect(mockDelete).not.toHaveBeenCalled();
   });
 
-  it('Eliminar calls DELETE /plans/:id and removes the plan from the list', async () => {
+  it('cancelling the confirmation does not delete', async () => {
+    renderPage();
+    await screen.findByText('Completo');
+    fireEvent.click(screen.getByRole('button', { name: /eliminar/i }));
+    fireEvent.click(screen.getByRole('button', { name: /cancelar/i }));
+
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(mockDelete).not.toHaveBeenCalled();
+  });
+
+  it('confirming deletion calls DELETE /plans/:id and removes the plan', async () => {
     mockDelete.mockResolvedValue({});
 
     renderPage();
@@ -170,8 +178,25 @@ describe('PlansPage', () => {
 
     fireEvent.click(screen.getByRole('button', { name: /eliminar/i }));
 
+    const dialog = screen.getByRole('dialog');
+    fireEvent.click(within(dialog).getByRole('button', { name: /eliminar/i }));
+
     await waitFor(() => expect(mockDelete).toHaveBeenCalledWith('/plans/1'));
     await waitFor(() => expect(screen.queryByText('Completo')).not.toBeInTheDocument());
+  });
+
+  it('confirm button is disabled while DELETE is in flight', async () => {
+    mockDelete.mockReturnValue(new Promise(() => {}));
+
+    renderPage();
+    await screen.findByText('Completo');
+    fireEvent.click(screen.getByRole('button', { name: /eliminar/i }));
+
+    const dialog = screen.getByRole('dialog');
+    const confirmBtn = within(dialog).getByRole('button', { name: /eliminar/i });
+    fireEvent.click(confirmBtn);
+
+    await waitFor(() => expect(confirmBtn).toBeDisabled());
   });
 
   it('modal submit calls POST /plans', async () => {
