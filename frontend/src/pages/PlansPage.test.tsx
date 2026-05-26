@@ -49,9 +49,9 @@ describe('PlansPage', () => {
     setupMocks();
   });
 
-  it('renders Planes heading', () => {
+  it('renders Planes heading', async () => {
     renderPage();
-    expect(screen.getByRole('heading', { name: /planes/i })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: /planes/i })).toBeInTheDocument();
   });
 
   it('loads and shows plan names and prices', async () => {

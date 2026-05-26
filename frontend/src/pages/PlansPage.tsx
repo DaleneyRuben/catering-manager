@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Icon } from '../components/ui/Icon';
+import { PageLoader } from '../components/ui/PageLoader';
 import api from '../services/api';
 import type { Client, Plan } from '../types/client';
 import { ConfirmDeleteModal } from './plans/ConfirmDeleteModal';
@@ -16,6 +17,7 @@ export function PlansPage() {
   const [createOpen, setCreateOpen] = useState(false);
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   const load = async () => {
     const [plansRes, clientsRes] = await Promise.all([api.get('/plans'), api.get('/clients')]);
@@ -33,7 +35,7 @@ export function PlansPage() {
   };
 
   useEffect(() => {
-    load();
+    load().finally(() => setIsLoading(false));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -73,6 +75,8 @@ export function PlansPage() {
     });
     await load();
   };
+
+  if (isLoading) return <PageLoader />;
 
   return (
     <div className="p-7 max-w-[1320px] mx-auto">
