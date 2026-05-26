@@ -6,11 +6,9 @@ import { COL1, COL2 } from './types';
 export function PlanEditorForm({
   draft,
   setDraft,
-  namePlaceholder = 'Ej. Completo, Mediodía…',
 }: {
   draft: PlanDraft;
   setDraft: (d: PlanDraft) => void;
-  namePlaceholder?: string;
 }) {
   const onToggle = (key: MealKey) => {
     const included = draft.meals.includes(key);
@@ -28,7 +26,6 @@ export function PlanEditorForm({
           type="text"
           value={draft.name}
           onChange={(e) => setDraft({ ...draft, name: e.target.value })}
-          placeholder={namePlaceholder}
           className={inputCls()}
         />
       </Field>
