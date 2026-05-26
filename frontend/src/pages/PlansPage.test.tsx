@@ -1,4 +1,4 @@
-import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import api from '../services/api';
@@ -121,6 +121,31 @@ describe('PlansPage', () => {
     expect(screen.queryByText('Definí nombre, comidas y precio')).not.toBeInTheDocument();
   });
 
+  it('submit button is disabled while POST is in flight', async () => {
+    mockPost.mockReturnValue(new Promise(() => {}));
+
+    renderPage();
+    await screen.findByText('Completo');
+    fireEvent.click(screen.getByRole('button', { name: /crear plan/i }));
+
+    const submitBtn = screen.getByRole('button', { name: /^crear plan$/i });
+    fireEvent.click(submitBtn);
+
+    await waitFor(() => expect(submitBtn).toBeDisabled());
+  });
+
+  it('save button is disabled while PATCH is in flight', async () => {
+    mockPatch.mockReturnValue(new Promise(() => {}));
+
+    renderPage();
+    await screen.findByText('Completo');
+    fireEvent.change(screen.getByDisplayValue('Completo'), { target: { value: 'Editado' } });
+    const saveBtn = screen.getByRole('button', { name: /guardar cambios/i });
+    fireEvent.click(saveBtn);
+
+    await waitFor(() => expect(saveBtn).toBeDisabled());
+  });
+
   it('modal submit calls POST /plans', async () => {
     const newPlan = { id: 3, name: 'Ligero', meals: ['breakfast'], price: 500, discount: 0 };
     mockPost.mockResolvedValue({ data: { data: newPlan } });
@@ -129,7 +154,8 @@ describe('PlansPage', () => {
     await screen.findByText('Completo');
     fireEvent.click(screen.getByRole('button', { name: /crear plan/i }));
 
-    const nameInput = screen.getByPlaceholderText(/ej\. completo/i);
+    const dialog = screen.getByRole('dialog');
+    const nameInput = within(dialog).getByRole('textbox');
     await userEvent.type(nameInput, 'Ligero');
 
     const priceInputs = screen.getAllByRole('spinbutton');

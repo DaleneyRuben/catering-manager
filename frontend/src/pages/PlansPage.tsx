@@ -13,6 +13,7 @@ export function PlansPage() {
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [draft, setDraft] = useState<PlanDraft>({ name: '', meals: [], price: '' });
   const [createOpen, setCreateOpen] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   const load = async () => {
     const [plansRes, clientsRes] = await Promise.all([api.get('/plans'), api.get('/clients')]);
@@ -47,12 +48,17 @@ export function PlansPage() {
 
   const handleSave = async () => {
     if (selectedId === null) return;
-    await api.patch(`/plans/${selectedId}`, {
-      name: draft.name,
-      meals: draft.meals,
-      price: Number(draft.price),
-    });
-    await load();
+    setIsSaving(true);
+    try {
+      await api.patch(`/plans/${selectedId}`, {
+        name: draft.name,
+        meals: draft.meals,
+        price: Number(draft.price),
+      });
+      await load();
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleCreate = async (newDraft: PlanDraft) => {
@@ -61,7 +67,6 @@ export function PlansPage() {
       meals: newDraft.meals,
       price: Number(newDraft.price),
     });
-    setCreateOpen(false);
     await load();
   };
 
@@ -118,12 +123,13 @@ export function PlansPage() {
         <div className="lg:col-span-5">
           {selectedId !== null ? (
             <div className="bg-paper border border-rule rounded-lg p-5 lg:sticky lg:top-[90px]">
-              <PlanEditorForm draft={draft} setDraft={setDraft} namePlaceholder="" />
+              <PlanEditorForm draft={draft} setDraft={setDraft} />
               <div className="flex gap-2.5 mt-[18px]">
                 <button
                   type="button"
                   onClick={handleDiscard}
-                  className="px-4 py-2.5 text-[13px] font-semibold border border-rule rounded-md text-ink hover:bg-cream-2 transition-colors"
+                  disabled={isSaving}
+                  className="px-4 py-2.5 text-[13px] font-semibold border border-rule rounded-md text-ink hover:bg-cream-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Descartar
                 </button>
@@ -131,9 +137,14 @@ export function PlansPage() {
                 <button
                   type="button"
                   onClick={handleSave}
-                  className="flex items-center gap-2 px-4 py-2.5 text-[13px] font-semibold bg-olive-800 text-white rounded-md hover:bg-olive-700 transition-colors"
+                  disabled={isSaving}
+                  className="flex items-center gap-2 px-4 py-2.5 text-[13px] font-semibold bg-olive-800 text-white rounded-md hover:bg-olive-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                 >
-                  <Icon name="check" size={14} />
+                  {isSaving ? (
+                    <span className="inline-block w-3.5 h-3.5 rounded-full border-2 border-current border-t-transparent animate-spin" />
+                  ) : (
+                    <Icon name="check" size={14} />
+                  )}
                   Guardar cambios
                 </button>
               </div>

@@ -8,9 +8,20 @@ export function CreatePlanModal({
   onSave,
 }: {
   onClose: () => void;
-  onSave: (draft: PlanDraft) => void;
+  onSave: (draft: PlanDraft) => Promise<void>;
 }) {
   const [draft, setDraft] = useState<PlanDraft>({ name: '', meals: [], price: '0' });
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleSubmit = async () => {
+    setIsLoading(true);
+    try {
+      await onSave(draft);
+      onClose();
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <>
@@ -45,17 +56,23 @@ export function CreatePlanModal({
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2.5 text-[13px] font-semibold border border-rule rounded-md text-ink hover:bg-paper transition-colors"
+              disabled={isLoading}
+              className="px-4 py-2.5 text-[13px] font-semibold border border-rule rounded-md text-ink hover:bg-paper transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Cancelar
             </button>
             <div className="flex-1" />
             <button
               type="button"
-              onClick={() => onSave(draft)}
-              className="flex items-center gap-2 px-4 py-2.5 text-[13px] font-semibold bg-olive-400 text-olive-900 rounded-md hover:bg-[#7ed427] transition-colors"
+              onClick={handleSubmit}
+              disabled={isLoading}
+              className="flex items-center gap-2 px-4 py-2.5 text-[13px] font-semibold bg-olive-400 text-olive-900 rounded-md hover:bg-[#7ed427] transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              <Icon name="check" size={14} />
+              {isLoading ? (
+                <span className="inline-block w-3.5 h-3.5 rounded-full border-2 border-current border-t-transparent animate-spin" />
+              ) : (
+                <Icon name="check" size={14} />
+              )}
               Crear plan
             </button>
           </div>
