@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Icon } from '../components/ui/Icon';
 import { PageLoader } from '../components/ui/PageLoader';
-import api from '../services/api';
-import type { Client, Plan } from '../types/client';
+import { usePlans } from '../hooks/usePlans';
 import { ConfirmDeleteModal } from './plans/ConfirmDeleteModal';
 import { CreatePlanModal } from './plans/CreatePlanModal';
 import { PlanCard } from './plans/PlanCard';
@@ -10,34 +9,15 @@ import { PlanEditorForm } from './plans/PlanEditorForm';
 import type { MealKey, PlanDraft } from './plans/types';
 
 export function PlansPage() {
-  const [plans, setPlans] = useState<Plan[]>([]);
-  const [clientCounts, setClientCounts] = useState<Record<number, number>>({});
+  const { plans, clientCounts, isLoading, isSaving, save, create, remove } = usePlans();
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [draft, setDraft] = useState<PlanDraft>({ name: '', meals: [], price: '' });
   const [createOpen, setCreateOpen] = useState(false);
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-
-  const load = async () => {
-    const [plansRes, clientsRes] = await Promise.all([api.get('/plans'), api.get('/clients')]);
-    const loadedPlans: Plan[] = plansRes.data.data;
-    setPlans(loadedPlans);
-    setSelectedId((prev) => (prev === null && loadedPlans.length > 0 ? loadedPlans[0].id : prev));
-
-    const clients: Client[] = clientsRes.data.data;
-    const counts = clients.reduce<Record<number, number>>((acc, c) => {
-      const sub = c.subscriptions?.[0];
-      if (!sub) return acc;
-      return { ...acc, [sub.planId]: (acc[sub.planId] ?? 0) + 1 };
-    }, {});
-    setClientCounts(counts);
-  };
 
   useEffect(() => {
-    load().finally(() => setIsLoading(false));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    if (selectedId === null && plans.length > 0) setSelectedId(plans[0].id);
+  }, [plans, selectedId]);
 
   useEffect(() => {
     if (selectedId === null || plans.length === 0) return;
@@ -47,33 +27,13 @@ export function PlansPage() {
 
   const handleDelete = async () => {
     if (selectedId === null) return;
-    await api.delete(`/plans/${selectedId}`);
+    await remove(selectedId);
     setSelectedId(null);
-    await load();
   };
 
-  const handleSave = async () => {
+  const handleSave = () => {
     if (selectedId === null) return;
-    setIsSaving(true);
-    try {
-      await api.patch(`/plans/${selectedId}`, {
-        name: draft.name,
-        meals: draft.meals,
-        price: Number(draft.price),
-      });
-      await load();
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  const handleCreate = async (newDraft: PlanDraft) => {
-    await api.post('/plans', {
-      name: newDraft.name,
-      meals: newDraft.meals,
-      price: Number(newDraft.price),
-    });
-    await load();
+    save(selectedId, draft);
   };
 
   if (isLoading) return <PageLoader />;
@@ -169,7 +129,7 @@ export function PlansPage() {
         </div>
       </div>
 
-      {createOpen && <CreatePlanModal onClose={() => setCreateOpen(false)} onSave={handleCreate} />}
+      {createOpen && <CreatePlanModal onClose={() => setCreateOpen(false)} onSave={create} />}
       {confirmDeleteOpen && selectedId !== null && (
         <ConfirmDeleteModal
           planName={plans.find((p) => p.id === selectedId)?.name ?? ''}
