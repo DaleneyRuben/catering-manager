@@ -17,7 +17,7 @@ export function MealRow({
       onClick={() => onToggle(mealKey)}
       className={`flex items-center gap-2.5 px-3 py-2.5 rounded-md border text-left w-full transition-colors ${
         included
-          ? 'bg-olive-800 border-olive-800 text-white'
+          ? 'bg-olive-600 border-olive-600 text-white'
           : 'bg-cream-2 border-rule text-muted hover:border-olive-600'
       }`}
     >
