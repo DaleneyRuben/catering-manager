@@ -1,10 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { format, parseISO } from 'date-fns';
 import { Field, inputCls, selectCls } from '../components/ui/Field';
 import { Icon } from '../components/ui/Icon';
 import { TagInput } from '../components/ui/TagInput';
-import api from '../services/api';
+import { useClient } from '../hooks/useClient';
 import type { Client, ClientStatus } from '../types/client';
 import { clientStatus } from '../types/client';
 
@@ -272,25 +272,16 @@ function EditClientForm({
 export function ClientDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [client, setClient] = useState<Client | null>(null);
+  const { client, update } = useClient(id!);
   const [isEditing, setIsEditing] = useState(false);
-
-  useEffect(() => {
-    const load = async () => {
-      const loaded = await api.get<Client>(`/clients/${id}`);
-      setClient(loaded);
-    };
-    load();
-  }, [id]);
 
   const handleToggleActive = async () => {
     if (!client) return;
-    const updated = await api.patch<Client>(`/clients/${id}`, { isActive: !client.isActive });
-    setClient(updated);
+    await update({ isActive: !client.isActive });
   };
 
   const handleSave = async (draft: EditDraft) => {
-    const payload = {
+    await update({
       name: draft.name,
       sex: draft.sex,
       dateOfBirth: draft.dateOfBirth,
@@ -302,9 +293,7 @@ export function ClientDetailPage() {
       businessName: draft.businessName || null,
       underlyingDiseases: draft.underlyingDiseases,
       restrictions: draft.restrictions,
-    };
-    const updated = await api.patch<Client>(`/clients/${id}`, payload);
-    setClient(updated);
+    });
     setIsEditing(false);
   };
 

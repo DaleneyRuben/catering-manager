@@ -1,4 +1,5 @@
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import api from '../services/api';
 import { ClientDetailPage } from './ClientDetailPage';
@@ -38,13 +39,18 @@ const mockClient = {
 
 function renderPage(client = mockClient) {
   mockGet.mockResolvedValue(client);
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
+  });
   return render(
-    <MemoryRouter initialEntries={['/clientes/1']}>
-      <Routes>
-        <Route path="/clientes/:id" element={<ClientDetailPage />} />
-        <Route path="/clientes" element={<div>Lista clientes</div>} />
-      </Routes>
-    </MemoryRouter>,
+    <QueryClientProvider client={queryClient}>
+      <MemoryRouter initialEntries={['/clientes/1']}>
+        <Routes>
+          <Route path="/clientes/:id" element={<ClientDetailPage />} />
+          <Route path="/clientes" element={<div>Lista clientes</div>} />
+        </Routes>
+      </MemoryRouter>
+    </QueryClientProvider>,
   );
 }
 
