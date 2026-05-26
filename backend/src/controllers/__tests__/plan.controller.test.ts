@@ -111,6 +111,32 @@ describe('POST /api/plans', () => {
   });
 });
 
+describe('DELETE /api/plans/:id', () => {
+  it('returns 204 when plan is deleted', async () => {
+    (planService.remove as jest.Mock).mockResolvedValue(true);
+
+    const res = await request(app).delete('/api/plans/1');
+
+    expect(res.status).toBe(204);
+  });
+
+  it('returns 404 when plan not found', async () => {
+    (planService.remove as jest.Mock).mockResolvedValue(false);
+
+    const res = await request(app).delete('/api/plans/999');
+
+    expect(res.status).toBe(404);
+  });
+
+  it('returns 500 when service throws', async () => {
+    (planService.remove as jest.Mock).mockRejectedValue(new Error('db error'));
+
+    const res = await request(app).delete('/api/plans/1');
+
+    expect(res.status).toBe(500);
+  });
+});
+
 describe('PATCH /api/plans/:id', () => {
   it('returns 200 with updated plan', async () => {
     const updated = { ...mockPlan, name: 'Updated Plan' };

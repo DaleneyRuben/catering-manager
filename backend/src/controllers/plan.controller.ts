@@ -46,4 +46,17 @@ const update = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
-export default { getAll, getById, create, update };
+const remove = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const deleted = await planService.remove(Number(req.params.id));
+    if (!deleted) {
+      sendError(res, 'Plan not found', 404);
+      return;
+    }
+    res.status(204).end();
+  } catch (err) {
+    next(err);
+  }
+};
+
+export default { getAll, getById, create, update, remove };

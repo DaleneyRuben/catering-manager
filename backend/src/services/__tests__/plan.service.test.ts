@@ -72,6 +72,33 @@ describe('planService.findById', () => {
   });
 });
 
+describe('planService.remove', () => {
+  it('destroys the plan and returns true', async () => {
+    const mockInstance = { destroy: jest.fn().mockResolvedValue(undefined) };
+    (Plan.findByPk as jest.Mock).mockResolvedValue(mockInstance);
+
+    const result = await planService.remove(1);
+
+    expect(mockInstance.destroy).toHaveBeenCalledTimes(1);
+    expect(result).toBe(true);
+  });
+
+  it('returns false when plan not found', async () => {
+    (Plan.findByPk as jest.Mock).mockResolvedValue(null);
+
+    const result = await planService.remove(999);
+
+    expect(result).toBe(false);
+  });
+
+  it('propagates db errors', async () => {
+    const mockInstance = { destroy: jest.fn().mockRejectedValue(new Error('db error')) };
+    (Plan.findByPk as jest.Mock).mockResolvedValue(mockInstance);
+
+    await expect(planService.remove(1)).rejects.toThrow('db error');
+  });
+});
+
 describe('planService.update', () => {
   it('updates a plan and returns the updated instance', async () => {
     const updatedPlan = { ...mockPlan, name: 'Updated Plan' };

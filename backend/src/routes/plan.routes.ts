@@ -9,5 +9,6 @@ router.get('/', planController.getAll);
 router.get('/:id', planController.getById);
 router.post('/', validate(createPlanSchema), planController.create);
 router.patch('/:id', validate(updatePlanSchema), planController.update);
+router.delete('/:id', planController.remove);
 
 export default router;

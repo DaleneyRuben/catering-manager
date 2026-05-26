@@ -13,4 +13,11 @@ const update = async (id: number, data: UpdatePlanDto) => {
   return plan.update(data);
 };
 
-export default { create, findAll, findById, update };
+const remove = async (id: number): Promise<boolean> => {
+  const plan = await Plan.findByPk(id);
+  if (!plan) return false;
+  await plan.destroy();
+  return true;
+};
+
+export default { create, findAll, findById, update, remove };
