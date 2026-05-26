@@ -105,7 +105,7 @@ export function NewClientPage() {
       });
       navigate('/clientes');
     } catch {
-      setSubmitError('Error al guardar el cliente. Intentá de nuevo.');
+      setSubmitError('Error al guardar el cliente. Intenta de nuevo.');
     }
   };
 

@@ -47,7 +47,7 @@ export function TagInput({
               onAdd();
             }
           }}
-          placeholder="Escribí y presioná Enter…"
+          placeholder="Escribe y presiona Enter…"
           className={`flex-1 ${inputCls()}`}
         />
         <button

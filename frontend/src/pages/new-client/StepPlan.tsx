@@ -25,7 +25,7 @@ export function StepPlan({ value, onChange, plans, errors }: Props) {
             onChange={(e) => onChange({ planId: e.target.value ? Number(e.target.value) : null })}
             className={selectCls(!!errors.planId)}
           >
-            <option value="">Seleccioná un plan…</option>
+            <option value="">Selecciona un plan…</option>
             {plans.map((p) => (
               <option key={p.id} value={p.id}>
                 {p.name} — ${p.price}

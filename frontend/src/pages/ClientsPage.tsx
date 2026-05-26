@@ -201,7 +201,7 @@ export function ClientsPage() {
               <Icon name="users" size={22} />
             </div>
             <p className="font-semibold text-ink">Sin resultados</p>
-            <p className="text-sm text-muted mt-1">Probá con otra búsqueda o quitá los filtros.</p>
+            <p className="text-sm text-muted mt-1">Prueba con otra búsqueda o quita los filtros.</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
