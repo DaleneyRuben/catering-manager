@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Icon } from '../components/ui/Icon';
 import api from '../services/api';
 import type { Client, Plan } from '../types/client';
+import { ConfirmDeleteModal } from './plans/ConfirmDeleteModal';
 import { CreatePlanModal } from './plans/CreatePlanModal';
 import { PlanCard } from './plans/PlanCard';
 import { PlanEditorForm } from './plans/PlanEditorForm';
@@ -13,8 +14,8 @@ export function PlansPage() {
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [draft, setDraft] = useState<PlanDraft>({ name: '', meals: [], price: '' });
   const [createOpen, setCreateOpen] = useState(false);
+  const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
 
   const load = async () => {
     const [plansRes, clientsRes] = await Promise.all([api.get('/plans'), api.get('/clients')]);
@@ -44,14 +45,9 @@ export function PlansPage() {
 
   const handleDelete = async () => {
     if (selectedId === null) return;
-    setIsDeleting(true);
-    try {
-      await api.delete(`/plans/${selectedId}`);
-      setSelectedId(null);
-      await load();
-    } finally {
-      setIsDeleting(false);
-    }
+    await api.delete(`/plans/${selectedId}`);
+    setSelectedId(null);
+    await load();
   };
 
   const handleSave = async () => {
@@ -135,20 +131,17 @@ export function PlansPage() {
               <div className="flex gap-2.5 mt-[18px]">
                 <button
                   type="button"
-                  onClick={handleDelete}
-                  disabled={isDeleting || isSaving}
-                  className="flex items-center gap-2 px-4 py-2.5 text-[13px] font-semibold border border-rule rounded-md text-warn hover:bg-cream-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  onClick={() => setConfirmDeleteOpen(true)}
+                  disabled={isSaving}
+                  className="px-4 py-2.5 text-[13px] font-semibold border border-rule rounded-md text-warn hover:bg-cream-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {isDeleting && (
-                    <span className="inline-block w-3.5 h-3.5 rounded-full border-2 border-current border-t-transparent animate-spin" />
-                  )}
                   Eliminar
                 </button>
                 <div className="flex-1" />
                 <button
                   type="button"
                   onClick={handleSave}
-                  disabled={isSaving || isDeleting}
+                  disabled={isSaving}
                   className="flex items-center gap-2 px-4 py-2.5 text-[13px] font-semibold bg-olive-800 text-white rounded-md hover:bg-olive-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                   {isSaving ? (
@@ -173,6 +166,13 @@ export function PlansPage() {
       </div>
 
       {createOpen && <CreatePlanModal onClose={() => setCreateOpen(false)} onSave={handleCreate} />}
+      {confirmDeleteOpen && selectedId !== null && (
+        <ConfirmDeleteModal
+          planName={plans.find((p) => p.id === selectedId)?.name ?? ''}
+          onClose={() => setConfirmDeleteOpen(false)}
+          onConfirm={handleDelete}
+        />
+      )}
     </div>
   );
 }
