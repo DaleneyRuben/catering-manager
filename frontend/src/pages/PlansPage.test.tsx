@@ -5,11 +5,12 @@ import api from '../services/api';
 import { PlansPage } from './PlansPage';
 
 jest.mock('../services/api', () => ({
-  default: { get: jest.fn(), post: jest.fn(), patch: jest.fn() },
+  default: { get: jest.fn(), post: jest.fn(), patch: jest.fn(), delete: jest.fn() },
 }));
 const mockGet = api.get as jest.Mock;
 const mockPost = api.post as jest.Mock;
 const mockPatch = api.patch as jest.Mock;
+const mockDelete = api.delete as jest.Mock;
 
 const mockPlan1 = {
   id: 1,
@@ -82,12 +83,10 @@ describe('PlansPage', () => {
     expect(await screen.findByDisplayValue('Mediodía')).toBeInTheDocument();
   });
 
-  it('Descartar resets the editor to saved values', async () => {
+  it('Eliminar button is visible in the editor panel', async () => {
     renderPage();
     await screen.findByText('Completo');
-    fireEvent.change(screen.getByDisplayValue('Completo'), { target: { value: 'Editado' } });
-    fireEvent.click(screen.getByRole('button', { name: /descartar/i }));
-    expect(screen.getByDisplayValue('Completo')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /eliminar/i })).toBeInTheDocument();
   });
 
   it('Guardar cambios calls PATCH /plans/:id', async () => {
@@ -144,6 +143,24 @@ describe('PlansPage', () => {
     fireEvent.click(saveBtn);
 
     await waitFor(() => expect(saveBtn).toBeDisabled());
+  });
+
+  it('Eliminar calls DELETE /plans/:id and removes the plan from the list', async () => {
+    mockDelete.mockResolvedValue({});
+
+    renderPage();
+    await screen.findByText('Completo');
+
+    mockGet.mockImplementation((url: string) => {
+      if (url === '/plans') return Promise.resolve({ data: { data: [mockPlan2] } });
+      if (url === '/clients') return Promise.resolve({ data: { data: [] } });
+      return Promise.reject(new Error(`Unknown URL: ${url}`));
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: /eliminar/i }));
+
+    await waitFor(() => expect(mockDelete).toHaveBeenCalledWith('/plans/1'));
+    await waitFor(() => expect(screen.queryByText('Completo')).not.toBeInTheDocument());
   });
 
   it('modal submit calls POST /plans', async () => {

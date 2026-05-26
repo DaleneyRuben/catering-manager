@@ -41,9 +41,11 @@ export function PlansPage() {
     if (p) setDraft({ name: p.name, meals: p.meals as MealKey[], price: String(p.price) });
   }, [selectedId, plans]);
 
-  const handleDiscard = () => {
-    const p = plans.find((plan) => plan.id === selectedId);
-    if (p) setDraft({ name: p.name, meals: p.meals as MealKey[], price: String(p.price) });
+  const handleDelete = async () => {
+    if (selectedId === null) return;
+    await api.delete(`/plans/${selectedId}`);
+    setSelectedId(null);
+    await load();
   };
 
   const handleSave = async () => {
@@ -127,11 +129,11 @@ export function PlansPage() {
               <div className="flex gap-2.5 mt-[18px]">
                 <button
                   type="button"
-                  onClick={handleDiscard}
+                  onClick={handleDelete}
                   disabled={isSaving}
-                  className="px-4 py-2.5 text-[13px] font-semibold border border-rule rounded-md text-ink hover:bg-cream-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-4 py-2.5 text-[13px] font-semibold border border-rule rounded-md text-warn hover:bg-cream-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Descartar
+                  Eliminar
                 </button>
                 <div className="flex-1" />
                 <button
