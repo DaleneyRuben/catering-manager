@@ -1,11 +1,11 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { format, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Icon } from '../components/ui/Icon';
 import { PageLoader } from '../components/ui/PageLoader';
-import api from '../services/api';
-import { Client, ClientStatus, clientStatus } from '../types/client';
+import { useClients } from '../hooks/useClients';
+import { ClientStatus, clientStatus } from '../types/client';
 
 const MONTHS = [
   'Enero',
@@ -56,19 +56,10 @@ type FilterValue = 'active' | 'expiring' | 'paused' | 'ended' | 'all';
 
 export function ClientsPage() {
   const navigate = useNavigate();
-  const [clients, setClients] = useState<Client[]>([]);
+  const { clients, isLoading } = useClients();
   const [q, setQ] = useState('');
   const [filter, setFilter] = useState<FilterValue>('active');
   const [birthMonth, setBirthMonth] = useState('all');
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    const load = async () => {
-      const res = await api.get('/clients');
-      setClients(res.data.data);
-    };
-    load().finally(() => setIsLoading(false));
-  }, []);
 
   const counts = useMemo(() => {
     const today = new Date();
