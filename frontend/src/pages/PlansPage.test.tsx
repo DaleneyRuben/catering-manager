@@ -145,6 +145,17 @@ describe('PlansPage', () => {
     await waitFor(() => expect(saveBtn).toBeDisabled());
   });
 
+  it('Eliminar button is disabled while DELETE is in flight', async () => {
+    mockDelete.mockReturnValue(new Promise(() => {}));
+
+    renderPage();
+    await screen.findByText('Completo');
+    const deleteBtn = screen.getByRole('button', { name: /eliminar/i });
+    fireEvent.click(deleteBtn);
+
+    await waitFor(() => expect(deleteBtn).toBeDisabled());
+  });
+
   it('Eliminar calls DELETE /plans/:id and removes the plan from the list', async () => {
     mockDelete.mockResolvedValue({});
 
