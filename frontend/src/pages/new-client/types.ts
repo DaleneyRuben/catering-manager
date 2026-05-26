@@ -1,4 +1,4 @@
-export interface IdentityState {
+export interface NewClientFormValues {
   name: string;
   sex: string;
   dateOfBirth: string;
@@ -8,15 +8,12 @@ export interface IdentityState {
   delivery: string;
   nit: string;
   businessName: string;
+  planId: number | null;
+  startDate: string;
+  discount: number;
 }
 
 export interface RestrictionsState {
   underlyingDiseases: string[];
   restrictions: string[];
-}
-
-export interface PlanState {
-  planId: number | null;
-  startDate: string;
-  discount: number;
 }

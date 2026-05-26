@@ -1,44 +1,65 @@
+import {
+  type UseFormRegister,
+  type FieldErrors,
+  type Control,
+  Controller,
+  useWatch,
+} from 'react-hook-form';
 import { Field, inputCls, selectCls } from '../../components/ui/Field';
 import type { Plan } from '../../types/client';
 import { addBusinessDays } from '../../utils/businessDays';
-import type { PlanState } from './types';
+import type { NewClientFormValues } from './types';
 
 interface Props {
-  value: PlanState;
-  onChange: (updates: Partial<PlanState>) => void;
+  register: UseFormRegister<NewClientFormValues>;
+  control: Control<NewClientFormValues>;
+  errors: FieldErrors<NewClientFormValues>;
   plans: Plan[];
-  errors: Record<string, string>;
 }
 
-export function StepPlan({ value, onChange, plans, errors }: Props) {
-  const selectedPlan = plans.find((p) => p.id === value.planId);
-  const contractEndDate = value.startDate ? addBusinessDays(value.startDate, 20) : '';
+export function StepPlan({ register, control, errors, plans }: Props) {
+  const startDate = useWatch({ control, name: 'startDate' });
+  const planId = useWatch({ control, name: 'planId' });
+  const selectedPlan = plans.find((p) => p.id === planId);
+  const contractEndDate = startDate ? addBusinessDays(startDate, 20) : '';
 
   return (
     <div>
       <h2 className="font-semibold text-ink text-[15px] mb-6">Plan</h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-        <Field label="Plan" htmlFor="planId" required error={errors.planId}>
-          <select
-            id="planId"
-            value={value.planId ?? ''}
-            onChange={(e) => onChange({ planId: e.target.value ? Number(e.target.value) : null })}
-            className={selectCls(!!errors.planId)}
-          >
-            <option value="">Selecciona un plan…</option>
-            {plans.map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.name} — ${p.price}
-              </option>
-            ))}
-          </select>
-        </Field>
-        <Field label="Fecha de inicio" htmlFor="startDate" required error={errors.startDate}>
+        <Controller
+          name="planId"
+          control={control}
+          rules={{ required: 'Plan es requerido' }}
+          render={({ field }) => (
+            <Field label="Plan" htmlFor="planId" required error={errors.planId?.message}>
+              <select
+                id="planId"
+                value={field.value ?? ''}
+                onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : null)}
+                onBlur={field.onBlur}
+                className={selectCls(!!errors.planId)}
+              >
+                <option value="">Selecciona un plan…</option>
+                {plans.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.name} — ${p.price}
+                  </option>
+                ))}
+              </select>
+            </Field>
+          )}
+        />
+        <Field
+          label="Fecha de inicio"
+          htmlFor="startDate"
+          required
+          error={errors.startDate?.message}
+        >
           <input
             id="startDate"
             type="date"
-            value={value.startDate}
-            onChange={(e) => onChange({ startDate: e.target.value })}
+            {...register('startDate', { required: 'Fecha de inicio es requerida' })}
             className={inputCls(!!errors.startDate)}
           />
         </Field>
@@ -47,8 +68,7 @@ export function StepPlan({ value, onChange, plans, errors }: Props) {
             id="discount"
             type="number"
             min={0}
-            value={value.discount}
-            onChange={(e) => onChange({ discount: Number(e.target.value) })}
+            {...register('discount', { valueAsNumber: true, min: 0 })}
             className={inputCls(false)}
           />
         </Field>

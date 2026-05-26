@@ -1,6 +1,6 @@
 import type { Plan } from '../../types/client';
 import { addBusinessDays } from '../../utils/businessDays';
-import type { IdentityState, PlanState, RestrictionsState } from './types';
+import type { NewClientFormValues, RestrictionsState } from './types';
 
 function formatSex(sex: string): string {
   if (sex === 'female') return 'Femenino';
@@ -9,35 +9,34 @@ function formatSex(sex: string): string {
 }
 
 interface Props {
-  identity: IdentityState;
+  formValues: NewClientFormValues;
   restrictions: RestrictionsState;
-  planData: PlanState;
   plans: Plan[];
   submitError: string;
 }
 
-export function StepConfirm({ identity, restrictions, planData, plans, submitError }: Props) {
-  const selectedPlan = plans.find((p) => p.id === planData.planId);
-  const contractEndDate = planData.startDate ? addBusinessDays(planData.startDate, 20) : '';
+export function StepConfirm({ formValues, restrictions, plans, submitError }: Props) {
+  const selectedPlan = plans.find((p) => p.id === formValues.planId);
+  const contractEndDate = formValues.startDate ? addBusinessDays(formValues.startDate, 20) : '';
 
   const identityRows: [string, string][] = [
-    ['Nombre', identity.name],
-    ['Sexo', formatSex(identity.sex)],
-    ['Nacimiento', identity.dateOfBirth],
-    ['Teléfono', identity.phoneNumber],
-    ['Dirección', identity.address],
-    ['Zona', identity.zone],
-    ['Delivery', identity.delivery],
-    ...(identity.nit ? ([['NIT', identity.nit]] as [string, string][]) : []),
-    ...(identity.businessName
-      ? ([['Razón Social', identity.businessName]] as [string, string][])
+    ['Nombre', formValues.name],
+    ['Sexo', formatSex(formValues.sex)],
+    ['Nacimiento', formValues.dateOfBirth],
+    ['Teléfono', formValues.phoneNumber],
+    ['Dirección', formValues.address],
+    ['Zona', formValues.zone],
+    ['Delivery', formValues.delivery],
+    ...(formValues.nit ? ([['NIT', formValues.nit]] as [string, string][]) : []),
+    ...(formValues.businessName
+      ? ([['Razón Social', formValues.businessName]] as [string, string][])
       : []),
   ];
 
   const planRows: [string, string][] = [
     ['Plan', selectedPlan?.name ?? '—'],
     ['Precio', selectedPlan ? `$${selectedPlan.price}` : '—'],
-    ['Inicio', planData.startDate],
+    ['Inicio', formValues.startDate],
     ['Fin contrato', contractEndDate],
   ];
 

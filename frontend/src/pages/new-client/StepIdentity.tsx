@@ -1,33 +1,31 @@
+import { type UseFormRegister, type FieldErrors } from 'react-hook-form';
 import { Field, inputCls, selectCls } from '../../components/ui/Field';
-import type { IdentityState } from './types';
+import type { NewClientFormValues } from './types';
 
 interface Props {
-  value: IdentityState;
-  onChange: (updates: Partial<IdentityState>) => void;
-  errors: Record<string, string>;
+  register: UseFormRegister<NewClientFormValues>;
+  errors: FieldErrors<NewClientFormValues>;
 }
 
-export function StepIdentity({ value, onChange, errors }: Props) {
+export function StepIdentity({ register, errors }: Props) {
   return (
     <div>
       <h2 className="font-semibold text-ink text-[15px] mb-6">Identidad</h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
         <div className="sm:col-span-2">
-          <Field label="Nombre completo" htmlFor="name" required error={errors.name}>
+          <Field label="Nombre completo" htmlFor="name" required error={errors.name?.message}>
             <input
               id="name"
               type="text"
-              value={value.name}
-              onChange={(e) => onChange({ name: e.target.value })}
+              {...register('name', { required: 'Nombre es requerido' })}
               className={inputCls(!!errors.name)}
             />
           </Field>
         </div>
-        <Field label="Sexo" htmlFor="sex" required error={errors.sex}>
+        <Field label="Sexo" htmlFor="sex" required error={errors.sex?.message}>
           <select
             id="sex"
-            value={value.sex}
-            onChange={(e) => onChange({ sex: e.target.value })}
+            {...register('sex', { required: 'Sexo es requerido' })}
             className={selectCls(!!errors.sex)}
           >
             <option value="">Seleccionar…</option>
@@ -40,39 +38,35 @@ export function StepIdentity({ value, onChange, errors }: Props) {
           label="Fecha de nacimiento"
           htmlFor="dateOfBirth"
           required
-          error={errors.dateOfBirth}
+          error={errors.dateOfBirth?.message}
         >
           <input
             id="dateOfBirth"
             type="date"
-            value={value.dateOfBirth}
-            onChange={(e) => onChange({ dateOfBirth: e.target.value })}
+            {...register('dateOfBirth', { required: 'Fecha de nacimiento es requerida' })}
             className={inputCls(!!errors.dateOfBirth)}
           />
         </Field>
-        <Field label="Teléfono" htmlFor="phoneNumber" required error={errors.phoneNumber}>
+        <Field label="Teléfono" htmlFor="phoneNumber" required error={errors.phoneNumber?.message}>
           <input
             id="phoneNumber"
             type="tel"
-            value={value.phoneNumber}
-            onChange={(e) => onChange({ phoneNumber: e.target.value })}
+            {...register('phoneNumber', { required: 'Teléfono es requerido' })}
             className={inputCls(!!errors.phoneNumber)}
           />
         </Field>
-        <Field label="Dirección" htmlFor="address" required error={errors.address}>
+        <Field label="Dirección" htmlFor="address" required error={errors.address?.message}>
           <input
             id="address"
             type="text"
-            value={value.address}
-            onChange={(e) => onChange({ address: e.target.value })}
+            {...register('address', { required: 'Dirección es requerida' })}
             className={inputCls(!!errors.address)}
           />
         </Field>
-        <Field label="Zona" htmlFor="zone" required error={errors.zone}>
+        <Field label="Zona" htmlFor="zone" required error={errors.zone?.message}>
           <select
             id="zone"
-            value={value.zone}
-            onChange={(e) => onChange({ zone: e.target.value })}
+            {...register('zone', { required: 'Zona es requerida' })}
             className={selectCls(!!errors.zone)}
           >
             <option value="">Seleccionar…</option>
@@ -80,11 +74,10 @@ export function StepIdentity({ value, onChange, errors }: Props) {
             <option value="Sur">Sur</option>
           </select>
         </Field>
-        <Field label="Delivery" htmlFor="delivery" required error={errors.delivery}>
+        <Field label="Delivery" htmlFor="delivery" required error={errors.delivery?.message}>
           <select
             id="delivery"
-            value={value.delivery}
-            onChange={(e) => onChange({ delivery: e.target.value })}
+            {...register('delivery', { required: 'Delivery es requerido' })}
             className={selectCls(!!errors.delivery)}
           >
             <option value="">Seleccionar…</option>
@@ -96,9 +89,8 @@ export function StepIdentity({ value, onChange, errors }: Props) {
           <input
             id="nit"
             type="text"
-            value={value.nit}
-            onChange={(e) => onChange({ nit: e.target.value })}
             placeholder="Opcional"
+            {...register('nit')}
             className={inputCls()}
           />
         </Field>
@@ -106,9 +98,8 @@ export function StepIdentity({ value, onChange, errors }: Props) {
           <input
             id="businessName"
             type="text"
-            value={value.businessName}
-            onChange={(e) => onChange({ businessName: e.target.value })}
             placeholder="Opcional"
+            {...register('businessName')}
             className={inputCls()}
           />
         </Field>
