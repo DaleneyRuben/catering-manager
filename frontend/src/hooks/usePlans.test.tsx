@@ -26,8 +26,8 @@ function makeWrapper() {
 beforeEach(() => {
   jest.clearAllMocks();
   mockGet.mockImplementation((url: string) => {
-    if (url === '/plans') return Promise.resolve({ data: { data: [plan1, plan2] } });
-    if (url === '/clients') return Promise.resolve({ data: { data: [] } });
+    if (url === '/plans') return Promise.resolve([plan1, plan2]);
+    if (url === '/clients') return Promise.resolve([]);
     return Promise.reject(new Error(`Unknown URL: ${url}`));
   });
 });
@@ -45,7 +45,7 @@ describe('usePlans', () => {
   });
 
   it('save calls PATCH /plans/:id', async () => {
-    mockPatch.mockResolvedValue({ data: { data: { ...plan1, name: 'Completo Plus' } } });
+    mockPatch.mockResolvedValue({ ...plan1, name: 'Completo Plus' });
     const { result } = renderHook(() => usePlans(), { wrapper: makeWrapper() });
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
@@ -59,7 +59,7 @@ describe('usePlans', () => {
   });
 
   it('create calls POST /plans', async () => {
-    mockPost.mockResolvedValue({ data: { data: { id: 3, name: 'Nuevo', meals: [], price: 500 } } });
+    mockPost.mockResolvedValue({ id: 3, name: 'Nuevo', meals: [], price: 500 });
     const { result } = renderHook(() => usePlans(), { wrapper: makeWrapper() });
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
@@ -80,13 +80,12 @@ describe('usePlans', () => {
 
   it('clientCounts is derived from clients data', async () => {
     mockGet.mockImplementation((url: string) => {
-      if (url === '/plans') return Promise.resolve({ data: { data: [plan1] } });
+      if (url === '/plans') return Promise.resolve([plan1]);
       if (url === '/clients')
-        return Promise.resolve({
-          data: {
-            data: [{ subscriptions: [{ planId: 1 }] }, { subscriptions: [{ planId: 1 }] }],
-          },
-        });
+        return Promise.resolve([
+          { subscriptions: [{ planId: 1 }] },
+          { subscriptions: [{ planId: 1 }] },
+        ]);
       return Promise.reject(new Error(`Unknown: ${url}`));
     });
 

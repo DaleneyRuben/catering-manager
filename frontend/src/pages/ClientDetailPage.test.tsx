@@ -37,7 +37,7 @@ const mockClient = {
 };
 
 function renderPage(client = mockClient) {
-  mockGet.mockResolvedValue({ data: { data: client } });
+  mockGet.mockResolvedValue(client);
   return render(
     <MemoryRouter initialEntries={['/clientes/1']}>
       <Routes>
@@ -87,7 +87,7 @@ describe('ClientDetailPage', () => {
   });
 
   it('calls PATCH on pause and toggles button', async () => {
-    mockPatch.mockResolvedValue({ data: { data: { ...mockClient, isActive: false } } });
+    mockPatch.mockResolvedValue({ ...mockClient, isActive: false });
     renderPage();
     const btn = await screen.findByRole('button', { name: /pausar/i });
     fireEvent.click(btn);
@@ -124,7 +124,7 @@ describe('ClientDetailPage', () => {
   });
 
   it('Guardar calls PATCH with updated fields and shows new name', async () => {
-    mockPatch.mockResolvedValue({ data: { data: { ...mockClient, name: 'Jane Doe' } } });
+    mockPatch.mockResolvedValue({ ...mockClient, name: 'Jane Doe' });
     renderPage();
     fireEvent.click(await screen.findByRole('button', { name: /editar/i }));
     fireEvent.change(screen.getByDisplayValue('John Doe'), { target: { value: 'Jane Doe' } });

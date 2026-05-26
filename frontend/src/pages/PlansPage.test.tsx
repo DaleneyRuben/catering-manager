@@ -30,8 +30,8 @@ const mockPlan2 = {
 
 function setupMocks(plans = [mockPlan1, mockPlan2]) {
   mockGet.mockImplementation((url: string) => {
-    if (url === '/plans') return Promise.resolve({ data: { data: plans } });
-    if (url === '/clients') return Promise.resolve({ data: { data: [] } });
+    if (url === '/plans') return Promise.resolve(plans);
+    if (url === '/clients') return Promise.resolve([]);
     return Promise.reject(new Error(`Unknown URL: ${url}`));
   });
 }
@@ -96,7 +96,7 @@ describe('PlansPage', () => {
   });
 
   it('Guardar cambios calls PATCH /plans/:id', async () => {
-    mockPatch.mockResolvedValue({ data: { data: { ...mockPlan1, name: 'Completo Plus' } } });
+    mockPatch.mockResolvedValue({ ...mockPlan1, name: 'Completo Plus' });
 
     renderPage();
     await screen.findByText('Completo');
@@ -177,8 +177,8 @@ describe('PlansPage', () => {
     await screen.findByText('Completo');
 
     mockGet.mockImplementation((url: string) => {
-      if (url === '/plans') return Promise.resolve({ data: { data: [mockPlan2] } });
-      if (url === '/clients') return Promise.resolve({ data: { data: [] } });
+      if (url === '/plans') return Promise.resolve([mockPlan2]);
+      if (url === '/clients') return Promise.resolve([]);
       return Promise.reject(new Error(`Unknown URL: ${url}`));
     });
 
@@ -207,7 +207,7 @@ describe('PlansPage', () => {
 
   it('modal submit calls POST /plans', async () => {
     const newPlan = { id: 3, name: 'Ligero', meals: ['breakfast'], price: 500, discount: 0 };
-    mockPost.mockResolvedValue({ data: { data: newPlan } });
+    mockPost.mockResolvedValue(newPlan);
 
     renderPage();
     await screen.findByText('Completo');

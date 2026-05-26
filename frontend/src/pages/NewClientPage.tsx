@@ -39,8 +39,8 @@ export function NewClientPage() {
 
   useEffect(() => {
     const loadPlans = async () => {
-      const res = await api.get('/plans');
-      setPlans(res.data.data);
+      const fetched = await api.get<Plan[]>('/plans');
+      setPlans(fetched);
     };
     loadPlans();
   }, []);
@@ -81,7 +81,7 @@ export function NewClientPage() {
   const handleSubmit = async () => {
     setSubmitError('');
     try {
-      const clientRes = await api.post('/clients', {
+      const created = await api.post<{ id: number }>('/clients', {
         name: identity.name,
         sex: identity.sex,
         dateOfBirth: identity.dateOfBirth,
@@ -94,7 +94,7 @@ export function NewClientPage() {
         underlyingDiseases: restrictions.underlyingDiseases,
         restrictions: restrictions.restrictions,
       });
-      const clientId = clientRes.data.data.id as number;
+      const clientId = created.id;
       const contractDate = format(new Date(), 'yyyy-MM-dd');
       const contractEndDate = addBusinessDays(planData.startDate!, 20);
       await api.post(`/clients/${clientId}/subscriptions`, {

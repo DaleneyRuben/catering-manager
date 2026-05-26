@@ -9,12 +9,12 @@ export function usePlans() {
 
   const plansQuery = useQuery({
     queryKey: ['plans'],
-    queryFn: (): Promise<Plan[]> => api.get('/plans').then((r) => r.data.data),
+    queryFn: (): Promise<Plan[]> => api.get<Plan[]>('/plans'),
   });
 
   const clientsQuery = useQuery({
     queryKey: ['clients'],
-    queryFn: (): Promise<Client[]> => api.get('/clients').then((r) => r.data.data),
+    queryFn: (): Promise<Client[]> => api.get<Client[]>('/clients'),
   });
 
   const clientCounts = useMemo(() => {

@@ -277,16 +277,16 @@ export function ClientDetailPage() {
 
   useEffect(() => {
     const load = async () => {
-      const res = await api.get(`/clients/${id}`);
-      setClient(res.data.data);
+      const loaded = await api.get<Client>(`/clients/${id}`);
+      setClient(loaded);
     };
     load();
   }, [id]);
 
   const handleToggleActive = async () => {
     if (!client) return;
-    const res = await api.patch(`/clients/${id}`, { isActive: !client.isActive });
-    setClient(res.data.data);
+    const updated = await api.patch<Client>(`/clients/${id}`, { isActive: !client.isActive });
+    setClient(updated);
   };
 
   const handleSave = async (draft: EditDraft) => {
@@ -303,8 +303,8 @@ export function ClientDetailPage() {
       underlyingDiseases: draft.underlyingDiseases,
       restrictions: draft.restrictions,
     };
-    const res = await api.patch(`/clients/${id}`, payload);
-    setClient(res.data.data);
+    const updated = await api.patch<Client>(`/clients/${id}`, payload);
+    setClient(updated);
     setIsEditing(false);
   };
 

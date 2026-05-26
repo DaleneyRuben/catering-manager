@@ -5,7 +5,7 @@ import App from './App';
 
 jest.mock('./services/api', () => ({
   default: {
-    get: jest.fn().mockResolvedValue({ data: { data: [] } }),
+    get: jest.fn().mockResolvedValue([]),
     post: jest.fn(),
   },
 }));

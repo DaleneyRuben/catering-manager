@@ -42,10 +42,8 @@ const fillStep1 = async () => {
 describe('NewClientPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockGet.mockResolvedValue({ data: { data: [makePlan()] } });
-    mockPost
-      .mockResolvedValueOnce({ data: { data: { id: 1 } } })
-      .mockResolvedValueOnce({ data: { data: {} } });
+    mockGet.mockResolvedValue([makePlan()]);
+    mockPost.mockResolvedValueOnce({ id: 1 }).mockResolvedValueOnce({});
   });
 
   it('renders the Alta de cliente heading and Identidad form on load', () => {

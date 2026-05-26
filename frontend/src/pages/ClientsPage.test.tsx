@@ -52,38 +52,34 @@ const renderPage = () => {
 
 describe('ClientsPage', () => {
   it('renders the page heading', async () => {
-    mockGet.mockResolvedValue({ data: { data: [] } });
+    mockGet.mockResolvedValue([]);
     renderPage();
     expect(await screen.findByRole('heading', { name: 'Clientes' })).toBeInTheDocument();
   });
 
   it('shows client names after loading', async () => {
-    mockGet.mockResolvedValue({ data: { data: [makeClient()] } });
+    mockGet.mockResolvedValue([makeClient()]);
     renderPage();
     await waitFor(() => expect(screen.getByText('María García')).toBeInTheDocument());
   });
 
   it('shows empty state when no clients match', async () => {
-    mockGet.mockResolvedValue({ data: { data: [] } });
+    mockGet.mockResolvedValue([]);
     renderPage();
     await waitFor(() => expect(screen.getByText('Sin resultados')).toBeInTheDocument());
   });
 
   it('has an add client button', async () => {
-    mockGet.mockResolvedValue({ data: { data: [] } });
+    mockGet.mockResolvedValue([]);
     renderPage();
     expect(await screen.findByRole('button', { name: /agregar cliente/i })).toBeInTheDocument();
   });
 
   it('filters clients by search query', async () => {
-    mockGet.mockResolvedValue({
-      data: {
-        data: [
-          makeClient({ id: 1, name: 'María García' }),
-          makeClient({ id: 2, name: 'Juan Pérez', subscriptions: [makeSub({ clientId: 2 })] }),
-        ],
-      },
-    });
+    mockGet.mockResolvedValue([
+      makeClient({ id: 1, name: 'María García' }),
+      makeClient({ id: 2, name: 'Juan Pérez', subscriptions: [makeSub({ clientId: 2 })] }),
+    ]);
     renderPage();
     await waitFor(() => expect(screen.getByText('María García')).toBeInTheDocument());
 

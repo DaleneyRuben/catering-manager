@@ -35,7 +35,7 @@ describe('useClients', () => {
   });
 
   it('returns clients after loading', async () => {
-    mockGet.mockResolvedValue({ data: { data: [client1] } });
+    mockGet.mockResolvedValue([client1]);
     const { result } = renderHook(() => useClients(), { wrapper: makeWrapper() });
     await waitFor(() => expect(result.current.isLoading).toBe(false));
     expect(result.current.clients).toEqual([client1]);

@@ -18,7 +18,7 @@ describe('HealthPage', () => {
   });
 
   it('shows connected when backend responds ok', async () => {
-    mockGet.mockResolvedValue({ data: { status: 'ok' } });
+    mockGet.mockResolvedValue({ status: 'ok' });
     render(
       <MemoryRouter>
         <HealthPage />
