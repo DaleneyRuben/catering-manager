@@ -14,6 +14,7 @@ export function PlansPage() {
   const [draft, setDraft] = useState<PlanDraft>({ name: '', meals: [], price: '' });
   const [createOpen, setCreateOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const load = async () => {
     const [plansRes, clientsRes] = await Promise.all([api.get('/plans'), api.get('/clients')]);
@@ -43,9 +44,14 @@ export function PlansPage() {
 
   const handleDelete = async () => {
     if (selectedId === null) return;
-    await api.delete(`/plans/${selectedId}`);
-    setSelectedId(null);
-    await load();
+    setIsDeleting(true);
+    try {
+      await api.delete(`/plans/${selectedId}`);
+      setSelectedId(null);
+      await load();
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   const handleSave = async () => {
@@ -130,16 +136,19 @@ export function PlansPage() {
                 <button
                   type="button"
                   onClick={handleDelete}
-                  disabled={isSaving}
-                  className="px-4 py-2.5 text-[13px] font-semibold border border-rule rounded-md text-warn hover:bg-cream-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled={isDeleting || isSaving}
+                  className="flex items-center gap-2 px-4 py-2.5 text-[13px] font-semibold border border-rule rounded-md text-warn hover:bg-cream-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
+                  {isDeleting && (
+                    <span className="inline-block w-3.5 h-3.5 rounded-full border-2 border-current border-t-transparent animate-spin" />
+                  )}
                   Eliminar
                 </button>
                 <div className="flex-1" />
                 <button
                   type="button"
                   onClick={handleSave}
-                  disabled={isSaving}
+                  disabled={isSaving || isDeleting}
                   className="flex items-center gap-2 px-4 py-2.5 text-[13px] font-semibold bg-olive-800 text-white rounded-md hover:bg-olive-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                   {isSaving ? (
