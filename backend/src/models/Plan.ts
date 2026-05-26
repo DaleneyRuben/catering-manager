@@ -15,9 +15,6 @@ class Plan extends Model {
   @Column({ type: DataType.DECIMAL(10, 2), allowNull: false })
   declare price: number;
 
-  @Column({ type: DataType.DECIMAL(10, 2), allowNull: false, defaultValue: 0 })
-  declare discount: number;
-
   @HasMany(() => Subscription)
   declare subscriptions: Subscription[];
 }
