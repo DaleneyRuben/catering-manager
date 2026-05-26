@@ -1,10 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import { Icon } from '../components/ui/Icon';
 import { StepIndicator } from '../components/ui/StepIndicator';
-import api from '../services/api';
-import type { Plan } from '../types/client';
+import { useClients } from '../hooks/useClients';
+import { usePlans } from '../hooks/usePlans';
 import { addBusinessDays } from '../utils/businessDays';
 import { StepConfirm } from './new-client/StepConfirm';
 import { StepIdentity } from './new-client/StepIdentity';
@@ -16,6 +16,8 @@ const STEPS = ['Identidad', 'Restricciones', 'Plan', 'Confirmar'];
 
 export function NewClientPage() {
   const navigate = useNavigate();
+  const { create } = useClients();
+  const { plans } = usePlans();
   const [step, setStep] = useState(1);
   const [identity, setIdentity] = useState<IdentityState>({
     name: '',
@@ -33,17 +35,8 @@ export function NewClientPage() {
     restrictions: [],
   });
   const [planData, setPlanData] = useState<PlanState>({ planId: null, startDate: '' });
-  const [plans, setPlans] = useState<Plan[]>([]);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitError, setSubmitError] = useState('');
-
-  useEffect(() => {
-    const loadPlans = async () => {
-      const fetched = await api.get<Plan[]>('/plans');
-      setPlans(fetched);
-    };
-    loadPlans();
-  }, []);
 
   const handleNext = () => {
     if (step === 1) {
@@ -81,28 +74,29 @@ export function NewClientPage() {
   const handleSubmit = async () => {
     setSubmitError('');
     try {
-      const created = await api.post<{ id: number }>('/clients', {
-        name: identity.name,
-        sex: identity.sex,
-        dateOfBirth: identity.dateOfBirth,
-        phoneNumber: identity.phoneNumber,
-        address: identity.address,
-        zone: identity.zone,
-        delivery: identity.delivery,
-        ...(identity.nit ? { nit: identity.nit } : {}),
-        ...(identity.businessName ? { businessName: identity.businessName } : {}),
-        underlyingDiseases: restrictions.underlyingDiseases,
-        restrictions: restrictions.restrictions,
-      });
-      const clientId = created.id;
       const contractDate = format(new Date(), 'yyyy-MM-dd');
       const contractEndDate = addBusinessDays(planData.startDate!, 20);
-      await api.post(`/clients/${clientId}/subscriptions`, {
-        planId: planData.planId,
-        startDate: planData.startDate,
-        contractDate,
-        contractEndDate,
-      });
+      await create(
+        {
+          name: identity.name,
+          sex: identity.sex,
+          dateOfBirth: identity.dateOfBirth,
+          phoneNumber: identity.phoneNumber,
+          address: identity.address,
+          zone: identity.zone,
+          delivery: identity.delivery,
+          ...(identity.nit ? { nit: identity.nit } : {}),
+          ...(identity.businessName ? { businessName: identity.businessName } : {}),
+          underlyingDiseases: restrictions.underlyingDiseases,
+          restrictions: restrictions.restrictions,
+        },
+        {
+          planId: planData.planId!,
+          startDate: planData.startDate!,
+          contractDate,
+          contractEndDate,
+        },
+      );
       navigate('/clientes');
     } catch {
       setSubmitError('Error al guardar el cliente. Intenta de nuevo.');
