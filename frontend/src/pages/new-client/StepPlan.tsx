@@ -42,6 +42,16 @@ export function StepPlan({ value, onChange, plans, errors }: Props) {
             className={inputCls(!!errors.startDate)}
           />
         </Field>
+        <Field label="Descuento" htmlFor="discount">
+          <input
+            id="discount"
+            type="number"
+            min={0}
+            value={value.discount}
+            onChange={(e) => onChange({ discount: Number(e.target.value) })}
+            className={inputCls(false)}
+          />
+        </Field>
         {contractEndDate && (
           <div>
             <p className="text-[11px] font-mono uppercase tracking-wider text-muted mb-1.5">

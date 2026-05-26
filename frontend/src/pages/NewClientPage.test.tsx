@@ -113,6 +113,72 @@ describe('NewClientPage', () => {
     );
   });
 
+  it('shows discount field on step 3', async () => {
+    renderPage();
+    await fillStep1();
+    await userEvent.click(screen.getByRole('button', { name: /siguiente/i }));
+    await userEvent.click(screen.getByRole('button', { name: /siguiente/i }));
+    await waitFor(() => expect(screen.getByLabelText(/plan/i)).toBeInTheDocument());
+    expect(screen.getByLabelText(/descuento/i)).toBeInTheDocument();
+  });
+
+  it('subscription POST defaults discount to 0', async () => {
+    renderPage();
+    await fillStep1();
+    await userEvent.click(screen.getByRole('button', { name: /siguiente/i }));
+    await userEvent.click(screen.getByRole('button', { name: /siguiente/i }));
+    await waitFor(() => expect(screen.getByLabelText(/plan/i)).toBeInTheDocument());
+    await userEvent.selectOptions(screen.getByLabelText(/plan/i), '1');
+    fireEvent.change(screen.getByLabelText(/fecha de inicio/i), {
+      target: { value: '2026-06-01' },
+    });
+    await userEvent.click(screen.getByRole('button', { name: /siguiente/i }));
+    await userEvent.click(screen.getByRole('button', { name: /confirmar/i }));
+    await waitFor(() => expect(mockPost).toHaveBeenCalledTimes(2));
+    expect(mockPost).toHaveBeenNthCalledWith(
+      2,
+      '/clients/1/subscriptions',
+      expect.objectContaining({ discount: 0 }),
+    );
+  });
+
+  it('subscription POST sends entered discount', async () => {
+    renderPage();
+    await fillStep1();
+    await userEvent.click(screen.getByRole('button', { name: /siguiente/i }));
+    await userEvent.click(screen.getByRole('button', { name: /siguiente/i }));
+    await waitFor(() => expect(screen.getByLabelText(/plan/i)).toBeInTheDocument());
+    await userEvent.selectOptions(screen.getByLabelText(/plan/i), '1');
+    fireEvent.change(screen.getByLabelText(/fecha de inicio/i), {
+      target: { value: '2026-06-01' },
+    });
+    fireEvent.change(screen.getByLabelText(/descuento/i), { target: { value: '100' } });
+    await userEvent.click(screen.getByRole('button', { name: /siguiente/i }));
+    await userEvent.click(screen.getByRole('button', { name: /confirmar/i }));
+    await waitFor(() => expect(mockPost).toHaveBeenCalledTimes(2));
+    expect(mockPost).toHaveBeenNthCalledWith(
+      2,
+      '/clients/1/subscriptions',
+      expect.objectContaining({ discount: 100 }),
+    );
+  });
+
+  it('subscription POST does not include contractEndDate', async () => {
+    renderPage();
+    await fillStep1();
+    await userEvent.click(screen.getByRole('button', { name: /siguiente/i }));
+    await userEvent.click(screen.getByRole('button', { name: /siguiente/i }));
+    await waitFor(() => expect(screen.getByLabelText(/plan/i)).toBeInTheDocument());
+    await userEvent.selectOptions(screen.getByLabelText(/plan/i), '1');
+    fireEvent.change(screen.getByLabelText(/fecha de inicio/i), {
+      target: { value: '2026-06-01' },
+    });
+    await userEvent.click(screen.getByRole('button', { name: /siguiente/i }));
+    await userEvent.click(screen.getByRole('button', { name: /confirmar/i }));
+    await waitFor(() => expect(mockPost).toHaveBeenCalledTimes(2));
+    expect(mockPost.mock.calls[1][1]).not.toHaveProperty('contractEndDate');
+  });
+
   it('navigates to /clientes after successful submit', async () => {
     renderPage();
     await fillStep1();

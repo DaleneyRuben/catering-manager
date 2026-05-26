@@ -5,7 +5,6 @@ import { Icon } from '../components/ui/Icon';
 import { StepIndicator } from '../components/ui/StepIndicator';
 import { useClients } from '../hooks/useClients';
 import { usePlans } from '../hooks/usePlans';
-import { addBusinessDays } from '../utils/businessDays';
 import { StepConfirm } from './new-client/StepConfirm';
 import { StepIdentity } from './new-client/StepIdentity';
 import { StepPlan } from './new-client/StepPlan';
@@ -34,7 +33,7 @@ export function NewClientPage() {
     underlyingDiseases: [],
     restrictions: [],
   });
-  const [planData, setPlanData] = useState<PlanState>({ planId: null, startDate: '' });
+  const [planData, setPlanData] = useState<PlanState>({ planId: null, startDate: '', discount: 0 });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitError, setSubmitError] = useState('');
 
@@ -75,7 +74,6 @@ export function NewClientPage() {
     setSubmitError('');
     try {
       const contractDate = format(new Date(), 'yyyy-MM-dd');
-      const contractEndDate = addBusinessDays(planData.startDate!, 20);
       await create(
         {
           name: identity.name,
@@ -94,7 +92,7 @@ export function NewClientPage() {
           planId: planData.planId!,
           startDate: planData.startDate!,
           contractDate,
-          contractEndDate,
+          discount: planData.discount,
         },
       );
       navigate('/clientes');

@@ -18,4 +18,5 @@ export interface RestrictionsState {
 export interface PlanState {
   planId: number | null;
   startDate: string;
+  discount: number;
 }
