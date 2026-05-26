@@ -47,7 +47,7 @@ describe('ClientsPage', () => {
   it('renders the page heading', async () => {
     mockGet.mockResolvedValue({ data: { data: [] } });
     renderPage();
-    expect(screen.getByRole('heading', { name: 'Clientes' })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'Clientes' })).toBeInTheDocument();
   });
 
   it('shows client names after loading', async () => {
@@ -65,7 +65,7 @@ describe('ClientsPage', () => {
   it('has an add client button', async () => {
     mockGet.mockResolvedValue({ data: { data: [] } });
     renderPage();
-    expect(screen.getByRole('button', { name: /agregar cliente/i })).toBeInTheDocument();
+    expect(await screen.findByRole('button', { name: /agregar cliente/i })).toBeInTheDocument();
   });
 
   it('filters clients by search query', async () => {

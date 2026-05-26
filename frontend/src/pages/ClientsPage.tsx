@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { format, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Icon } from '../components/ui/Icon';
+import { PageLoader } from '../components/ui/PageLoader';
 import api from '../services/api';
 import { Client, ClientStatus, clientStatus } from '../types/client';
 
@@ -59,13 +60,14 @@ export function ClientsPage() {
   const [q, setQ] = useState('');
   const [filter, setFilter] = useState<FilterValue>('active');
   const [birthMonth, setBirthMonth] = useState('all');
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const load = async () => {
       const res = await api.get('/clients');
       setClients(res.data.data);
     };
-    load();
+    load().finally(() => setIsLoading(false));
   }, []);
 
   const counts = useMemo(() => {
@@ -100,6 +102,8 @@ export function ClientsPage() {
     }
     return list;
   }, [clients, filter, birthMonth, q]);
+
+  if (isLoading) return <PageLoader />;
 
   return (
     <div className="p-7 max-w-[1320px] mx-auto">
