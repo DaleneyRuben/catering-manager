@@ -7,7 +7,7 @@ export const createSubscriptionSchema = z.object({
   planId: z.number().int().positive(),
   startDate: dateField,
   contractDate: dateField,
-  contractEndDate: dateField,
+  discount: z.number().int().min(0).default(0),
 });
 
 export const updateSubscriptionSchema = z.object({
@@ -16,5 +16,5 @@ export const updateSubscriptionSchema = z.object({
   contractEndDate: dateField.optional(),
 });
 
-export type CreateSubscriptionDto = z.infer<typeof createSubscriptionSchema>;
+export type CreateSubscriptionDto = z.input<typeof createSubscriptionSchema>;
 export type UpdateSubscriptionDto = z.infer<typeof updateSubscriptionSchema>;

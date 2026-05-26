@@ -19,13 +19,14 @@ const mockSubscription = {
   id: 1,
   clientId: 1,
   planId: 2,
+  discount: 0,
   contractDate: today,
   startDate,
   contractEndDate,
 };
 
 describe('subscriptionService.create', () => {
-  it('creates a subscription when dates match calculated values', async () => {
+  it('creates a subscription and calculates contractEndDate', async () => {
     (Client.findByPk as jest.Mock).mockResolvedValue({ id: 1 });
     (Subscription.create as jest.Mock).mockResolvedValue(mockSubscription);
 
@@ -33,11 +34,33 @@ describe('subscriptionService.create', () => {
       planId: 2,
       startDate,
       contractDate: today,
-      contractEndDate,
     });
 
-    expect(Subscription.create).toHaveBeenCalledTimes(1);
+    expect(Subscription.create).toHaveBeenCalledWith(expect.objectContaining({ contractEndDate }));
     expect(result).toMatchObject({ clientId: 1, planId: 2 });
+  });
+
+  it('defaults discount to 0 when not provided', async () => {
+    (Client.findByPk as jest.Mock).mockResolvedValue({ id: 1 });
+    (Subscription.create as jest.Mock).mockResolvedValue(mockSubscription);
+
+    await subscriptionService.create(1, { planId: 2, startDate, contractDate: today });
+
+    expect(Subscription.create).toHaveBeenCalledWith(expect.objectContaining({ discount: 0 }));
+  });
+
+  it('stores provided discount', async () => {
+    (Client.findByPk as jest.Mock).mockResolvedValue({ id: 1 });
+    (Subscription.create as jest.Mock).mockResolvedValue({ ...mockSubscription, discount: 500 });
+
+    await subscriptionService.create(1, {
+      planId: 2,
+      startDate,
+      contractDate: today,
+      discount: 500,
+    });
+
+    expect(Subscription.create).toHaveBeenCalledWith(expect.objectContaining({ discount: 500 }));
   });
 
   it('throws 400 when contractDate does not match today', async () => {
@@ -48,22 +71,6 @@ describe('subscriptionService.create', () => {
         planId: 2,
         startDate,
         contractDate: '2026-01-01',
-        contractEndDate,
-      }),
-    ).rejects.toMatchObject({ statusCode: 400 });
-
-    expect(Subscription.create).not.toHaveBeenCalled();
-  });
-
-  it('throws 400 when contractEndDate does not match calculated value', async () => {
-    (Client.findByPk as jest.Mock).mockResolvedValue({ id: 1 });
-
-    await expect(
-      subscriptionService.create(1, {
-        planId: 2,
-        startDate,
-        contractDate: today,
-        contractEndDate: '2026-12-31',
       }),
     ).rejects.toMatchObject({ statusCode: 400 });
 
@@ -77,7 +84,6 @@ describe('subscriptionService.create', () => {
       planId: 2,
       startDate,
       contractDate: today,
-      contractEndDate,
     });
 
     expect(result).toBeNull();
@@ -89,7 +95,7 @@ describe('subscriptionService.create', () => {
     (Subscription.create as jest.Mock).mockRejectedValue(new Error('db error'));
 
     await expect(
-      subscriptionService.create(1, { planId: 2, startDate, contractDate: today, contractEndDate }),
+      subscriptionService.create(1, { planId: 2, startDate, contractDate: today }),
     ).rejects.toThrow('db error');
   });
 });

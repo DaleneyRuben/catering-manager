@@ -13,18 +13,18 @@ const create = async (clientId: number, data: CreateSubscriptionDto) => {
   if (!client) return null;
 
   const expectedContractDate = format(new Date(), 'yyyy-MM-dd');
-  const expectedContractEndDate = addDeliveryDays(data.startDate, PLAN_DURATION_DAYS);
-
   if (data.contractDate !== expectedContractDate) {
     throw validationError('contractDate must be today');
   }
-  if (data.contractEndDate !== expectedContractEndDate) {
-    throw validationError(
-      `contractEndDate must be ${expectedContractEndDate} (${PLAN_DURATION_DAYS} business days from startDate)`,
-    );
-  }
 
-  return Subscription.create({ ...data, clientId } as never);
+  const contractEndDate = addDeliveryDays(data.startDate, PLAN_DURATION_DAYS);
+
+  return Subscription.create({
+    ...data,
+    discount: data.discount ?? 0,
+    contractEndDate,
+    clientId,
+  } as never);
 };
 
 const update = async (clientId: number, id: number, data: UpdateSubscriptionDto) => {
