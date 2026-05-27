@@ -1,11 +1,10 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { format, parseISO } from 'date-fns';
-import { es } from 'date-fns/locale';
 import { Icon } from '../components/ui/Icon';
 import { PageLoader } from '../components/ui/PageLoader';
 import { useClients } from '../hooks/useClients';
 import { clientStatus } from '../types/client';
+import { formatDate } from '../utils/format';
 import { STATUS_LABELS, STATUS_CLASSES } from '../constants/clientStatus';
 import { SEX_LABELS } from '../constants/clientOptions';
 
@@ -30,14 +29,6 @@ function initials(name: string) {
     .slice(0, 2)
     .map((s) => s[0])
     .join('');
-}
-
-function formatDateShort(iso: string) {
-  return format(parseISO(iso), 'dd/MM/yy');
-}
-
-function formatMonthDay(iso: string) {
-  return format(parseISO(iso), 'd MMM', { locale: es });
 }
 
 type FilterValue = 'active' | 'expiring' | 'paused' | 'ended' | 'all';
@@ -233,12 +224,10 @@ export function ClientsPage() {
                         )}
                       </td>
                       <td className="px-4 py-3 font-mono text-xs">{c.zone}</td>
-                      <td className="px-4 py-3 font-mono text-xs">
-                        {formatMonthDay(c.dateOfBirth)}
-                      </td>
+                      <td className="px-4 py-3 font-mono text-xs">{formatDate(c.dateOfBirth)}</td>
                       <td className="px-4 py-3 font-mono text-xs text-ink-2">
                         {sub
-                          ? `${formatDateShort(sub.startDate)} → ${formatDateShort(sub.contractEndDate)}`
+                          ? `${formatDate(sub.startDate)} → ${formatDate(sub.contractEndDate)}`
                           : '—'}
                       </td>
                       <td className="px-4 py-3">
