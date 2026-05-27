@@ -21,7 +21,7 @@ const STEP_FIELDS: Partial<Record<number, (keyof NewClientFormValues)[]>> = {
 
 export function NewClientPage() {
   const navigate = useNavigate();
-  const { create } = useClients();
+  const { create, isCreating } = useClients();
   const { plans } = usePlans();
   const [step, setStep] = useState(1);
   const [restrictions, setRestrictions] = useState<RestrictionsState>({
@@ -162,10 +162,15 @@ export function NewClientPage() {
           <button
             type="button"
             onClick={submit}
-            className="flex items-center gap-2 px-4 py-2.5 text-[13px] font-semibold bg-olive-800 text-white rounded-md hover:bg-olive-700 transition-colors"
+            disabled={isCreating}
+            className="flex items-center gap-2 px-4 py-2.5 text-[13px] font-semibold bg-olive-800 text-white rounded-md hover:bg-olive-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
           >
+            {isCreating ? (
+              <span className="inline-block w-3.5 h-3.5 rounded-full border-2 border-current border-t-transparent animate-spin" />
+            ) : (
+              <Icon name="check" size={14} />
+            )}
             Guardar cliente
-            <Icon name="check" size={14} />
           </button>
         )}
       </div>
