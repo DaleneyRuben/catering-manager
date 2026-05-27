@@ -1,13 +1,6 @@
-import { differenceInYears, parseISO } from 'date-fns';
 import type { Plan } from '../../../types/client';
 import { addBusinessDays } from '../../../utils/businessDays';
 import type { NewClientFormValues, RestrictionsState } from '../types';
-
-function formatSex(sex: string): string {
-  if (sex === 'female') return 'F';
-  if (sex === 'male') return 'M';
-  return 'X';
-}
 
 function initials(name: string): string {
   return name
@@ -28,9 +21,6 @@ export function ClientPreviewCard({ formValues, restrictions, plans }: Props) {
   const selectedPlan = plans.find((p) => p.id === formValues.planId);
   const contractEndDate = formValues.startDate ? addBusinessDays(formValues.startDate, 20) : '—';
   const total = (selectedPlan?.price ?? 0) - (formValues.discount || 0);
-  const age = formValues.dateOfBirth
-    ? differenceInYears(new Date(), parseISO(formValues.dateOfBirth))
-    : null;
 
   return (
     <div className="bg-cream-2 p-5 rounded-lg border border-rule space-y-3">
@@ -42,22 +32,7 @@ export function ClientPreviewCard({ formValues, restrictions, plans }: Props) {
           <div className="font-serif text-[24px] leading-tight text-ink">
             {formValues.name || '— Sin nombre —'}
           </div>
-          <div className="font-mono text-[11px] text-muted mt-1">
-            {age !== null ? `${age} años · ` : ''}
-            {formatSex(formValues.sex)} · {formValues.zone} · entrega: {formValues.delivery}
-          </div>
-          {formValues.phoneNumber && (
-            <div className="font-mono text-[11px] text-muted">{formValues.phoneNumber}</div>
-          )}
-          {formValues.address && (
-            <div className="font-mono text-[11px] text-muted">{formValues.address}</div>
-          )}
         </div>
-        {selectedPlan && (
-          <span className="ml-auto shrink-0 px-2.5 py-1 bg-olive-800 text-white text-[11px] font-mono rounded-full">
-            {selectedPlan.name}
-          </span>
-        )}
       </div>
 
       <div className="bg-paper rounded-md border border-rule p-4">

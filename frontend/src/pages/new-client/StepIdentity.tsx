@@ -25,7 +25,6 @@ export function StepIdentity({ register, control, errors }: Props) {
             <input
               id="name"
               type="text"
-              placeholder="Ej. María García Soler"
               {...register('name', { required: 'Nombre es requerido' })}
               className={inputCls(!!errors.name)}
             />
@@ -41,7 +40,6 @@ export function StepIdentity({ register, control, errors }: Props) {
             <option value="">Seleccionar…</option>
             <option value="female">Femenino</option>
             <option value="male">Masculino</option>
-            <option value="other">Otro</option>
           </select>
         </Field>
 
@@ -59,11 +57,10 @@ export function StepIdentity({ register, control, errors }: Props) {
           />
         </Field>
 
-        <Field label="Teléfono" htmlFor="phoneNumber" required error={errors.phoneNumber?.message}>
+        <Field label="Celular" htmlFor="phoneNumber" required error={errors.phoneNumber?.message}>
           <input
             id="phoneNumber"
             type="tel"
-            placeholder="+34 …"
             {...register('phoneNumber', { required: 'Teléfono es requerido' })}
             className={inputCls(!!errors.phoneNumber)}
           />
@@ -74,7 +71,6 @@ export function StepIdentity({ register, control, errors }: Props) {
             <input
               id="address"
               type="text"
-              placeholder="Calle, número, piso…"
               {...register('address', { required: 'Dirección es requerida' })}
               className={inputCls(!!errors.address)}
             />

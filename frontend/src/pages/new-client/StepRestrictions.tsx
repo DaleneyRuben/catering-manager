@@ -24,11 +24,7 @@ export function StepRestrictions({ value, onChange }: Props) {
 
   return (
     <div>
-      <h2 className="font-semibold text-ink text-[15px] mb-1">Restricciones</h2>
-      <p className="text-[11.5px] font-mono text-muted mb-5">
-        Agregá una restricción por vez. Texto libre — todo lo que el equipo de cocina deba tener en
-        cuenta.
-      </p>
+      <h2 className="font-semibold text-ink text-[15px] mb-1">Alergias, intolerancias y gustos</h2>
 
       <div className="flex gap-2 mb-5">
         <input
@@ -40,7 +36,6 @@ export function StepRestrictions({ value, onChange }: Props) {
               add();
             }
           }}
-          placeholder="Ej. lactosa · vegetariano · no le gusta el cilantro"
           className="flex-1 px-3 py-2.5 border border-rule bg-paper rounded-md text-[13px] focus:outline-none focus:border-olive-700"
         />
         <button
