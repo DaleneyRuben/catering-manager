@@ -115,7 +115,7 @@ export function StepRestrictions({ value, onChange }: Props) {
                 onClick={() => toggleDisease(d)}
                 className={`px-3 py-1.5 rounded-full text-[12px] font-mono border transition-colors ${
                   selected
-                    ? 'bg-olive-800 text-white border-olive-800'
+                    ? 'bg-olive-700 text-white border-olive-800'
                     : 'bg-paper text-ink border-rule hover:border-olive-700'
                 }`}
               >
