@@ -14,7 +14,7 @@ export function ToggleGroup({ options, value, onChange }: Props) {
           onClick={() => onChange(opt)}
           className={`flex-1 py-2 px-3 rounded-md border text-[13px] font-medium transition-colors ${
             value === opt
-              ? 'bg-olive-800 text-white border-olive-800'
+              ? 'bg-olive-700 text-white border-olive-700'
               : 'bg-paper text-ink border-rule hover:border-olive-700'
           }`}
         >
