@@ -4,9 +4,9 @@ import { differenceInDays, differenceInYears, parseISO } from 'date-fns';
 import { Icon } from '../components/ui/Icon';
 import { useClient } from '../hooks/useClient';
 import { MEAL_LABELS } from '../constants/meals';
-import type { ClientStatus } from '../types/client';
-import { formatDate } from '../utils/format';
 import { clientStatus } from '../types/client';
+import { STATUS_LABELS, STATUS_CLASSES } from '../constants/clientStatus';
+import { formatDate } from '../utils/format';
 import { ClientEditModal } from './ClientEditModal';
 import type { EditDraft } from './ClientEditModal';
 import { ClientOverviewTab } from './ClientOverviewTab';
@@ -19,20 +19,6 @@ const TABS: { id: TabId; label: string }[] = [
   { id: 'suspensions', label: 'Suspensiones' },
   { id: 'history', label: 'Historial' },
 ];
-
-const STATUS_LABELS: Record<ClientStatus, string> = {
-  active: 'Activo',
-  paused: 'Pausado',
-  expiring: 'Por vencer',
-  ended: 'Finalizado',
-};
-
-const STATUS_CLASSES: Record<ClientStatus, string> = {
-  active: 'bg-ok-bg text-ok',
-  paused: 'bg-warn-bg text-warn',
-  expiring: 'bg-warn-bg text-warn',
-  ended: 'bg-rule text-muted',
-};
 
 function initials(name: string) {
   return name

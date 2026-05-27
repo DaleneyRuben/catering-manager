@@ -5,7 +5,8 @@ import { es } from 'date-fns/locale';
 import { Icon } from '../components/ui/Icon';
 import { PageLoader } from '../components/ui/PageLoader';
 import { useClients } from '../hooks/useClients';
-import { ClientStatus, clientStatus } from '../types/client';
+import { clientStatus } from '../types/client';
+import { STATUS_LABELS, STATUS_CLASSES } from '../constants/clientStatus';
 
 const MONTHS = [
   'Enero',
@@ -21,20 +22,6 @@ const MONTHS = [
   'Noviembre',
   'Diciembre',
 ];
-
-const STATUS_LABELS: Record<ClientStatus, string> = {
-  active: 'Activo',
-  paused: 'Pausado',
-  expiring: 'Por vencer',
-  ended: 'Finalizado',
-};
-
-const STATUS_CLASSES: Record<ClientStatus, string> = {
-  active: 'bg-ok-bg text-ok',
-  paused: 'bg-warn-bg text-warn',
-  expiring: 'bg-warn-bg text-warn',
-  ended: 'bg-rule text-muted',
-};
 
 function initials(name: string) {
   return name
