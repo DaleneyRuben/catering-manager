@@ -175,7 +175,7 @@ export function ClientDetailPage() {
                     {sub.plan.meals.map((m) => (
                       <span
                         key={m}
-                        className="px-2 py-0.5 rounded-full text-[11px] font-mono bg-cream-2 border border-rule text-ink"
+                        className="px-2 py-0.5 rounded-full text-[11px] font-mono bg-olive-50 border border-rule text-ink"
                       >
                         {MEAL_LABELS[m] ?? m}
                       </span>
