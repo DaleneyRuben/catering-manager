@@ -150,4 +150,54 @@ describe('ClientDetailPage', () => {
     fireEvent.click(screen.getByRole('button', { name: /clientes/i }));
     expect(await screen.findByText('Lista clientes')).toBeInTheDocument();
   });
+
+  it('renders 4 navigation tabs', async () => {
+    renderPage();
+    await screen.findByText('John Doe');
+    expect(screen.getByRole('tab', { name: /resumen/i })).toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: /plan/i })).toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: /suspensiones/i })).toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: /historial/i })).toBeInTheDocument();
+  });
+
+  it('shows plan vigente card in Resumen tab by default', async () => {
+    renderPage();
+    await screen.findByText('John Doe');
+    expect(screen.getByText(/plan vigente/i)).toBeInTheDocument();
+  });
+
+  it('switching to Plan tab shows plan asignado section', async () => {
+    renderPage();
+    await screen.findByText('John Doe');
+    fireEvent.click(screen.getByRole('tab', { name: /plan/i }));
+    expect(screen.getByText(/plan asignado/i)).toBeInTheDocument();
+  });
+
+  it('switching to Suspensiones tab shows empty state', async () => {
+    renderPage();
+    await screen.findByText('John Doe');
+    fireEvent.click(screen.getByRole('tab', { name: /suspensiones/i }));
+    expect(screen.getByText(/sin suspensiones/i)).toBeInTheDocument();
+  });
+
+  it('switching to Historial tab shows empty state', async () => {
+    renderPage();
+    await screen.findByText('John Doe');
+    fireEvent.click(screen.getByRole('tab', { name: /historial/i }));
+    expect(screen.getByText(/sin eventos/i)).toBeInTheDocument();
+  });
+
+  it('clicking Editar opens a modal with Editar cliente heading', async () => {
+    renderPage();
+    fireEvent.click(await screen.findByRole('button', { name: /editar/i }));
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+    expect(screen.getByText('Editar cliente')).toBeInTheDocument();
+  });
+
+  it('modal shows predefined disease chips', async () => {
+    renderPage();
+    fireEvent.click(await screen.findByRole('button', { name: /editar/i }));
+    expect(screen.getByRole('button', { name: 'Diabetes' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Hipertensión' })).toBeInTheDocument();
+  });
 });
