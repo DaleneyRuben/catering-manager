@@ -173,6 +173,7 @@ export function ClientEditModal({
                     options={ZONES}
                     value={draft.zone}
                     onChange={(v) => set({ zone: v })}
+                    selectedClassName="bg-olive-100 text-ink border-olive-200"
                   />
                 </Field>
                 <Field label="Delivery" htmlFor="em-delivery" required>
@@ -180,6 +181,7 @@ export function ClientEditModal({
                     options={DELIVERIES}
                     value={draft.delivery}
                     onChange={(v) => set({ delivery: v })}
+                    selectedClassName="bg-olive-100 text-ink border-olive-200"
                   />
                 </Field>
               </div>
