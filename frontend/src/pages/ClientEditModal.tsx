@@ -201,7 +201,7 @@ export function ClientEditModal({
 
           <div>
             <p className="text-[13px] font-semibold text-ink mb-1">Enfermedades de base</p>
-            <p className="text-[11.5px] font-mono text-muted mb-3">Seleccioná las que apliquen.</p>
+            <p className="text-[11.5px] font-mono text-muted mb-3">Selecciona las que apliquen.</p>
             <div className="flex flex-wrap gap-2">
               {DISEASES.map((d) => {
                 const selected = draft.underlyingDiseases.includes(d);

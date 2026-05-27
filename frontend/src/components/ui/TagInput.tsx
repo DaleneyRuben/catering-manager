@@ -8,6 +8,7 @@ export function TagInput({
   setInput,
   onAdd,
   onRemove,
+  tagClassName = 'bg-cream-2 border-rule text-ink',
 }: {
   label: string;
   tags: string[];
@@ -15,6 +16,7 @@ export function TagInput({
   setInput: (v: string) => void;
   onAdd: () => void;
   onRemove: (v: string) => void;
+  tagClassName?: string;
 }) {
   return (
     <div>
@@ -23,7 +25,7 @@ export function TagInput({
         {tags.map((t) => (
           <span
             key={t}
-            className="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-cream-2 border border-rule text-ink"
+            className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-xs border ${tagClassName}`}
           >
             {t}
             <button
