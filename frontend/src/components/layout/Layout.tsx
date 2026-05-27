@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { Icon } from '../ui/Icon';
+import smallLogo from '../../assets/small_logo.png';
 
 interface NavItem {
   to: string;
@@ -48,9 +49,8 @@ export function Layout({ children }: LayoutProps) {
           menuOpen ? 'translate-x-0' : '-translate-x-full',
         ].join(' ')}
       >
-        <div className="px-5 py-5 flex items-center gap-3 border-b border-olive-800">
-          <div className="brand-mark rounded-full w-9 h-9" aria-hidden="true" />
-          <span className="font-serif text-xl text-white leading-none">La Oliva</span>
+        <div className="px-4 py-4 flex items-center justify-center border-b border-olive-800">
+          <img src={smallLogo} alt="La Oliva" className="w-36 h-auto" />
         </div>
         <nav className="flex-1 py-4 flex flex-col">
           {NAV_ITEMS.map(({ to, label, icon }) => (
@@ -100,7 +100,7 @@ export function Layout({ children }: LayoutProps) {
           >
             <Icon name="menu" size={20} />
           </button>
-          <span className="font-serif text-lg text-white leading-none">La Oliva</span>
+          <img src={smallLogo} alt="La Oliva" className="h-7 w-auto" />
         </header>
         <main className="flex-1 min-w-0 overflow-auto">{children}</main>
       </div>
