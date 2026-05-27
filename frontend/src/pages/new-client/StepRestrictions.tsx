@@ -1,19 +1,7 @@
 import { useState } from 'react';
 import { Icon } from '../../components/ui/Icon';
+import { DISEASES } from '../../constants/diseases';
 import type { RestrictionsState } from './types';
-
-const DISEASES = [
-  'Diabetes',
-  'Hipertensión',
-  'Sobrepeso',
-  'Gastritis',
-  'Celíaco',
-  'Intolerancia a la lactosa',
-  'Enfermedad renal',
-  'Anemia',
-  'Postoperatorias',
-  'Adulto mayor',
-] as const;
 
 interface Props {
   value: RestrictionsState;
