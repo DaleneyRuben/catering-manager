@@ -45,6 +45,12 @@ const fillStep1 = async () => {
   await userEvent.click(screen.getByRole('button', { name: 'La Oliva' }));
 };
 
+const navigateToStep2 = async () => {
+  renderPage();
+  await fillStep1();
+  await userEvent.click(screen.getByRole('button', { name: /siguiente/i }));
+};
+
 const navigateToStep3 = async () => {
   renderPage();
   await fillStep1();
@@ -87,6 +93,40 @@ describe('NewClientPage', () => {
     await userEvent.click(screen.getByRole('button', { name: /siguiente/i }));
     await userEvent.click(screen.getByRole('button', { name: /atr/i }));
     expect(screen.getByLabelText(/nombre/i)).toBeInTheDocument();
+  });
+
+  it('shows predefined disease chips on step 2', async () => {
+    await navigateToStep2();
+    expect(screen.getByRole('button', { name: 'Diabetes' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Hipertensión' })).toBeInTheDocument();
+  });
+
+  it('toggles a disease chip on click', async () => {
+    await navigateToStep2();
+    const btn = screen.getByRole('button', { name: 'Diabetes' });
+    await userEvent.click(btn);
+    expect(btn).toHaveAttribute('aria-pressed', 'true');
+    await userEvent.click(btn);
+    expect(btn).toHaveAttribute('aria-pressed', 'false');
+  });
+
+  it('selected diseases are submitted in underlyingDiseases', async () => {
+    await navigateToStep2();
+    await userEvent.click(screen.getByRole('button', { name: 'Diabetes' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Anemia' }));
+    await userEvent.click(screen.getByRole('button', { name: /siguiente/i }));
+    await userEvent.click(screen.getByRole('button', { name: /completo/i }));
+    fireEvent.change(screen.getByLabelText(/inicio del servicio/i), {
+      target: { value: '2026-06-01' },
+    });
+    await userEvent.click(screen.getByRole('button', { name: /siguiente/i }));
+    await userEvent.click(screen.getByRole('button', { name: /confirmar/i }));
+    await waitFor(() => expect(mockPost).toHaveBeenCalledTimes(2));
+    expect(mockPost).toHaveBeenNthCalledWith(
+      1,
+      '/clients',
+      expect.objectContaining({ underlyingDiseases: ['Diabetes', 'Anemia'] }),
+    );
   });
 
   it('loads and shows plan cards on step 3', async () => {

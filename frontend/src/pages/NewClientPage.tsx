@@ -26,6 +26,7 @@ export function NewClientPage() {
   const [step, setStep] = useState(1);
   const [restrictions, setRestrictions] = useState<RestrictionsState>({
     restrictions: [],
+    underlyingDiseases: [],
   });
   const [submitError, setSubmitError] = useState('');
 
@@ -79,7 +80,7 @@ export function NewClientPage() {
           delivery: data.delivery,
           ...(data.nit ? { nit: data.nit } : {}),
           ...(data.businessName ? { businessName: data.businessName } : {}),
-          underlyingDiseases: [],
+          underlyingDiseases: restrictions.underlyingDiseases,
           restrictions: restrictions.restrictions,
         },
         {
