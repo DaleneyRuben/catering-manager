@@ -35,7 +35,7 @@ export function ClientOverviewTab({ client, sub, remaining }: Props) {
                 {sub.plan.meals.map((m) => (
                   <span
                     key={m}
-                    className="px-2 py-0.5 rounded-full text-[11px] font-mono bg-olive-50 border border-rule text-ink"
+                    className="px-2 py-0.5 rounded-full text-[11px] font-mono bg-olive-100 border border-rule text-ink"
                   >
                     {MEAL_LABELS[m] ?? m}
                   </span>
@@ -118,7 +118,7 @@ export function ClientOverviewTab({ client, sub, remaining }: Props) {
                     {client.underlyingDiseases.map((d) => (
                       <span
                         key={d}
-                        className="px-2.5 py-1 rounded-full text-[12px] font-mono bg-cream-2 border border-rule text-ink"
+                        className="px-2.5 py-1 rounded-full text-[12px] font-mono bg-olive-100 border border-rule text-ink"
                       >
                         {d}
                       </span>

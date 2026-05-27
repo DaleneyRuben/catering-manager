@@ -88,6 +88,7 @@ export function StepIdentity({ register, control, errors }: Props) {
                 options={ZONES}
                 value={field.value as (typeof ZONES)[number] | ''}
                 onChange={field.onChange}
+                selectedClassName="bg-olive-200 text-ink border-olive-200"
               />
             </Field>
           )}
@@ -103,6 +104,7 @@ export function StepIdentity({ register, control, errors }: Props) {
                 options={DELIVERIES}
                 value={field.value as (typeof DELIVERIES)[number] | ''}
                 onChange={field.onChange}
+                selectedClassName="bg-olive-200 text-ink border-olive-200"
               />
             </Field>
           )}
