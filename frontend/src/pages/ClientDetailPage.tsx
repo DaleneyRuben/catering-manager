@@ -6,6 +6,7 @@ import { useClient } from '../hooks/useClient';
 import { MEAL_LABELS } from '../constants/meals';
 import { clientStatus } from '../types/client';
 import { STATUS_LABELS, STATUS_CLASSES } from '../constants/clientStatus';
+import { SEX_LABELS } from '../constants/clientOptions';
 import { formatDate } from '../utils/format';
 import { ClientEditModal } from './ClientEditModal';
 import type { EditDraft } from './ClientEditModal';
@@ -95,7 +96,8 @@ export function ClientDetailPage() {
             </span>
           </div>
           <p className="font-mono text-[12px] text-muted mt-1.5">
-            {age} años · {client.sex} · {client.zone} · {client.phoneNumber}
+            {age} años · {SEX_LABELS[client.sex] ?? client.sex} · {client.zone} ·{' '}
+            {client.phoneNumber}
           </p>
         </div>
         <div className="flex gap-2.5 flex-wrap">

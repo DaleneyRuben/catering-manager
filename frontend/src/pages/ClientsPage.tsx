@@ -7,6 +7,7 @@ import { PageLoader } from '../components/ui/PageLoader';
 import { useClients } from '../hooks/useClients';
 import { clientStatus } from '../types/client';
 import { STATUS_LABELS, STATUS_CLASSES } from '../constants/clientStatus';
+import { SEX_LABELS } from '../constants/clientOptions';
 
 const MONTHS = [
   'Enero',
@@ -217,7 +218,7 @@ export function ClientsPage() {
                           <div>
                             <p className="font-semibold text-ink">{c.name}</p>
                             <p className="text-xs font-mono text-muted">
-                              {c.zone} · {c.sex}
+                              {c.zone} · {SEX_LABELS[c.sex] ?? c.sex}
                             </p>
                           </div>
                         </div>
