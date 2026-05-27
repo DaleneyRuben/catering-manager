@@ -3,15 +3,13 @@ import { Field, inputCls, selectCls } from '../../components/ui/Field';
 import { Icon } from '../../components/ui/Icon';
 import { ToggleGroup } from '../../components/ui/ToggleGroup';
 import type { NewClientFormValues } from './types';
+import { ZONES, DELIVERIES, SEX_OPTIONS } from '../../constants/clientOptions';
 
 interface Props {
   register: UseFormRegister<NewClientFormValues>;
   control: Control<NewClientFormValues>;
   errors: FieldErrors<NewClientFormValues>;
 }
-
-const ZONES = ['Centro', 'Sur'] as const;
-const DELIVERIES = ['La Oliva', 'Otro'] as const;
 
 export function StepIdentity({ register, control, errors }: Props) {
   return (
@@ -38,8 +36,11 @@ export function StepIdentity({ register, control, errors }: Props) {
             className={selectCls(!!errors.sex)}
           >
             <option value="">Seleccionar…</option>
-            <option value="female">Femenino</option>
-            <option value="male">Masculino</option>
+            {SEX_OPTIONS.map((o) => (
+              <option key={o.value} value={o.value}>
+                {o.label}
+              </option>
+            ))}
           </select>
         </Field>
 

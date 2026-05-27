@@ -4,6 +4,7 @@ import { Icon } from '../components/ui/Icon';
 import { TagInput } from '../components/ui/TagInput';
 import { ToggleGroup } from '../components/ui/ToggleGroup';
 import { DISEASES } from '../constants/diseases';
+import { ZONES, DELIVERIES, SEX_OPTIONS } from '../constants/clientOptions';
 import type { Client } from '../types/client';
 
 export interface EditDraft {
@@ -121,9 +122,11 @@ export function ClientEditModal({
                     onChange={(e) => set({ sex: e.target.value })}
                     className={selectCls()}
                   >
-                    <option value="female">Femenino</option>
-                    <option value="male">Masculino</option>
-                    <option value="other">Otro</option>
+                    {SEX_OPTIONS.map((o) => (
+                      <option key={o.value} value={o.value}>
+                        {o.label}
+                      </option>
+                    ))}
                   </select>
                 </Field>
                 <Field label="Fecha de nacimiento" htmlFor="em-dob" required>
@@ -167,14 +170,14 @@ export function ClientEditModal({
               <div className="grid grid-cols-2 gap-4">
                 <Field label="Zona" htmlFor="em-zone" required>
                   <ToggleGroup
-                    options={['Centro', 'Sur']}
+                    options={ZONES}
                     value={draft.zone}
                     onChange={(v) => set({ zone: v })}
                   />
                 </Field>
                 <Field label="Delivery" htmlFor="em-delivery" required>
                   <ToggleGroup
-                    options={['La Oliva', 'Otro']}
+                    options={DELIVERIES}
                     value={draft.delivery}
                     onChange={(v) => set({ delivery: v })}
                   />
