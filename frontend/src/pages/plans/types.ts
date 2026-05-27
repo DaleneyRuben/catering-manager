@@ -11,17 +11,6 @@ export const MEAL_KEYS = [
 
 export type MealKey = (typeof MEAL_KEYS)[number];
 
-export const MEAL_LABELS: Record<MealKey, string> = {
-  breakfast: 'Desayuno',
-  morning_snack: 'Merienda AM',
-  salad: 'Ensalada',
-  lunch: 'Almuerzo',
-  afternoon_snack: 'Merienda PM',
-  dinner: 'Cena',
-  juice: 'Jugo',
-  extra: 'Extra',
-};
-
 export interface PlanDraft {
   name: string;
   meals: MealKey[];

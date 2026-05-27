@@ -1,6 +1,6 @@
 import { Icon } from '../../components/ui/Icon';
 import type { MealKey } from './types';
-import { MEAL_LABELS } from './types';
+import { MEAL_LABELS } from '../../constants/meals';
 
 export function MealRow({
   mealKey,

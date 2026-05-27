@@ -1,5 +1,6 @@
 import type { Plan } from '../../types/client';
-import { MEAL_KEYS, MEAL_LABELS } from './types';
+import { MEAL_LABELS } from '../../constants/meals';
+import { MEAL_KEYS } from './types';
 
 export function PlanCard({
   plan,
