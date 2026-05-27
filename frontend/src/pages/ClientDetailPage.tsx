@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { differenceInDays, differenceInYears, format, parseISO } from 'date-fns';
+import { differenceInDays, differenceInYears, parseISO } from 'date-fns';
 import { Icon } from '../components/ui/Icon';
 import { useClient } from '../hooks/useClient';
 import { MEAL_LABELS } from '../constants/meals';
 import type { ClientStatus } from '../types/client';
+import { formatDate } from '../utils/format';
 import { clientStatus } from '../types/client';
 import { ClientEditModal } from './ClientEditModal';
 import type { EditDraft } from './ClientEditModal';
@@ -32,10 +33,6 @@ const STATUS_CLASSES: Record<ClientStatus, string> = {
   expiring: 'bg-warn-bg text-warn',
   ended: 'bg-rule text-muted',
 };
-
-function fmt(iso: string) {
-  return format(parseISO(iso), 'dd/MM/yyyy');
-}
 
 function initials(name: string) {
   return name
@@ -238,17 +235,17 @@ export function ClientDetailPage() {
                     <p className="text-[11px] font-mono uppercase tracking-wider text-muted">
                       Firma
                     </p>
-                    <p className="font-mono text-[13px]">{fmt(sub.contractDate)}</p>
+                    <p className="font-mono text-[13px]">{formatDate(sub.contractDate)}</p>
                   </div>
                   <div>
                     <p className="text-[11px] font-mono uppercase tracking-wider text-muted">
                       Inicio
                     </p>
-                    <p className="font-mono text-[13px]">{fmt(sub.startDate)}</p>
+                    <p className="font-mono text-[13px]">{formatDate(sub.startDate)}</p>
                   </div>
                   <div>
                     <p className="text-[11px] font-mono uppercase tracking-wider text-muted">Fin</p>
-                    <p className="font-mono text-[13px]">{fmt(sub.contractEndDate)}</p>
+                    <p className="font-mono text-[13px]">{formatDate(sub.contractEndDate)}</p>
                   </div>
                   <div>
                     <p className="text-[11px] font-mono uppercase tracking-wider text-muted">

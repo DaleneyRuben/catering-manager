@@ -1,11 +1,7 @@
-import { format, parseISO } from 'date-fns';
 import { Icon } from '../components/ui/Icon';
 import { MEAL_LABELS } from '../constants/meals';
 import type { Client, Subscription } from '../types/client';
-
-function fmt(iso: string) {
-  return format(parseISO(iso), 'dd/MM/yyyy');
-}
+import { formatDate } from '../utils/format';
 
 interface Props {
   client: Client;
@@ -46,7 +42,8 @@ export function ClientOverviewTab({ client, sub, remaining }: Props) {
                 ))}
               </div>
               <p className="font-mono text-[11.5px] text-muted">
-                {fmt(sub.startDate)} → {fmt(sub.contractEndDate)} · quedan {remaining} día
+                {formatDate(sub.startDate)} → {formatDate(sub.contractEndDate)} · quedan {remaining}{' '}
+                día
                 {remaining === 1 ? '' : 's'}
               </p>
             </>
