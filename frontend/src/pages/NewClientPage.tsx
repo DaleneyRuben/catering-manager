@@ -25,7 +25,6 @@ export function NewClientPage() {
   const { plans } = usePlans();
   const [step, setStep] = useState(1);
   const [restrictions, setRestrictions] = useState<RestrictionsState>({
-    underlyingDiseases: [],
     restrictions: [],
   });
   const [submitError, setSubmitError] = useState('');
@@ -80,7 +79,7 @@ export function NewClientPage() {
           delivery: data.delivery,
           ...(data.nit ? { nit: data.nit } : {}),
           ...(data.businessName ? { businessName: data.businessName } : {}),
-          underlyingDiseases: restrictions.underlyingDiseases,
+          underlyingDiseases: [],
           restrictions: restrictions.restrictions,
         },
         {
@@ -116,7 +115,7 @@ export function NewClientPage() {
       <StepIndicator steps={STEPS} current={step} />
 
       <div className="bg-paper border border-rule rounded-lg p-6 sm:p-8 mt-7">
-        {step === 1 && <StepIdentity register={register} errors={errors} />}
+        {step === 1 && <StepIdentity register={register} control={control} errors={errors} />}
         {step === 2 && (
           <StepRestrictions
             value={restrictions}

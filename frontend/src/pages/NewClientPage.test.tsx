@@ -12,9 +12,8 @@ const mockPost = api.post as jest.Mock;
 const makePlan = (overrides = {}) => ({
   id: 1,
   name: 'Completo',
-  meals: [],
+  meals: ['breakfast', 'lunch'],
   price: 480,
-  discount: 0,
   ...overrides,
 });
 
@@ -42,8 +41,18 @@ const fillStep1 = async () => {
   });
   await userEvent.type(screen.getByLabelText(/teléfono/i), '+34 612 345 678');
   await userEvent.type(screen.getByLabelText(/dirección/i), 'Av. Centro 142');
-  await userEvent.selectOptions(screen.getByLabelText(/zona/i), 'Centro');
-  await userEvent.selectOptions(screen.getByLabelText(/delivery/i), 'La Oliva');
+  await userEvent.click(screen.getByRole('button', { name: 'Centro' }));
+  await userEvent.click(screen.getByRole('button', { name: 'La Oliva' }));
+};
+
+const navigateToStep3 = async () => {
+  renderPage();
+  await fillStep1();
+  await userEvent.click(screen.getByRole('button', { name: /siguiente/i }));
+  await userEvent.click(screen.getByRole('button', { name: /siguiente/i }));
+  await waitFor(() =>
+    expect(screen.getByRole('button', { name: /completo/i })).toBeInTheDocument(),
+  );
 };
 
 describe('NewClientPage', () => {
@@ -80,22 +89,28 @@ describe('NewClientPage', () => {
     expect(screen.getByLabelText(/nombre/i)).toBeInTheDocument();
   });
 
-  it('loads and shows plans on step 3', async () => {
-    renderPage();
-    await fillStep1();
-    await userEvent.click(screen.getByRole('button', { name: /siguiente/i }));
-    await userEvent.click(screen.getByRole('button', { name: /siguiente/i }));
-    await waitFor(() => expect(screen.getByText(/completo/i)).toBeInTheDocument());
+  it('loads and shows plan cards on step 3', async () => {
+    await navigateToStep3();
+    expect(screen.getByRole('button', { name: /completo/i })).toBeInTheDocument();
+  });
+
+  it('shows discount and billing fields on step 3', async () => {
+    await navigateToStep3();
+    expect(screen.getByLabelText(/descuento/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/inicio del servicio/i)).toBeInTheDocument();
+  });
+
+  it('shows calculated total when plan and discount are set', async () => {
+    await navigateToStep3();
+    await userEvent.click(screen.getByRole('button', { name: /completo/i }));
+    fireEvent.change(screen.getByLabelText(/descuento/i), { target: { value: '50' } });
+    expect(screen.getByText('$430')).toBeInTheDocument();
   });
 
   it('creates client and subscription on confirm', async () => {
-    renderPage();
-    await fillStep1();
-    await userEvent.click(screen.getByRole('button', { name: /siguiente/i }));
-    await userEvent.click(screen.getByRole('button', { name: /siguiente/i }));
-    await waitFor(() => expect(screen.getByLabelText(/plan/i)).toBeInTheDocument());
-    await userEvent.selectOptions(screen.getByLabelText(/plan/i), '1');
-    fireEvent.change(screen.getByLabelText(/fecha de inicio/i), {
+    await navigateToStep3();
+    await userEvent.click(screen.getByRole('button', { name: /completo/i }));
+    fireEvent.change(screen.getByLabelText(/inicio del servicio/i), {
       target: { value: '2026-06-01' },
     });
     await userEvent.click(screen.getByRole('button', { name: /siguiente/i }));
@@ -113,23 +128,10 @@ describe('NewClientPage', () => {
     );
   });
 
-  it('shows discount field on step 3', async () => {
-    renderPage();
-    await fillStep1();
-    await userEvent.click(screen.getByRole('button', { name: /siguiente/i }));
-    await userEvent.click(screen.getByRole('button', { name: /siguiente/i }));
-    await waitFor(() => expect(screen.getByLabelText(/plan/i)).toBeInTheDocument());
-    expect(screen.getByLabelText(/descuento/i)).toBeInTheDocument();
-  });
-
   it('subscription POST defaults discount to 0', async () => {
-    renderPage();
-    await fillStep1();
-    await userEvent.click(screen.getByRole('button', { name: /siguiente/i }));
-    await userEvent.click(screen.getByRole('button', { name: /siguiente/i }));
-    await waitFor(() => expect(screen.getByLabelText(/plan/i)).toBeInTheDocument());
-    await userEvent.selectOptions(screen.getByLabelText(/plan/i), '1');
-    fireEvent.change(screen.getByLabelText(/fecha de inicio/i), {
+    await navigateToStep3();
+    await userEvent.click(screen.getByRole('button', { name: /completo/i }));
+    fireEvent.change(screen.getByLabelText(/inicio del servicio/i), {
       target: { value: '2026-06-01' },
     });
     await userEvent.click(screen.getByRole('button', { name: /siguiente/i }));
@@ -143,13 +145,9 @@ describe('NewClientPage', () => {
   });
 
   it('subscription POST sends entered discount', async () => {
-    renderPage();
-    await fillStep1();
-    await userEvent.click(screen.getByRole('button', { name: /siguiente/i }));
-    await userEvent.click(screen.getByRole('button', { name: /siguiente/i }));
-    await waitFor(() => expect(screen.getByLabelText(/plan/i)).toBeInTheDocument());
-    await userEvent.selectOptions(screen.getByLabelText(/plan/i), '1');
-    fireEvent.change(screen.getByLabelText(/fecha de inicio/i), {
+    await navigateToStep3();
+    await userEvent.click(screen.getByRole('button', { name: /completo/i }));
+    fireEvent.change(screen.getByLabelText(/inicio del servicio/i), {
       target: { value: '2026-06-01' },
     });
     fireEvent.change(screen.getByLabelText(/descuento/i), { target: { value: '100' } });
@@ -164,13 +162,9 @@ describe('NewClientPage', () => {
   });
 
   it('subscription POST does not include contractEndDate', async () => {
-    renderPage();
-    await fillStep1();
-    await userEvent.click(screen.getByRole('button', { name: /siguiente/i }));
-    await userEvent.click(screen.getByRole('button', { name: /siguiente/i }));
-    await waitFor(() => expect(screen.getByLabelText(/plan/i)).toBeInTheDocument());
-    await userEvent.selectOptions(screen.getByLabelText(/plan/i), '1');
-    fireEvent.change(screen.getByLabelText(/fecha de inicio/i), {
+    await navigateToStep3();
+    await userEvent.click(screen.getByRole('button', { name: /completo/i }));
+    fireEvent.change(screen.getByLabelText(/inicio del servicio/i), {
       target: { value: '2026-06-01' },
     });
     await userEvent.click(screen.getByRole('button', { name: /siguiente/i }));
@@ -180,13 +174,9 @@ describe('NewClientPage', () => {
   });
 
   it('navigates to /clientes after successful submit', async () => {
-    renderPage();
-    await fillStep1();
-    await userEvent.click(screen.getByRole('button', { name: /siguiente/i }));
-    await userEvent.click(screen.getByRole('button', { name: /siguiente/i }));
-    await waitFor(() => expect(screen.getByLabelText(/plan/i)).toBeInTheDocument());
-    await userEvent.selectOptions(screen.getByLabelText(/plan/i), '1');
-    fireEvent.change(screen.getByLabelText(/fecha de inicio/i), {
+    await navigateToStep3();
+    await userEvent.click(screen.getByRole('button', { name: /completo/i }));
+    fireEvent.change(screen.getByLabelText(/inicio del servicio/i), {
       target: { value: '2026-06-01' },
     });
     await userEvent.click(screen.getByRole('button', { name: /siguiente/i }));

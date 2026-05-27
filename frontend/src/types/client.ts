@@ -5,7 +5,6 @@ export interface Plan {
   name: string;
   meals: string[];
   price: number;
-  discount: number;
 }
 
 export interface Subscription {
