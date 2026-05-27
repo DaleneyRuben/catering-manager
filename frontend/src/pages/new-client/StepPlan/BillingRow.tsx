@@ -20,7 +20,7 @@ export function BillingRow({ register, price, discount }: Props) {
         <div>
           <p className="text-[11px] font-mono uppercase tracking-wider text-muted mb-1.5">Precio</p>
           <p className="font-mono text-[13px] text-ink py-2 px-3 bg-cream-2 rounded-md border border-rule">
-            {price !== undefined ? `$${price}` : '—'}
+            {price !== undefined ? price : '—'}
           </p>
         </div>
         <Field label="Descuento" htmlFor="discount">
@@ -41,7 +41,7 @@ export function BillingRow({ register, price, discount }: Props) {
               borderColor: 'var(--olive-200, #c8d4b0)',
             }}
           >
-            {price !== undefined ? `$${total}` : '—'}
+            {price !== undefined ? total : '—'}
           </p>
         </div>
       </div>

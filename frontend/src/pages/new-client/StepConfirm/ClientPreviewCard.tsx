@@ -46,7 +46,7 @@ export function ClientPreviewCard({ formValues, restrictions, plans }: Props) {
               Total mensual
             </p>
             <p className="font-serif text-[28px] leading-none text-olive-800">
-              ${selectedPlan ? total : '—'}
+              {selectedPlan ? total : '—'}
             </p>
           </div>
         </div>
@@ -58,19 +58,19 @@ export function ClientPreviewCard({ formValues, restrictions, plans }: Props) {
             <p className="text-[10.5px] font-mono uppercase tracking-[.14em] text-muted mb-0.5">
               Precio
             </p>
-            <p className="font-mono">{selectedPlan ? `$${selectedPlan.price}` : '—'}</p>
+            <p className="font-mono">{selectedPlan ? selectedPlan.price : '—'}</p>
           </div>
           <div>
             <p className="text-[10.5px] font-mono uppercase tracking-[.14em] text-muted mb-0.5">
               Descuento
             </p>
-            <p className="font-mono">{formValues.discount ? `− $${formValues.discount}` : '—'}</p>
+            <p className="font-mono">{formValues.discount ? `− ${formValues.discount}` : '—'}</p>
           </div>
           <div>
             <p className="text-[10.5px] font-mono uppercase tracking-[.14em] text-muted mb-0.5">
               Total
             </p>
-            <p className="font-mono font-bold text-olive-800">{selectedPlan ? `$${total}` : '—'}</p>
+            <p className="font-mono font-bold text-olive-800">{selectedPlan ? total : '—'}</p>
           </div>
         </div>
 

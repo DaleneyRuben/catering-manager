@@ -64,8 +64,8 @@ describe('PlansPage', () => {
     renderPage();
     expect(await screen.findByText('Completo')).toBeInTheDocument();
     expect(screen.getByText('Mediodía')).toBeInTheDocument();
-    expect(screen.getAllByText('$1200')[0]).toBeInTheDocument();
-    expect(screen.getAllByText('$800')[0]).toBeInTheDocument();
+    expect(screen.getAllByText('1200')[0]).toBeInTheDocument();
+    expect(screen.getAllByText('800')[0]).toBeInTheDocument();
   });
 
   it('shows meal labels on plan cards', async () => {

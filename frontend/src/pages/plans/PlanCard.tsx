@@ -43,7 +43,7 @@ export function PlanCard({
         className="font-mono font-semibold text-[30px] mt-1.5"
         style={{ color: isSelected ? '#fff' : '#1e3c0a' }}
       >
-        ${plan.price}
+        {plan.price}
         <span
           className="text-[12px]"
           style={{ color: isSelected ? '#a8c374' : 'var(--color-muted)' }}

@@ -39,7 +39,7 @@ const fillStep1 = async () => {
   fireEvent.change(screen.getByLabelText(/fecha de nacimiento/i), {
     target: { value: '1970-04-12' },
   });
-  await userEvent.type(screen.getByLabelText(/teléfono/i), '+34 612 345 678');
+  await userEvent.type(screen.getByLabelText(/celular/i), '+34 612 345 678');
   await userEvent.type(screen.getByLabelText(/dirección/i), 'Av. Centro 142');
   await userEvent.click(screen.getByRole('button', { name: 'Centro' }));
   await userEvent.click(screen.getByRole('button', { name: 'La Oliva' }));
@@ -78,7 +78,7 @@ describe('NewClientPage', () => {
     renderPage();
     await fillStep1();
     await userEvent.click(screen.getByRole('button', { name: /siguiente/i }));
-    expect(screen.getByRole('heading', { name: 'Restricciones' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /alergias/i })).toBeInTheDocument();
   });
 
   it('goes back to Identidad from Restricciones', async () => {
@@ -104,7 +104,7 @@ describe('NewClientPage', () => {
     await navigateToStep3();
     await userEvent.click(screen.getByRole('button', { name: /completo/i }));
     fireEvent.change(screen.getByLabelText(/descuento/i), { target: { value: '50' } });
-    expect(screen.getByText('$430')).toBeInTheDocument();
+    expect(screen.getByText('430')).toBeInTheDocument();
   });
 
   it('creates client and subscription on confirm', async () => {

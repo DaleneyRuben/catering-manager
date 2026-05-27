@@ -261,7 +261,7 @@ export function ClientsPage() {
                         </span>
                       </td>
                       <td className="px-4 py-3 text-right font-mono text-sm">
-                        {sub ? `$${sub.plan.price}` : '—'}
+                        {sub ? sub.plan.price : '—'}
                       </td>
                     </tr>
                   );

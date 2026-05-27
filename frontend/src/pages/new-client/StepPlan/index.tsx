@@ -52,7 +52,7 @@ export function StepPlan({ register, control, errors, plans }: Props) {
                   >
                     <div className="font-serif text-[18px] leading-tight">{p.name}</div>
                     <div className="font-mono text-[20px] mt-1">
-                      ${p.price}
+                      {p.price}
                       <span className={`text-[11px] ${isSel ? 'opacity-60' : 'text-muted'}`}>
                         /mes
                       </span>

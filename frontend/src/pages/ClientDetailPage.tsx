@@ -413,7 +413,7 @@ export function ClientDetailPage() {
             {sub ? (
               <dl className="space-y-3">
                 <InfoRow label="Plan" value={sub.plan.name} />
-                <InfoRow label="Precio" value={`$${sub.plan.price}`} />
+                <InfoRow label="Precio" value={String(sub.plan.price)} />
                 <InfoRow label="Inicio" value={fmt(sub.startDate)} />
                 <InfoRow label="Fin contrato" value={fmt(sub.contractEndDate)} />
                 <InfoRow label="Contratado" value={fmt(sub.contractDate)} />
