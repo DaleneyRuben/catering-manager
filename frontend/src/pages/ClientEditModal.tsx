@@ -197,6 +197,7 @@ export function ClientEditModal({
             setInput={setRestrictionInput}
             onAdd={addRestriction}
             onRemove={removeRestriction}
+            tagClassName="bg-olive-100 border-olive-200 text-ink"
           />
 
           <div>
@@ -213,8 +214,8 @@ export function ClientEditModal({
                     onClick={() => toggleDisease(d)}
                     className={`px-3 py-1.5 rounded-full text-[12px] font-mono border transition-colors ${
                       selected
-                        ? 'bg-olive-700 text-white border-olive-800'
-                        : 'bg-paper text-ink border-rule hover:border-olive-700'
+                        ? 'bg-olive-100 text-ink border-olive-200'
+                        : 'bg-paper text-ink border-rule hover:border-olive-200'
                     }`}
                   >
                     {d}
