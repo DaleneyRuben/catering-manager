@@ -34,6 +34,23 @@ export interface Client {
   subscriptions: Subscription[];
 }
 
+export type HistoryEventType =
+  | 'paused'
+  | 'resumed'
+  | 'plan_assigned'
+  | 'plan_changed'
+  | 'suspended'
+  | 'reactivated'
+  | 'finalized';
+
+export interface ClientHistoryEntry {
+  id: number;
+  clientId: number;
+  eventType: HistoryEventType;
+  occurredAt: string;
+  metadata: Record<string, unknown>;
+}
+
 export type ClientStatus = 'active' | 'paused' | 'expiring' | 'ended';
 
 export function clientStatus(client: Client, today = new Date()): ClientStatus {
