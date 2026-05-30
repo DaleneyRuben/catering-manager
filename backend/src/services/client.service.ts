@@ -1,4 +1,5 @@
 import Client from '../models/Client';
+import ClientHistory from '../models/ClientHistory';
 import Plan from '../models/Plan';
 import Subscription from '../models/Subscription';
 import { CreateClientDto, UpdateClientDto } from '../schemas/client.schema';
@@ -14,6 +15,16 @@ const findById = (id: number) => Client.findByPk(id, { include: INCLUDE_SUBSCRIP
 const update = async (id: number, data: UpdateClientDto) => {
   const client = await Client.findByPk(id, { include: INCLUDE_SUBSCRIPTION });
   if (!client) return null;
+
+  if (data.isActive !== undefined && data.isActive !== client.isActive) {
+    await ClientHistory.create({
+      clientId: client.id,
+      eventType: data.isActive ? 'resumed' : 'paused',
+      occurredAt: new Date().toISOString().slice(0, 10),
+      metadata: {},
+    });
+  }
+
   return client.update(data);
 };
 
