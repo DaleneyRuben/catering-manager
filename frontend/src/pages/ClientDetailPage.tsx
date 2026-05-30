@@ -11,6 +11,7 @@ import { formatDate } from '../utils/format';
 import { ClientEditModal } from './ClientEditModal';
 import type { EditDraft } from './ClientEditModal';
 import { ClientOverviewTab } from './ClientOverviewTab';
+import { ClientHistoryTab } from './ClientHistoryTab';
 
 type TabId = 'overview' | 'plan' | 'suspensions' | 'history';
 
@@ -273,11 +274,7 @@ export function ClientDetailPage() {
         </div>
       )}
 
-      {tab === 'history' && (
-        <div className="bg-paper border border-rule rounded-lg p-10 text-center">
-          <p className="font-mono text-[13px] text-muted">Sin eventos en el historial.</p>
-        </div>
-      )}
+      {tab === 'history' && <ClientHistoryTab clientId={client.id} />}
 
       {editOpen && (
         <ClientEditModal
