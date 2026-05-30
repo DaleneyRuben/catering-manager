@@ -1,4 +1,5 @@
 import { Table, Column, Model, DataType, HasMany } from 'sequelize-typescript';
+import ClientHistory from './ClientHistory';
 import Subscription from './Subscription';
 
 @Table({ tableName: 'clients', timestamps: true })
@@ -41,6 +42,9 @@ class Client extends Model {
 
   @HasMany(() => Subscription)
   declare subscriptions: Subscription[];
+
+  @HasMany(() => ClientHistory)
+  declare history: ClientHistory[];
 }
 
 export default Client;
