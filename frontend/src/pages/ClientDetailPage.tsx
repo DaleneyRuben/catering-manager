@@ -106,18 +106,28 @@ export function ClientDetailPage() {
             <button
               type="button"
               onClick={handleToggleActive}
-              className="flex items-center gap-2 px-4 py-2.5 text-[13px] font-semibold border border-rule rounded-md text-ink hover:bg-cream-2 transition-colors"
+              disabled={isUpdating}
+              className="flex items-center gap-2 px-4 py-2.5 text-[13px] font-semibold border border-rule rounded-md text-ink hover:bg-cream-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <Icon name="calendar" size={14} />
+              {isUpdating ? (
+                <span className="inline-block w-3.5 h-3.5 rounded-full border-2 border-current border-t-transparent animate-spin" />
+              ) : (
+                <Icon name="calendar" size={14} />
+              )}
               Pausar
             </button>
           ) : (
             <button
               type="button"
               onClick={handleToggleActive}
-              className="flex items-center gap-2 px-4 py-2.5 text-[13px] font-semibold bg-olive-800 text-white rounded-md hover:bg-olive-700 transition-colors"
+              disabled={isUpdating}
+              className="flex items-center gap-2 px-4 py-2.5 text-[13px] font-semibold bg-olive-800 text-white rounded-md hover:bg-olive-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <Icon name="check" size={14} />
+              {isUpdating ? (
+                <span className="inline-block w-3.5 h-3.5 rounded-full border-2 border-current border-t-transparent animate-spin" />
+              ) : (
+                <Icon name="check" size={14} />
+              )}
               Reanudar
             </button>
           )}
