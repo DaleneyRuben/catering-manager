@@ -1,5 +1,5 @@
 import { useClientHistory } from '../hooks/useClientHistory';
-import { formatDate } from '../utils/format';
+import { formatDateTime } from '../utils/format';
 import type { HistoryEventType } from '../types/client';
 
 const EVENT_LABELS: Record<HistoryEventType, string> = {
@@ -49,8 +49,8 @@ export function ClientHistoryTab({ clientId }: Props) {
     <div className="bg-paper border border-rule rounded-lg divide-y divide-rule">
       {history.map((entry) => (
         <div key={entry.id} className="flex items-center gap-4 px-5 py-4">
-          <p className="font-mono text-[12px] text-muted shrink-0 w-24">
-            {formatDate(entry.occurredAt)}
+          <p className="font-mono text-[12px] text-muted shrink-0 w-32">
+            {formatDateTime(entry.occurredAt)}
           </p>
           <span
             className={`px-2.5 py-0.5 rounded-full text-[11px] font-mono ${EVENT_CLASSES[entry.eventType]}`}
