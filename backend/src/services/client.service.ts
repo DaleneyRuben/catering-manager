@@ -20,7 +20,7 @@ const update = async (id: number, data: UpdateClientDto) => {
     await ClientHistory.create({
       clientId: client.id,
       eventType: data.isActive ? 'resumed' : 'paused',
-      occurredAt: new Date().toISOString().slice(0, 10),
+      occurredAt: new Date(),
       metadata: {},
     });
   }

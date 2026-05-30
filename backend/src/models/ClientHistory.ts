@@ -22,7 +22,7 @@ class ClientHistory extends Model {
   @Column({ type: DataType.STRING, allowNull: false })
   declare eventType: HistoryEventType;
 
-  @Column({ type: DataType.DATEONLY, allowNull: false })
+  @Column({ type: DataType.DATE, allowNull: false })
   declare occurredAt: string;
 
   @Column({ type: DataType.JSONB, allowNull: false, defaultValue: {} })
