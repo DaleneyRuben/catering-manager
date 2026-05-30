@@ -17,6 +17,7 @@ export function useClient(id: string | number) {
     onSuccess: (updated) => {
       qc.setQueryData(['clients', id], updated);
       qc.invalidateQueries({ queryKey: ['clients'], exact: true });
+      qc.invalidateQueries({ queryKey: ['clients', id, 'history'] });
     },
   });
 
