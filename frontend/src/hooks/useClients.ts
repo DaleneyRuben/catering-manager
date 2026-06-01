@@ -39,12 +39,34 @@ export interface ClientUpdateDraft {
   isActive?: boolean;
 }
 
-export function useClients() {
+export interface ClientFilters {
+  status?: string;
+  q?: string;
+  birthMonth?: string;
+}
+
+export interface ClientCounts {
+  active: number;
+  expiring: number;
+  paused: number;
+  ended: number;
+  total: number;
+}
+
+export function useClients(filters: ClientFilters = {}) {
   const qc = useQueryClient();
 
   const { data: clients = [], isLoading } = useQuery({
-    queryKey: ['clients'],
-    queryFn: (): Promise<Client[]> => api.get<Client[]>('/clients'),
+    queryKey: ['clients', filters],
+    queryFn: () => {
+      const params = new URLSearchParams();
+      if (filters.status && filters.status !== 'all') params.set('status', filters.status);
+      if (filters.q) params.set('q', filters.q);
+      if (filters.birthMonth && filters.birthMonth !== 'all')
+        params.set('birthMonth', filters.birthMonth);
+      const qs = params.toString();
+      return api.get<Client[]>(`/clients${qs ? `?${qs}` : ''}`);
+    },
   });
 
   const createMutation = useMutation({
@@ -58,7 +80,9 @@ export function useClients() {
       const created = await api.post<{ id: number }>('/clients', client);
       await api.post(`/clients/${created.id}/subscriptions`, subscription);
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['clients'] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['clients'] });
+    },
   });
 
   return {
@@ -68,4 +92,12 @@ export function useClients() {
     create: (client: ClientCreateDraft, subscription: SubscriptionCreateDraft): Promise<void> =>
       createMutation.mutateAsync({ client, subscription }).then(() => {}),
   };
+}
+
+export function useClientCounts() {
+  const { data, isLoading } = useQuery({
+    queryKey: ['clients', 'counts'],
+    queryFn: () => api.get<ClientCounts>('/clients/counts'),
+  });
+  return { counts: data, isLoading };
 }

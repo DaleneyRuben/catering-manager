@@ -11,10 +11,24 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
-const getAll = async (_req: Request, res: Response, next: NextFunction) => {
+const getAll = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const clients = await clientService.findAll();
+    const { status, q, birthMonth } = req.query;
+    const clients = await clientService.findAll({
+      status: typeof status === 'string' ? status : undefined,
+      q: typeof q === 'string' && q ? q : undefined,
+      birthMonth: birthMonth ? Number(birthMonth) : undefined,
+    });
     sendSuccess(res, clients);
+  } catch (err) {
+    next(err);
+  }
+};
+
+const getCounts = async (_req: Request, res: Response, next: NextFunction) => {
+  try {
+    const counts = await clientService.getCounts();
+    sendSuccess(res, counts);
   } catch (err) {
     next(err);
   }
@@ -46,4 +60,4 @@ const update = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
-export default { create, getAll, getById, update };
+export default { create, getAll, getCounts, getById, update };

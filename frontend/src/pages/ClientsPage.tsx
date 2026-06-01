@@ -1,8 +1,9 @@
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Icon } from '../components/ui/Icon';
 import { PageLoader } from '../components/ui/PageLoader';
-import { useClients } from '../hooks/useClients';
+import { useClients, useClientCounts } from '../hooks/useClients';
+import { useDebounce } from '../hooks/useDebounce';
 import { clientStatus } from '../types/client';
 import { formatDate } from '../utils/format';
 import { STATUS_LABELS, STATUS_CLASSES } from '../constants/clientStatus';
@@ -35,53 +36,21 @@ type FilterValue = 'active' | 'expiring' | 'paused' | 'ended' | 'all';
 
 export function ClientsPage() {
   const navigate = useNavigate();
-  const { clients, isLoading } = useClients();
   const [q, setQ] = useState('');
   const [filter, setFilter] = useState<FilterValue>('active');
   const [birthMonth, setBirthMonth] = useState('all');
 
-  const counts = useMemo(() => {
-    const today = new Date();
-    return {
-      active: clients.filter((c) => {
-        const s = clientStatus(c, today);
-        return s === 'active' || s === 'expiring';
-      }).length,
-      paused: clients.filter((c) => clientStatus(c, today) === 'paused').length,
-      expiring: clients.filter((c) => clientStatus(c, today) === 'expiring').length,
-      ended: clients.filter((c) => clientStatus(c, today) === 'ended').length,
-    };
-  }, [clients]);
+  const debouncedQ = useDebounce(q);
 
-  const filtered = useMemo(() => {
-    const today = new Date();
-    let list = clients;
+  const { clients, isLoading } = useClients({
+    status: filter,
+    q: debouncedQ,
+    birthMonth,
+  });
 
-    if (filter === 'active') {
-      list = list.filter((c) => {
-        const s = clientStatus(c, today);
-        return s === 'active' || s === 'expiring';
-      });
-    } else if (filter !== 'all') {
-      list = list.filter((c) => clientStatus(c, today) === filter);
-    }
-    if (birthMonth !== 'all') {
-      const m = Number(birthMonth);
-      list = list.filter((c) => new Date(c.dateOfBirth).getMonth() + 1 === m);
-    }
-    if (q) {
-      const Q = q.toLowerCase();
-      list = list.filter(
-        (c) =>
-          c.name.toLowerCase().includes(Q) ||
-          c.address.toLowerCase().includes(Q) ||
-          (c.nit || '').toLowerCase().includes(Q),
-      );
-    }
-    return list;
-  }, [clients, filter, birthMonth, q]);
+  const { counts } = useClientCounts();
 
-  if (isLoading) return <PageLoader />;
+  if (isLoading && !clients.length) return <PageLoader />;
 
   return (
     <div className="p-7 max-w-[1320px] mx-auto">
@@ -93,8 +62,8 @@ export function ClientsPage() {
           </p>
           <h1 className="font-serif text-[44px] leading-none text-ink">Clientes</h1>
           <p className="text-[13px] text-muted mt-2.5">
-            {counts.active} activos · {clients.length} totales · {counts.expiring} vencen en ≤ 5
-            días hábiles
+            {counts?.active ?? '—'} activos · {counts?.total ?? '—'} totales ·{' '}
+            {counts?.expiring ?? '—'} vencen en ≤ 5 días hábiles
           </p>
         </div>
         <div className="ml-auto flex gap-2 flex-wrap">
@@ -179,13 +148,13 @@ export function ClientsPage() {
         </div>
 
         <span className="text-[11px] font-mono text-muted ml-auto">
-          {filtered.length} resultados
+          {clients.length} resultados
         </span>
       </div>
 
       {/* Table */}
       <div className="bg-paper border border-rule rounded-lg overflow-hidden">
-        {filtered.length === 0 ? (
+        {clients.length === 0 ? (
           <div className="py-16 text-center">
             <div className="w-12 h-12 rounded-full bg-cream mx-auto mb-3 flex items-center justify-center text-olive-700">
               <Icon name="users" size={22} />
@@ -208,7 +177,7 @@ export function ClientsPage() {
                 </tr>
               </thead>
               <tbody>
-                {filtered.map((c) => {
+                {clients.map((c) => {
                   const sub = c.subscriptions[0];
                   const status = clientStatus(c);
                   return (
