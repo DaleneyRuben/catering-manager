@@ -7,6 +7,7 @@ export const createSubscriptionSchema = z.object({
   planId: z.number().int().positive(),
   startDate: dateField,
   contractDate: dateField,
+  duration: z.number().int().min(1),
   discount: z.number().int().min(0).default(0),
 });
 

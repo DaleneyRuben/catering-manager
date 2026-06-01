@@ -4,8 +4,6 @@ import Subscription from '../models/Subscription';
 import { CreateSubscriptionDto, UpdateSubscriptionDto } from '../schemas/subscription.schema';
 import { addDeliveryDays } from '../utils/date';
 
-const PLAN_DURATION_DAYS = 20;
-
 const validationError = (message: string) => Object.assign(new Error(message), { statusCode: 400 });
 
 const create = async (clientId: number, data: CreateSubscriptionDto) => {
@@ -17,10 +15,12 @@ const create = async (clientId: number, data: CreateSubscriptionDto) => {
     throw validationError('contractDate must be today');
   }
 
-  const contractEndDate = addDeliveryDays(data.startDate, PLAN_DURATION_DAYS);
+  const contractEndDate = addDeliveryDays(data.startDate, data.duration);
 
   return Subscription.create({
-    ...data,
+    planId: data.planId,
+    startDate: data.startDate,
+    contractDate: data.contractDate,
     discount: data.discount ?? 0,
     contractEndDate,
     clientId,
