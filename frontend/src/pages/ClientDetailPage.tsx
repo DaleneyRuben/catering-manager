@@ -12,6 +12,7 @@ import { ClientEditModal } from './ClientEditModal';
 import type { EditDraft } from './ClientEditModal';
 import { ClientOverviewTab } from './ClientOverviewTab';
 import { ClientHistoryTab } from './ClientHistoryTab';
+import { PageLoader } from '../components/ui/PageLoader';
 
 type TabId = 'overview' | 'plan' | 'suspensions' | 'history';
 
@@ -33,7 +34,7 @@ function initials(name: string) {
 export function ClientDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { client, update, isUpdating } = useClient(id!);
+  const { client, isLoading, update, isUpdating } = useClient(id!);
   const [tab, setTab] = useState<TabId>('overview');
   const [editOpen, setEditOpen] = useState(false);
 
@@ -59,10 +60,12 @@ export function ClientDetailPage() {
     setEditOpen(false);
   };
 
+  if (isLoading) return <PageLoader />;
+
   if (!client) {
     return (
       <div className="p-7 max-w-[1320px] mx-auto">
-        <p className="text-muted text-[13px]">Cargando…</p>
+        <p className="text-muted text-[13px]">Cliente no encontrado.</p>
       </div>
     );
   }
