@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Field, inputCls, selectCls } from '../components/ui/Field';
+import { DatePickerInput } from '../components/ui/DatePickerInput';
 import { Icon } from '../components/ui/Icon';
 import { TagInput } from '../components/ui/TagInput';
 import { ToggleGroup } from '../components/ui/ToggleGroup';
@@ -130,12 +131,13 @@ export function ClientEditModal({
                   </select>
                 </Field>
                 <Field label="Fecha de nacimiento" htmlFor="em-dob" required>
-                  <input
-                    id="em-dob"
-                    type="date"
+                  <DatePickerInput
                     value={draft.dateOfBirth}
-                    onChange={(e) => set({ dateOfBirth: e.target.value })}
-                    className={inputCls()}
+                    onChange={(v) => set({ dateOfBirth: v })}
+                    captionLayout="dropdown"
+                    startMonth={new Date(1940, 0)}
+                    endMonth={new Date()}
+                    disabled={{ after: new Date() }}
                   />
                 </Field>
                 <Field label="Celular" htmlFor="em-phone" required>

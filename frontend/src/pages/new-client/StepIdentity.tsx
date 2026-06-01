@@ -2,6 +2,7 @@ import { type UseFormRegister, type FieldErrors, type Control, Controller } from
 import { Field, inputCls, selectCls } from '../../components/ui/Field';
 import { Icon } from '../../components/ui/Icon';
 import { ToggleGroup } from '../../components/ui/ToggleGroup';
+import { DatePickerInput } from '../../components/ui/DatePickerInput';
 import type { NewClientFormValues } from './types';
 import { ZONES, DELIVERIES, SEX_OPTIONS } from '../../constants/clientOptions';
 
@@ -44,19 +45,29 @@ export function StepIdentity({ register, control, errors }: Props) {
           </select>
         </Field>
 
-        <Field
-          label="Fecha de nacimiento"
-          htmlFor="dateOfBirth"
-          required
-          error={errors.dateOfBirth?.message}
-        >
-          <input
-            id="dateOfBirth"
-            type="date"
-            {...register('dateOfBirth', { required: 'Fecha de nacimiento es requerida' })}
-            className={inputCls(!!errors.dateOfBirth)}
-          />
-        </Field>
+        <Controller
+          name="dateOfBirth"
+          control={control}
+          rules={{ required: 'Fecha de nacimiento es requerida' }}
+          render={({ field }) => (
+            <Field
+              label="Fecha de nacimiento"
+              htmlFor="dateOfBirth"
+              required
+              error={errors.dateOfBirth?.message}
+            >
+              <DatePickerInput
+                value={field.value ?? ''}
+                onChange={field.onChange}
+                hasError={!!errors.dateOfBirth}
+                captionLayout="dropdown"
+                startMonth={new Date(1940, 0)}
+                endMonth={new Date()}
+                disabled={{ after: new Date() }}
+              />
+            </Field>
+          )}
+        />
 
         <Field label="Celular" htmlFor="phoneNumber" required error={errors.phoneNumber?.message}>
           <input

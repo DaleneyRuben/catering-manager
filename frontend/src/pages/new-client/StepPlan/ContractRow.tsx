@@ -1,18 +1,20 @@
-import { type UseFormRegister, type FieldErrors } from 'react-hook-form';
+import { type UseFormRegister, type FieldErrors, type Control, Controller } from 'react-hook-form';
 import { format } from 'date-fns';
 import { Field, inputCls } from '../../../components/ui/Field';
+import { DatePickerInput } from '../../../components/ui/DatePickerInput';
 import { addBusinessDays } from '../../../utils/businessDays';
 import { formatDate } from '../../../utils/format';
 import type { NewClientFormValues } from '../types';
 
 interface Props {
   register: UseFormRegister<NewClientFormValues>;
+  control: Control<NewClientFormValues>;
   errors: FieldErrors<NewClientFormValues>;
   startDate: string;
   duration: number;
 }
 
-export function ContractRow({ register, errors, startDate, duration }: Props) {
+export function ContractRow({ register, control, errors, startDate, duration }: Props) {
   const today = format(new Date(), 'dd/MM/yyyy');
   const contractEndDate =
     startDate && duration > 0 ? formatDate(addBusinessDays(startDate, duration)) : '—';
@@ -30,19 +32,26 @@ export function ContractRow({ register, errors, startDate, duration }: Props) {
           </p>
           <p className="text-[10.5px] font-mono text-muted mt-1">Hoy automáticamente</p>
         </div>
-        <Field
-          label="Inicio del servicio"
-          htmlFor="startDate"
-          required
-          error={errors.startDate?.message}
-        >
-          <input
-            id="startDate"
-            type="date"
-            {...register('startDate', { required: 'Fecha de inicio es requerida' })}
-            className={inputCls(!!errors.startDate)}
-          />
-        </Field>
+        <Controller
+          name="startDate"
+          control={control}
+          rules={{ required: 'Fecha de inicio es requerida' }}
+          render={({ field }) => (
+            <Field
+              label="Inicio del servicio"
+              htmlFor="startDate"
+              required
+              error={errors.startDate?.message}
+            >
+              <DatePickerInput
+                value={field.value ?? ''}
+                onChange={field.onChange}
+                hasError={!!errors.startDate}
+                startMonth={new Date()}
+              />
+            </Field>
+          )}
+        />
         <Field label="Duración (días)" htmlFor="duration" required error={errors.duration?.message}>
           <input
             id="duration"

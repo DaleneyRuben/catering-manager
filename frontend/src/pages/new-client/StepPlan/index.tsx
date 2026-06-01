@@ -84,6 +84,7 @@ export function StepPlan({ register, control, errors, plans }: Props) {
       <div className="border-t border-rule mt-6 pt-5">
         <ContractRow
           register={register}
+          control={control}
           errors={errors}
           startDate={startDate}
           duration={duration}
