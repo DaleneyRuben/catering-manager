@@ -10,6 +10,7 @@ export interface NewClientFormValues {
   businessName: string;
   planId: number | null;
   startDate: string;
+  duration: number;
   discount: number;
 }
 

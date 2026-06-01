@@ -20,6 +20,7 @@ export interface SubscriptionCreateDraft {
   planId: number;
   startDate: string;
   contractDate: string;
+  duration: number;
   discount: number;
 }
 

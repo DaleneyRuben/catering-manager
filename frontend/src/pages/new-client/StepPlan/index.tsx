@@ -20,6 +20,7 @@ interface Props {
 
 export function StepPlan({ register, control, errors, plans }: Props) {
   const startDate = useWatch({ control, name: 'startDate' });
+  const duration = useWatch({ control, name: 'duration' });
   const planId = useWatch({ control, name: 'planId' });
   const discount = useWatch({ control, name: 'discount' });
   const selectedPlan = plans.find((p) => p.id === planId);
@@ -81,7 +82,12 @@ export function StepPlan({ register, control, errors, plans }: Props) {
       />
 
       <div className="border-t border-rule mt-6 pt-5">
-        <ContractRow register={register} errors={errors} startDate={startDate} />
+        <ContractRow
+          register={register}
+          errors={errors}
+          startDate={startDate}
+          duration={duration}
+        />
       </div>
 
       <div className="border-t border-rule mt-6 pt-5">

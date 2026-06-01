@@ -16,7 +16,7 @@ const STEPS = ['Identidad', 'Restricciones', 'Plan', 'Confirmar'];
 
 const STEP_FIELDS: Partial<Record<number, (keyof NewClientFormValues)[]>> = {
   1: ['name', 'sex', 'dateOfBirth', 'phoneNumber', 'address', 'zone', 'delivery'],
-  3: ['planId', 'startDate'],
+  3: ['planId', 'startDate', 'duration'],
 };
 
 export function NewClientPage() {
@@ -50,6 +50,7 @@ export function NewClientPage() {
       businessName: '',
       planId: null,
       startDate: '',
+      duration: 20,
       discount: 0,
     },
   });
@@ -87,6 +88,7 @@ export function NewClientPage() {
           planId: data.planId!,
           startDate: data.startDate,
           contractDate,
+          duration: data.duration,
           discount: data.discount,
         },
       );
