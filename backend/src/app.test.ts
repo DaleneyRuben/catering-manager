@@ -1,6 +1,8 @@
 import request from 'supertest';
 import app from './app';
 
+jest.mock('./database/sequelize', () => ({ __esModule: true, default: { query: jest.fn() } }));
+
 describe('GET /api/health', () => {
   it('returns status ok', async () => {
     const res = await request(app).get('/api/health');

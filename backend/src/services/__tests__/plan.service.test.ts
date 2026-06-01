@@ -1,7 +1,12 @@
 import Plan from '../../models/Plan';
+import sequelize from '../../database/sequelize';
 import planService from '../plan.service';
 
 jest.mock('../../models/Plan');
+jest.mock('../../database/sequelize', () => ({
+  __esModule: true,
+  default: { query: jest.fn() },
+}));
 
 const mockPlan = {
   id: 1,
@@ -124,5 +129,34 @@ describe('planService.update', () => {
     (Plan.findByPk as jest.Mock).mockResolvedValue(mockInstance);
 
     await expect(planService.update(1, { name: 'Updated Plan' })).rejects.toThrow('db error');
+  });
+});
+
+describe('planService.getClientCounts', () => {
+  beforeEach(() => jest.clearAllMocks());
+
+  it('returns a planId → count map as numbers', async () => {
+    (sequelize.query as jest.Mock).mockResolvedValue([
+      { planId: 1, count: '5' },
+      { planId: 2, count: '3' },
+    ]);
+
+    const result = await planService.getClientCounts();
+
+    expect(result).toEqual({ 1: 5, 2: 3 });
+  });
+
+  it('returns an empty object when no active clients exist', async () => {
+    (sequelize.query as jest.Mock).mockResolvedValue([]);
+
+    const result = await planService.getClientCounts();
+
+    expect(result).toEqual({});
+  });
+
+  it('propagates db errors', async () => {
+    (sequelize.query as jest.Mock).mockRejectedValue(new Error('db error'));
+
+    await expect(planService.getClientCounts()).rejects.toThrow('db error');
   });
 });

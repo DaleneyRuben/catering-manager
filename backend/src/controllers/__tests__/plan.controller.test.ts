@@ -3,6 +3,7 @@ import app from '../../app';
 import planService from '../../services/plan.service';
 
 jest.mock('../../services/plan.service');
+jest.mock('../../database/sequelize', () => ({ __esModule: true, default: { query: jest.fn() } }));
 
 const mockPlan = {
   id: 1,
@@ -20,6 +21,25 @@ const validPayload = {
   price: 150.0,
   discount: 0,
 };
+
+describe('GET /api/plans/client-counts', () => {
+  it('returns 200 with plan client counts', async () => {
+    (planService.getClientCounts as jest.Mock).mockResolvedValue({ 1: 5, 2: 3 });
+
+    const res = await request(app).get('/api/plans/client-counts');
+
+    expect(res.status).toBe(200);
+    expect(res.body.data).toEqual({ 1: 5, 2: 3 });
+  });
+
+  it('returns 500 when service throws', async () => {
+    (planService.getClientCounts as jest.Mock).mockRejectedValue(new Error('db error'));
+
+    const res = await request(app).get('/api/plans/client-counts');
+
+    expect(res.status).toBe(500);
+  });
+});
 
 describe('GET /api/plans', () => {
   it('returns 200 with list of plans', async () => {

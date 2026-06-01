@@ -3,6 +3,7 @@ import app from '../../app';
 import subscriptionService from '../../services/subscription.service';
 
 jest.mock('../../services/subscription.service');
+jest.mock('../../database/sequelize', () => ({ __esModule: true, default: { query: jest.fn() } }));
 
 const mockSubscription = {
   id: 1,

@@ -1,7 +1,12 @@
 import Client from '../../models/Client';
+import sequelize from '../../database/sequelize';
 import clientService from '../client.service';
 
 jest.mock('../../models/Client');
+jest.mock('../../database/sequelize', () => ({
+  __esModule: true,
+  default: { query: jest.fn() },
+}));
 
 const mockClient = {
   id: 1,
@@ -113,5 +118,84 @@ describe('clientService.update', () => {
     (Client.findByPk as jest.Mock).mockResolvedValue(mockInstance);
 
     await expect(clientService.update(1, { isActive: false })).rejects.toThrow('db error');
+  });
+});
+
+describe('clientService.findAll with filters', () => {
+  beforeEach(() => jest.clearAllMocks());
+
+  it('status=active passes isActive:true and required subscription', async () => {
+    (Client.findAll as jest.Mock).mockResolvedValue([]);
+
+    await clientService.findAll({ status: 'active' });
+
+    expect(Client.findAll).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({ isActive: true }),
+        include: expect.arrayContaining([expect.objectContaining({ required: true })]),
+      }),
+    );
+  });
+
+  it('status=paused passes isActive:false and required subscription', async () => {
+    (Client.findAll as jest.Mock).mockResolvedValue([]);
+
+    await clientService.findAll({ status: 'paused' });
+
+    expect(Client.findAll).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({ isActive: false }),
+        include: expect.arrayContaining([expect.objectContaining({ required: true })]),
+      }),
+    );
+  });
+
+  it('status=ended uses left join (required:false)', async () => {
+    (Client.findAll as jest.Mock).mockResolvedValue([]);
+
+    await clientService.findAll({ status: 'ended' });
+
+    expect(Client.findAll).toHaveBeenCalledWith(
+      expect.objectContaining({
+        include: expect.arrayContaining([expect.objectContaining({ required: false })]),
+      }),
+    );
+  });
+
+  it('no filters calls findAll without where', async () => {
+    (Client.findAll as jest.Mock).mockResolvedValue([]);
+
+    await clientService.findAll();
+
+    expect(Client.findAll).toHaveBeenCalledWith(expect.objectContaining({ where: undefined }));
+  });
+
+  it('returns what Client.findAll returns', async () => {
+    const mockClients = [{ id: 1, name: 'María García' }];
+    (Client.findAll as jest.Mock).mockResolvedValue(mockClients);
+
+    const result = await clientService.findAll({ status: 'active' });
+
+    expect(result).toBe(mockClients);
+  });
+});
+
+describe('clientService.getCounts', () => {
+  beforeEach(() => jest.clearAllMocks());
+
+  it('returns counts as numbers from string DB values', async () => {
+    (sequelize.query as jest.Mock).mockResolvedValue([
+      { active: '10', expiring: '5', paused: '3', ended: '2', total: '20' },
+    ]);
+
+    const result = await clientService.getCounts();
+
+    expect(result).toEqual({ active: 10, expiring: 5, paused: 3, ended: 2, total: 20 });
+  });
+
+  it('propagates db errors', async () => {
+    (sequelize.query as jest.Mock).mockRejectedValue(new Error('db error'));
+
+    await expect(clientService.getCounts()).rejects.toThrow('db error');
   });
 });

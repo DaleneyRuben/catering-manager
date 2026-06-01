@@ -3,6 +3,7 @@ import app from '../../app';
 import clientService from '../../services/client.service';
 
 jest.mock('../../services/client.service');
+jest.mock('../../database/sequelize', () => ({ __esModule: true, default: { query: jest.fn() } }));
 
 const mockClient = {
   id: 1,
@@ -41,6 +42,32 @@ describe('GET /api/clients', () => {
     expect(res.status).toBe(200);
     expect(res.body.data).toHaveLength(1);
     expect(res.body.data[0]).toMatchObject({ name: 'John Doe' });
+  });
+
+  it('forwards status query param to service', async () => {
+    (clientService.findAll as jest.Mock).mockResolvedValue([]);
+
+    await request(app).get('/api/clients?status=active');
+
+    expect(clientService.findAll).toHaveBeenCalledWith(
+      expect.objectContaining({ status: 'active' }),
+    );
+  });
+
+  it('forwards q query param to service', async () => {
+    (clientService.findAll as jest.Mock).mockResolvedValue([]);
+
+    await request(app).get('/api/clients?q=maria');
+
+    expect(clientService.findAll).toHaveBeenCalledWith(expect.objectContaining({ q: 'maria' }));
+  });
+
+  it('forwards birthMonth query param to service as number', async () => {
+    (clientService.findAll as jest.Mock).mockResolvedValue([]);
+
+    await request(app).get('/api/clients?birthMonth=3');
+
+    expect(clientService.findAll).toHaveBeenCalledWith(expect.objectContaining({ birthMonth: 3 }));
   });
 
   it('returns 500 when service throws', async () => {
@@ -193,6 +220,27 @@ describe('POST /api/clients', () => {
     (clientService.create as jest.Mock).mockRejectedValue(new Error('db error'));
 
     const res = await request(app).post('/api/clients').send(validPayload);
+
+    expect(res.status).toBe(500);
+  });
+});
+
+describe('GET /api/clients/counts', () => {
+  const mockCounts = { active: 10, expiring: 5, paused: 3, ended: 2, total: 20 };
+
+  it('returns 200 with counts', async () => {
+    (clientService.getCounts as jest.Mock).mockResolvedValue(mockCounts);
+
+    const res = await request(app).get('/api/clients/counts');
+
+    expect(res.status).toBe(200);
+    expect(res.body.data).toEqual(mockCounts);
+  });
+
+  it('returns 500 when service throws', async () => {
+    (clientService.getCounts as jest.Mock).mockRejectedValue(new Error('db error'));
+
+    const res = await request(app).get('/api/clients/counts');
 
     expect(res.status).toBe(500);
   });
