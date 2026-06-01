@@ -12,16 +12,6 @@ const EVENT_LABELS: Record<HistoryEventType, string> = {
   finalized: 'Plan finalizado',
 };
 
-const EVENT_CLASSES: Record<HistoryEventType, string> = {
-  paused: 'bg-warn-bg text-warn',
-  resumed: 'bg-ok-bg text-ok',
-  plan_assigned: 'bg-olive-100 text-ink',
-  plan_changed: 'bg-olive-100 text-ink',
-  suspended: 'bg-warn-bg text-warn',
-  reactivated: 'bg-ok-bg text-ok',
-  finalized: 'bg-rule text-muted',
-};
-
 interface Props {
   clientId: number;
 }
@@ -46,19 +36,21 @@ export function ClientHistoryTab({ clientId }: Props) {
   }
 
   return (
-    <div className="bg-paper border border-rule rounded-lg divide-y divide-rule">
-      {history.map((entry) => (
-        <div key={entry.id} className="flex items-center gap-4 px-5 py-4">
-          <p className="font-mono text-[12px] text-muted shrink-0 w-32">
-            {formatDateTime(entry.occurredAt)}
-          </p>
-          <span
-            className={`px-2.5 py-0.5 rounded-full text-[11px] font-mono ${EVENT_CLASSES[entry.eventType]}`}
-          >
-            {EVENT_LABELS[entry.eventType]}
-          </span>
-        </div>
-      ))}
+    <div className="bg-paper border border-rule rounded-lg p-5">
+      <div className="relative flex flex-col gap-3.5 pl-[18px]">
+        <div className="absolute left-[5px] top-[6px] bottom-[6px] w-px bg-rule" />
+        {history.map((entry, i) => (
+          <div key={entry.id} className="relative">
+            <div
+              className={`absolute -left-[18px] top-[5px] w-[11px] h-[11px] rounded-full border ${
+                i === 0 ? 'bg-olive-800 border-olive-800' : 'bg-paper border-rule'
+              }`}
+            />
+            <p className="font-mono text-[10.5px] text-muted">{formatDateTime(entry.occurredAt)}</p>
+            <p className="text-[13px] font-semibold text-ink">{EVENT_LABELS[entry.eventType]}</p>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
