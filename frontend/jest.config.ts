@@ -7,6 +7,7 @@ const config: Config = {
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
     '\\.(css|less|scss|sass)$': 'identity-obj-proxy',
+    '\\.(png|jpg|jpeg|gif|svg|ico|webp)$': '<rootDir>/src/__mocks__/fileMock.ts',
   },
   collectCoverageFrom: [
     'src/**/*.{ts,tsx}',

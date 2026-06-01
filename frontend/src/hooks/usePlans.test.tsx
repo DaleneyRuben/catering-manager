@@ -27,7 +27,7 @@ beforeEach(() => {
   jest.clearAllMocks();
   mockGet.mockImplementation((url: string) => {
     if (url === '/plans') return Promise.resolve([plan1, plan2]);
-    if (url === '/clients') return Promise.resolve([]);
+    if (url === '/plans/client-counts') return Promise.resolve({});
     return Promise.reject(new Error(`Unknown URL: ${url}`));
   });
 });
@@ -78,14 +78,10 @@ describe('usePlans', () => {
     expect(mockDelete).toHaveBeenCalledWith('/plans/1');
   });
 
-  it('clientCounts is derived from clients data', async () => {
+  it('clientCounts comes from /plans/client-counts endpoint', async () => {
     mockGet.mockImplementation((url: string) => {
       if (url === '/plans') return Promise.resolve([plan1]);
-      if (url === '/clients')
-        return Promise.resolve([
-          { subscriptions: [{ planId: 1 }] },
-          { subscriptions: [{ planId: 1 }] },
-        ]);
+      if (url === '/plans/client-counts') return Promise.resolve({ 1: 2 });
       return Promise.reject(new Error(`Unknown: ${url}`));
     });
 

@@ -75,18 +75,26 @@ describe('ClientsPage', () => {
     expect(await screen.findByRole('button', { name: /agregar cliente/i })).toBeInTheDocument();
   });
 
-  it('filters clients by search query', async () => {
-    mockGet.mockResolvedValue([
-      makeClient({ id: 1, name: 'María García' }),
-      makeClient({ id: 2, name: 'Juan Pérez', subscriptions: [makeSub({ clientId: 2 })] }),
-    ]);
+  it('filters clients by search query via backend', async () => {
+    mockGet.mockImplementation((url: string) => {
+      if (url.includes('q=Juan'))
+        return Promise.resolve([
+          makeClient({ id: 2, name: 'Juan Pérez', subscriptions: [makeSub({ clientId: 2 })] }),
+        ]);
+      return Promise.resolve([
+        makeClient({ id: 1, name: 'María García' }),
+        makeClient({ id: 2, name: 'Juan Pérez', subscriptions: [makeSub({ clientId: 2 })] }),
+      ]);
+    });
     renderPage();
     await waitFor(() => expect(screen.getByText('María García')).toBeInTheDocument());
 
     const search = screen.getByPlaceholderText(/buscar/i);
     await userEvent.type(search, 'Juan');
 
-    expect(screen.getByText('Juan Pérez')).toBeInTheDocument();
-    expect(screen.queryByText('María García')).not.toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText('Juan Pérez')).toBeInTheDocument();
+      expect(screen.queryByText('María García')).not.toBeInTheDocument();
+    });
   });
 });

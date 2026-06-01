@@ -31,7 +31,7 @@ const mockPlan2 = {
 function setupMocks(plans = [mockPlan1, mockPlan2]) {
   mockGet.mockImplementation((url: string) => {
     if (url === '/plans') return Promise.resolve(plans);
-    if (url === '/clients') return Promise.resolve([]);
+    if (url === '/plans/client-counts') return Promise.resolve({});
     return Promise.reject(new Error(`Unknown URL: ${url}`));
   });
 }
@@ -47,6 +47,13 @@ function renderPage() {
       </MemoryRouter>
     </QueryClientProvider>,
   );
+}
+
+async function openEditModal(planName = 'Completo') {
+  renderPage();
+  await screen.findByText(planName);
+  fireEvent.click(screen.getByText(planName));
+  return screen.findByRole('dialog');
 }
 
 describe('PlansPage', () => {
@@ -76,32 +83,29 @@ describe('PlansPage', () => {
     expect(screen.getAllByText('Cena')[0]).toBeInTheDocument();
   });
 
-  it('auto-selects first plan and shows its name in the editor', async () => {
-    renderPage();
-    await screen.findByText('Completo');
-    expect(screen.getByDisplayValue('Completo')).toBeInTheDocument();
+  it('clicking a plan card opens edit modal with plan name in input', async () => {
+    const modal = await openEditModal();
+    expect(within(modal).getByDisplayValue('Completo')).toBeInTheDocument();
   });
 
-  it('clicking a plan card updates the editor', async () => {
-    renderPage();
-    await screen.findByText('Mediodía');
-    fireEvent.click(screen.getByText('Mediodía'));
-    expect(await screen.findByDisplayValue('Mediodía')).toBeInTheDocument();
+  it('clicking a different plan card opens its edit modal', async () => {
+    const modal = await openEditModal('Mediodía');
+    expect(within(modal).getByDisplayValue('Mediodía')).toBeInTheDocument();
   });
 
-  it('Eliminar button is visible in the editor panel', async () => {
-    renderPage();
-    await screen.findByText('Completo');
-    expect(screen.getByRole('button', { name: /eliminar/i })).toBeInTheDocument();
+  it('Eliminar button is visible in the edit modal', async () => {
+    const modal = await openEditModal();
+    expect(within(modal).getByRole('button', { name: /eliminar/i })).toBeInTheDocument();
   });
 
   it('Guardar cambios calls PATCH /plans/:id', async () => {
     mockPatch.mockResolvedValue({ ...mockPlan1, name: 'Completo Plus' });
 
-    renderPage();
-    await screen.findByText('Completo');
-    fireEvent.change(screen.getByDisplayValue('Completo'), { target: { value: 'Completo Plus' } });
-    fireEvent.click(screen.getByRole('button', { name: /guardar cambios/i }));
+    const modal = await openEditModal();
+    fireEvent.change(within(modal).getByDisplayValue('Completo'), {
+      target: { value: 'Completo Plus' },
+    });
+    fireEvent.click(within(modal).getByRole('button', { name: /guardar cambios/i }));
 
     await waitFor(() =>
       expect(mockPatch).toHaveBeenCalledWith(
@@ -142,50 +146,51 @@ describe('PlansPage', () => {
   it('save button is disabled while PATCH is in flight', async () => {
     mockPatch.mockReturnValue(new Promise(() => {}));
 
-    renderPage();
-    await screen.findByText('Completo');
-    fireEvent.change(screen.getByDisplayValue('Completo'), { target: { value: 'Editado' } });
-    const saveBtn = screen.getByRole('button', { name: /guardar cambios/i });
+    const modal = await openEditModal();
+    fireEvent.change(within(modal).getByDisplayValue('Completo'), {
+      target: { value: 'Editado' },
+    });
+    const saveBtn = within(modal).getByRole('button', { name: /guardar cambios/i });
     fireEvent.click(saveBtn);
 
     await waitFor(() => expect(saveBtn).toBeDisabled());
   });
 
-  it('clicking Eliminar opens a confirmation modal', async () => {
-    renderPage();
-    await screen.findByText('Completo');
-    fireEvent.click(screen.getByRole('button', { name: /eliminar/i }));
+  it('clicking Eliminar in edit modal opens confirmation dialog', async () => {
+    const modal = await openEditModal();
+    fireEvent.click(within(modal).getByRole('button', { name: /^eliminar$/i }));
 
-    expect(screen.getByRole('dialog')).toBeInTheDocument();
+    expect(await screen.findByText('Eliminar plan')).toBeInTheDocument();
     expect(mockDelete).not.toHaveBeenCalled();
   });
 
   it('cancelling the confirmation does not delete', async () => {
-    renderPage();
-    await screen.findByText('Completo');
-    fireEvent.click(screen.getByRole('button', { name: /eliminar/i }));
+    const modal = await openEditModal();
+    fireEvent.click(within(modal).getByRole('button', { name: /^eliminar$/i }));
+    await screen.findByText('Eliminar plan');
     fireEvent.click(screen.getByRole('button', { name: /cancelar/i }));
 
-    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    await waitFor(() => expect(screen.queryByText('Eliminar plan')).not.toBeInTheDocument());
     expect(mockDelete).not.toHaveBeenCalled();
   });
 
   it('confirming deletion calls DELETE /plans/:id and removes the plan', async () => {
     mockDelete.mockResolvedValue({});
 
-    renderPage();
-    await screen.findByText('Completo');
+    const modal = await openEditModal();
 
     mockGet.mockImplementation((url: string) => {
       if (url === '/plans') return Promise.resolve([mockPlan2]);
-      if (url === '/clients') return Promise.resolve([]);
+      if (url === '/plans/client-counts') return Promise.resolve({});
       return Promise.reject(new Error(`Unknown URL: ${url}`));
     });
 
-    fireEvent.click(screen.getByRole('button', { name: /eliminar/i }));
+    fireEvent.click(within(modal).getByRole('button', { name: /^eliminar$/i }));
+    await screen.findByText('Eliminar plan');
 
-    const dialog = screen.getByRole('dialog');
-    fireEvent.click(within(dialog).getByRole('button', { name: /eliminar/i }));
+    const dialogs = screen.getAllByRole('dialog');
+    const confirmDialog = dialogs[dialogs.length - 1];
+    fireEvent.click(within(confirmDialog).getByRole('button', { name: /^eliminar$/i }));
 
     await waitFor(() => expect(mockDelete).toHaveBeenCalledWith('/plans/1'));
     await waitFor(() => expect(screen.queryByText('Completo')).not.toBeInTheDocument());
@@ -194,12 +199,13 @@ describe('PlansPage', () => {
   it('confirm button is disabled while DELETE is in flight', async () => {
     mockDelete.mockReturnValue(new Promise(() => {}));
 
-    renderPage();
-    await screen.findByText('Completo');
-    fireEvent.click(screen.getByRole('button', { name: /eliminar/i }));
+    const modal = await openEditModal();
+    fireEvent.click(within(modal).getByRole('button', { name: /^eliminar$/i }));
+    await screen.findByText('Eliminar plan');
 
-    const dialog = screen.getByRole('dialog');
-    const confirmBtn = within(dialog).getByRole('button', { name: /eliminar/i });
+    const dialogs = screen.getAllByRole('dialog');
+    const confirmDialog = dialogs[dialogs.length - 1];
+    const confirmBtn = within(confirmDialog).getByRole('button', { name: /^eliminar$/i });
     fireEvent.click(confirmBtn);
 
     await waitFor(() => expect(confirmBtn).toBeDisabled());
