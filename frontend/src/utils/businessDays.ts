@@ -9,3 +9,13 @@ export function addBusinessDays(dateString: string, days: number): string {
   }
   return format(date, 'yyyy-MM-dd');
 }
+
+export function businessDaysUntil(from: Date, to: Date): number {
+  let count = 0;
+  let cur = new Date(from);
+  while (cur <= to) {
+    if (!isWeekend(cur)) count += 1;
+    cur = addDays(cur, 1);
+  }
+  return count;
+}

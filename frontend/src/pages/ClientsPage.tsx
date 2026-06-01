@@ -85,17 +85,25 @@ export function ClientsPage() {
           </p>
           <h1 className="font-serif text-[44px] leading-none text-ink">Clientes</h1>
           <p className="text-[13px] text-muted mt-2.5">
-            {counts.active} activos · {clients.length} totales · {counts.expiring} vencen pronto
+            {counts.active} activos · {clients.length} totales · {counts.expiring} vencen en ≤ 5
+            días hábiles
           </p>
         </div>
         <div className="ml-auto flex gap-2 flex-wrap">
+          <button
+            type="button"
+            className="flex items-center gap-2 px-3.5 py-2.5 text-[13px] font-semibold border border-rule rounded-md text-ink hover:bg-paper transition-colors"
+          >
+            <Icon name="download" size={14} />
+            Exportar
+          </button>
           <button
             type="button"
             onClick={() => navigate('/clientes/nuevo')}
             className="flex items-center gap-2 px-3.5 py-2.5 text-[13px] font-semibold bg-olive-800 text-white rounded-md hover:bg-olive-700 transition-colors"
           >
             <Icon name="plus" size={14} />
-            Agregar Cliente
+            Alta de cliente
           </button>
         </div>
       </div>
