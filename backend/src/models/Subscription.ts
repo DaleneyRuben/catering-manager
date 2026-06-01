@@ -21,6 +21,9 @@ class Subscription extends Model {
   @Column({ type: DataType.INTEGER, allowNull: false, defaultValue: 0 })
   declare discount: number;
 
+  @Column({ type: DataType.INTEGER, allowNull: false, defaultValue: 20 })
+  declare duration: number;
+
   @Column({ type: DataType.DATEONLY, allowNull: false })
   declare contractDate: string;
 
