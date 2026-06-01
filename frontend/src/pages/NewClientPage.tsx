@@ -112,7 +112,7 @@ export function NewClientPage() {
         <p className="text-[10.5px] font-mono uppercase tracking-[.14em] text-muted mb-2">
           Directorio
         </p>
-        <h1 className="font-serif text-[44px] leading-none text-ink">Alta de cliente</h1>
+        <h1 className="font-serif text-[44px] leading-none text-ink">Agregar cliente</h1>
       </div>
 
       <StepIndicator steps={STEPS} current={step} />

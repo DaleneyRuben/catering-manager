@@ -68,9 +68,9 @@ describe('NewClientPage', () => {
     mockPost.mockResolvedValueOnce({ id: 1 }).mockResolvedValueOnce({});
   });
 
-  it('renders the Alta de cliente heading and Identidad form on load', () => {
+  it('renders the Agregar cliente heading and Identidad form on load', () => {
     renderPage();
-    expect(screen.getByText('Alta de cliente')).toBeInTheDocument();
+    expect(screen.getByText('Agregar cliente')).toBeInTheDocument();
     expect(screen.getByLabelText(/nombre/i)).toBeInTheDocument();
   });
 

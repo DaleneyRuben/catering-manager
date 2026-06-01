@@ -103,7 +103,7 @@ export function ClientsPage() {
             className="flex items-center gap-2 px-3.5 py-2.5 text-[13px] font-semibold bg-olive-800 text-white rounded-md hover:bg-olive-700 transition-colors"
           >
             <Icon name="plus" size={14} />
-            Alta de cliente
+            Agregar cliente
           </button>
         </div>
       </div>
