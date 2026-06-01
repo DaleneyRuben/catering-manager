@@ -91,6 +91,15 @@ export function ClientPreviewCard({ formValues, restrictions, plans }: Props) {
           </div>
         </div>
 
+        <div className="border-t border-rule my-3" />
+
+        <div className="text-[13px]">
+          <p className="text-[10.5px] font-mono uppercase tracking-[.14em] text-muted mb-0.5">
+            Dirección
+          </p>
+          <p className="font-mono">{formValues.address || '—'}</p>
+        </div>
+
         {(formValues.nit || formValues.businessName) && (
           <>
             <div className="border-t border-rule my-3" />
