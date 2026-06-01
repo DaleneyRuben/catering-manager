@@ -1,3 +1,5 @@
+import { QueryTypes } from 'sequelize';
+import sequelize from '../database/sequelize';
 import Plan from '../models/Plan';
 import { CreatePlanDto, UpdatePlanDto } from '../schemas/plan.schema';
 
@@ -20,4 +22,20 @@ const remove = async (id: number): Promise<boolean> => {
   return true;
 };
 
-export default { create, findAll, findById, update, remove };
+const getClientCounts = async (): Promise<Record<number, number>> => {
+  type Row = { planId: number; count: string };
+  const rows = await sequelize.query<Row>(
+    `SELECT s."planId", COUNT(c.id) AS count
+     FROM subscriptions s
+     JOIN clients c ON c.id = s."clientId"
+     WHERE c."isActive" = true AND s."contractEndDate" >= CURRENT_DATE
+     GROUP BY s."planId"`,
+    { type: QueryTypes.SELECT },
+  );
+  return rows.reduce<Record<number, number>>((acc, r) => {
+    acc[r.planId] = Number(r.count);
+    return acc;
+  }, {});
+};
+
+export default { create, findAll, findById, update, remove, getClientCounts };

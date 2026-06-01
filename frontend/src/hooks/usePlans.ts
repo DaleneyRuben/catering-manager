@@ -1,7 +1,6 @@
-import { useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '../services/api';
-import type { Client, Plan } from '../types/client';
+import type { Plan } from '../types/client';
 import type { PlanDraft } from '../pages/plans/types';
 
 export function usePlans() {
@@ -12,19 +11,10 @@ export function usePlans() {
     queryFn: (): Promise<Plan[]> => api.get<Plan[]>('/plans'),
   });
 
-  const clientsQuery = useQuery({
-    queryKey: ['clients'],
-    queryFn: (): Promise<Client[]> => api.get<Client[]>('/clients'),
+  const clientCountsQuery = useQuery({
+    queryKey: ['plans', 'client-counts'],
+    queryFn: (): Promise<Record<number, number>> => api.get('/plans/client-counts'),
   });
-
-  const clientCounts = useMemo(() => {
-    const clients = clientsQuery.data ?? [];
-    return clients.reduce<Record<number, number>>((acc, c) => {
-      const sub = c.subscriptions?.[0];
-      if (!sub) return acc;
-      return { ...acc, [sub.planId]: (acc[sub.planId] ?? 0) + 1 };
-    }, {});
-  }, [clientsQuery.data]);
 
   const saveMutation = useMutation({
     mutationFn: ({ id, draft }: { id: number; draft: PlanDraft }) =>
@@ -53,8 +43,8 @@ export function usePlans() {
 
   return {
     plans: plansQuery.data ?? [],
-    clientCounts,
-    isLoading: plansQuery.isLoading || clientsQuery.isLoading,
+    clientCounts: clientCountsQuery.data ?? {},
+    isLoading: plansQuery.isLoading,
     isSaving: saveMutation.isPending,
     save: (id: number, draft: PlanDraft): Promise<void> =>
       saveMutation.mutateAsync({ id, draft }).then(() => {}),

@@ -59,4 +59,13 @@ const remove = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
-export default { getAll, getById, create, update, remove };
+const getClientCounts = async (_req: Request, res: Response, next: NextFunction) => {
+  try {
+    const counts = await planService.getClientCounts();
+    sendSuccess(res, counts);
+  } catch (err) {
+    next(err);
+  }
+};
+
+export default { getAll, getById, create, update, remove, getClientCounts };
