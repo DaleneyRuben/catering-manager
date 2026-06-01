@@ -1,39 +1,21 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Icon } from '../components/ui/Icon';
 import { PageLoader } from '../components/ui/PageLoader';
 import { usePlans } from '../hooks/usePlans';
-import { ConfirmDeleteModal } from './plans/ConfirmDeleteModal';
+import type { Plan } from '../types/client';
 import { CreatePlanModal } from './plans/CreatePlanModal';
 import { PlanCard } from './plans/PlanCard';
-import { PlanEditorForm } from './plans/PlanEditorForm';
-import type { MealKey, PlanDraft } from './plans/types';
+import { PlanEditModal } from './plans/PlanEditModal';
 
 export function PlansPage() {
   const { plans, clientCounts, isLoading, isSaving, save, create, remove } = usePlans();
-  const [selectedId, setSelectedId] = useState<number | null>(null);
-  const [draft, setDraft] = useState<PlanDraft>({ name: '', meals: [], price: '' });
+  const [editPlan, setEditPlan] = useState<Plan | null>(null);
   const [createOpen, setCreateOpen] = useState(false);
-  const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
-
-  useEffect(() => {
-    if (selectedId === null && plans.length > 0) setSelectedId(plans[0].id);
-  }, [plans, selectedId]);
-
-  useEffect(() => {
-    if (selectedId === null || plans.length === 0) return;
-    const p = plans.find((plan) => plan.id === selectedId);
-    if (p) setDraft({ name: p.name, meals: p.meals as MealKey[], price: String(p.price) });
-  }, [selectedId, plans]);
 
   const handleDelete = async () => {
-    if (selectedId === null) return;
-    await remove(selectedId);
-    setSelectedId(null);
-  };
-
-  const handleSave = () => {
-    if (selectedId === null) return;
-    save(selectedId, draft);
+    if (editPlan === null) return;
+    await remove(editPlan.id);
+    setEditPlan(null);
   };
 
   if (isLoading) return <PageLoader />;
@@ -64,77 +46,33 @@ export function PlansPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
-        <div className="lg:col-span-7">
-          {plans.length === 0 ? (
-            <div className="py-16 text-center bg-paper border border-rule rounded-lg">
-              <p className="font-semibold text-ink">Sin planes</p>
-              <p className="text-sm text-muted mt-1">
-                Crea el primer plan usando el botón de arriba.
-              </p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {plans.map((p) => (
-                <PlanCard
-                  key={p.id}
-                  plan={p}
-                  isSelected={p.id === selectedId}
-                  clientCount={clientCounts[p.id] ?? 0}
-                  onClick={() => setSelectedId(p.id)}
-                />
-              ))}
-            </div>
-          )}
+      {plans.length === 0 ? (
+        <div className="py-16 text-center bg-paper border border-rule rounded-lg">
+          <p className="font-semibold text-ink">Sin planes</p>
+          <p className="text-sm text-muted mt-1">Crea el primer plan usando el botón de arriba.</p>
         </div>
-
-        <div className="lg:col-span-5">
-          {selectedId !== null ? (
-            <div className="bg-paper border border-rule rounded-lg p-5 lg:sticky lg:top-[90px]">
-              <PlanEditorForm draft={draft} setDraft={setDraft} />
-              <div className="flex gap-2.5 mt-[18px]">
-                <button
-                  type="button"
-                  onClick={() => setConfirmDeleteOpen(true)}
-                  disabled={isSaving}
-                  className="px-4 py-2.5 text-[13px] font-semibold border border-rule rounded-md text-warn hover:bg-cream-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  Eliminar
-                </button>
-                <div className="flex-1" />
-                <button
-                  type="button"
-                  onClick={handleSave}
-                  disabled={isSaving}
-                  className="flex items-center gap-2 px-4 py-2.5 text-[13px] font-semibold bg-olive-800 text-white rounded-md hover:bg-olive-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
-                >
-                  {isSaving ? (
-                    <span className="inline-block w-3.5 h-3.5 rounded-full border-2 border-current border-t-transparent animate-spin" />
-                  ) : (
-                    <Icon name="check" size={14} />
-                  )}
-                  Guardar cambios
-                </button>
-              </div>
-              <p className="font-mono text-[11px] text-muted mt-3.5 px-3 py-2.5 bg-cream-2 rounded-md">
-                ⓘ Modificar este plan afectará a {clientCounts[selectedId] ?? 0} cliente
-                {(clientCounts[selectedId] ?? 0) !== 1 ? 's' : ''} con contrato vigente.
-              </p>
-            </div>
-          ) : (
-            <div className="bg-paper border border-rule rounded-lg p-5 text-center text-muted text-[13px]">
-              Selecciona un plan para editarlo.
-            </div>
-          )}
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {plans.map((p) => (
+            <PlanCard
+              key={p.id}
+              plan={p}
+              clientCount={clientCounts[p.id] ?? 0}
+              onClick={() => setEditPlan(p)}
+            />
+          ))}
         </div>
-      </div>
+      )}
 
       {createOpen && <CreatePlanModal onClose={() => setCreateOpen(false)} onSave={create} />}
-      {confirmDeleteOpen && selectedId !== null && (
-        <ConfirmDeleteModal
-          planName={plans.find((p) => p.id === selectedId)?.name ?? ''}
-          onClose={() => setConfirmDeleteOpen(false)}
-          onConfirm={handleDelete}
+      {editPlan && (
+        <PlanEditModal
+          plan={editPlan}
+          clientCount={clientCounts[editPlan.id] ?? 0}
+          isSaving={isSaving}
+          onSave={(draft) => save(editPlan.id, draft)}
+          onDelete={handleDelete}
+          onClose={() => setEditPlan(null)}
         />
       )}
     </div>
