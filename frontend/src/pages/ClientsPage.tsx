@@ -43,7 +43,10 @@ export function ClientsPage() {
   const counts = useMemo(() => {
     const today = new Date();
     return {
-      active: clients.filter((c) => clientStatus(c, today) === 'active').length,
+      active: clients.filter((c) => {
+        const s = clientStatus(c, today);
+        return s === 'active' || s === 'expiring';
+      }).length,
       paused: clients.filter((c) => clientStatus(c, today) === 'paused').length,
       expiring: clients.filter((c) => clientStatus(c, today) === 'expiring').length,
       ended: clients.filter((c) => clientStatus(c, today) === 'ended').length,
@@ -54,7 +57,12 @@ export function ClientsPage() {
     const today = new Date();
     let list = clients;
 
-    if (filter !== 'all') {
+    if (filter === 'active') {
+      list = list.filter((c) => {
+        const s = clientStatus(c, today);
+        return s === 'active' || s === 'expiring';
+      });
+    } else if (filter !== 'all') {
       list = list.filter((c) => clientStatus(c, today) === filter);
     }
     if (birthMonth !== 'all') {
