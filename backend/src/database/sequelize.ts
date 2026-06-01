@@ -5,17 +5,16 @@ import ClientHistory from '../models/ClientHistory';
 import Plan from '../models/Plan';
 import Subscription from '../models/Subscription';
 
+const isProduction = process.env.NODE_ENV === 'production';
+
 const sequelize = new Sequelize(process.env.DATABASE_URL as string, {
   dialect: 'postgres',
   dialectModule: pg,
-  dialectOptions: {
-    ssl: {
-      require: true,
-      rejectUnauthorized: false,
-    },
-  },
+  ...(isProduction
+    ? { dialectOptions: { ssl: { require: true, rejectUnauthorized: false } } }
+    : {}),
   models: [Client, ClientHistory, Plan, Subscription],
-  logging: process.env.NODE_ENV === 'development' ? console.log : false,
+  logging: false,
 });
 
 export default sequelize;
