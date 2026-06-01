@@ -34,6 +34,7 @@ describe('subscriptionService.create', () => {
       planId: 2,
       startDate,
       contractDate: today,
+      duration: 20,
     });
 
     expect(Subscription.create).toHaveBeenCalledWith(expect.objectContaining({ contractEndDate }));
@@ -44,7 +45,12 @@ describe('subscriptionService.create', () => {
     (Client.findByPk as jest.Mock).mockResolvedValue({ id: 1 });
     (Subscription.create as jest.Mock).mockResolvedValue(mockSubscription);
 
-    await subscriptionService.create(1, { planId: 2, startDate, contractDate: today });
+    await subscriptionService.create(1, {
+      planId: 2,
+      startDate,
+      contractDate: today,
+      duration: 20,
+    });
 
     expect(Subscription.create).toHaveBeenCalledWith(expect.objectContaining({ discount: 0 }));
   });
@@ -57,6 +63,7 @@ describe('subscriptionService.create', () => {
       planId: 2,
       startDate,
       contractDate: today,
+      duration: 20,
       discount: 500,
     });
 
@@ -71,6 +78,7 @@ describe('subscriptionService.create', () => {
         planId: 2,
         startDate,
         contractDate: '2026-01-01',
+        duration: 20,
       }),
     ).rejects.toMatchObject({ statusCode: 400 });
 
@@ -84,6 +92,7 @@ describe('subscriptionService.create', () => {
       planId: 2,
       startDate,
       contractDate: today,
+      duration: 20,
     });
 
     expect(result).toBeNull();
@@ -95,7 +104,7 @@ describe('subscriptionService.create', () => {
     (Subscription.create as jest.Mock).mockRejectedValue(new Error('db error'));
 
     await expect(
-      subscriptionService.create(1, { planId: 2, startDate, contractDate: today }),
+      subscriptionService.create(1, { planId: 2, startDate, contractDate: today, duration: 20 }),
     ).rejects.toThrow('db error');
   });
 });

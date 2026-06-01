@@ -18,7 +18,7 @@ const validPayload = {
   planId: 2,
   startDate: '2026-05-26',
   contractDate: '2026-05-23',
-  contractEndDate: '2026-06-22',
+  duration: 20,
 };
 
 describe('POST /api/clients/:clientId/subscriptions', () => {
@@ -63,18 +63,6 @@ describe('POST /api/clients/:clientId/subscriptions', () => {
     const res = await request(app)
       .post('/api/clients/1/subscriptions')
       .send({ ...validPayload, contractDate: '2026-01-01' });
-
-    expect(res.status).toBe(400);
-  });
-
-  it('returns 400 when contractEndDate does not match', async () => {
-    (subscriptionService.create as jest.Mock).mockRejectedValue(
-      Object.assign(new Error('contractEndDate must be ...'), { statusCode: 400 }),
-    );
-
-    const res = await request(app)
-      .post('/api/clients/1/subscriptions')
-      .send({ ...validPayload, contractEndDate: '2026-12-31' });
 
     expect(res.status).toBe(400);
   });

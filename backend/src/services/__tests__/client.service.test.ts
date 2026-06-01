@@ -3,6 +3,7 @@ import sequelize from '../../database/sequelize';
 import clientService from '../client.service';
 
 jest.mock('../../models/Client');
+jest.mock('../../models/ClientHistory');
 jest.mock('../../database/sequelize', () => ({
   __esModule: true,
   default: { query: jest.fn() },
@@ -95,6 +96,7 @@ describe('clientService.findById', () => {
 describe('clientService.update', () => {
   it('updates a client and returns the updated instance', async () => {
     const mockInstance = {
+      isActive: true,
       update: jest.fn().mockResolvedValue({ ...mockClient, isActive: false }),
     };
     (Client.findByPk as jest.Mock).mockResolvedValue(mockInstance);
@@ -114,7 +116,10 @@ describe('clientService.update', () => {
   });
 
   it('propagates db errors', async () => {
-    const mockInstance = { update: jest.fn().mockRejectedValue(new Error('db error')) };
+    const mockInstance = {
+      isActive: true,
+      update: jest.fn().mockRejectedValue(new Error('db error')),
+    };
     (Client.findByPk as jest.Mock).mockResolvedValue(mockInstance);
 
     await expect(clientService.update(1, { isActive: false })).rejects.toThrow('db error');
