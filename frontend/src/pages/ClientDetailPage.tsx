@@ -133,6 +133,13 @@ export function ClientDetailPage() {
           )}
           <button
             type="button"
+            className="flex items-center gap-2 px-4 py-2.5 text-[13px] font-semibold border border-rule rounded-md text-ink hover:bg-cream-2 transition-colors"
+          >
+            <Icon name="refresh" size={14} />
+            Renovar
+          </button>
+          <button
+            type="button"
             onClick={() => setEditOpen(true)}
             className="flex items-center gap-2 px-4 py-2.5 text-[13px] font-semibold bg-olive-800 text-white rounded-md hover:bg-olive-700 transition-colors"
           >
@@ -141,6 +148,18 @@ export function ClientDetailPage() {
           </button>
         </div>
       </div>
+
+      {!client.isActive && (
+        <div className="flex items-center gap-2.5 bg-[#f3eedc] border border-[#d8c075] rounded-md px-3.5 py-3 mb-5">
+          <Icon name="calendar" size={14} className="text-[#6b4f08] shrink-0" />
+          <div>
+            <p className="text-[13px] font-semibold text-[#6b4f08]">Plan en pausa</p>
+            <p className="font-mono text-[11px] text-[#6b4f08]">
+              El cliente no recibe entregas. Reanudá el plan cuando esté listo.
+            </p>
+          </div>
+        </div>
+      )}
 
       <div role="tablist" className="flex border-b border-rule mb-5">
         {TABS.map(({ id: tId, label }) => (
