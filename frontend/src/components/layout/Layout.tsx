@@ -10,12 +10,11 @@ interface NavItem {
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { to: '/', label: 'Dashboard', icon: 'dashboard' },
+  { to: '/', label: 'Panel', icon: 'dashboard' },
   { to: '/clientes', label: 'Clientes', icon: 'users' },
   { to: '/planes', label: 'Planes', icon: 'plan' },
   { to: '/menu', label: 'Menú', icon: 'chef' },
   { to: '/informes', label: 'Informes', icon: 'report' },
-  { to: '/renovaciones', label: 'Renovaciones', icon: 'refresh' },
 ];
 
 interface LayoutProps {
