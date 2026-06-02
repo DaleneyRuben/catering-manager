@@ -9,6 +9,7 @@ import { inputCls } from './Field';
 type CaptionLayout = 'label' | 'dropdown' | 'dropdown-months' | 'dropdown-years';
 
 interface Props {
+  id?: string;
   value: string;
   onChange: (v: string) => void;
   hasError?: boolean;
@@ -57,6 +58,7 @@ const CLASSNAMES = {
 };
 
 export function DatePickerInput({
+  id,
   value,
   onChange,
   hasError,
@@ -110,6 +112,7 @@ export function DatePickerInput({
   return (
     <>
       <button
+        id={id}
         ref={triggerRef}
         type="button"
         onClick={() => setOpen((o) => !o)}

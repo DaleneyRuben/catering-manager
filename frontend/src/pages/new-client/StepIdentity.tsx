@@ -57,6 +57,7 @@ export function StepIdentity({ register, control, errors }: Props) {
               error={errors.dateOfBirth?.message}
             >
               <DatePickerInput
+                id="dateOfBirth"
                 value={field.value ?? ''}
                 onChange={field.onChange}
                 hasError={!!errors.dateOfBirth}

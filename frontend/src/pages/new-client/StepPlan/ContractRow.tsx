@@ -44,6 +44,7 @@ export function ContractRow({ register, control, errors, startDate, duration }: 
               error={errors.startDate?.message}
             >
               <DatePickerInput
+                id="startDate"
                 value={field.value ?? ''}
                 onChange={field.onChange}
                 hasError={!!errors.startDate}

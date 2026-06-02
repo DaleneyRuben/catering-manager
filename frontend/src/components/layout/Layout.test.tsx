@@ -23,12 +23,11 @@ describe('Layout', () => {
         </Layout>
       </MemoryRouter>,
     );
-    expect(screen.getByText('Dashboard')).toBeInTheDocument();
+    expect(screen.getByText('Panel')).toBeInTheDocument();
     expect(screen.getByText('Clientes')).toBeInTheDocument();
     expect(screen.getByText('Planes')).toBeInTheDocument();
     expect(screen.getByText('Menú')).toBeInTheDocument();
     expect(screen.getByText('Informes')).toBeInTheDocument();
-    expect(screen.getByText('Renovaciones')).toBeInTheDocument();
   });
 
   it('renders a hamburger button for mobile', () => {

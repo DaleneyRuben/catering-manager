@@ -38,7 +38,10 @@ const mockClient = {
 };
 
 function renderPage(client = mockClient) {
-  mockGet.mockResolvedValue(client);
+  mockGet.mockImplementation((url: string) => {
+    if (url.includes('/history')) return Promise.resolve([]);
+    return Promise.resolve(client);
+  });
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
   });
@@ -184,7 +187,7 @@ describe('ClientDetailPage', () => {
     renderPage();
     await screen.findByText('John Doe');
     fireEvent.click(screen.getByRole('tab', { name: /historial/i }));
-    expect(screen.getByText(/sin eventos/i)).toBeInTheDocument();
+    expect(await screen.findByText(/sin eventos/i)).toBeInTheDocument();
   });
 
   it('clicking Editar opens a modal with Editar cliente heading', async () => {

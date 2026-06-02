@@ -6,6 +6,17 @@ import api from '../services/api';
 import { NewClientPage } from './NewClientPage';
 
 jest.mock('../services/api', () => ({ default: { get: jest.fn(), post: jest.fn() } }));
+jest.mock('../components/ui/DatePickerInput', () => ({
+  DatePickerInput: ({
+    id,
+    value,
+    onChange,
+  }: {
+    id?: string;
+    value: string;
+    onChange: (v: string) => void;
+  }) => <input id={id} type="date" value={value} onChange={(e) => onChange(e.target.value)} />,
+}));
 const mockGet = api.get as jest.Mock;
 const mockPost = api.post as jest.Mock;
 
