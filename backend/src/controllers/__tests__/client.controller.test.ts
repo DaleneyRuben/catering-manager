@@ -245,3 +245,29 @@ describe('GET /api/clients/counts', () => {
     expect(res.status).toBe(500);
   });
 });
+
+describe('POST /api/clients/:id/finalize', () => {
+  it('returns 200 when client is finalized', async () => {
+    (clientService.finalize as jest.Mock).mockResolvedValue({});
+
+    const res = await request(app).post('/api/clients/1/finalize');
+
+    expect(res.status).toBe(200);
+  });
+
+  it('returns 404 when client not found', async () => {
+    (clientService.finalize as jest.Mock).mockResolvedValue(null);
+
+    const res = await request(app).post('/api/clients/999/finalize');
+
+    expect(res.status).toBe(404);
+  });
+
+  it('returns 500 when service throws', async () => {
+    (clientService.finalize as jest.Mock).mockRejectedValue(new Error('db error'));
+
+    const res = await request(app).post('/api/clients/1/finalize');
+
+    expect(res.status).toBe(500);
+  });
+});

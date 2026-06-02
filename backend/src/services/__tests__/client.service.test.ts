@@ -1,9 +1,11 @@
 import Client from '../../models/Client';
+import ClientHistory from '../../models/ClientHistory';
 import sequelize from '../../database/sequelize';
 import clientService from '../client.service';
 
 jest.mock('../../models/Client');
 jest.mock('../../models/ClientHistory');
+jest.mock('../../models/Subscription');
 jest.mock('../../database/sequelize', () => ({
   __esModule: true,
   default: { query: jest.fn() },
@@ -202,5 +204,45 @@ describe('clientService.getCounts', () => {
     (sequelize.query as jest.Mock).mockRejectedValue(new Error('db error'));
 
     await expect(clientService.getCounts()).rejects.toThrow('db error');
+  });
+});
+
+describe('clientService.finalize', () => {
+  beforeEach(() => jest.clearAllMocks());
+
+  it('sets contractEndDate to today, deactivates client, and records history', async () => {
+    const mockSub = { update: jest.fn().mockResolvedValue({}) };
+    const mockInstance = {
+      id: 1,
+      isActive: true,
+      subscriptions: [mockSub],
+      update: jest.fn().mockResolvedValue({}),
+    };
+    (Client.findByPk as jest.Mock).mockResolvedValue(mockInstance);
+    (ClientHistory.create as jest.Mock).mockResolvedValue({});
+
+    await clientService.finalize(1);
+
+    expect(mockSub.update).toHaveBeenCalledWith(
+      expect.objectContaining({ contractEndDate: expect.any(String) }),
+    );
+    expect(mockInstance.update).toHaveBeenCalledWith({ isActive: false });
+    expect(ClientHistory.create).toHaveBeenCalledWith(
+      expect.objectContaining({ clientId: 1, eventType: 'finalized' }),
+    );
+  });
+
+  it('returns null when client not found', async () => {
+    (Client.findByPk as jest.Mock).mockResolvedValue(null);
+
+    const result = await clientService.finalize(999);
+
+    expect(result).toBeNull();
+  });
+
+  it('propagates db errors', async () => {
+    (Client.findByPk as jest.Mock).mockRejectedValue(new Error('db error'));
+
+    await expect(clientService.finalize(1)).rejects.toThrow('db error');
   });
 });
