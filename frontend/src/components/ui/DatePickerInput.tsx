@@ -57,6 +57,12 @@ const CLASSNAMES = {
   selected: '',
 };
 
+function toDisplay(iso: string): string {
+  if (!iso) return '';
+  const d = parse(iso, 'yyyy-MM-dd', new Date());
+  return d && isValid(d) ? format(d, 'dd/MM/yyyy') : '';
+}
+
 export function DatePickerInput({
   id,
   value,
@@ -69,11 +75,17 @@ export function DatePickerInput({
   disabled,
 }: Props) {
   const [open, setOpen] = useState(false);
+  const [inputText, setInputText] = useState(() => toDisplay(value));
   const [popoverStyle, setPopoverStyle] = useState<React.CSSProperties>({});
-  const triggerRef = useRef<HTMLButtonElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Sync display text when value is changed externally (e.g. calendar selection)
+  useEffect(() => {
+    setInputText(toDisplay(value));
+  }, [value]);
 
   const updatePosition = () => {
-    const rect = triggerRef.current?.getBoundingClientRect();
+    const rect = containerRef.current?.getBoundingClientRect();
     if (!rect) return;
     const left =
       rect.left + POPOVER_WIDTH > window.innerWidth ? rect.right - POPOVER_WIDTH : rect.left;
@@ -84,9 +96,8 @@ export function DatePickerInput({
     if (!open) return undefined;
     updatePosition();
     const onMouseDown = (e: MouseEvent) => {
-      const target = e.target as Node;
       if (
-        !triggerRef.current?.contains(target) &&
+        !containerRef.current?.contains(e.target as Node) &&
         !(e.target as Element).closest('[data-datepicker-portal]')
       ) {
         setOpen(false);
@@ -109,19 +120,57 @@ export function DatePickerInput({
   const parsed = value ? parse(value, 'yyyy-MM-dd', new Date()) : undefined;
   const selected = parsed && isValid(parsed) ? parsed : undefined;
 
+  const handleTextChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let val = e.target.value;
+
+    // Auto-insert slashes only when adding characters
+    if (val.length > inputText.length) {
+      if (val.length === 2 && !val.includes('/')) val += '/';
+      else if (val.length === 5 && val[2] === '/' && !val.slice(3).includes('/')) val += '/';
+    }
+
+    setInputText(val);
+
+    if (val === '') {
+      onChange('');
+      return;
+    }
+    if (val.length === 10) {
+      const d = parse(val, 'dd/MM/yyyy', new Date());
+      if (isValid(d)) onChange(format(d, 'yyyy-MM-dd'));
+    }
+  };
+
+  const handleBlur = () => {
+    if (!inputText) return;
+    const d = parse(inputText, 'dd/MM/yyyy', new Date());
+    if (isValid(d)) {
+      onChange(format(d, 'yyyy-MM-dd'));
+      setInputText(format(d, 'dd/MM/yyyy'));
+    } else {
+      // Reset to last valid value
+      setInputText(toDisplay(value));
+    }
+  };
+
   return (
-    <>
-      <button
+    <div ref={containerRef} className="relative flex items-center">
+      <input
         id={id}
-        ref={triggerRef}
+        type="text"
+        value={inputText}
+        onChange={handleTextChange}
+        onBlur={handleBlur}
+        placeholder={placeholder}
+        className={`${inputCls(hasError)} pr-9`}
+      />
+      <button
         type="button"
+        tabIndex={-1}
         onClick={() => setOpen((o) => !o)}
-        className={`${inputCls(hasError)} flex items-center justify-between gap-2`}
+        className="absolute right-2.5 flex items-center text-muted hover:text-ink transition-colors"
       >
-        <span className={selected ? 'text-ink' : 'text-muted'}>
-          {selected ? format(selected, 'dd/MM/yyyy') : placeholder}
-        </span>
-        <Icon name="calendar" size={14} className="shrink-0 text-muted" />
+        <Icon name="calendar" size={14} />
       </button>
 
       {open &&
@@ -158,6 +207,6 @@ export function DatePickerInput({
           </div>,
           document.body,
         )}
-    </>
+    </div>
   );
 }
