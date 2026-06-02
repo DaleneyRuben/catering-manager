@@ -16,7 +16,7 @@ const STEPS = ['Identidad', 'Restricciones', 'Plan', 'Confirmar'];
 
 const STEP_FIELDS: Partial<Record<number, (keyof NewClientFormValues)[]>> = {
   1: ['name', 'sex', 'dateOfBirth', 'phoneNumber', 'address', 'deliveryZone', 'delivery'],
-  3: ['planId', 'startDate', 'duration'],
+  3: ['planId', 'contractDate', 'startDate', 'duration'],
 };
 
 export function NewClientPage() {
@@ -49,6 +49,7 @@ export function NewClientPage() {
       nit: '',
       businessName: '',
       planId: null,
+      contractDate: format(new Date(), 'yyyy-MM-dd'),
       startDate: '',
       duration: 20,
       discount: 0,
@@ -69,7 +70,6 @@ export function NewClientPage() {
   const submit = handleSubmit(async (data) => {
     setSubmitError('');
     try {
-      const contractDate = format(new Date(), 'yyyy-MM-dd');
       await create(
         {
           name: data.name,
@@ -86,8 +86,8 @@ export function NewClientPage() {
         },
         {
           planId: data.planId!,
+          contractDate: data.contractDate,
           startDate: data.startDate,
-          contractDate,
           duration: data.duration,
           discount: data.discount,
         },

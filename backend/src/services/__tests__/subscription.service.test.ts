@@ -70,19 +70,19 @@ describe('subscriptionService.create', () => {
     expect(Subscription.create).toHaveBeenCalledWith(expect.objectContaining({ discount: 500 }));
   });
 
-  it('throws 400 when contractDate does not match today', async () => {
+  it('accepts a past contractDate', async () => {
     (Client.findByPk as jest.Mock).mockResolvedValue({ id: 1 });
+    (Subscription.create as jest.Mock).mockResolvedValue(mockSubscription);
 
-    await expect(
-      subscriptionService.create(1, {
-        planId: 2,
-        startDate,
-        contractDate: '2026-01-01',
-        duration: 20,
-      }),
-    ).rejects.toMatchObject({ statusCode: 400 });
+    const result = await subscriptionService.create(1, {
+      planId: 2,
+      startDate,
+      contractDate: '2026-01-01',
+      duration: 20,
+    });
 
-    expect(Subscription.create).not.toHaveBeenCalled();
+    expect(Subscription.create).toHaveBeenCalled();
+    expect(result).toMatchObject({ clientId: 1 });
   });
 
   it('returns null when client does not exist', async () => {

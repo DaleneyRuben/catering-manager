@@ -9,6 +9,7 @@ export interface NewClientFormValues {
   nit: string;
   businessName: string;
   planId: number | null;
+  contractDate: string;
   startDate: string;
   duration: number;
   discount: number;

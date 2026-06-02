@@ -55,16 +55,14 @@ describe('POST /api/clients/:clientId/subscriptions', () => {
     expect(res.status).toBe(400);
   });
 
-  it('returns 400 when contractDate does not match', async () => {
-    (subscriptionService.create as jest.Mock).mockRejectedValue(
-      Object.assign(new Error('contractDate must be today'), { statusCode: 400 }),
-    );
+  it('accepts a past contractDate', async () => {
+    (subscriptionService.create as jest.Mock).mockResolvedValue({ id: 1, clientId: 1, planId: 2 });
 
     const res = await request(app)
       .post('/api/clients/1/subscriptions')
       .send({ ...validPayload, contractDate: '2026-01-01' });
 
-    expect(res.status).toBe(400);
+    expect(res.status).toBe(201);
   });
 
   it('returns 500 when service throws', async () => {

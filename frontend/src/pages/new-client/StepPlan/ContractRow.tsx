@@ -1,5 +1,4 @@
 import { type UseFormRegister, type FieldErrors, type Control, Controller } from 'react-hook-form';
-import { format } from 'date-fns';
 import { Field, inputCls } from '../../../components/ui/Field';
 import { DatePickerInput } from '../../../components/ui/DatePickerInput';
 import { addBusinessDays } from '../../../utils/businessDays';
@@ -15,7 +14,6 @@ interface Props {
 }
 
 export function ContractRow({ register, control, errors, startDate, duration }: Props) {
-  const today = format(new Date(), 'dd/MM/yyyy');
   const contractEndDate =
     startDate && duration > 0 ? formatDate(addBusinessDays(startDate, duration)) : '—';
 
@@ -23,15 +21,29 @@ export function ContractRow({ register, control, errors, startDate, duration }: 
     <div>
       <p className="text-[10.5px] font-mono uppercase tracking-[.14em] text-muted mb-4">Contrato</p>
       <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-        <div>
-          <p className="text-[11px] font-mono uppercase tracking-wider text-muted mb-1.5">
-            Firma de contrato
-          </p>
-          <p className="font-mono text-[13px] text-ink py-2 px-3 bg-cream-2 rounded-md border border-rule">
-            {today}
-          </p>
-          <p className="text-[10.5px] font-mono text-muted mt-1">Hoy automáticamente</p>
-        </div>
+        {/* TODO: restrict to today-only once backfilling of existing clients is complete */}
+        <Controller
+          name="contractDate"
+          control={control}
+          rules={{ required: 'Fecha de contrato es requerida' }}
+          render={({ field }) => (
+            <Field
+              label="Firma de contrato"
+              htmlFor="contractDate"
+              required
+              error={errors.contractDate?.message}
+            >
+              <DatePickerInput
+                id="contractDate"
+                value={field.value ?? ''}
+                onChange={field.onChange}
+                hasError={!!errors.contractDate}
+                endMonth={new Date()}
+              />
+            </Field>
+          )}
+        />
+        {/* TODO: restrict to future-only once backfilling of existing clients is complete */}
         <Controller
           name="startDate"
           control={control}
@@ -48,7 +60,7 @@ export function ContractRow({ register, control, errors, startDate, duration }: 
                 value={field.value ?? ''}
                 onChange={field.onChange}
                 hasError={!!errors.startDate}
-                startMonth={new Date()}
+                endMonth={new Date()}
               />
             </Field>
           )}
