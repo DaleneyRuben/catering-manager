@@ -60,4 +60,17 @@ const update = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
-export default { create, getAll, getCounts, getById, update };
+const finalize = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const client = await clientService.finalize(Number(req.params.id));
+    if (!client) {
+      sendError(res, 'Client not found', 404);
+      return;
+    }
+    sendSuccess(res, client);
+  } catch (err) {
+    next(err);
+  }
+};
+
+export default { create, getAll, getCounts, getById, update, finalize };

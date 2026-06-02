@@ -138,4 +138,24 @@ const update = async (id: number, data: UpdateClientDto) => {
   return client.update(data);
 };
 
-export default { create, findAll, findById, update, getCounts };
+const finalize = async (id: number) => {
+  const client = await Client.findByPk(id, { include: INCLUDE_SUBSCRIPTION });
+  if (!client) return null;
+
+  const today = new Date().toISOString().slice(0, 10);
+  const sub = (client as never as { subscriptions: { update: (d: object) => Promise<void> }[] })
+    .subscriptions?.[0];
+
+  if (sub) await sub.update({ contractEndDate: today });
+  await client.update({ isActive: false });
+  await ClientHistory.create({
+    clientId: client.id,
+    eventType: 'finalized',
+    occurredAt: new Date(),
+    metadata: {},
+  });
+
+  return client;
+};
+
+export default { create, findAll, findById, update, getCounts, finalize };
