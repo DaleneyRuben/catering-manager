@@ -8,6 +8,7 @@ import { clientStatus } from '../types/client';
 import { formatDate } from '../utils/format';
 import { STATUS_LABELS, STATUS_CLASSES } from '../constants/clientStatus';
 import { SEX_LABELS } from '../constants/clientOptions';
+import { EXPIRY_THRESHOLD_DAYS } from '../constants/subscription';
 
 const MONTHS = [
   'Enero',
@@ -63,7 +64,7 @@ export function ClientsPage() {
           <h1 className="font-serif text-[44px] leading-none text-ink">Clientes</h1>
           <p className="text-[13px] text-muted mt-2.5">
             {counts?.active ?? '—'} activos · {counts?.total ?? '—'} totales ·{' '}
-            {counts?.expiring ?? '—'} vencen en ≤ 5 días hábiles
+            {counts?.expiring ?? '—'} vencen en ≤ {EXPIRY_THRESHOLD_DAYS} días hábiles
           </p>
         </div>
         <div className="ml-auto flex gap-2 flex-wrap">

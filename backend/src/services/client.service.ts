@@ -1,5 +1,6 @@
 import { Op, literal, QueryTypes } from 'sequelize';
 import { addBusinessDays } from 'date-fns';
+import { EXPIRY_THRESHOLD_DAYS } from '../constants/subscription.constants';
 import Client from '../models/Client';
 import ClientHistory from '../models/ClientHistory';
 import Plan from '../models/Plan';
@@ -20,7 +21,7 @@ const create = (data: CreateClientDto) => Client.create(data as never);
 const findAll = (filters: FindAllFilters = {}) => {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  const expiryThreshold = addBusinessDays(today, 5);
+  const expiryThreshold = addBusinessDays(today, EXPIRY_THRESHOLD_DAYS);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const clientWhere: Record<string | symbol, any> = {};
@@ -93,7 +94,7 @@ const findAll = (filters: FindAllFilters = {}) => {
 const getCounts = async () => {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  const threshold = addBusinessDays(today, 5);
+  const threshold = addBusinessDays(today, EXPIRY_THRESHOLD_DAYS);
   const todayStr = today.toISOString().slice(0, 10);
   const thresholdStr = threshold.toISOString().slice(0, 10);
 

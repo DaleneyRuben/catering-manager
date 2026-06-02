@@ -1,5 +1,6 @@
 import { parseISO, isAfter } from 'date-fns';
 import { businessDaysUntil } from '../utils/businessDays';
+import { EXPIRY_THRESHOLD_DAYS } from '../constants/subscription';
 
 export interface Plan {
   id: number;
@@ -59,6 +60,7 @@ export function clientStatus(client: Client, today = new Date()): ClientStatus {
   const sub = client.subscriptions[0];
   if (!sub || !isAfter(parseISO(sub.contractEndDate), today)) return 'ended';
   if (!client.isActive) return 'paused';
-  if (businessDaysUntil(today, parseISO(sub.contractEndDate)) <= 5) return 'expiring';
+  if (businessDaysUntil(today, parseISO(sub.contractEndDate)) <= EXPIRY_THRESHOLD_DAYS)
+    return 'expiring';
   return 'active';
 }
