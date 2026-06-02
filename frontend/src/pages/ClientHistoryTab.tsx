@@ -1,16 +1,6 @@
 import { useClientHistory } from '../hooks/useClientHistory';
 import { formatDateTime } from '../utils/format';
-import type { HistoryEventType } from '../types/client';
-
-const EVENT_LABELS: Record<HistoryEventType, string> = {
-  paused: 'Plan pausado',
-  resumed: 'Plan reanudado',
-  plan_assigned: 'Plan asignado',
-  plan_changed: 'Plan modificado',
-  suspended: 'Días suspendidos',
-  reactivated: 'Cliente reactivado',
-  finalized: 'Plan finalizado',
-};
+import { EVENT_LABELS } from '../constants/historyEvents';
 
 interface Props {
   clientId: number;
