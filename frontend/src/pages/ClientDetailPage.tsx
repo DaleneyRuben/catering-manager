@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { differenceInYears, parseISO, differenceInBusinessDays, isWeekend } from 'date-fns';
+import { differenceInYears, parseISO } from 'date-fns';
+import { remainingDeliveryDays } from '../utils/businessDays';
 import { Icon } from '../components/ui/Icon';
 import { useClient } from '../hooks/useClient';
 import { MEAL_LABELS } from '../constants/meals';
@@ -73,20 +74,9 @@ export function ClientDetailPage() {
   const sub = client.subscriptions[0];
   const status = clientStatus(client);
   const age = differenceInYears(new Date(), parseISO(client.dateOfBirth));
-
-  const today = new Date();
-  const startDate = parseISO(sub.startDate);
-  const endDate = parseISO(sub.contractEndDate);
-
-  const startsInFuture = startDate > today;
-  const effectiveStart = startsInFuture ? startDate : today;
-
-  const shouldDiscountToday = !startsInFuture && !isWeekend(today);
-
-  const remaining = Math.max(
-    0,
-    differenceInBusinessDays(endDate, effectiveStart) - (shouldDiscountToday ? 1 : 0),
-  );
+  const remaining = sub
+    ? remainingDeliveryDays(parseISO(sub.startDate), parseISO(sub.contractEndDate))
+    : 0;
 
   return (
     <div className="p-7 max-w-[1320px] mx-auto">
