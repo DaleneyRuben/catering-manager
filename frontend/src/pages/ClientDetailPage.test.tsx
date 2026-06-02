@@ -205,9 +205,10 @@ describe('ClientDetailPage', () => {
     expect(screen.getByRole('button', { name: 'Hipertensión' })).toBeInTheDocument();
   });
 
-  it('shows Finalizar plan button when client is active', async () => {
+  it('shows Finalizar plan button in Resumen tab when client is active', async () => {
     renderPage();
-    expect(await screen.findByRole('button', { name: /finalizar plan/i })).toBeInTheDocument();
+    await screen.findByText('John Doe');
+    expect(screen.getByRole('button', { name: /finalizar plan/i })).toBeInTheDocument();
   });
 
   it('does not show Finalizar plan button when client is already ended', async () => {
@@ -222,15 +223,17 @@ describe('ClientDetailPage', () => {
 
   it('clicking Finalizar plan opens a confirmation dialog', async () => {
     renderPage();
-    fireEvent.click(await screen.findByRole('button', { name: /finalizar plan/i }));
+    await screen.findByText('John Doe');
+    fireEvent.click(screen.getByRole('button', { name: /finalizar plan/i }));
     expect(screen.getByRole('dialog')).toBeInTheDocument();
   });
 
   it('confirming finalize calls POST /clients/:id/finalize', async () => {
     mockPost.mockResolvedValue({});
     renderPage();
-    fireEvent.click(await screen.findByRole('button', { name: /finalizar plan/i }));
+    await screen.findByText('John Doe');
+    fireEvent.click(screen.getByRole('button', { name: /finalizar plan/i }));
     fireEvent.click(screen.getByRole('button', { name: /^finalizar$/i }));
-    await waitFor(() => expect(mockPost).toHaveBeenCalledWith('/clients/1/finalize'));
+    await waitFor(() => expect(mockPost).toHaveBeenCalledWith('/clients/1/finalize', {}));
   });
 });
