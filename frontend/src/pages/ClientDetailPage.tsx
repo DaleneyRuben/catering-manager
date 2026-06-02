@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { differenceInDays, differenceInYears, parseISO } from 'date-fns';
+import { differenceInYears, parseISO, differenceInBusinessDays } from 'date-fns';
 import { Icon } from '../components/ui/Icon';
 import { useClient } from '../hooks/useClient';
 import { MEAL_LABELS } from '../constants/meals';
@@ -73,7 +73,7 @@ export function ClientDetailPage() {
   const sub = client.subscriptions[0];
   const status = clientStatus(client);
   const age = differenceInYears(new Date(), parseISO(client.dateOfBirth));
-  const remaining = sub ? differenceInDays(parseISO(sub.contractEndDate), new Date()) : 0;
+  const remaining = sub ? differenceInBusinessDays(parseISO(sub.contractEndDate), new Date()) : 0;
 
   return (
     <div className="p-7 max-w-[1320px] mx-auto">
