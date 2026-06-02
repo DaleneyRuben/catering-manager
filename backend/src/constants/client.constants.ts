@@ -1,3 +1,10 @@
+export const CLIENT_STATUS = {
+  ACTIVE: 'active',
+  EXPIRING: 'expiring',
+  PAUSED: 'paused',
+  ENDED: 'ended',
+} as const;
+
 export const ZONES = ['Centro', 'Sur'] as const;
 export const DELIVERIES = ['La Oliva', 'Otro'] as const;
 export const SEX_OPTIONS = ['male', 'female', 'other'] as const;

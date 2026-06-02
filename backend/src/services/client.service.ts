@@ -1,6 +1,7 @@
 import { Op, literal, QueryTypes } from 'sequelize';
 import { addBusinessDays } from 'date-fns';
 import { EXPIRY_THRESHOLD_DAYS } from '../constants/subscription.constants';
+import { CLIENT_STATUS } from '../constants/client.constants';
 import Client from '../models/Client';
 import ClientHistory from '../models/ClientHistory';
 import Plan from '../models/Plan';
@@ -32,19 +33,19 @@ const findAll = (filters: FindAllFilters = {}) => {
   const andConditions: any[] = [];
 
   switch (filters.status) {
-    case 'active':
+    case CLIENT_STATUS.ACTIVE:
       clientWhere.isActive = true;
       subscriptionWhere.contractEndDate = { [Op.gt]: today };
       break;
-    case 'expiring':
+    case CLIENT_STATUS.EXPIRING:
       clientWhere.isActive = true;
       subscriptionWhere.contractEndDate = { [Op.between]: [today, expiryThreshold] };
       break;
-    case 'paused':
+    case CLIENT_STATUS.PAUSED:
       clientWhere.isActive = false;
       subscriptionWhere.contractEndDate = { [Op.gt]: today };
       break;
-    case 'ended':
+    case CLIENT_STATUS.ENDED:
       subscriptionRequired = false;
       andConditions.push(
         literal(

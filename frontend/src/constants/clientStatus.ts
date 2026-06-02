@@ -1,5 +1,13 @@
 import type { ClientStatus } from '../types/client';
 
+export const CLIENT_STATUS = {
+  ACTIVE: 'active',
+  EXPIRING: 'expiring',
+  PAUSED: 'paused',
+  ENDED: 'ended',
+  ALL: 'all',
+} as const;
+
 export const STATUS_LABELS: Record<ClientStatus, string> = {
   active: 'Activo',
   paused: 'Pausado',

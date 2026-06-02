@@ -2,6 +2,7 @@ import { Icon } from '../components/ui/Icon';
 import { MEAL_LABELS } from '../constants/meals';
 import type { Client, Subscription } from '../types/client';
 import { clientStatus } from '../types/client';
+import { CLIENT_STATUS } from '../constants/clientStatus';
 import { formatDate } from '../utils/format';
 
 interface Props {
@@ -150,7 +151,7 @@ export function ClientOverviewTab({ client, sub, remaining, onFinalize }: Props)
           )}
         </div>
 
-        {status !== 'ended' && (
+        {status !== CLIENT_STATUS.ENDED && (
           <div className="bg-paper border border-rule rounded-lg p-5">
             <p className="text-[11px] font-mono uppercase tracking-wider text-muted mb-3">
               Acciones rápidas

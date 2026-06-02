@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '../services/api';
 import type { Client } from '../types/client';
+import { CLIENT_STATUS } from '../constants/clientStatus';
 
 export interface ClientCreateDraft {
   name: string;
@@ -60,9 +61,10 @@ export function useClients(filters: ClientFilters = {}) {
     queryKey: ['clients', filters],
     queryFn: () => {
       const params = new URLSearchParams();
-      if (filters.status && filters.status !== 'all') params.set('status', filters.status);
+      if (filters.status && filters.status !== CLIENT_STATUS.ALL)
+        params.set('status', filters.status);
       if (filters.q) params.set('q', filters.q);
-      if (filters.birthMonth && filters.birthMonth !== 'all')
+      if (filters.birthMonth && filters.birthMonth !== CLIENT_STATUS.ALL)
         params.set('birthMonth', filters.birthMonth);
       const qs = params.toString();
       return api.get<Client[]>(`/clients${qs ? `?${qs}` : ''}`);

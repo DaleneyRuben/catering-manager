@@ -6,7 +6,7 @@ import { useClients, useClientCounts } from '../hooks/useClients';
 import { useDebounce } from '../hooks/useDebounce';
 import { clientStatus } from '../types/client';
 import { formatDate } from '../utils/format';
-import { STATUS_LABELS, STATUS_CLASSES } from '../constants/clientStatus';
+import { STATUS_LABELS, STATUS_CLASSES, CLIENT_STATUS } from '../constants/clientStatus';
 import { SEX_LABELS } from '../constants/clientOptions';
 import { EXPIRY_THRESHOLD_DAYS } from '../constants/subscription';
 
@@ -33,13 +33,13 @@ function initials(name: string) {
     .join('');
 }
 
-type FilterValue = 'active' | 'expiring' | 'paused' | 'ended' | 'all';
+type FilterValue = (typeof CLIENT_STATUS)[keyof typeof CLIENT_STATUS];
 
 export function ClientsPage() {
   const navigate = useNavigate();
   const [q, setQ] = useState('');
-  const [filter, setFilter] = useState<FilterValue>('active');
-  const [birthMonth, setBirthMonth] = useState('all');
+  const [filter, setFilter] = useState<FilterValue>(CLIENT_STATUS.ACTIVE);
+  const [birthMonth, setBirthMonth] = useState<string>(CLIENT_STATUS.ALL);
 
   const debouncedQ = useDebounce(q);
 
@@ -106,11 +106,11 @@ export function ClientsPage() {
           <div className="inline-flex p-[3px] bg-cream-2 border border-rule rounded-[7px] text-[12px]">
             {(
               [
-                { v: 'active', l: 'Activos' },
-                { v: 'expiring', l: 'Por vencer' },
-                { v: 'paused', l: 'Pausados' },
-                { v: 'ended', l: 'Finalizados' },
-                { v: 'all', l: 'Todos' },
+                { v: CLIENT_STATUS.ACTIVE, l: 'Activos' },
+                { v: CLIENT_STATUS.EXPIRING, l: 'Por vencer' },
+                { v: CLIENT_STATUS.PAUSED, l: 'Pausados' },
+                { v: CLIENT_STATUS.ENDED, l: 'Finalizados' },
+                { v: CLIENT_STATUS.ALL, l: 'Todos' },
               ] as { v: FilterValue; l: string }[]
             ).map(({ v, l }) => (
               <button
