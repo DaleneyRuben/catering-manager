@@ -16,7 +16,7 @@ const client1 = {
   dateOfBirth: '1980-03-10',
   phoneNumber: '555-0001',
   address: 'Calle 10',
-  zone: 'Centro',
+  deliveryZone: 'Centro',
   delivery: 'La Oliva',
   nit: null,
   businessName: null,

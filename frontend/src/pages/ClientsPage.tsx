@@ -194,7 +194,7 @@ export function ClientsPage() {
                           <div>
                             <p className="font-semibold text-ink">{c.name}</p>
                             <p className="text-xs font-mono text-muted">
-                              {c.zone} · {SEX_LABELS[c.sex] ?? c.sex}
+                              {c.deliveryZone} · {SEX_LABELS[c.sex] ?? c.sex}
                             </p>
                           </div>
                         </div>
@@ -208,7 +208,7 @@ export function ClientsPage() {
                           <span className="text-muted">—</span>
                         )}
                       </td>
-                      <td className="px-4 py-3 font-mono text-xs">{c.zone}</td>
+                      <td className="px-4 py-3 font-mono text-xs">{c.deliveryZone}</td>
                       <td className="px-4 py-3 font-mono text-xs">{formatDate(c.dateOfBirth)}</td>
                       <td className="px-4 py-3 font-mono text-xs text-ink-2">
                         {sub

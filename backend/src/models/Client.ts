@@ -20,7 +20,7 @@ class Client extends Model {
   declare address: string;
 
   @Column({ type: DataType.STRING, allowNull: false })
-  declare zone: string;
+  declare deliveryZone: string;
 
   @Column({ type: DataType.STRING, allowNull: false })
   declare delivery: string;

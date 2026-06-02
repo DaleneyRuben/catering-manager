@@ -91,11 +91,16 @@ export function StepIdentity({ register, control, errors }: Props) {
         </div>
 
         <Controller
-          name="zone"
+          name="deliveryZone"
           control={control}
           rules={{ required: 'Zona es requerida' }}
           render={({ field }) => (
-            <Field label="Zona" htmlFor="zone" required error={errors.zone?.message}>
+            <Field
+              label="Zona"
+              htmlFor="deliveryZone"
+              required
+              error={errors.deliveryZone?.message}
+            >
               <ToggleGroup
                 options={ZONES}
                 value={field.value as (typeof ZONES)[number] | ''}

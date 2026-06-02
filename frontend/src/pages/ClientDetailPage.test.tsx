@@ -17,7 +17,7 @@ const mockClient = {
   dateOfBirth: '1990-05-15',
   phoneNumber: '+1234567890',
   address: '123 Main St',
-  zone: 'Centro',
+  deliveryZone: 'Centro',
   delivery: 'La Oliva',
   nit: null,
   businessName: null,

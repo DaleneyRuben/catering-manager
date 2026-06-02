@@ -25,7 +25,7 @@ export interface Client {
   dateOfBirth: string;
   phoneNumber: string;
   address: string;
-  zone: string;
+  deliveryZone: string;
   delivery: string;
   nit: string | null;
   businessName: string | null;

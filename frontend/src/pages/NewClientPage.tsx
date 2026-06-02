@@ -15,7 +15,7 @@ import type { NewClientFormValues, RestrictionsState } from './new-client/types'
 const STEPS = ['Identidad', 'Restricciones', 'Plan', 'Confirmar'];
 
 const STEP_FIELDS: Partial<Record<number, (keyof NewClientFormValues)[]>> = {
-  1: ['name', 'sex', 'dateOfBirth', 'phoneNumber', 'address', 'zone', 'delivery'],
+  1: ['name', 'sex', 'dateOfBirth', 'phoneNumber', 'address', 'deliveryZone', 'delivery'],
   3: ['planId', 'startDate', 'duration'],
 };
 
@@ -44,7 +44,7 @@ export function NewClientPage() {
       dateOfBirth: '',
       phoneNumber: '',
       address: '',
-      zone: '',
+      deliveryZone: '',
       delivery: '',
       nit: '',
       businessName: '',
@@ -77,7 +77,7 @@ export function NewClientPage() {
           dateOfBirth: data.dateOfBirth,
           phoneNumber: data.phoneNumber,
           address: data.address,
-          zone: data.zone,
+          deliveryZone: data.deliveryZone,
           delivery: data.delivery,
           ...(data.nit ? { nit: data.nit } : {}),
           ...(data.businessName ? { businessName: data.businessName } : {}),

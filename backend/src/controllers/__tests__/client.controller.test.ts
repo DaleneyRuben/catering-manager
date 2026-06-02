@@ -12,7 +12,7 @@ const mockClient = {
   dateOfBirth: '1990-05-15',
   phoneNumber: '+1234567890',
   address: '123 Main St',
-  zone: 'Centro',
+  deliveryZone: 'Centro',
   delivery: 'La Oliva',
   nit: null,
   businessName: null,
@@ -27,7 +27,7 @@ const validPayload = {
   dateOfBirth: '1990-05-15',
   phoneNumber: '+1234567890',
   address: '123 Main St',
-  zone: 'Centro',
+  deliveryZone: 'Centro',
   delivery: 'La Oliva',
   underlyingDiseases: ['diabetes'],
   restrictions: ['gluten'],
@@ -137,8 +137,8 @@ describe('PATCH /api/clients/:id', () => {
     expect(res.status).toBe(400);
   });
 
-  it('returns 400 when zone is invalid', async () => {
-    const res = await request(app).patch('/api/clients/1').send({ zone: 'Norte' });
+  it('returns 400 when deliveryZone is invalid', async () => {
+    const res = await request(app).patch('/api/clients/1').send({ deliveryZone: 'Norte' });
 
     expect(res.status).toBe(400);
   });
@@ -200,10 +200,10 @@ describe('POST /api/clients', () => {
     expect(res.status).toBe(400);
   });
 
-  it('returns 400 when zone is invalid', async () => {
+  it('returns 400 when deliveryZone is invalid', async () => {
     const res = await request(app)
       .post('/api/clients')
-      .send({ ...validPayload, zone: 'Norte' });
+      .send({ ...validPayload, deliveryZone: 'Norte' });
 
     expect(res.status).toBe(400);
   });

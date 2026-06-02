@@ -50,7 +50,7 @@ export function ClientDetailPage() {
       dateOfBirth: draft.dateOfBirth,
       phoneNumber: draft.phoneNumber,
       address: draft.address,
-      zone: draft.zone,
+      deliveryZone: draft.deliveryZone,
       delivery: draft.delivery,
       nit: draft.nit || null,
       businessName: draft.businessName || null,
@@ -100,7 +100,7 @@ export function ClientDetailPage() {
             </span>
           </div>
           <p className="font-mono text-[12px] text-muted mt-1.5">
-            {age} años · {SEX_LABELS[client.sex] ?? client.sex} · {client.zone} ·{' '}
+            {age} años · {SEX_LABELS[client.sex] ?? client.sex} · {client.deliveryZone} ·{' '}
             {client.phoneNumber}
           </p>
         </div>

@@ -4,7 +4,7 @@ export interface NewClientFormValues {
   dateOfBirth: string;
   phoneNumber: string;
   address: string;
-  zone: string;
+  deliveryZone: string;
   delivery: string;
   nit: string;
   businessName: string;

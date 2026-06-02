@@ -14,7 +14,7 @@ export interface EditDraft {
   dateOfBirth: string;
   phoneNumber: string;
   address: string;
-  zone: string;
+  deliveryZone: string;
   delivery: string;
   nit: string;
   businessName: string;
@@ -29,7 +29,7 @@ export function draftFromClient(c: Client): EditDraft {
     dateOfBirth: c.dateOfBirth,
     phoneNumber: c.phoneNumber,
     address: c.address,
-    zone: c.zone,
+    deliveryZone: c.deliveryZone,
     delivery: c.delivery,
     nit: c.nit ?? '',
     businessName: c.businessName ?? '',
@@ -170,11 +170,11 @@ export function ClientEditModal({
                 />
               </Field>
               <div className="grid grid-cols-2 gap-4">
-                <Field label="Zona" htmlFor="em-zone" required>
+                <Field label="Zona" htmlFor="em-deliveryZone" required>
                   <ToggleGroup
                     options={ZONES}
-                    value={draft.zone}
-                    onChange={(v) => set({ zone: v })}
+                    value={draft.deliveryZone}
+                    onChange={(v) => set({ deliveryZone: v })}
                     selectedClassName="bg-olive-100 text-ink border-olive-200"
                   />
                 </Field>

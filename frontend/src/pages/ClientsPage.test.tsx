@@ -26,7 +26,7 @@ const makeClient = (overrides = {}) => ({
   dateOfBirth: '1970-04-12',
   phoneNumber: '+34 612 345 678',
   address: 'Av. Centro 142',
-  zone: 'Centro',
+  deliveryZone: 'Centro',
   delivery: 'La Oliva',
   nit: null,
   businessName: null,

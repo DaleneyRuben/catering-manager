@@ -63,7 +63,7 @@ export function ClientOverviewTab({ client, sub, remaining }: Props) {
               <Icon name="pin" size={14} />
               <span className="text-[13px]">{client.address}</span>
               <span className="text-muted text-[13px]"> · </span>
-              <span className="text-[13px]">{client.zone}</span>
+              <span className="text-[13px]">{client.deliveryZone}</span>
             </div>
             <div className="flex items-center gap-2.5">
               <Icon name="refresh" size={14} />
