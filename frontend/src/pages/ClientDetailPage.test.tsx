@@ -5,10 +5,11 @@ import api from '../services/api';
 import { ClientDetailPage } from './ClientDetailPage';
 
 jest.mock('../services/api', () => ({
-  default: { get: jest.fn(), patch: jest.fn() },
+  default: { get: jest.fn(), patch: jest.fn(), post: jest.fn() },
 }));
 const mockGet = api.get as jest.Mock;
 const mockPatch = api.patch as jest.Mock;
+const mockPost = api.post as jest.Mock;
 
 const mockClient = {
   id: 1,
@@ -202,5 +203,34 @@ describe('ClientDetailPage', () => {
     fireEvent.click(await screen.findByRole('button', { name: /editar/i }));
     expect(screen.getByRole('button', { name: 'Diabetes' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Hipertensión' })).toBeInTheDocument();
+  });
+
+  it('shows Finalizar plan button when client is active', async () => {
+    renderPage();
+    expect(await screen.findByRole('button', { name: /finalizar plan/i })).toBeInTheDocument();
+  });
+
+  it('does not show Finalizar plan button when client is already ended', async () => {
+    renderPage({
+      ...mockClient,
+      isActive: false,
+      subscriptions: [{ ...mockClient.subscriptions[0], contractEndDate: '2020-01-01' }],
+    });
+    await screen.findByText('John Doe');
+    expect(screen.queryByRole('button', { name: /finalizar plan/i })).not.toBeInTheDocument();
+  });
+
+  it('clicking Finalizar plan opens a confirmation dialog', async () => {
+    renderPage();
+    fireEvent.click(await screen.findByRole('button', { name: /finalizar plan/i }));
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+  });
+
+  it('confirming finalize calls POST /clients/:id/finalize', async () => {
+    mockPost.mockResolvedValue({});
+    renderPage();
+    fireEvent.click(await screen.findByRole('button', { name: /finalizar plan/i }));
+    fireEvent.click(screen.getByRole('button', { name: /^finalizar$/i }));
+    await waitFor(() => expect(mockPost).toHaveBeenCalledWith('/clients/1/finalize'));
   });
 });
