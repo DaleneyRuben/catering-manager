@@ -1,5 +1,6 @@
 import {
   type UseFormRegister,
+  type UseFormSetValue,
   type FieldErrors,
   type Control,
   Controller,
@@ -16,9 +17,10 @@ interface Props {
   control: Control<NewClientFormValues>;
   errors: FieldErrors<NewClientFormValues>;
   plans: Plan[];
+  setValue: UseFormSetValue<NewClientFormValues>;
 }
 
-export function StepPlan({ register, control, errors, plans }: Props) {
+export function StepPlan({ register, control, errors, plans, setValue }: Props) {
   const startDate = useWatch({ control, name: 'startDate' });
   const duration = useWatch({ control, name: 'duration' });
   const planId = useWatch({ control, name: 'planId' });
@@ -92,7 +94,7 @@ export function StepPlan({ register, control, errors, plans }: Props) {
       </div>
 
       <div className="border-t border-rule mt-6 pt-5">
-        <BillingRow register={register} price={selectedPlan?.price} discount={discount} />
+        <BillingRow setValue={setValue} price={selectedPlan?.price} discount={discount} />
       </div>
     </div>
   );

@@ -1,15 +1,35 @@
-import { type UseFormRegister } from 'react-hook-form';
+import { useState, useEffect } from 'react';
+import { type UseFormSetValue } from 'react-hook-form';
 import { Field, inputCls } from '../../../components/ui/Field';
 import type { NewClientFormValues } from '../types';
 
 interface Props {
-  register: UseFormRegister<NewClientFormValues>;
+  setValue: UseFormSetValue<NewClientFormValues>;
   price: number | undefined;
   discount: number;
 }
 
-export function BillingRow({ register, price, discount }: Props) {
-  const total = (price ?? 0) - (discount || 0);
+export function BillingRow({ setValue, price, discount }: Props) {
+  const [clientPrice, setClientPrice] = useState('');
+
+  // Reset when plan changes — default client price to plan price (discount = 0)
+  useEffect(() => {
+    setClientPrice(price !== undefined ? String(price - discount) : '');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [price]);
+
+  const handleClientPriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    setClientPrice(val);
+    if (price !== undefined) {
+      const num = Number(val);
+      setValue('discount', !Number.isNaN(num) ? Math.max(0, price - num) : 0);
+    }
+  };
+
+  const clientPriceNum = clientPrice !== '' ? Number(clientPrice) : undefined;
+  const calculatedDiscount =
+    price !== undefined && clientPriceNum !== undefined ? price - clientPriceNum : undefined;
 
   return (
     <div>
@@ -17,21 +37,27 @@ export function BillingRow({ register, price, discount }: Props) {
         Facturación del plan
       </p>
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
-        <div>
-          <p className="text-[11px] font-mono uppercase tracking-wider text-muted mb-1.5">Precio</p>
-          <p className="font-mono text-[13px] text-ink py-2 px-3 bg-cream-2 rounded-md border border-rule">
-            {price !== undefined ? price : '—'}
-          </p>
-        </div>
-        <Field label="Descuento" htmlFor="discount">
+        <Field label="Precio" htmlFor="client-price">
           <input
-            id="discount"
+            id="client-price"
             type="number"
             min={0}
-            {...register('discount', { valueAsNumber: true, min: 0 })}
+            max={price}
+            value={clientPrice}
+            onChange={handleClientPriceChange}
+            disabled={price === undefined}
+            placeholder={price === undefined ? '—' : ''}
             className={inputCls(false)}
           />
         </Field>
+        <div>
+          <p className="text-[11px] font-mono uppercase tracking-wider text-muted mb-1.5">
+            Descuento
+          </p>
+          <p className="font-mono text-[13px] text-ink py-2 px-3 bg-cream-2 rounded-md border border-rule">
+            {calculatedDiscount !== undefined ? calculatedDiscount : '—'}
+          </p>
+        </div>
         <div>
           <p className="text-[11px] font-mono uppercase tracking-wider text-muted mb-1.5">Total</p>
           <p
@@ -41,7 +67,7 @@ export function BillingRow({ register, price, discount }: Props) {
               borderColor: 'var(--olive-200, #c8d4b0)',
             }}
           >
-            {price !== undefined ? total : '—'}
+            {clientPriceNum !== undefined ? clientPriceNum : '—'}
           </p>
         </div>
       </div>

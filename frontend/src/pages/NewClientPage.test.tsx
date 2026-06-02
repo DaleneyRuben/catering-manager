@@ -145,16 +145,17 @@ describe('NewClientPage', () => {
     expect(screen.getByRole('button', { name: /completo/i })).toBeInTheDocument();
   });
 
-  it('shows discount and billing fields on step 3', async () => {
+  it('shows precio and billing fields on step 3', async () => {
     await navigateToStep3();
-    expect(screen.getByLabelText(/descuento/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/precio/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/inicio del servicio/i)).toBeInTheDocument();
   });
 
-  it('shows calculated total when plan and discount are set', async () => {
+  it('shows calculated total when precio is entered', async () => {
     await navigateToStep3();
     await userEvent.click(screen.getByRole('button', { name: /completo/i }));
-    fireEvent.change(screen.getByLabelText(/descuento/i), { target: { value: '50' } });
+    // plan price 480, precio 430 → descuento 50, total 430
+    fireEvent.change(screen.getByLabelText(/precio/i), { target: { value: '430' } });
     expect(screen.getByText('430')).toBeInTheDocument();
   });
 
@@ -195,13 +196,14 @@ describe('NewClientPage', () => {
     );
   });
 
-  it('subscription POST sends entered discount', async () => {
+  it('subscription POST sends calculated discount when precio is entered', async () => {
     await navigateToStep3();
     await userEvent.click(screen.getByRole('button', { name: /completo/i }));
     fireEvent.change(screen.getByLabelText(/inicio del servicio/i), {
       target: { value: '2026-06-01' },
     });
-    fireEvent.change(screen.getByLabelText(/descuento/i), { target: { value: '100' } });
+    // plan price 480, precio 380 → discount = 100
+    fireEvent.change(screen.getByLabelText(/precio/i), { target: { value: '380' } });
     await userEvent.click(screen.getByRole('button', { name: /siguiente/i }));
     await userEvent.click(screen.getByRole('button', { name: /guardar/i }));
     await waitFor(() => expect(mockPost).toHaveBeenCalledTimes(2));

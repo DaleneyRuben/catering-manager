@@ -35,6 +35,7 @@ export function NewClientPage() {
     control,
     trigger,
     getValues,
+    setValue,
     handleSubmit,
     formState: { errors },
   } = useForm<NewClientFormValues>({
@@ -126,7 +127,13 @@ export function NewClientPage() {
           />
         )}
         {step === 3 && (
-          <StepPlan register={register} control={control} errors={errors} plans={plans} />
+          <StepPlan
+            register={register}
+            control={control}
+            errors={errors}
+            plans={plans}
+            setValue={setValue}
+          />
         )}
         {step === 4 && (
           <StepConfirm
