@@ -1,4 +1,4 @@
-import { parseISO, isBefore } from 'date-fns';
+import { parseISO, isAfter } from 'date-fns';
 import { businessDaysUntil } from '../utils/businessDays';
 
 export interface Plan {
@@ -57,7 +57,7 @@ export type ClientStatus = 'active' | 'paused' | 'expiring' | 'ended';
 
 export function clientStatus(client: Client, today = new Date()): ClientStatus {
   const sub = client.subscriptions[0];
-  if (!sub || isBefore(parseISO(sub.contractEndDate), today)) return 'ended';
+  if (!sub || !isAfter(parseISO(sub.contractEndDate), today)) return 'ended';
   if (!client.isActive) return 'paused';
   if (businessDaysUntil(today, parseISO(sub.contractEndDate)) <= 5) return 'expiring';
   return 'active';
