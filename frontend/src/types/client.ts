@@ -15,6 +15,7 @@ export interface Subscription {
   contractDate: string;
   startDate: string;
   contractEndDate: string;
+  discount: number;
   plan: Plan;
 }
 

@@ -201,7 +201,7 @@ export function ClientDetailPage() {
                     <div className="ml-auto text-right">
                       <p className="font-mono text-[10.5px] text-muted">Total mensual</p>
                       <p className="font-serif text-[40px] text-olive-800 tabular-nums">
-                        {sub.plan.price}
+                        {Number(sub.plan.price) - sub.discount}
                       </p>
                     </div>
                   </div>
@@ -228,14 +228,16 @@ export function ClientDetailPage() {
                       <p className="text-[11px] font-mono uppercase tracking-wider text-muted">
                         Descuento
                       </p>
-                      <p className="font-mono text-[14px] text-muted">—</p>
+                      <p className="font-mono text-[14px] text-muted">
+                        {sub.discount > 0 ? sub.discount : '—'}
+                      </p>
                     </div>
                     <div>
                       <p className="text-[11px] font-mono uppercase tracking-wider text-muted">
                         Total
                       </p>
                       <p className="font-mono text-[14px] font-bold text-olive-800">
-                        {sub.plan.price}
+                        {Number(sub.plan.price) - sub.discount}
                       </p>
                     </div>
                   </div>
