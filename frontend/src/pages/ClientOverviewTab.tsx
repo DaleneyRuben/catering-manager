@@ -162,13 +162,7 @@ export function ClientOverviewTab({ client, sub, remaining, onFinalize }: Props)
               <Icon name="calendar" size={14} />
               Suspender días
             </button>
-            <button
-              type="button"
-              className="flex items-center gap-2 px-3 py-2.5 text-[13px] border border-rule rounded-md text-ink hover:bg-cream-2 transition-colors"
-            >
-              <Icon name="refresh" size={14} />
-              Cambiar de plan
-            </button>
+
             {status !== 'ended' && (
               <button
                 type="button"
