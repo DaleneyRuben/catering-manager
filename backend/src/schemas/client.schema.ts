@@ -1,13 +1,16 @@
 import { z } from 'zod';
+import { ZONES, DELIVERIES, SEX_OPTIONS } from '../constants/client.constants';
+
+const dateField = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'must be YYYY-MM-DD');
 
 export const createClientSchema = z.object({
   name: z.string().min(1),
-  sex: z.enum(['male', 'female', 'other']),
-  dateOfBirth: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'dateOfBirth must be YYYY-MM-DD'),
+  sex: z.enum(SEX_OPTIONS),
+  dateOfBirth: dateField,
   phoneNumber: z.string().min(1),
   address: z.string().min(1),
-  deliveryZone: z.enum(['Centro', 'Sur']),
-  delivery: z.enum(['La Oliva', 'Otro']),
+  deliveryZone: z.enum(ZONES),
+  delivery: z.enum(DELIVERIES),
   nit: z.string().optional(),
   businessName: z.string().optional(),
   underlyingDiseases: z.array(z.string()).default([]),
@@ -18,15 +21,12 @@ export type CreateClientDto = z.infer<typeof createClientSchema>;
 
 export const updateClientSchema = z.object({
   name: z.string().min(1).optional(),
-  sex: z.enum(['male', 'female', 'other']).optional(),
-  dateOfBirth: z
-    .string()
-    .regex(/^\d{4}-\d{2}-\d{2}$/, 'dateOfBirth must be YYYY-MM-DD')
-    .optional(),
+  sex: z.enum(SEX_OPTIONS).optional(),
+  dateOfBirth: dateField.optional(),
   phoneNumber: z.string().min(1).optional(),
   address: z.string().min(1).optional(),
-  deliveryZone: z.enum(['Centro', 'Sur']).optional(),
-  delivery: z.enum(['La Oliva', 'Otro']).optional(),
+  deliveryZone: z.enum(ZONES).optional(),
+  delivery: z.enum(DELIVERIES).optional(),
   nit: z.string().nullable().optional(),
   businessName: z.string().nullable().optional(),
   underlyingDiseases: z.array(z.string()).optional(),
