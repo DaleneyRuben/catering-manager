@@ -11,6 +11,7 @@ import { SEX_LABELS } from '../constants/clientOptions';
 import { formatDate } from '../utils/format';
 import { ClientEditModal } from './ClientEditModal';
 import type { EditDraft } from './ClientEditModal';
+import { ConfirmFinalizeModal } from './ConfirmFinalizeModal';
 import { ClientOverviewTab } from './ClientOverviewTab';
 import { ClientHistoryTab } from './ClientHistoryTab';
 import { PageLoader } from '../components/ui/PageLoader';
@@ -35,9 +36,10 @@ function initials(name: string) {
 export function ClientDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { client, isLoading, update, isUpdating } = useClient(id!);
+  const { client, isLoading, update, isUpdating, finalize } = useClient(id!);
   const [tab, setTab] = useState<TabId>('overview');
   const [editOpen, setEditOpen] = useState(false);
+  const [finalizeOpen, setFinalizeOpen] = useState(false);
 
   const handleToggleActive = async () => {
     if (!client) return;
@@ -186,7 +188,14 @@ export function ClientDetailPage() {
         ))}
       </div>
 
-      {tab === 'overview' && <ClientOverviewTab client={client} sub={sub} remaining={remaining} />}
+      {tab === 'overview' && (
+        <ClientOverviewTab
+          client={client}
+          sub={sub}
+          remaining={remaining}
+          onFinalize={() => setFinalizeOpen(true)}
+        />
+      )}
 
       {tab === 'plan' && (
         <div className="grid grid-cols-12 gap-5">
@@ -319,6 +328,13 @@ export function ClientDetailPage() {
           onSave={handleSave}
           onClose={() => setEditOpen(false)}
           isSaving={isUpdating}
+        />
+      )}
+      {finalizeOpen && (
+        <ConfirmFinalizeModal
+          clientName={client.name}
+          onClose={() => setFinalizeOpen(false)}
+          onConfirm={finalize}
         />
       )}
     </div>

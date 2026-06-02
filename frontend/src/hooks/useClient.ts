@@ -21,10 +21,20 @@ export function useClient(id: string | number) {
     },
   });
 
+  const finalizeMutation = useMutation({
+    mutationFn: () => api.post(`/clients/${id}/finalize`, {}),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['clients', id] });
+      qc.invalidateQueries({ queryKey: ['clients'], exact: true });
+    },
+  });
+
   return {
     client: client ?? null,
     isLoading,
     isUpdating: updateMutation.isPending,
+    isFinalizing: finalizeMutation.isPending,
     update: (data: ClientUpdateDraft): Promise<Client> => updateMutation.mutateAsync(data),
+    finalize: (): Promise<void> => finalizeMutation.mutateAsync().then(() => {}),
   };
 }

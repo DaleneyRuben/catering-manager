@@ -1,15 +1,18 @@
 import { Icon } from '../components/ui/Icon';
 import { MEAL_LABELS } from '../constants/meals';
 import type { Client, Subscription } from '../types/client';
+import { clientStatus } from '../types/client';
 import { formatDate } from '../utils/format';
 
 interface Props {
   client: Client;
   sub: Subscription | undefined;
   remaining: number;
+  onFinalize: () => void;
 }
 
-export function ClientOverviewTab({ client, sub, remaining }: Props) {
+export function ClientOverviewTab({ client, sub, remaining, onFinalize }: Props) {
+  const status = clientStatus(client);
   return (
     <div className="grid grid-cols-12 gap-5">
       <div className="col-span-12 lg:col-span-7 flex flex-col gap-4">
@@ -166,12 +169,15 @@ export function ClientOverviewTab({ client, sub, remaining }: Props) {
               <Icon name="refresh" size={14} />
               Cambiar de plan
             </button>
-            <button
-              type="button"
-              className="flex items-center gap-2 px-3 py-2.5 text-[13px] border border-[#e9c4bb] rounded-md text-alert hover:bg-cream-2 transition-colors"
-            >
-              Finalizar plan
-            </button>
+            {status !== 'ended' && (
+              <button
+                type="button"
+                onClick={onFinalize}
+                className="flex items-center gap-2 px-3 py-2.5 text-[13px] border border-[#e9c4bb] rounded-md text-alert hover:bg-cream-2 transition-colors"
+              >
+                Finalizar plan
+              </button>
+            )}
           </div>
         </div>
       </div>
