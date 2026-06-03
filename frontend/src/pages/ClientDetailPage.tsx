@@ -12,6 +12,7 @@ import { formatDate } from '../utils/format';
 import { ClientEditModal } from './ClientEditModal';
 import type { EditDraft } from './ClientEditModal';
 import { ConfirmFinalizeModal } from './ConfirmFinalizeModal';
+import { SuspendModal } from './SuspendModal';
 import { ClientOverviewTab } from './ClientOverviewTab';
 import { ClientHistoryTab } from './ClientHistoryTab';
 import { PageLoader } from '../components/ui/PageLoader';
@@ -36,10 +37,11 @@ function initials(name: string) {
 export function ClientDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { client, isLoading, update, isUpdating, finalize } = useClient(id!);
+  const { client, isLoading, update, isUpdating, finalize, updateSuspensions } = useClient(id!);
   const [tab, setTab] = useState<TabId>('overview');
   const [editOpen, setEditOpen] = useState(false);
   const [finalizeOpen, setFinalizeOpen] = useState(false);
+  const [suspendOpen, setSuspendOpen] = useState(false);
 
   const handleToggleActive = async () => {
     if (!client) return;
@@ -195,6 +197,7 @@ export function ClientDetailPage() {
           sub={sub}
           remaining={remaining}
           onFinalize={() => setFinalizeOpen(true)}
+          onSuspend={() => setSuspendOpen(true)}
         />
       )}
 
@@ -316,8 +319,42 @@ export function ClientDetailPage() {
       )}
 
       {tab === 'suspensions' && (
-        <div className="bg-paper border border-rule rounded-lg p-10 text-center">
-          <p className="font-mono text-[13px] text-muted">Sin suspensiones registradas.</p>
+        <div className="bg-paper border border-rule rounded-lg p-5">
+          <div className="flex items-center mb-4">
+            <div>
+              <p className="text-[10.5px] font-mono uppercase tracking-wider text-muted mb-0.5">
+                Días suspendidos
+              </p>
+              <p className="font-serif text-[32px] leading-none text-alert">
+                {sub?.suspendedDates?.length ?? 0}
+              </p>
+            </div>
+            <div className="ml-auto">
+              <button
+                type="button"
+                onClick={() => setSuspendOpen(true)}
+                className="flex items-center gap-2 px-3.5 py-2.5 text-[13px] font-semibold bg-olive-800 text-white rounded-md hover:bg-olive-700 transition-colors"
+              >
+                <Icon name="calendar" size={14} />
+                Suspender días
+              </button>
+            </div>
+          </div>
+          {sub && (sub.suspendedDates?.length ?? 0) > 0 ? (
+            <div className="flex flex-wrap gap-2">
+              {[...(sub.suspendedDates ?? [])].sort().map((d) => (
+                <span
+                  key={d}
+                  className="px-2.5 py-1 rounded-full text-[11px] font-mono"
+                  style={{ background: '#f3eedc', color: '#6b4f08' }}
+                >
+                  {formatDate(d)}
+                </span>
+              ))}
+            </div>
+          ) : (
+            <p className="font-mono text-[12px] text-muted">Sin suspensiones registradas.</p>
+          )}
         </div>
       )}
 
@@ -336,6 +373,14 @@ export function ClientDetailPage() {
           clientName={client.name}
           onClose={() => setFinalizeOpen(false)}
           onConfirm={finalize}
+        />
+      )}
+      {suspendOpen && sub && (
+        <SuspendModal
+          sub={sub}
+          clientName={client.name}
+          onClose={() => setSuspendOpen(false)}
+          onSave={(dates) => updateSuspensions(sub.id, dates)}
         />
       )}
     </div>

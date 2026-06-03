@@ -29,12 +29,28 @@ export function useClient(id: string | number) {
     },
   });
 
+  const updateSuspensionsMutation = useMutation({
+    mutationFn: ({
+      suspendedDates,
+      subscriptionId,
+    }: {
+      suspendedDates: string[];
+      subscriptionId: number;
+    }) => api.patch(`/clients/${id}/subscriptions/${subscriptionId}`, { suspendedDates }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['clients', id] });
+    },
+  });
+
   return {
     client: client ?? null,
     isLoading,
     isUpdating: updateMutation.isPending,
     isFinalizing: finalizeMutation.isPending,
+    isUpdatingSuspensions: updateSuspensionsMutation.isPending,
     update: (data: ClientUpdateDraft): Promise<Client> => updateMutation.mutateAsync(data),
     finalize: (): Promise<void> => finalizeMutation.mutateAsync().then(() => {}),
+    updateSuspensions: (subscriptionId: number, suspendedDates: string[]): Promise<void> =>
+      updateSuspensionsMutation.mutateAsync({ suspendedDates, subscriptionId }).then(() => {}),
   };
 }

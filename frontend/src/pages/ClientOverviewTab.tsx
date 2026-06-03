@@ -11,9 +11,10 @@ interface Props {
   sub: Subscription | undefined;
   remaining: number;
   onFinalize: () => void;
+  onSuspend: () => void;
 }
 
-export function ClientOverviewTab({ client, sub, remaining, onFinalize }: Props) {
+export function ClientOverviewTab({ client, sub, remaining, onFinalize, onSuspend }: Props) {
   const status = clientStatus(client);
   return (
     <div className="grid grid-cols-12 gap-5">
@@ -169,6 +170,7 @@ export function ClientOverviewTab({ client, sub, remaining, onFinalize }: Props)
             <div className="flex flex-col gap-2">
               <button
                 type="button"
+                onClick={onSuspend}
                 className="flex items-center gap-2 px-3 py-2.5 text-[13px] border border-rule rounded-md text-ink hover:bg-cream-2 transition-colors"
               >
                 <Icon name="calendar" size={14} />

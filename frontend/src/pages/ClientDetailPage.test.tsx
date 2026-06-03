@@ -5,12 +5,11 @@ import api from '../services/api';
 import { ClientDetailPage } from './ClientDetailPage';
 
 jest.mock('../services/api', () => ({
-  default: { get: jest.fn(), patch: jest.fn(), post: jest.fn(), put: jest.fn() },
+  default: { get: jest.fn(), patch: jest.fn(), post: jest.fn() },
 }));
 const mockGet = api.get as jest.Mock;
 const mockPatch = api.patch as jest.Mock;
 const mockPost = api.post as jest.Mock;
-const mockPut = api.put as jest.Mock;
 
 const mockClient = {
   id: 1,
@@ -257,17 +256,17 @@ describe('ClientDetailPage', () => {
     expect(await screen.findByRole('dialog')).toBeInTheDocument();
   });
 
-  it('saving suspensions calls PUT on subscriptions', async () => {
-    mockPut.mockResolvedValue({});
+  it('saving suspensions calls PATCH on subscriptions with suspendedDates', async () => {
+    mockPatch.mockResolvedValue({});
     renderPage();
     await screen.findByText('John Doe');
     fireEvent.click(screen.getByRole('button', { name: /suspender días/i }));
     await screen.findByRole('dialog');
     fireEvent.click(screen.getByRole('button', { name: /guardar/i }));
     await waitFor(() =>
-      expect(mockPut).toHaveBeenCalledWith(
-        '/clients/1/subscriptions/1/suspensions',
-        expect.objectContaining({ dates: expect.any(Array) }),
+      expect(mockPatch).toHaveBeenCalledWith(
+        '/clients/1/subscriptions/1',
+        expect.objectContaining({ suspendedDates: expect.any(Array) }),
       ),
     );
   });

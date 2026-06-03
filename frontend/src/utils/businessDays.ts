@@ -10,6 +10,16 @@ export function addBusinessDays(dateString: string, days: number): string {
   return format(date, 'yyyy-MM-dd');
 }
 
+export function subtractBusinessDays(dateString: string, days: number): string {
+  let date = parseISO(dateString);
+  let subtracted = 0;
+  while (subtracted < days) {
+    date = addDays(date, -1);
+    if (!isWeekend(date)) subtracted += 1;
+  }
+  return format(date, 'yyyy-MM-dd');
+}
+
 export function remainingDeliveryDays(startDate: Date, endDate: Date, today = new Date()): number {
   const startsInFuture = startDate > today;
   const effectiveStart = startsInFuture ? startDate : today;
