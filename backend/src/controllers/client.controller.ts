@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import clientService from '../services/client.service';
-import { sendSuccess, sendError } from '../utils/response';
+import { sendSuccess, sendPaginated, sendError } from '../utils/response';
 
 const create = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -13,13 +13,17 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
 
 const getAll = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { status, q, birthMonth } = req.query;
-    const clients = await clientService.findAll({
+    const { status, q, birthMonth, page, limit } = req.query;
+    const resolvedPage = page ? Number(page) : 1;
+    const resolvedLimit = limit ? Number(limit) : 20;
+    const { rows, total } = await clientService.findAll({
       status: typeof status === 'string' ? status : undefined,
       q: typeof q === 'string' && q ? q : undefined,
       birthMonth: birthMonth ? Number(birthMonth) : undefined,
+      page: resolvedPage,
+      limit: resolvedLimit,
     });
-    sendSuccess(res, clients);
+    sendPaginated(res, rows, total, resolvedPage, resolvedLimit);
   } catch (err) {
     next(err);
   }

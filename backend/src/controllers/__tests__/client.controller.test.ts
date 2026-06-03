@@ -34,18 +34,41 @@ const validPayload = {
 };
 
 describe('GET /api/clients', () => {
-  it('returns 200 with list of clients', async () => {
-    (clientService.findAll as jest.Mock).mockResolvedValue([mockClient]);
+  it('returns 200 with paginated clients', async () => {
+    (clientService.findAll as jest.Mock).mockResolvedValue({ rows: [mockClient], total: 1 });
 
     const res = await request(app).get('/api/clients');
 
     expect(res.status).toBe(200);
     expect(res.body.data).toHaveLength(1);
     expect(res.body.data[0]).toMatchObject({ name: 'John Doe' });
+    expect(res.body.total).toBe(1);
+    expect(res.body.page).toBe(1);
+    expect(res.body.limit).toBe(20);
+  });
+
+  it('forwards page and limit to service', async () => {
+    (clientService.findAll as jest.Mock).mockResolvedValue({ rows: [], total: 0 });
+
+    await request(app).get('/api/clients?page=2&limit=10');
+
+    expect(clientService.findAll).toHaveBeenCalledWith(
+      expect.objectContaining({ page: 2, limit: 10 }),
+    );
+  });
+
+  it('defaults to page 1 and limit 20', async () => {
+    (clientService.findAll as jest.Mock).mockResolvedValue({ rows: [], total: 0 });
+
+    await request(app).get('/api/clients');
+
+    expect(clientService.findAll).toHaveBeenCalledWith(
+      expect.objectContaining({ page: 1, limit: 20 }),
+    );
   });
 
   it('forwards status query param to service', async () => {
-    (clientService.findAll as jest.Mock).mockResolvedValue([]);
+    (clientService.findAll as jest.Mock).mockResolvedValue({ rows: [], total: 0 });
 
     await request(app).get('/api/clients?status=active');
 
@@ -55,7 +78,7 @@ describe('GET /api/clients', () => {
   });
 
   it('forwards q query param to service', async () => {
-    (clientService.findAll as jest.Mock).mockResolvedValue([]);
+    (clientService.findAll as jest.Mock).mockResolvedValue({ rows: [], total: 0 });
 
     await request(app).get('/api/clients?q=maria');
 
@@ -63,7 +86,7 @@ describe('GET /api/clients', () => {
   });
 
   it('forwards birthMonth query param to service as number', async () => {
-    (clientService.findAll as jest.Mock).mockResolvedValue([]);
+    (clientService.findAll as jest.Mock).mockResolvedValue({ rows: [], total: 0 });
 
     await request(app).get('/api/clients?birthMonth=3');
 

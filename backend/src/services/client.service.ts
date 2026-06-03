@@ -15,6 +15,8 @@ export interface FindAllFilters {
   status?: string;
   q?: string;
   birthMonth?: number;
+  page?: number;
+  limit?: number;
 }
 
 const create = (data: CreateClientDto) => Client.create(data as never);
@@ -88,7 +90,11 @@ const findAll = (filters: FindAllFilters = {}) => {
 
   if (andConditions.length) clientWhere[Op.and] = andConditions;
 
-  return Client.findAll({
+  const page = filters.page ?? 1;
+  const limit = filters.limit ?? 20;
+  const offset = (page - 1) * limit;
+
+  return Client.findAndCountAll({
     where:
       Object.getOwnPropertySymbols(clientWhere).length || Object.keys(clientWhere).length
         ? clientWhere
@@ -101,7 +107,10 @@ const findAll = (filters: FindAllFilters = {}) => {
         required: subscriptionRequired,
       },
     ],
-  });
+    limit,
+    offset,
+    distinct: true,
+  }).then(({ rows, count }) => ({ rows, total: count }));
 };
 
 const getCounts = async () => {

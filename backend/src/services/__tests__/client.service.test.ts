@@ -67,13 +67,14 @@ describe('clientService.create', () => {
 });
 
 describe('clientService.findAll', () => {
-  it('returns all clients', async () => {
-    (Client.findAll as jest.Mock).mockResolvedValue([mockClient]);
+  it('returns rows and total', async () => {
+    (Client.findAndCountAll as jest.Mock).mockResolvedValue({ rows: [mockClient], count: 1 });
 
     const result = await clientService.findAll();
 
-    expect(result).toHaveLength(1);
-    expect(result[0]).toMatchObject({ name: 'John Doe' });
+    expect(result.rows).toHaveLength(1);
+    expect(result.rows[0]).toMatchObject({ name: 'John Doe' });
+    expect(result.total).toBe(1);
   });
 });
 
@@ -132,11 +133,11 @@ describe('clientService.findAll with filters', () => {
   beforeEach(() => jest.clearAllMocks());
 
   it('status=active passes isActive:true and required subscription', async () => {
-    (Client.findAll as jest.Mock).mockResolvedValue([]);
+    (Client.findAndCountAll as jest.Mock).mockResolvedValue({ rows: [], count: 0 });
 
     await clientService.findAll({ status: 'active' });
 
-    expect(Client.findAll).toHaveBeenCalledWith(
+    expect(Client.findAndCountAll).toHaveBeenCalledWith(
       expect.objectContaining({
         where: expect.objectContaining({ isActive: true }),
         include: expect.arrayContaining([expect.objectContaining({ required: true })]),
@@ -145,11 +146,11 @@ describe('clientService.findAll with filters', () => {
   });
 
   it('status=active excludes today-suspended clients via Op.and literal', async () => {
-    (Client.findAll as jest.Mock).mockResolvedValue([]);
+    (Client.findAndCountAll as jest.Mock).mockResolvedValue({ rows: [], count: 0 });
 
     await clientService.findAll({ status: 'active' });
 
-    const call = (Client.findAll as jest.Mock).mock.calls[0][0];
+    const call = (Client.findAndCountAll as jest.Mock).mock.calls[0][0];
     const andConditions = call.where?.[Symbol.for('and')];
     expect(andConditions).toBeDefined();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -157,16 +158,13 @@ describe('clientService.findAll with filters', () => {
   });
 
   it('status=paused uses OR condition for paused and suspended-today clients', async () => {
-    (Client.findAll as jest.Mock).mockResolvedValue([]);
+    (Client.findAndCountAll as jest.Mock).mockResolvedValue({ rows: [], count: 0 });
 
     await clientService.findAll({ status: 'paused' });
 
-    const call = (Client.findAll as jest.Mock).mock.calls[0][0];
-    // must not have top-level isActive: false (that would exclude suspended clients)
+    const call = (Client.findAndCountAll as jest.Mock).mock.calls[0][0];
     expect(call.where?.isActive).toBeUndefined();
-    // must have required subscription
     expect(call.include[0].required).toBe(true);
-    // must have Op.and with an Op.or condition
     const andConditions = call.where?.[Symbol.for('and')];
     expect(andConditions).toBeDefined();
     const hasOr = andConditions.some(
@@ -176,32 +174,55 @@ describe('clientService.findAll with filters', () => {
   });
 
   it('status=ended uses left join (required:false)', async () => {
-    (Client.findAll as jest.Mock).mockResolvedValue([]);
+    (Client.findAndCountAll as jest.Mock).mockResolvedValue({ rows: [], count: 0 });
 
     await clientService.findAll({ status: 'ended' });
 
-    expect(Client.findAll).toHaveBeenCalledWith(
+    expect(Client.findAndCountAll).toHaveBeenCalledWith(
       expect.objectContaining({
         include: expect.arrayContaining([expect.objectContaining({ required: false })]),
       }),
     );
   });
 
-  it('no filters calls findAll without where', async () => {
-    (Client.findAll as jest.Mock).mockResolvedValue([]);
+  it('no filters calls findAndCountAll without where', async () => {
+    (Client.findAndCountAll as jest.Mock).mockResolvedValue({ rows: [], count: 0 });
 
     await clientService.findAll();
 
-    expect(Client.findAll).toHaveBeenCalledWith(expect.objectContaining({ where: undefined }));
+    expect(Client.findAndCountAll).toHaveBeenCalledWith(
+      expect.objectContaining({ where: undefined }),
+    );
   });
 
-  it('returns what Client.findAll returns', async () => {
+  it('returns rows and total from findAndCountAll', async () => {
     const mockClients = [{ id: 1, name: 'María García' }];
-    (Client.findAll as jest.Mock).mockResolvedValue(mockClients);
+    (Client.findAndCountAll as jest.Mock).mockResolvedValue({ rows: mockClients, count: 42 });
 
     const result = await clientService.findAll({ status: 'active' });
 
-    expect(result).toBe(mockClients);
+    expect(result.rows).toBe(mockClients);
+    expect(result.total).toBe(42);
+  });
+
+  it('applies limit and offset from page and limit params', async () => {
+    (Client.findAndCountAll as jest.Mock).mockResolvedValue({ rows: [], count: 0 });
+
+    await clientService.findAll({ page: 3, limit: 10 });
+
+    expect(Client.findAndCountAll).toHaveBeenCalledWith(
+      expect.objectContaining({ limit: 10, offset: 20 }),
+    );
+  });
+
+  it('defaults to page 1 and limit 20 when not provided', async () => {
+    (Client.findAndCountAll as jest.Mock).mockResolvedValue({ rows: [], count: 0 });
+
+    await clientService.findAll();
+
+    expect(Client.findAndCountAll).toHaveBeenCalledWith(
+      expect.objectContaining({ limit: 20, offset: 0 }),
+    );
   });
 });
 
