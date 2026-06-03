@@ -48,21 +48,25 @@ export function ClientsPage() {
   const debouncedQ = useDebounce(q);
 
   const changeFilter = (v: FilterValue) => {
+    if (v === filter) return;
     setTableLoading(true);
     setFilter(v);
     setPage(1);
   };
   const changeBirthMonth = (v: string) => {
+    if (v === birthMonth) return;
     setTableLoading(true);
     setBirthMonth(v);
     setPage(1);
   };
   const changeLimit = (v: number) => {
+    if (v === limit) return;
     setTableLoading(true);
     setLimit(v);
     setPage(1);
   };
   const changePage = (p: number) => {
+    if (p === page) return;
     setTableLoading(true);
     setPage(p);
   };
