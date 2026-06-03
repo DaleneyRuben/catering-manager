@@ -43,20 +43,28 @@ export function ClientsPage() {
   const [birthMonth, setBirthMonth] = useState<string>(CLIENT_STATUS.ALL);
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(25);
+  const [tableLoading, setTableLoading] = useState(false);
 
   const debouncedQ = useDebounce(q);
 
   const changeFilter = (v: FilterValue) => {
+    setTableLoading(true);
     setFilter(v);
     setPage(1);
   };
   const changeBirthMonth = (v: string) => {
+    setTableLoading(true);
     setBirthMonth(v);
     setPage(1);
   };
   const changeLimit = (v: number) => {
+    setTableLoading(true);
     setLimit(v);
     setPage(1);
+  };
+  const changePage = (p: number) => {
+    setTableLoading(true);
+    setPage(p);
   };
 
   useEffect(() => {
@@ -70,6 +78,10 @@ export function ClientsPage() {
     page,
     limit,
   });
+
+  useEffect(() => {
+    if (!isFetching) setTableLoading(false);
+  }, [isFetching]);
 
   const { counts } = useClientCounts();
 
@@ -179,7 +191,15 @@ export function ClientsPage() {
 
       {/* Table */}
       <div className="bg-paper border border-rule rounded-lg overflow-hidden">
-        {clients.length === 0 ? (
+        {tableLoading && (
+          <div className="py-20 flex flex-col items-center justify-center gap-3">
+            <span className="inline-block w-5 h-5 rounded-full border-2 border-olive-800 border-t-transparent animate-spin" />
+            <p className="font-mono text-[11px] uppercase tracking-[.14em] text-muted">
+              Cargando...
+            </p>
+          </div>
+        )}
+        {!tableLoading && clients.length === 0 && (
           <div className="py-16 text-center">
             <div className="w-12 h-12 rounded-full bg-cream mx-auto mb-3 flex items-center justify-center text-olive-700">
               <Icon name="users" size={22} />
@@ -187,7 +207,8 @@ export function ClientsPage() {
             <p className="font-semibold text-ink">Sin resultados</p>
             <p className="text-sm text-muted mt-1">Prueba con otra búsqueda o quita los filtros.</p>
           </div>
-        ) : (
+        )}
+        {!tableLoading && clients.length > 0 && (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
@@ -261,7 +282,7 @@ export function ClientsPage() {
           page={page}
           total={total}
           limit={limit}
-          onChange={setPage}
+          onChange={changePage}
           onLimitChange={changeLimit}
         />
       </div>
