@@ -45,6 +45,7 @@ export interface ClientFilters {
   q?: string;
   birthMonth?: string;
   page?: number;
+  limit?: number;
 }
 
 export interface ClientCounts {
@@ -68,6 +69,7 @@ export function useClients(filters: ClientFilters = {}) {
       if (filters.birthMonth && filters.birthMonth !== CLIENT_STATUS.ALL)
         params.set('birthMonth', filters.birthMonth);
       if (filters.page) params.set('page', String(filters.page));
+      if (filters.limit) params.set('limit', String(filters.limit));
       const qs = params.toString();
       return api.getPaginated<Client>(`/clients${qs ? `?${qs}` : ''}`);
     },

@@ -42,6 +42,7 @@ export function ClientsPage() {
   const [filter, setFilter] = useState<FilterValue>(CLIENT_STATUS.ACTIVE);
   const [birthMonth, setBirthMonth] = useState<string>(CLIENT_STATUS.ALL);
   const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(25);
 
   const debouncedQ = useDebounce(q);
 
@@ -51,6 +52,10 @@ export function ClientsPage() {
   };
   const changeBirthMonth = (v: string) => {
     setBirthMonth(v);
+    setPage(1);
+  };
+  const changeLimit = (v: number) => {
+    setLimit(v);
     setPage(1);
   };
 
@@ -63,6 +68,7 @@ export function ClientsPage() {
     q: debouncedQ,
     birthMonth,
     page,
+    limit,
   });
 
   const { counts } = useClientCounts();
@@ -251,7 +257,13 @@ export function ClientsPage() {
             </table>
           </div>
         )}
-        <Pagination page={page} total={total} limit={20} onChange={setPage} />
+        <Pagination
+          page={page}
+          total={total}
+          limit={limit}
+          onChange={setPage}
+          onLimitChange={changeLimit}
+        />
       </div>
     </div>
   );

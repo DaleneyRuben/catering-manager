@@ -51,10 +51,17 @@ describe('useClients', () => {
   });
 
   it('passes page param in the query string', async () => {
-    mockGetPaginated.mockResolvedValue({ data: [], total: 0, page: 2, limit: 20 });
+    mockGetPaginated.mockResolvedValue({ data: [], total: 0, page: 2, limit: 25 });
     renderHook(() => useClients({ page: 2 }), { wrapper: makeWrapper() });
     await waitFor(() => expect(mockGetPaginated).toHaveBeenCalled());
     expect(mockGetPaginated).toHaveBeenCalledWith(expect.stringContaining('page=2'));
+  });
+
+  it('passes limit param in the query string', async () => {
+    mockGetPaginated.mockResolvedValue({ data: [], total: 0, page: 1, limit: 10 });
+    renderHook(() => useClients({ limit: 10 }), { wrapper: makeWrapper() });
+    await waitFor(() => expect(mockGetPaginated).toHaveBeenCalled());
+    expect(mockGetPaginated).toHaveBeenCalledWith(expect.stringContaining('limit=10'));
   });
 
   it('create calls POST /clients then POST /clients/:id/subscriptions', async () => {

@@ -1,13 +1,16 @@
 import { Icon } from './Icon';
 
+const LIMIT_OPTIONS = [10, 25, 50];
+
 interface Props {
   page: number;
   total: number;
   limit: number;
   onChange: (page: number) => void;
+  onLimitChange: (limit: number) => void;
 }
 
-export function Pagination({ page, total, limit, onChange }: Props) {
+export function Pagination({ page, total, limit, onChange, onLimitChange }: Props) {
   const totalPages = Math.max(1, Math.ceil(total / limit));
   if (total === 0) return null;
 
@@ -25,9 +28,23 @@ export function Pagination({ page, total, limit, onChange }: Props) {
 
   return (
     <div className="flex items-center justify-between px-4 py-3 border-t border-rule">
-      <p className="text-[11.5px] font-mono text-muted">
-        {(page - 1) * limit + 1}–{Math.min(page * limit, total)} de {total}
-      </p>
+      <div className="flex items-center gap-3">
+        <p className="text-[11.5px] font-mono text-muted">
+          {(page - 1) * limit + 1}–{Math.min(page * limit, total)} de {total}
+        </p>
+        <select
+          value={limit}
+          onChange={(e) => onLimitChange(Number(e.target.value))}
+          className="text-[11.5px] font-mono text-muted border border-rule rounded-md px-1.5 py-0.5 bg-paper cursor-pointer"
+        >
+          {LIMIT_OPTIONS.map((o) => (
+            <option key={o} value={o}>
+              {o}
+            </option>
+          ))}
+        </select>
+        <span className="text-[11px] font-mono text-muted">por página</span>
+      </div>
       <div className="flex items-center gap-1">
         <button
           type="button"
