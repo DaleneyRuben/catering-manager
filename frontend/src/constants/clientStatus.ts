@@ -19,7 +19,7 @@ export const STATUS_LABELS: Record<ClientStatus, string> = {
 
 export const STATUS_CLASSES: Record<ClientStatus, string> = {
   active: 'bg-ok-bg text-ok',
-  paused: 'bg-warn-bg text-warn',
+  paused: 'bg-alert-bg text-alert',
   expiring: 'bg-warn-bg text-warn',
   suspended: 'bg-warn-bg text-warn',
   ended: 'bg-alert-bg text-alert',
