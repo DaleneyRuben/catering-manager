@@ -18,6 +18,7 @@ export interface Subscription {
   startDate: string;
   contractEndDate: string;
   discount: number;
+  suspendedDates: string[];
   plan: Plan;
 }
 
@@ -55,12 +56,14 @@ export interface ClientHistoryEntry {
   metadata: Record<string, unknown>;
 }
 
-export type ClientStatus = 'active' | 'paused' | 'expiring' | 'ended';
+export type ClientStatus = 'active' | 'paused' | 'expiring' | 'ended' | 'suspended';
 
 export function clientStatus(client: Client, today = new Date()): ClientStatus {
   const sub = client.subscriptions[0];
   if (!sub || !isAfter(parseISO(sub.contractEndDate), today)) return CLIENT_STATUS.ENDED;
   if (!client.isActive) return CLIENT_STATUS.PAUSED;
+  const todayIso = today.toISOString().slice(0, 10);
+  if (sub.suspendedDates?.includes(todayIso)) return CLIENT_STATUS.SUSPENDED;
   if (businessDaysUntil(today, parseISO(sub.contractEndDate)) <= EXPIRY_THRESHOLD_DAYS)
     return CLIENT_STATUS.EXPIRING;
   return CLIENT_STATUS.ACTIVE;
