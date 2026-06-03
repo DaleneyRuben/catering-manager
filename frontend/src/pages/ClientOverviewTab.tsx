@@ -25,7 +25,7 @@ export function ClientOverviewTab({ client, sub, remaining, onFinalize, onSuspen
               <div className="flex items-start justify-between gap-4 mb-3">
                 <div>
                   <p className="text-[10.5px] font-mono uppercase tracking-wider text-muted mb-1">
-                    Plan vigente
+                    {status === CLIENT_STATUS.ENDED ? 'Último plan' : 'Plan vigente'}
                   </p>
                   <p className="font-serif text-[24px] leading-tight text-ink">{sub.plan.name}</p>
                 </div>
