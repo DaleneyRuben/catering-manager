@@ -43,7 +43,7 @@ export function ClientsPage() {
 
   const debouncedQ = useDebounce(q);
 
-  const { clients, isLoading } = useClients({
+  const { clients, isLoading, isFetching } = useClients({
     status: filter,
     q: debouncedQ,
     birthMonth,
@@ -51,7 +51,7 @@ export function ClientsPage() {
 
   const { counts } = useClientCounts();
 
-  if (isLoading && !clients.length) return <PageLoader />;
+  if (isLoading) return <PageLoader />;
 
   return (
     <div className="p-7 max-w-[1320px] mx-auto">
@@ -148,7 +148,9 @@ export function ClientsPage() {
           />
         </div>
 
-        <span className="text-[11px] font-mono text-muted ml-auto">
+        <span
+          className={`text-[11px] font-mono ml-auto transition-opacity ${isFetching ? 'opacity-40' : 'text-muted'}`}
+        >
           {clients.length} resultados
         </span>
       </div>

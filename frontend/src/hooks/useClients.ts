@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query';
 import api from '../services/api';
 import type { Client } from '../types/client';
 import { CLIENT_STATUS } from '../constants/clientStatus';
@@ -57,7 +57,11 @@ export interface ClientCounts {
 export function useClients(filters: ClientFilters = {}) {
   const qc = useQueryClient();
 
-  const { data: clients = [], isLoading } = useQuery({
+  const {
+    data: clients = [],
+    isLoading,
+    isFetching,
+  } = useQuery({
     queryKey: ['clients', filters],
     queryFn: () => {
       const params = new URLSearchParams();
@@ -69,6 +73,7 @@ export function useClients(filters: ClientFilters = {}) {
       const qs = params.toString();
       return api.get<Client[]>(`/clients${qs ? `?${qs}` : ''}`);
     },
+    placeholderData: keepPreviousData,
   });
 
   const createMutation = useMutation({
@@ -90,6 +95,7 @@ export function useClients(filters: ClientFilters = {}) {
   return {
     clients,
     isLoading,
+    isFetching,
     isCreating: createMutation.isPending,
     create: (client: ClientCreateDraft, subscription: SubscriptionCreateDraft): Promise<void> =>
       createMutation.mutateAsync({ client, subscription }).then(() => {}),
