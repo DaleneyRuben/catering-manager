@@ -1,16 +1,8 @@
 import type { Plan } from '../../../types/client';
 import { addBusinessDays } from '../../../utils/businessDays';
 import { formatDate } from '../../../utils/format';
+import { initials } from '../../../utils/string';
 import type { NewClientFormValues, RestrictionsState } from '../types';
-
-function initials(name: string): string {
-  return name
-    .split(' ')
-    .slice(0, 2)
-    .map((s) => s[0] ?? '')
-    .join('')
-    .toUpperCase();
-}
 
 interface Props {
   formValues: NewClientFormValues;

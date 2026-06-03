@@ -16,6 +16,7 @@ import { SuspendModal } from './SuspendModal';
 import { ClientOverviewTab } from './ClientOverviewTab';
 import { ClientHistoryTab } from './ClientHistoryTab';
 import { PageLoader } from '../components/ui/PageLoader';
+import { initials } from '../utils/string';
 
 type TabId = 'overview' | 'plan' | 'suspensions' | 'history';
 
@@ -25,14 +26,6 @@ const TABS: { id: TabId; label: string }[] = [
   { id: 'suspensions', label: 'Suspensiones' },
   { id: 'history', label: 'Historial' },
 ];
-
-function initials(name: string) {
-  return name
-    .split(' ')
-    .slice(0, 2)
-    .map((s) => s[0])
-    .join('');
-}
 
 export function ClientDetailPage() {
   const { id } = useParams<{ id: string }>();

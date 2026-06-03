@@ -10,6 +10,7 @@ import { formatDate } from '../utils/format';
 import { STATUS_LABELS, STATUS_CLASSES, CLIENT_STATUS } from '../constants/clientStatus';
 import { SEX_LABELS } from '../constants/clientOptions';
 import { EXPIRY_THRESHOLD_DAYS } from '../constants/subscription';
+import { initials } from '../utils/string';
 
 const MONTHS = [
   'Enero',
@@ -25,14 +26,6 @@ const MONTHS = [
   'Noviembre',
   'Diciembre',
 ];
-
-function initials(name: string) {
-  return name
-    .split(' ')
-    .slice(0, 2)
-    .map((s) => s[0])
-    .join('');
-}
 
 type FilterValue = (typeof CLIENT_STATUS)[keyof typeof CLIENT_STATUS];
 
