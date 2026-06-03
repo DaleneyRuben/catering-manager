@@ -144,17 +144,35 @@ describe('clientService.findAll with filters', () => {
     );
   });
 
-  it('status=paused passes isActive:false and required subscription', async () => {
+  it('status=active excludes today-suspended clients via Op.and literal', async () => {
+    (Client.findAll as jest.Mock).mockResolvedValue([]);
+
+    await clientService.findAll({ status: 'active' });
+
+    const call = (Client.findAll as jest.Mock).mock.calls[0][0];
+    const andConditions = call.where?.[Symbol.for('and')];
+    expect(andConditions).toBeDefined();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    expect(andConditions.some((c: any) => c?.val?.includes?.('NOT IN'))).toBe(true);
+  });
+
+  it('status=paused uses OR condition for paused and suspended-today clients', async () => {
     (Client.findAll as jest.Mock).mockResolvedValue([]);
 
     await clientService.findAll({ status: 'paused' });
 
-    expect(Client.findAll).toHaveBeenCalledWith(
-      expect.objectContaining({
-        where: expect.objectContaining({ isActive: false }),
-        include: expect.arrayContaining([expect.objectContaining({ required: true })]),
-      }),
+    const call = (Client.findAll as jest.Mock).mock.calls[0][0];
+    // must not have top-level isActive: false (that would exclude suspended clients)
+    expect(call.where?.isActive).toBeUndefined();
+    // must have required subscription
+    expect(call.include[0].required).toBe(true);
+    // must have Op.and with an Op.or condition
+    const andConditions = call.where?.[Symbol.for('and')];
+    expect(andConditions).toBeDefined();
+    const hasOr = andConditions.some(
+      (c: unknown) => c !== null && typeof c === 'object' && Symbol.for('or') in (c as object),
     );
+    expect(hasOr).toBe(true);
   });
 
   it('status=ended uses left join (required:false)', async () => {

@@ -22,6 +22,7 @@ const create = (data: CreateClientDto) => Client.create(data as never);
 const findAll = (filters: FindAllFilters = {}) => {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
+  const todayStr = today.toISOString().slice(0, 10);
   const expiryThreshold = addBusinessDays(today, EXPIRY_THRESHOLD_DAYS);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -36,14 +37,26 @@ const findAll = (filters: FindAllFilters = {}) => {
     case CLIENT_STATUS.ACTIVE:
       clientWhere.isActive = true;
       subscriptionWhere.contractEndDate = { [Op.gt]: today };
+      andConditions.push(
+        literal(
+          `"Client"."id" NOT IN (SELECT s2."clientId" FROM subscriptions s2 WHERE '${todayStr}'::date = ANY(s2."suspendedDates") AND s2."contractEndDate" > '${todayStr}')`,
+        ),
+      );
       break;
     case CLIENT_STATUS.EXPIRING:
       clientWhere.isActive = true;
       subscriptionWhere.contractEndDate = { [Op.between]: [today, expiryThreshold] };
       break;
     case CLIENT_STATUS.PAUSED:
-      clientWhere.isActive = false;
       subscriptionWhere.contractEndDate = { [Op.gt]: today };
+      andConditions.push({
+        [Op.or]: [
+          { isActive: false },
+          literal(
+            `"Client"."id" IN (SELECT s2."clientId" FROM subscriptions s2 WHERE '${todayStr}'::date = ANY(s2."suspendedDates") AND s2."contractEndDate" > '${todayStr}')`,
+          ),
+        ],
+      });
       break;
     case CLIENT_STATUS.ENDED:
       subscriptionRequired = false;
@@ -102,11 +115,11 @@ const getCounts = async () => {
   type Row = { active: string; expiring: string; paused: string; ended: string; total: string };
   const [rows] = await sequelize.query<Row>(
     `SELECT
-      COUNT(CASE WHEN c."isActive" = true  AND s."contractEndDate" > :today                                  THEN 1 END) AS active,
-      COUNT(CASE WHEN c."isActive" = true  AND s."contractEndDate" > :today AND s."contractEndDate" <= :threshold THEN 1 END) AS expiring,
-      COUNT(CASE WHEN c."isActive" = false AND s."contractEndDate" > :today                                  THEN 1 END) AS paused,
-      COUNT(CASE WHEN s."contractEndDate" <= :today OR s."contractEndDate" IS NULL                            THEN 1 END) AS ended,
-      COUNT(*)                                                                                                             AS total
+      COUNT(CASE WHEN c."isActive" = true  AND s."contractEndDate" > :today AND NOT (:today::date = ANY(s."suspendedDates"))     THEN 1 END) AS active,
+      COUNT(CASE WHEN c."isActive" = true  AND s."contractEndDate" > :today AND s."contractEndDate" <= :threshold                THEN 1 END) AS expiring,
+      COUNT(CASE WHEN (c."isActive" = false OR :today::date = ANY(s."suspendedDates")) AND s."contractEndDate" > :today          THEN 1 END) AS paused,
+      COUNT(CASE WHEN s."contractEndDate" <= :today OR s."contractEndDate" IS NULL                                               THEN 1 END) AS ended,
+      COUNT(*)                                                                                                                               AS total
     FROM clients c
     LEFT JOIN subscriptions s ON s."clientId" = c.id`,
     { replacements: { today: todayStr, threshold: thresholdStr }, type: QueryTypes.SELECT },
