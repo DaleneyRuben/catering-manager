@@ -5,11 +5,12 @@ import api from '../services/api';
 import { ClientDetailPage } from './ClientDetailPage';
 
 jest.mock('../services/api', () => ({
-  default: { get: jest.fn(), patch: jest.fn(), post: jest.fn() },
+  default: { get: jest.fn(), patch: jest.fn(), post: jest.fn(), put: jest.fn() },
 }));
 const mockGet = api.get as jest.Mock;
 const mockPatch = api.patch as jest.Mock;
 const mockPost = api.post as jest.Mock;
+const mockPut = api.put as jest.Mock;
 
 const mockClient = {
   id: 1,
@@ -33,6 +34,8 @@ const mockClient = {
       contractDate: '2026-05-25',
       startDate: '2026-05-26',
       contractEndDate: '2026-06-25',
+      discount: 0,
+      suspendedDates: [],
       plan: { id: 2, name: 'Plan A', price: 1200, meals: [], discount: 0 },
     },
   ],
@@ -235,5 +238,37 @@ describe('ClientDetailPage', () => {
     fireEvent.click(screen.getByRole('button', { name: /finalizar plan/i }));
     fireEvent.click(screen.getByRole('button', { name: /^finalizar$/i }));
     await waitFor(() => expect(mockPost).toHaveBeenCalledWith('/clients/1/finalize', {}));
+  });
+
+  it('switching to Suspensiones tab shows suspended days count', async () => {
+    renderPage({
+      ...mockClient,
+      subscriptions: [{ ...mockClient.subscriptions[0], suspendedDates: ['2026-06-10'] }],
+    });
+    await screen.findByText('John Doe');
+    fireEvent.click(screen.getByRole('tab', { name: /suspensiones/i }));
+    expect(await screen.findByText('1')).toBeInTheDocument();
+  });
+
+  it('Suspender días button opens suspend modal', async () => {
+    renderPage();
+    await screen.findByText('John Doe');
+    fireEvent.click(screen.getByRole('button', { name: /suspender días/i }));
+    expect(await screen.findByRole('dialog')).toBeInTheDocument();
+  });
+
+  it('saving suspensions calls PUT on subscriptions', async () => {
+    mockPut.mockResolvedValue({});
+    renderPage();
+    await screen.findByText('John Doe');
+    fireEvent.click(screen.getByRole('button', { name: /suspender días/i }));
+    await screen.findByRole('dialog');
+    fireEvent.click(screen.getByRole('button', { name: /guardar/i }));
+    await waitFor(() =>
+      expect(mockPut).toHaveBeenCalledWith(
+        '/clients/1/subscriptions/1/suspensions',
+        expect.objectContaining({ dates: expect.any(Array) }),
+      ),
+    );
   });
 });
