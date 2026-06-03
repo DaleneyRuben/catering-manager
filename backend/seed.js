@@ -655,6 +655,76 @@ const ACTIVE_CLIENTS = [
   },
 ];
 
+// 3 expiring clients — isActive true, contractEndDate within 5 business days of today
+const EXPIRING_CLIENTS = [
+  {
+    name: 'Sofía Montero',
+    sex: 'female',
+    dateOfBirth: '1990-08-14',
+    phoneNumber: '76111222',
+    address: 'Av. Las Américas 340',
+    deliveryZone: 'Centro',
+    delivery: 'La Oliva',
+    nit: null,
+    businessName: null,
+    underlyingDiseases: [],
+    restrictions: ['gluten'],
+    isActive: true,
+    plan: 'Ligero',
+    discount: 0,
+    contractDate: '2026-03-01',
+    startDate: '2026-03-03',
+    contractEndDate: '2026-06-05',
+    duration: 70,
+    suspendedDates: [],
+    history: [{ eventType: 'plan_assigned', occurredAt: '2026-03-01', metadata: { plan: 'Ligero', price: 2000 } }],
+  },
+  {
+    name: 'Tomás Quiroga',
+    sex: 'male',
+    dateOfBirth: '1985-02-20',
+    phoneNumber: '77222333',
+    address: 'Calle Sucre 890',
+    deliveryZone: 'Sur',
+    delivery: 'Otro',
+    nit: null,
+    businessName: null,
+    underlyingDiseases: ['hipertensión'],
+    restrictions: ['sal', 'embutidos'],
+    isActive: true,
+    plan: 'Básico',
+    discount: 100,
+    contractDate: '2026-03-05',
+    startDate: '2026-03-06',
+    contractEndDate: '2026-06-08',
+    duration: 70,
+    suspendedDates: [],
+    history: [{ eventType: 'plan_assigned', occurredAt: '2026-03-05', metadata: { plan: 'Básico', price: 1500 } }],
+  },
+  {
+    name: 'Mariana Villanueva',
+    sex: 'female',
+    dateOfBirth: '1993-11-30',
+    phoneNumber: '78333444',
+    address: 'Av. Blanco Galindo 560',
+    deliveryZone: 'Centro',
+    delivery: 'La Oliva',
+    nit: null,
+    businessName: null,
+    underlyingDiseases: [],
+    restrictions: ['lactosa', 'huevo'],
+    isActive: true,
+    plan: 'Ejecutivo',
+    discount: 0,
+    contractDate: '2026-03-08',
+    startDate: '2026-03-09',
+    contractEndDate: '2026-06-09',
+    duration: 70,
+    suspendedDates: [],
+    history: [{ eventType: 'plan_assigned', occurredAt: '2026-03-08', metadata: { plan: 'Ejecutivo', price: 1800 } }],
+  },
+];
+
 // 5 suspended clients — isActive true, suspendedDates includes today
 const SUSPENDED_CLIENTS = [
   {
@@ -1195,6 +1265,7 @@ async function seed() {
     // Insert all client groups
     const allClients = [
       ...ACTIVE_CLIENTS,
+      ...EXPIRING_CLIENTS,
       ...SUSPENDED_CLIENTS,
       ...PAUSED_CLIENTS,
       ...FINALIZED_CLIENTS,
@@ -1261,6 +1332,7 @@ async function seed() {
     const counts = {
       plans: PLANS.length,
       active: ACTIVE_CLIENTS.length,
+      expiring: EXPIRING_CLIENTS.length,
       suspended: SUSPENDED_CLIENTS.length,
       paused: PAUSED_CLIENTS.length,
       finalized: FINALIZED_CLIENTS.length,
