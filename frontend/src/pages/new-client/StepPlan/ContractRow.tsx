@@ -1,4 +1,5 @@
 import { type UseFormRegister, type FieldErrors, type Control, Controller } from 'react-hook-form';
+import { startOfToday } from 'date-fns';
 import { Field, inputCls } from '../../../components/ui/Field';
 import { DatePickerInput } from '../../../components/ui/DatePickerInput';
 import { addBusinessDays } from '../../../utils/businessDays';
@@ -38,7 +39,7 @@ export function ContractRow({ register, control, errors, startDate, duration }: 
                 value={field.value ?? ''}
                 onChange={field.onChange}
                 hasError={!!errors.contractDate}
-                endMonth={new Date()}
+                endMonth={startOfToday()}
               />
             </Field>
           )}
@@ -60,7 +61,7 @@ export function ContractRow({ register, control, errors, startDate, duration }: 
                 value={field.value ?? ''}
                 onChange={field.onChange}
                 hasError={!!errors.startDate}
-                endMonth={new Date()}
+                endMonth={startOfToday()}
               />
             </Field>
           )}

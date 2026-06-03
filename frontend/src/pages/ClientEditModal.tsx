@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { parseISO, startOfToday } from 'date-fns';
 import { Field, inputCls, selectCls } from '../components/ui/Field';
 import { DatePickerInput } from '../components/ui/DatePickerInput';
 import { Icon } from '../components/ui/Icon';
@@ -135,9 +136,9 @@ export function ClientEditModal({
                     value={draft.dateOfBirth}
                     onChange={(v) => set({ dateOfBirth: v })}
                     captionLayout="dropdown"
-                    startMonth={new Date(1940, 0)}
-                    endMonth={new Date()}
-                    disabled={{ after: new Date() }}
+                    startMonth={parseISO('1940-01-01')}
+                    endMonth={startOfToday()}
+                    disabled={{ after: startOfToday() }}
                   />
                 </Field>
                 <Field label="Celular" htmlFor="em-phone" required>

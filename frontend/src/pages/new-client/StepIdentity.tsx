@@ -1,4 +1,5 @@
 import { type UseFormRegister, type FieldErrors, type Control, Controller } from 'react-hook-form';
+import { parseISO, startOfToday } from 'date-fns';
 import { Field, inputCls, selectCls } from '../../components/ui/Field';
 import { Icon } from '../../components/ui/Icon';
 import { ToggleGroup } from '../../components/ui/ToggleGroup';
@@ -62,9 +63,9 @@ export function StepIdentity({ register, control, errors }: Props) {
                 onChange={field.onChange}
                 hasError={!!errors.dateOfBirth}
                 captionLayout="dropdown"
-                startMonth={new Date(1940, 0)}
-                endMonth={new Date()}
-                disabled={{ after: new Date() }}
+                startMonth={parseISO('1940-01-01')}
+                endMonth={startOfToday()}
+                disabled={{ after: startOfToday() }}
               />
             </Field>
           )}

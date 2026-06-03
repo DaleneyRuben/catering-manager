@@ -1,5 +1,5 @@
 import { Op, literal, QueryTypes } from 'sequelize';
-import { addBusinessDays } from 'date-fns';
+import { addBusinessDays, startOfDay, format } from 'date-fns';
 import { EXPIRY_THRESHOLD_DAYS } from '../constants/subscription.constants';
 import { CLIENT_STATUS } from '../constants/client.constants';
 import Client from '../models/Client';
@@ -20,9 +20,8 @@ export interface FindAllFilters {
 const create = (data: CreateClientDto) => Client.create(data as never);
 
 const findAll = (filters: FindAllFilters = {}) => {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const todayStr = today.toISOString().slice(0, 10);
+  const today = startOfDay(new Date());
+  const todayStr = format(today, 'yyyy-MM-dd');
   const expiryThreshold = addBusinessDays(today, EXPIRY_THRESHOLD_DAYS);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -106,11 +105,10 @@ const findAll = (filters: FindAllFilters = {}) => {
 };
 
 const getCounts = async () => {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  const today = startOfDay(new Date());
   const threshold = addBusinessDays(today, EXPIRY_THRESHOLD_DAYS);
-  const todayStr = today.toISOString().slice(0, 10);
-  const thresholdStr = threshold.toISOString().slice(0, 10);
+  const todayStr = format(today, 'yyyy-MM-dd');
+  const thresholdStr = format(threshold, 'yyyy-MM-dd');
 
   type Row = { active: string; expiring: string; paused: string; ended: string; total: string };
   const [rows] = await sequelize.query<Row>(
@@ -157,7 +155,7 @@ const finalize = async (id: number) => {
   const client = await Client.findByPk(id, { include: INCLUDE_SUBSCRIPTION });
   if (!client) return null;
 
-  const today = new Date().toISOString().slice(0, 10);
+  const today = format(startOfDay(new Date()), 'yyyy-MM-dd');
   const sub = (client as never as { subscriptions: { update: (d: object) => Promise<void> }[] })
     .subscriptions?.[0];
 

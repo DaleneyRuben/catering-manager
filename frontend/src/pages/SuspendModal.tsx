@@ -1,14 +1,20 @@
 import { useState } from 'react';
 import {
   addDays,
+  addMonths,
+  compareAsc,
+  endOfMonth,
   isAfter,
   isBefore,
   isSameDay,
   isSameMonth,
   format,
   parseISO,
+  startOfDay,
+  startOfMonth,
   startOfWeek,
   subDays,
+  subMonths,
 } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Icon } from '../components/ui/Icon';
@@ -18,9 +24,9 @@ import type { Subscription } from '../types/client';
 
 const WEEKDAY_LABELS = ['LUN', 'MAR', 'MIÉ', 'JUE', 'VIE'];
 
-function getCalendarWeeks(year: number, month: number): Date[][] {
-  const firstOfMonth = new Date(year, month, 1);
-  const lastOfMonth = new Date(year, month + 1, 0);
+function getCalendarWeeks(anchor: Date): Date[][] {
+  const firstOfMonth = startOfMonth(anchor);
+  const lastOfMonth = endOfMonth(anchor);
   const mondayOfFirst = startOfWeek(firstOfMonth, { weekStartsOn: 1 });
   const weeks: Date[][] = [];
   let current = mondayOfFirst;
@@ -44,10 +50,10 @@ export function SuspendModal({
   onClose: () => void;
   onSave: (dates: string[]) => Promise<void>;
 }) {
-  const today = new Date();
-  const [anchor, setAnchor] = useState(new Date(today.getFullYear(), today.getMonth(), 1));
+  const today = startOfDay(new Date());
+  const [anchor, setAnchor] = useState(startOfMonth(today));
   const [selected, setSelected] = useState<Date[]>(
-    (sub.suspendedDates ?? []).map((d) => new Date(`${d}T12:00:00`)),
+    (sub.suspendedDates ?? []).map((d) => parseISO(`${d}T12:00:00`)),
   );
   const [isSaving, setIsSaving] = useState(false);
 
@@ -70,7 +76,7 @@ export function SuspendModal({
   if (net > 0) newEndDate = addBusinessDays(sub.contractEndDate, net);
   else if (net < 0) newEndDate = subtractBusinessDays(sub.contractEndDate, Math.abs(net));
 
-  const weeks = getCalendarWeeks(anchor.getFullYear(), anchor.getMonth());
+  const weeks = getCalendarWeeks(anchor);
 
   const handleSave = async () => {
     setIsSaving(true);
@@ -114,7 +120,7 @@ export function SuspendModal({
           <div className="flex items-center gap-3 mb-4">
             <button
               type="button"
-              onClick={() => setAnchor(new Date(anchor.getFullYear(), anchor.getMonth() - 1, 1))}
+              onClick={() => setAnchor(startOfMonth(subMonths(anchor, 1)))}
               className="w-9 h-9 flex items-center justify-center border border-rule rounded-md bg-paper hover:bg-cream-2 transition-colors text-muted text-lg"
             >
               ‹
@@ -124,7 +130,7 @@ export function SuspendModal({
             </p>
             <button
               type="button"
-              onClick={() => setAnchor(new Date(anchor.getFullYear(), anchor.getMonth() + 1, 1))}
+              onClick={() => setAnchor(startOfMonth(addMonths(anchor, 1)))}
               className="w-9 h-9 flex items-center justify-center border border-rule rounded-md bg-paper hover:bg-cream-2 transition-colors text-muted text-lg"
             >
               ›
@@ -201,27 +207,25 @@ export function SuspendModal({
               </p>
             ) : (
               <div className="flex flex-wrap gap-2">
-                {[...selected]
-                  .sort((a, b) => a.getTime() - b.getTime())
-                  .map((d) => {
-                    const iso = format(d, 'yyyy-MM-dd');
-                    return (
-                      <span
-                        key={iso}
-                        className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-mono"
-                        style={{ background: '#f3eedc', color: '#6b4f08' }}
+                {[...selected].sort(compareAsc).map((d) => {
+                  const iso = format(d, 'yyyy-MM-dd');
+                  return (
+                    <span
+                      key={iso}
+                      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-mono"
+                      style={{ background: '#f3eedc', color: '#6b4f08' }}
+                    >
+                      {formatDate(iso)}
+                      <button
+                        type="button"
+                        onClick={() => toggle(d)}
+                        className="opacity-70 hover:opacity-100"
                       >
-                        {formatDate(iso)}
-                        <button
-                          type="button"
-                          onClick={() => toggle(d)}
-                          className="opacity-70 hover:opacity-100"
-                        >
-                          ×
-                        </button>
-                      </span>
-                    );
-                  })}
+                        ×
+                      </button>
+                    </span>
+                  );
+                })}
               </div>
             )}
           </div>

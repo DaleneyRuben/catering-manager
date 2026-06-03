@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { differenceInYears, parseISO } from 'date-fns';
+import { differenceInYears, parseISO, startOfToday } from 'date-fns';
 import { remainingDeliveryDays } from '../utils/businessDays';
 import { Icon } from '../components/ui/Icon';
 import { useClient } from '../hooks/useClient';
@@ -77,7 +77,7 @@ export function ClientDetailPage() {
 
   const sub = client.subscriptions[0];
   const status = clientStatus(client);
-  const age = differenceInYears(new Date(), parseISO(client.dateOfBirth));
+  const age = differenceInYears(startOfToday(), parseISO(client.dateOfBirth));
   const remaining = sub
     ? remainingDeliveryDays(parseISO(sub.startDate), parseISO(sub.contractEndDate))
     : 0;

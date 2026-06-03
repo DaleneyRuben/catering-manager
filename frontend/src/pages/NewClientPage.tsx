@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
-import { format } from 'date-fns';
+import { format, startOfToday } from 'date-fns';
 import { Icon } from '../components/ui/Icon';
 import { StepIndicator } from '../components/ui/StepIndicator';
 import { useClients } from '../hooks/useClients';
@@ -50,7 +50,7 @@ export function NewClientPage() {
       nit: '',
       businessName: '',
       planId: null,
-      contractDate: format(new Date(), 'yyyy-MM-dd'),
+      contractDate: format(startOfToday(), 'yyyy-MM-dd'),
       startDate: '',
       duration: 20,
       discount: 0,

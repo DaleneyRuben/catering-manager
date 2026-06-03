@@ -27,7 +27,7 @@ export function remainingDeliveryDays(startDate: Date, endDate: Date, today = ne
 
 export function businessDaysUntil(from: Date, to: Date): number {
   let count = 0;
-  let cur = new Date(from);
+  let cur = from;
   while (cur <= to) {
     if (!isWeekend(cur)) count += 1;
     cur = addDays(cur, 1);
