@@ -1,4 +1,4 @@
-import { addDeliveryDays } from '../date';
+import { addDeliveryDays, subtractDeliveryDays } from '../date';
 
 describe('addDeliveryDays', () => {
   it('adds business days skipping weekends', () => {
@@ -19,5 +19,35 @@ describe('addDeliveryDays', () => {
   it('handles 20 days from a thursday', () => {
     // Thu May 7 + 20 = Thu Jun 4
     expect(addDeliveryDays('2026-05-07', 20)).toBe('2026-06-04');
+  });
+
+  it('returns the same date when adding 0 days', () => {
+    expect(addDeliveryDays('2026-05-06', 0)).toBe('2026-05-06');
+  });
+
+  it('handles start date on saturday by treating it as the next monday', () => {
+    // Sat May 9 + 1: date-fns normalises Sat into Mon May 11 (counts as the +1)
+    expect(addDeliveryDays('2026-05-09', 1)).toBe('2026-05-11');
+  });
+});
+
+describe('subtractDeliveryDays', () => {
+  it('subtracts business days skipping weekends', () => {
+    // Tue Jun 2 - 20 = Tue May 5
+    expect(subtractDeliveryDays('2026-06-02', 20)).toBe('2026-05-05');
+  });
+
+  it('skips saturday and sunday going backward', () => {
+    // Mon May 11 - 1 = Fri May 8 (skip Sat/Sun)
+    expect(subtractDeliveryDays('2026-05-11', 1)).toBe('2026-05-08');
+  });
+
+  it('handles end date on monday spanning a weekend', () => {
+    // Mon May 11 - 3 = Wed May 6
+    expect(subtractDeliveryDays('2026-05-11', 3)).toBe('2026-05-06');
+  });
+
+  it('returns the same date when subtracting 0 days', () => {
+    expect(subtractDeliveryDays('2026-05-06', 0)).toBe('2026-05-06');
   });
 });
