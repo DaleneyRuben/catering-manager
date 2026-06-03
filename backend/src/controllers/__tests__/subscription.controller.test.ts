@@ -115,3 +115,29 @@ describe('PATCH /api/clients/:clientId/subscriptions/:id', () => {
     expect(res.status).toBe(500);
   });
 });
+
+describe('PATCH /api/clients/:clientId/subscriptions/:id with suspendedDates', () => {
+  it('returns 200 when suspendedDates is updated', async () => {
+    const updated = { ...mockSubscription, suspendedDates: ['2026-06-10'] };
+    (subscriptionService.update as jest.Mock).mockResolvedValue(updated);
+
+    const res = await request(app)
+      .patch('/api/clients/1/subscriptions/1')
+      .send({ suspendedDates: ['2026-06-10'] });
+
+    expect(res.status).toBe(200);
+    expect(subscriptionService.update).toHaveBeenCalledWith(
+      1,
+      1,
+      expect.objectContaining({ suspendedDates: ['2026-06-10'] }),
+    );
+  });
+
+  it('returns 400 when a suspension date has invalid format', async () => {
+    const res = await request(app)
+      .patch('/api/clients/1/subscriptions/1')
+      .send({ suspendedDates: ['10-06-2026'] });
+
+    expect(res.status).toBe(400);
+  });
+});
