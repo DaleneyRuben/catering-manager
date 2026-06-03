@@ -185,6 +185,18 @@ describe('clientService.findAll with filters', () => {
     );
   });
 
+  it('status=ended uses NOT EXISTS subquery to avoid missing JOIN in count query', async () => {
+    (Client.findAndCountAll as jest.Mock).mockResolvedValue({ rows: [], count: 0 });
+
+    await clientService.findAll({ status: 'ended' });
+
+    const call = (Client.findAndCountAll as jest.Mock).mock.calls[0][0];
+    const andConditions = call.where?.[Symbol.for('and')];
+    expect(andConditions).toBeDefined();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    expect(andConditions.some((c: any) => c?.val?.includes?.('NOT EXISTS'))).toBe(true);
+  });
+
   it('no filters calls findAndCountAll without where', async () => {
     (Client.findAndCountAll as jest.Mock).mockResolvedValue({ rows: [], count: 0 });
 
