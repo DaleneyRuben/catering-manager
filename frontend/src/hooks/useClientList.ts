@@ -56,7 +56,7 @@ export interface ClientCounts {
   total: number;
 }
 
-export function useClients(filters: ClientFilters = {}) {
+export function useClientList(filters: ClientFilters = {}) {
   const qc = useQueryClient();
 
   const { data, isLoading, isFetching } = useQuery({

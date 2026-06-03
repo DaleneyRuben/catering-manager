@@ -1,7 +1,7 @@
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import api from '../services/api';
-import { useClients } from './useClients';
+import { useClientList } from './useClientList';
 
 jest.mock('../services/api', () => ({
   default: { get: jest.fn(), getPaginated: jest.fn(), post: jest.fn(), patch: jest.fn() },
@@ -28,16 +28,16 @@ beforeEach(() => {
   jest.clearAllMocks();
 });
 
-describe('useClients', () => {
+describe('useClientList', () => {
   it('isLoading is true initially', () => {
     mockGetPaginated.mockReturnValue(new Promise(() => {}));
-    const { result } = renderHook(() => useClients(), { wrapper: makeWrapper() });
+    const { result } = renderHook(() => useClientList(), { wrapper: makeWrapper() });
     expect(result.current.isLoading).toBe(true);
   });
 
   it('returns clients and total after loading', async () => {
     mockGetPaginated.mockResolvedValue({ data: [client1], total: 1, page: 1, limit: 20 });
-    const { result } = renderHook(() => useClients(), { wrapper: makeWrapper() });
+    const { result } = renderHook(() => useClientList(), { wrapper: makeWrapper() });
     await waitFor(() => expect(result.current.isLoading).toBe(false));
     expect(result.current.clients).toEqual([client1]);
     expect(result.current.total).toBe(1);
@@ -45,21 +45,21 @@ describe('useClients', () => {
 
   it('returns empty array and zero total before data arrives', () => {
     mockGetPaginated.mockReturnValue(new Promise(() => {}));
-    const { result } = renderHook(() => useClients(), { wrapper: makeWrapper() });
+    const { result } = renderHook(() => useClientList(), { wrapper: makeWrapper() });
     expect(result.current.clients).toEqual([]);
     expect(result.current.total).toBe(0);
   });
 
   it('passes page param in the query string', async () => {
     mockGetPaginated.mockResolvedValue({ data: [], total: 0, page: 2, limit: 25 });
-    renderHook(() => useClients({ page: 2 }), { wrapper: makeWrapper() });
+    renderHook(() => useClientList({ page: 2 }), { wrapper: makeWrapper() });
     await waitFor(() => expect(mockGetPaginated).toHaveBeenCalled());
     expect(mockGetPaginated).toHaveBeenCalledWith(expect.stringContaining('page=2'));
   });
 
   it('passes limit param in the query string', async () => {
     mockGetPaginated.mockResolvedValue({ data: [], total: 0, page: 1, limit: 10 });
-    renderHook(() => useClients({ limit: 10 }), { wrapper: makeWrapper() });
+    renderHook(() => useClientList({ limit: 10 }), { wrapper: makeWrapper() });
     await waitFor(() => expect(mockGetPaginated).toHaveBeenCalled());
     expect(mockGetPaginated).toHaveBeenCalledWith(expect.stringContaining('limit=10'));
   });
@@ -67,7 +67,7 @@ describe('useClients', () => {
   it('create calls POST /clients then POST /clients/:id/subscriptions', async () => {
     mockGetPaginated.mockResolvedValue({ data: [], total: 0, page: 1, limit: 20 });
     mockPost.mockResolvedValueOnce({ id: 42 }).mockResolvedValueOnce(undefined);
-    const { result } = renderHook(() => useClients(), { wrapper: makeWrapper() });
+    const { result } = renderHook(() => useClientList(), { wrapper: makeWrapper() });
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
     await result.current.create(

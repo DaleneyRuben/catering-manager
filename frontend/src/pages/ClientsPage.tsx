@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Icon } from '../components/ui/Icon';
 import { PageLoader } from '../components/ui/PageLoader';
 import { Pagination } from '../components/ui/Pagination';
-import { useClients, useClientCounts } from '../hooks/useClients';
+import { useClientList, useClientCounts } from '../hooks/useClientList';
 import { useDebounce } from '../hooks/useDebounce';
 import { clientStatus } from '../types/client';
 import { formatDate } from '../utils/format';
@@ -54,7 +54,7 @@ export function ClientsPage() {
     setPage(1);
   }, [debouncedQ]);
 
-  const { clients, total, isLoading, isFetching } = useClients({
+  const { clients, total, isLoading, isFetching } = useClientList({
     status: filter,
     q: debouncedQ,
     birthMonth,

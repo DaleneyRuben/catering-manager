@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '../services/api';
 import type { Client } from '../types/client';
-import type { ClientUpdateDraft } from './useClients';
+import type { ClientUpdateDraft } from './useClientList';
 
 export function useClient(id: string | number) {
   const qc = useQueryClient();
