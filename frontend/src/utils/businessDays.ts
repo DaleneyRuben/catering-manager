@@ -21,13 +21,8 @@ export function subtractBusinessDays(dateString: string, days: number): string {
 }
 
 export function remainingDeliveryDays(startDate: Date, endDate: Date, today = new Date()): number {
-  const startsInFuture = startDate > today;
-  const effectiveStart = startsInFuture ? startDate : today;
-  const shouldDiscountToday = !startsInFuture && !isWeekend(today);
-  return Math.max(
-    0,
-    differenceInBusinessDays(endDate, effectiveStart) - (shouldDiscountToday ? 1 : 0),
-  );
+  const effectiveStart = startDate > today ? startDate : today;
+  return Math.max(0, differenceInBusinessDays(endDate, effectiveStart));
 }
 
 export function businessDaysUntil(from: Date, to: Date): number {

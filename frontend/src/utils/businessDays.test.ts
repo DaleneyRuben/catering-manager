@@ -33,11 +33,11 @@ describe('remainingDeliveryDays', () => {
     expect(remainingDeliveryDays(start, end, today)).toBe(5);
   });
 
-  it('subtracts 1 when plan has started and today is a business day', () => {
-    const today = new Date(2026, 5, 1); // Mon Jun 1
+  it('counts days strictly after today when plan has started and today is a business day', () => {
+    const today = new Date(2026, 5, 3); // Wed Jun 3
     const start = new Date(2026, 4, 25); // Mon May 25, already started
-    const end = new Date(2026, 5, 8); // Mon Jun 8 — Tue–Fri + Mon = 5, minus 1 = 4
-    expect(remainingDeliveryDays(start, end, today)).toBe(4);
+    const end = new Date(2026, 5, 5); // Fri Jun 5 — Thu + Fri = 2
+    expect(remainingDeliveryDays(start, end, today)).toBe(2);
   });
 
   it('does not subtract 1 when today is a weekend', () => {
