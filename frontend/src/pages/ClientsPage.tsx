@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Icon } from '../components/ui/Icon';
 import { PageLoader } from '../components/ui/PageLoader';
+import { Pagination } from '../components/ui/Pagination';
 import { useClients, useClientCounts } from '../hooks/useClients';
 import { useDebounce } from '../hooks/useDebounce';
 import { clientStatus } from '../types/client';
@@ -40,13 +41,28 @@ export function ClientsPage() {
   const [q, setQ] = useState('');
   const [filter, setFilter] = useState<FilterValue>(CLIENT_STATUS.ACTIVE);
   const [birthMonth, setBirthMonth] = useState<string>(CLIENT_STATUS.ALL);
+  const [page, setPage] = useState(1);
 
   const debouncedQ = useDebounce(q);
 
-  const { clients, isLoading, isFetching } = useClients({
+  const changeFilter = (v: FilterValue) => {
+    setFilter(v);
+    setPage(1);
+  };
+  const changeBirthMonth = (v: string) => {
+    setBirthMonth(v);
+    setPage(1);
+  };
+
+  useEffect(() => {
+    setPage(1);
+  }, [debouncedQ]);
+
+  const { clients, total, isLoading, isFetching } = useClients({
     status: filter,
     q: debouncedQ,
     birthMonth,
+    page,
   });
 
   const { counts } = useClientCounts();
@@ -116,7 +132,7 @@ export function ClientsPage() {
               <button
                 type="button"
                 key={v}
-                onClick={() => setFilter(v)}
+                onClick={() => changeFilter(v)}
                 className={`px-3 py-1.5 rounded-[5px] font-medium whitespace-nowrap transition-all ${
                   filter === v ? 'bg-paper text-ink shadow-sm' : 'text-muted hover:text-ink-2'
                 }`}
@@ -130,7 +146,7 @@ export function ClientsPage() {
         <div className="relative shrink-0">
           <select
             value={birthMonth}
-            onChange={(e) => setBirthMonth(e.target.value)}
+            onChange={(e) => changeBirthMonth(e.target.value)}
             style={{ fontSize: 13 }}
             className="appearance-none py-[7px] pl-2.5 pr-7 border border-rule rounded-[5px] bg-paper cursor-pointer"
           >
@@ -235,6 +251,7 @@ export function ClientsPage() {
             </table>
           </div>
         )}
+        <Pagination page={page} total={total} limit={20} onChange={setPage} />
       </div>
     </div>
   );

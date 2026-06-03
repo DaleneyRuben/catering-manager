@@ -44,6 +44,7 @@ export interface ClientFilters {
   status?: string;
   q?: string;
   birthMonth?: string;
+  page?: number;
 }
 
 export interface ClientCounts {
@@ -57,11 +58,7 @@ export interface ClientCounts {
 export function useClients(filters: ClientFilters = {}) {
   const qc = useQueryClient();
 
-  const {
-    data: clients = [],
-    isLoading,
-    isFetching,
-  } = useQuery({
+  const { data, isLoading, isFetching } = useQuery({
     queryKey: ['clients', filters],
     queryFn: () => {
       const params = new URLSearchParams();
@@ -70,11 +67,15 @@ export function useClients(filters: ClientFilters = {}) {
       if (filters.q) params.set('q', filters.q);
       if (filters.birthMonth && filters.birthMonth !== CLIENT_STATUS.ALL)
         params.set('birthMonth', filters.birthMonth);
+      if (filters.page) params.set('page', String(filters.page));
       const qs = params.toString();
-      return api.get<Client[]>(`/clients${qs ? `?${qs}` : ''}`);
+      return api.getPaginated<Client>(`/clients${qs ? `?${qs}` : ''}`);
     },
     placeholderData: keepPreviousData,
   });
+
+  const clients = data?.data ?? [];
+  const total = data?.total ?? 0;
 
   const createMutation = useMutation({
     mutationFn: async ({
@@ -94,6 +95,7 @@ export function useClients(filters: ClientFilters = {}) {
 
   return {
     clients,
+    total,
     isLoading,
     isFetching,
     isCreating: createMutation.isPending,
