@@ -91,7 +91,7 @@ const findAll = (filters: FindAllFilters = {}) => {
   if (andConditions.length) clientWhere[Op.and] = andConditions;
 
   const page = filters.page ?? 1;
-  const limit = filters.limit ?? 20;
+  const limit = filters.limit ?? 25;
   const offset = (page - 1) * limit;
 
   return Client.findAndCountAll({

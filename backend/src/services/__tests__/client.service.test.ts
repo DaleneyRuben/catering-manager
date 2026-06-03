@@ -233,7 +233,7 @@ describe('clientService.findAll with filters', () => {
     await clientService.findAll();
 
     expect(Client.findAndCountAll).toHaveBeenCalledWith(
-      expect.objectContaining({ limit: 20, offset: 0 }),
+      expect.objectContaining({ limit: 25, offset: 0 }),
     );
   });
 });

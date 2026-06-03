@@ -15,7 +15,7 @@ const getAll = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { status, q, birthMonth, page, limit } = req.query;
     const resolvedPage = page ? Number(page) : 1;
-    const resolvedLimit = limit ? Number(limit) : 20;
+    const resolvedLimit = limit ? Number(limit) : 25;
     const { rows, total } = await clientService.findAll({
       status: typeof status === 'string' ? status : undefined,
       q: typeof q === 'string' && q ? q : undefined,

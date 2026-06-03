@@ -44,7 +44,7 @@ describe('GET /api/clients', () => {
     expect(res.body.data[0]).toMatchObject({ name: 'John Doe' });
     expect(res.body.total).toBe(1);
     expect(res.body.page).toBe(1);
-    expect(res.body.limit).toBe(20);
+    expect(res.body.limit).toBe(25);
   });
 
   it('forwards page and limit to service', async () => {
@@ -57,13 +57,13 @@ describe('GET /api/clients', () => {
     );
   });
 
-  it('defaults to page 1 and limit 20', async () => {
+  it('defaults to page 1 and limit 25', async () => {
     (clientService.findAll as jest.Mock).mockResolvedValue({ rows: [], total: 0 });
 
     await request(app).get('/api/clients');
 
     expect(clientService.findAll).toHaveBeenCalledWith(
-      expect.objectContaining({ page: 1, limit: 20 }),
+      expect.objectContaining({ page: 1, limit: 25 }),
     );
   });
 
