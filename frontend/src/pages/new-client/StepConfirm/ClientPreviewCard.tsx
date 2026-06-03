@@ -1,5 +1,6 @@
 import type { Plan } from '../../../types/client';
 import { addBusinessDays } from '../../../utils/businessDays';
+import { formatDate } from '../../../utils/format';
 import type { NewClientFormValues, RestrictionsState } from '../types';
 
 function initials(name: string): string {
@@ -19,7 +20,10 @@ interface Props {
 
 export function ClientPreviewCard({ formValues, restrictions, plans }: Props) {
   const selectedPlan = plans.find((p) => p.id === formValues.planId);
-  const contractEndDate = formValues.startDate ? addBusinessDays(formValues.startDate, 20) : '—';
+  const contractEndDate =
+    formValues.startDate && formValues.duration > 0
+      ? addBusinessDays(formValues.startDate, formValues.duration)
+      : '—';
   const total = (selectedPlan?.price ?? 0) - (formValues.discount || 0);
 
   return (
@@ -81,13 +85,17 @@ export function ClientPreviewCard({ formValues, restrictions, plans }: Props) {
             <p className="text-[10.5px] font-mono uppercase tracking-[.14em] text-muted mb-0.5">
               Inicio
             </p>
-            <p className="font-mono">{formValues.startDate || '—'}</p>
+            <p className="font-mono">
+              {formValues.startDate ? formatDate(formValues.startDate) : '—'}
+            </p>
           </div>
           <div>
             <p className="text-[10.5px] font-mono uppercase tracking-[.14em] text-muted mb-0.5">
               Fin de contrato
             </p>
-            <p className="font-mono">{contractEndDate}</p>
+            <p className="font-mono">
+              {contractEndDate !== '—' ? formatDate(contractEndDate) : '—'}
+            </p>
           </div>
         </div>
 
