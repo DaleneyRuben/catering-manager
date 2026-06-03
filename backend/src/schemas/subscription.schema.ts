@@ -15,6 +15,7 @@ export const updateSubscriptionSchema = z.object({
   planId: z.number().int().positive().optional(),
   startDate: dateField.optional(),
   contractEndDate: dateField.optional(),
+  suspendedDates: z.array(dateField).optional(),
 });
 
 export type CreateSubscriptionDto = z.input<typeof createSubscriptionSchema>;

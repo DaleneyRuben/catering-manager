@@ -164,7 +164,7 @@ describe('subscriptionService.update with suspendedDates', () => {
   });
 
   it('skips weekend when extending contractEndDate across Friday', async () => {
-    const friday = '2026-06-20'; // Friday
+    const friday = '2026-06-19'; // Friday
     const mockInstance = {
       suspendedDates: [],
       contractEndDate: friday,
@@ -176,7 +176,7 @@ describe('subscriptionService.update with suspendedDates', () => {
 
     // Friday + 1 business day = Monday (skips Sat+Sun)
     expect(mockInstance.update).toHaveBeenCalledWith(
-      expect.objectContaining({ contractEndDate: '2026-06-23' }),
+      expect.objectContaining({ contractEndDate: '2026-06-22' }),
     );
   });
 
@@ -197,7 +197,7 @@ describe('subscriptionService.update with suspendedDates', () => {
   });
 
   it('skips weekend when reducing contractEndDate from Monday', async () => {
-    const monday = '2026-06-23'; // Monday
+    const monday = '2026-06-22'; // Monday
     const mockInstance = {
       suspendedDates: ['2026-06-10'],
       contractEndDate: monday,
@@ -209,7 +209,7 @@ describe('subscriptionService.update with suspendedDates', () => {
 
     // Monday - 1 business day = Friday (skips Sat+Sun)
     expect(mockInstance.update).toHaveBeenCalledWith(
-      expect.objectContaining({ contractEndDate: '2026-06-20' }),
+      expect.objectContaining({ contractEndDate: '2026-06-19' }),
     );
   });
 
