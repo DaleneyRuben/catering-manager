@@ -3,6 +3,7 @@ import { MEAL_LABELS } from '../constants/meals';
 import type { Client, Subscription } from '../types/client';
 import { clientStatus } from '../types/client';
 import { CLIENT_STATUS } from '../constants/clientStatus';
+import { EXPIRY_THRESHOLD_DAYS } from '../constants/subscription';
 import { formatDate } from '../utils/format';
 
 interface Props {
@@ -18,24 +19,23 @@ export function ClientOverviewTab({ client, sub, remaining, onFinalize }: Props)
     <div className="grid grid-cols-12 gap-5">
       <div className="col-span-12 lg:col-span-7 flex flex-col gap-4">
         <div className="bg-paper border border-rule rounded-lg p-5">
-          <div className="flex items-center mb-3">
-            <p className="text-[11px] font-mono uppercase tracking-wider text-muted">
-              Plan vigente
-            </p>
-            {sub && (
-              <div className="ml-auto flex items-center gap-2">
-                <span className="px-2.5 py-0.5 rounded-full text-xs font-mono bg-olive-100 border border-rule text-ink">
-                  {sub.plan.name}
-                </span>
-                <span className="px-2.5 py-0.5 rounded-full text-xs font-mono text-muted">
-                  {sub.plan.price}/mes
-                </span>
-              </div>
-            )}
-          </div>
           {sub ? (
             <>
-              <div className="flex flex-wrap gap-1.5 mb-3">
+              <div className="flex items-start justify-between gap-4 mb-3">
+                <div>
+                  <p className="text-[10.5px] font-mono uppercase tracking-wider text-muted mb-1">
+                    Plan vigente
+                  </p>
+                  <p className="font-serif text-[24px] leading-tight text-ink">{sub.plan.name}</p>
+                </div>
+                <div className="text-right shrink-0">
+                  <p className="font-mono font-semibold text-[22px] leading-tight text-olive-800">
+                    {Number(sub.plan.price) - sub.discount}
+                  </p>
+                  <p className="font-mono text-[10.5px] text-muted">/mes</p>
+                </div>
+              </div>
+              <div className="flex flex-wrap gap-1.5 mb-4">
                 {sub.plan.meals.map((m) => (
                   <span
                     key={m}
@@ -45,11 +45,21 @@ export function ClientOverviewTab({ client, sub, remaining, onFinalize }: Props)
                   </span>
                 ))}
               </div>
-              <p className="font-mono text-[11.5px] text-muted">
-                {formatDate(sub.startDate)} → {formatDate(sub.contractEndDate)} · quedan {remaining}{' '}
-                día
-                {remaining === 1 ? '' : 's'}
-              </p>
+              <div className="flex items-center justify-between">
+                <p className="font-mono text-[11.5px] text-muted">
+                  {formatDate(sub.startDate)} → {formatDate(sub.contractEndDate)}
+                </p>
+                {(() => {
+                  let cls = 'bg-ok-bg text-ok';
+                  if (remaining <= 0) cls = 'bg-rule text-muted';
+                  else if (remaining <= EXPIRY_THRESHOLD_DAYS) cls = 'bg-warn-bg text-warn';
+                  return (
+                    <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-mono ${cls}`}>
+                      {remaining} día{remaining === 1 ? '' : 's'}
+                    </span>
+                  );
+                })()}
+              </div>
             </>
           ) : (
             <p className="text-[13px] text-muted">Sin suscripción activa.</p>
