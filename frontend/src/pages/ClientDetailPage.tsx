@@ -77,6 +77,11 @@ export function ClientDetailPage() {
 
   const sub = client.subscriptions[0];
   const status = clientStatus(client);
+  const isEnded = status === CLIENT_STATUS.ENDED;
+  const visibleTabs = isEnded
+    ? TABS.filter((t) => t.id !== 'plan' && t.id !== 'suspensions')
+    : TABS;
+  const activeTab = isEnded && (tab === 'plan' || tab === 'suspensions') ? 'overview' : tab;
   const age = differenceInYears(startOfToday(), parseISO(client.dateOfBirth));
   const remaining = sub
     ? remainingDeliveryDays(parseISO(sub.startDate), parseISO(sub.contractEndDate))
@@ -173,15 +178,15 @@ export function ClientDetailPage() {
       )}
 
       <div role="tablist" className="flex border-b border-rule mb-5">
-        {TABS.map(({ id: tId, label }) => (
+        {visibleTabs.map(({ id: tId, label }) => (
           <button
             key={tId}
             type="button"
             role="tab"
-            aria-selected={tab === tId}
+            aria-selected={activeTab === tId}
             onClick={() => setTab(tId)}
             className={`px-4 py-2.5 text-[13px] font-medium border-b-2 -mb-px transition-colors ${
-              tab === tId
+              activeTab === tId
                 ? 'border-olive-800 text-ink'
                 : 'border-transparent text-muted hover:text-ink'
             }`}
@@ -191,7 +196,7 @@ export function ClientDetailPage() {
         ))}
       </div>
 
-      {tab === 'overview' && (
+      {activeTab === 'overview' && (
         <ClientOverviewTab
           client={client}
           sub={sub}
@@ -201,7 +206,7 @@ export function ClientDetailPage() {
         />
       )}
 
-      {tab === 'plan' && (
+      {activeTab === 'plan' && (
         <div className="grid grid-cols-12 gap-5">
           <div className="col-span-12 lg:col-span-7">
             <div className="bg-paper border border-rule rounded-lg p-5">
@@ -318,7 +323,7 @@ export function ClientDetailPage() {
         </div>
       )}
 
-      {tab === 'suspensions' && (
+      {activeTab === 'suspensions' && (
         <div className="bg-paper border border-rule rounded-lg p-5">
           <div className="flex items-center mb-4">
             <div>
@@ -358,7 +363,7 @@ export function ClientDetailPage() {
         </div>
       )}
 
-      {tab === 'history' && <ClientHistoryTab clientId={client.id} />}
+      {activeTab === 'history' && <ClientHistoryTab clientId={client.id} />}
 
       {editOpen && (
         <ClientEditModal
