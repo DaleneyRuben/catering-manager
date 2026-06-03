@@ -6,7 +6,7 @@ import { Icon } from '../components/ui/Icon';
 import { useClient } from '../hooks/useClient';
 import { MEAL_LABELS } from '../constants/meals';
 import { clientStatus } from '../types/client';
-import { STATUS_LABELS, STATUS_CLASSES } from '../constants/clientStatus';
+import { STATUS_LABELS, STATUS_CLASSES, CLIENT_STATUS } from '../constants/clientStatus';
 import { SEX_LABELS } from '../constants/clientOptions';
 import { formatDate } from '../utils/format';
 import { ClientEditModal } from './ClientEditModal';
@@ -80,6 +80,21 @@ export function ClientDetailPage() {
     ? remainingDeliveryDays(parseISO(sub.startDate), parseISO(sub.contractEndDate))
     : 0;
 
+  let toggleConfig: { label: string; icon: 'calendar' | 'check'; className: string } | null = null;
+  if (status === CLIENT_STATUS.ACTIVE || status === CLIENT_STATUS.EXPIRING) {
+    toggleConfig = {
+      label: 'Pausar',
+      icon: 'calendar',
+      className: 'border border-rule text-ink hover:bg-cream-2',
+    };
+  } else if (status === CLIENT_STATUS.PAUSED) {
+    toggleConfig = {
+      label: 'Reanudar',
+      icon: 'check',
+      className: 'bg-olive-800 text-white hover:bg-olive-700',
+    };
+  }
+
   return (
     <div className="p-7 max-w-[1320px] mx-auto">
       <button
@@ -110,33 +125,19 @@ export function ClientDetailPage() {
           </p>
         </div>
         <div className="flex gap-2.5 flex-wrap">
-          {client.isActive ? (
+          {toggleConfig && (
             <button
               type="button"
               onClick={handleToggleActive}
               disabled={isUpdating}
-              className="flex items-center gap-2 px-4 py-2.5 text-[13px] font-semibold border border-rule rounded-md text-ink hover:bg-cream-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className={`flex items-center gap-2 px-4 py-2.5 text-[13px] font-semibold rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${toggleConfig.className}`}
             >
               {isUpdating ? (
                 <span className="inline-block w-3.5 h-3.5 rounded-full border-2 border-current border-t-transparent animate-spin" />
               ) : (
-                <Icon name="calendar" size={14} />
+                <Icon name={toggleConfig.icon} size={14} />
               )}
-              Pausar
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={handleToggleActive}
-              disabled={isUpdating}
-              className="flex items-center gap-2 px-4 py-2.5 text-[13px] font-semibold bg-olive-800 text-white rounded-md hover:bg-olive-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isUpdating ? (
-                <span className="inline-block w-3.5 h-3.5 rounded-full border-2 border-current border-t-transparent animate-spin" />
-              ) : (
-                <Icon name="check" size={14} />
-              )}
-              Reanudar
+              {toggleConfig.label}
             </button>
           )}
           <button
@@ -157,7 +158,7 @@ export function ClientDetailPage() {
         </div>
       </div>
 
-      {!client.isActive && (
+      {status === CLIENT_STATUS.PAUSED && (
         <div className="flex items-center gap-2.5 bg-[#f3eedc] border border-[#d8c075] rounded-md px-3.5 py-3 mb-5">
           <Icon name="calendar" size={14} className="text-[#6b4f08] shrink-0" />
           <div>
