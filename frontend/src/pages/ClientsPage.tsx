@@ -11,21 +11,7 @@ import { STATUS_LABELS, STATUS_CLASSES, CLIENT_STATUS } from '../constants/clien
 import { SEX_LABELS } from '../constants/clientOptions';
 import { EXPIRY_THRESHOLD_DAYS } from '../constants/subscription';
 import { initials } from '../utils/string';
-
-const MONTHS = [
-  'Enero',
-  'Febrero',
-  'Marzo',
-  'Abril',
-  'Mayo',
-  'Junio',
-  'Julio',
-  'Agosto',
-  'Septiembre',
-  'Octubre',
-  'Noviembre',
-  'Diciembre',
-];
+import { MONTHS } from '../constants/months';
 
 type FilterValue = (typeof CLIENT_STATUS)[keyof typeof CLIENT_STATUS];
 
