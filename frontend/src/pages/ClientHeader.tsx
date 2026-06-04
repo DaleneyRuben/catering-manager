@@ -11,6 +11,7 @@ interface Props {
   isUpdating: boolean;
   onToggleActive: () => void;
   onEdit: () => void;
+  onDelete: () => void;
   onBack: () => void;
 }
 
@@ -20,6 +21,7 @@ export function ClientHeader({
   isUpdating,
   onToggleActive,
   onEdit,
+  onDelete,
   onBack,
 }: Props) {
   const age = differenceInYears(startOfToday(), parseISO(client.dateOfBirth));
@@ -98,6 +100,13 @@ export function ClientHeader({
           >
             <Icon name="settings" size={14} />
             Editar
+          </button>
+          <button
+            type="button"
+            onClick={onDelete}
+            className="flex items-center gap-2 px-4 py-2.5 text-[13px] font-semibold border border-[#e9c4bb] rounded-md text-alert hover:bg-cream-2 transition-colors"
+          >
+            Eliminar
           </button>
         </div>
       </div>
