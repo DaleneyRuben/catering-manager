@@ -31,21 +31,22 @@ function ContractCard({
 }) {
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [draft, setDraft] = useState<ContractDraft>({
-    contractDate: sub.contractDate,
-    startDate: sub.startDate,
-    duration: sub.duration,
-  });
+  const [contractDate, setContractDate] = useState(sub.contractDate);
+  const [startDate, setStartDate] = useState(sub.startDate);
+  const [durationStr, setDurationStr] = useState(String(sub.duration));
 
+  const parsedDuration = parseInt(durationStr, 10);
+  const validDuration = !Number.isNaN(parsedDuration) && parsedDuration > 0 ? parsedDuration : 0;
   const previewEndDate =
-    draft.startDate && draft.duration > 0
-      ? addBusinessDays(draft.startDate, draft.duration)
+    startDate && validDuration > 0
+      ? addBusinessDays(startDate, validDuration)
       : sub.contractEndDate;
 
   const handleSave = async () => {
+    if (!validDuration) return;
     setSaving(true);
     try {
-      await onUpdateContract(draft);
+      await onUpdateContract({ contractDate, startDate, duration: validDuration });
       setEditing(false);
     } finally {
       setSaving(false);
@@ -53,7 +54,9 @@ function ContractCard({
   };
 
   const handleCancel = () => {
-    setDraft({ contractDate: sub.contractDate, startDate: sub.startDate, duration: sub.duration });
+    setContractDate(sub.contractDate);
+    setStartDate(sub.startDate);
+    setDurationStr(String(sub.duration));
     setEditing(false);
   };
 
@@ -65,7 +68,7 @@ function ContractCard({
           <button
             type="button"
             onClick={() => setEditing(true)}
-            className="ml-auto flex items-center gap-1.5 text-[11px] font-mono text-muted hover:text-ink transition-colors"
+            className="ml-auto flex items-center gap-1.5 text-[11px] font-mono text-ok hover:opacity-80 transition-colors"
           >
             <Icon name="settings" size={11} />
             Editar
@@ -81,8 +84,8 @@ function ContractCard({
                 Firma
               </p>
               <DatePickerInput
-                value={draft.contractDate}
-                onChange={(v) => setDraft((d) => ({ ...d, contractDate: v }))}
+                value={contractDate}
+                onChange={setContractDate}
                 endMonth={startOfToday()}
               />
             </div>
@@ -90,20 +93,17 @@ function ContractCard({
               <p className="text-[11px] font-mono uppercase tracking-wider text-muted mb-1">
                 Inicio
               </p>
-              <DatePickerInput
-                value={draft.startDate}
-                onChange={(v) => setDraft((d) => ({ ...d, startDate: v }))}
-              />
+              <DatePickerInput value={startDate} onChange={setStartDate} />
             </div>
             <div>
               <p className="text-[11px] font-mono uppercase tracking-wider text-muted mb-1">
                 Duración (días hábiles)
               </p>
               <input
-                type="number"
-                min={1}
-                value={draft.duration}
-                onChange={(e) => setDraft((d) => ({ ...d, duration: Number(e.target.value) }))}
+                type="text"
+                inputMode="numeric"
+                value={durationStr}
+                onChange={(e) => setDurationStr(e.target.value.replace(/\D/g, ''))}
                 className="w-full px-2.5 py-1.5 text-[13px] font-mono border border-rule rounded-md bg-cream focus:outline-none focus:border-olive-600"
               />
             </div>
