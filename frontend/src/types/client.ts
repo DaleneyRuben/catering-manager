@@ -46,7 +46,8 @@ export type HistoryEventType =
   | 'plan_changed'
   | 'suspended'
   | 'reactivated'
-  | 'finalized';
+  | 'finalized'
+  | 'deleted';
 
 export interface ClientHistoryEntry {
   id: number;
