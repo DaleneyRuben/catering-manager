@@ -1,3 +1,4 @@
+import './setup';
 import 'dotenv/config';
 import 'reflect-metadata';
 import app from './app';
