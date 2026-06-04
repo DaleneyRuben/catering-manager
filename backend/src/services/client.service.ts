@@ -177,4 +177,19 @@ const finalize = async (id: number) => {
   return client;
 };
 
-export default { create, findAll, findById, update, getCounts, finalize };
+const softDelete = async (id: number) => {
+  const client = await Client.findByPk(id);
+  if (!client) return null;
+
+  await client.destroy();
+  await ClientHistory.create({
+    clientId: id,
+    eventType: 'deleted',
+    occurredAt: new Date(),
+    metadata: {},
+  });
+
+  return client;
+};
+
+export default { create, findAll, findById, update, getCounts, finalize, softDelete };
