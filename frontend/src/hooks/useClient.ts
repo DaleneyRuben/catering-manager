@@ -29,6 +29,29 @@ export function useClient(id: string | number) {
     },
   });
 
+  const updateContractMutation = useMutation({
+    mutationFn: ({
+      subscriptionId,
+      contractDate,
+      startDate,
+      duration,
+    }: {
+      subscriptionId: number;
+      contractDate: string;
+      startDate: string;
+      duration: number;
+    }) =>
+      api.patch(`/clients/${id}/subscriptions/${subscriptionId}`, {
+        contractDate,
+        startDate,
+        duration,
+      }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['clients', id] });
+      qc.invalidateQueries({ queryKey: ['clients', id, 'history'] });
+    },
+  });
+
   const deleteMutation = useMutation({
     mutationFn: () => api.delete(`/clients/${id}`),
     onSuccess: () => {
@@ -59,6 +82,11 @@ export function useClient(id: string | number) {
     update: (data: ClientUpdateDraft): Promise<Client> => updateMutation.mutateAsync(data),
     finalize: (): Promise<void> => finalizeMutation.mutateAsync().then(() => {}),
     deleteClient: (): Promise<void> => deleteMutation.mutateAsync().then(() => {}),
+    updateContract: (
+      subscriptionId: number,
+      draft: { contractDate: string; startDate: string; duration: number },
+    ): Promise<void> =>
+      updateContractMutation.mutateAsync({ subscriptionId, ...draft }).then(() => {}),
     updateSuspensions: (subscriptionId: number, suspendedDates: string[]): Promise<void> =>
       updateSuspensionsMutation.mutateAsync({ suspendedDates, subscriptionId }).then(() => {}),
   };

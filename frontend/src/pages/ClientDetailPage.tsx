@@ -4,7 +4,6 @@ import { parseISO } from 'date-fns';
 import { remainingDeliveryDays } from '../utils/businessDays';
 import { Icon } from '../components/ui/Icon';
 import { useClient } from '../hooks/useClient';
-import { MEAL_LABELS } from '../constants/meals';
 import { clientStatus } from '../types/client';
 import { CLIENT_STATUS } from '../constants/clientStatus';
 import { formatDate } from '../utils/format';
@@ -14,6 +13,7 @@ import { ConfirmFinalizeModal } from './ConfirmFinalizeModal';
 import { SuspendModal } from './SuspendModal';
 import { ClientOverviewTab } from './ClientOverviewTab';
 import { ClientHistoryTab } from './ClientHistoryTab';
+import { ClientPlanTab } from './ClientPlanTab';
 import { ClientHeader } from './ClientHeader';
 import { ConfirmModal } from '../components/ui/ConfirmModal';
 import { PageLoader } from '../components/ui/PageLoader';
@@ -30,8 +30,16 @@ const TABS: { id: TabId; label: string }[] = [
 export function ClientDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { client, isLoading, update, isUpdating, finalize, deleteClient, updateSuspensions } =
-    useClient(id!);
+  const {
+    client,
+    isLoading,
+    update,
+    isUpdating,
+    finalize,
+    deleteClient,
+    updateSuspensions,
+    updateContract,
+  } = useClient(id!);
   const [tab, setTab] = useState<TabId>('overview');
   const [editOpen, setEditOpen] = useState(false);
   const [finalizeOpen, setFinalizeOpen] = useState(false);
@@ -123,120 +131,12 @@ export function ClientDetailPage() {
       )}
 
       {activeTab === 'plan' && (
-        <div className="grid grid-cols-12 gap-5">
-          <div className="col-span-12 lg:col-span-7">
-            <div className="bg-paper border border-rule rounded-lg p-5">
-              {sub ? (
-                <>
-                  <div className="flex items-start flex-wrap gap-3 mb-4">
-                    <div>
-                      <p className="text-[11px] font-mono uppercase tracking-wider text-muted mb-1">
-                        Plan asignado
-                      </p>
-                      <p className="font-serif text-[28px]">{sub.plan.name}</p>
-                    </div>
-                    <div className="ml-auto text-right">
-                      <p className="font-mono text-[10.5px] text-muted">Total mensual</p>
-                      <p className="font-serif text-[40px] text-olive-800 tabular-nums">
-                        {Number(sub.plan.price) - sub.discount}
-                      </p>
-                    </div>
-                  </div>
-                  <hr className="border-rule mb-4" />
-                  <div className="flex flex-wrap gap-1.5 mb-4">
-                    {sub.plan.meals.map((m) => (
-                      <span
-                        key={m}
-                        className="px-2 py-0.5 rounded-full text-[11px] font-mono bg-olive-100 border border-rule text-ink"
-                      >
-                        {MEAL_LABELS[m] ?? m}
-                      </span>
-                    ))}
-                  </div>
-                  <hr className="border-rule mb-4" />
-                  <div className="grid grid-cols-3 gap-3">
-                    <div>
-                      <p className="text-[11px] font-mono uppercase tracking-wider text-muted">
-                        Precio
-                      </p>
-                      <p className="font-mono text-[14px]">{sub.plan.price}</p>
-                    </div>
-                    <div>
-                      <p className="text-[11px] font-mono uppercase tracking-wider text-muted">
-                        Descuento
-                      </p>
-                      <p className="font-mono text-[14px] text-muted">
-                        {sub.discount > 0 ? sub.discount : '—'}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-[11px] font-mono uppercase tracking-wider text-muted">
-                        Total
-                      </p>
-                      <p className="font-mono text-[14px] font-bold text-olive-800">
-                        {Number(sub.plan.price) - sub.discount}
-                      </p>
-                    </div>
-                  </div>
-                </>
-              ) : (
-                <p className="text-[13px] text-muted">Sin suscripción activa.</p>
-              )}
-            </div>
-          </div>
-          {sub && (
-            <div className="col-span-12 lg:col-span-5 flex flex-col gap-4">
-              <div className="bg-paper border border-rule rounded-lg p-5">
-                <p className="text-[11px] font-mono uppercase tracking-wider text-muted mb-3">
-                  Contrato
-                </p>
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <p className="text-[11px] font-mono uppercase tracking-wider text-muted">
-                      Firma
-                    </p>
-                    <p className="font-mono text-[13px]">{formatDate(sub.contractDate)}</p>
-                  </div>
-                  <div>
-                    <p className="text-[11px] font-mono uppercase tracking-wider text-muted">
-                      Inicio
-                    </p>
-                    <p className="font-mono text-[13px]">{formatDate(sub.startDate)}</p>
-                  </div>
-                  <div>
-                    <p className="text-[11px] font-mono uppercase tracking-wider text-muted">Fin</p>
-                    <p className="font-mono text-[13px]">{formatDate(sub.contractEndDate)}</p>
-                  </div>
-                  <div>
-                    <p className="text-[11px] font-mono uppercase tracking-wider text-muted">
-                      Restan
-                    </p>
-                    <p className="font-mono text-[13px]">{remaining} d. hábiles</p>
-                  </div>
-                </div>
-              </div>
-              <div className="bg-paper border border-rule rounded-lg p-5">
-                <p className="text-[11px] font-mono uppercase tracking-wider text-muted mb-3">
-                  Facturación
-                </p>
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <p className="text-[11px] font-mono uppercase tracking-wider text-muted">NIT</p>
-                    <p className="font-mono text-[13px]">{client.nit || '—'}</p>
-                  </div>
-                  <div>
-                    <p className="text-[11px] font-mono uppercase tracking-wider text-muted">
-                      Razón social
-                    </p>
-                    <p className="font-mono text-[13px] break-words">
-                      {client.businessName || '—'}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
+        <ClientPlanTab
+          client={client}
+          sub={sub}
+          remaining={remaining}
+          onUpdateContract={(draft) => updateContract(sub!.id, draft)}
+        />
       )}
 
       {activeTab === 'suspensions' && (
