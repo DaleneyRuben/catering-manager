@@ -142,6 +142,102 @@ describe('subscriptionService.update', () => {
   });
 });
 
+describe('subscriptionService.update contract dates', () => {
+  beforeEach(() => jest.clearAllMocks());
+
+  it('recalculates contractEndDate when startDate changes using existing duration', async () => {
+    const mockInstance = {
+      clientId: 1,
+      startDate: '2026-05-26',
+      duration: 20,
+      contractEndDate: addDeliveryDays('2026-05-26', 20),
+      suspendedDates: [],
+      update: jest.fn().mockResolvedValue({}),
+    };
+    (Subscription.findOne as jest.Mock).mockResolvedValue(mockInstance);
+
+    await subscriptionService.update(1, 1, { startDate: '2026-06-01' });
+
+    expect(mockInstance.update).toHaveBeenCalledWith(
+      expect.objectContaining({ contractEndDate: addDeliveryDays('2026-06-01', 20) }),
+    );
+  });
+
+  it('recalculates contractEndDate when duration changes using existing startDate', async () => {
+    const mockInstance = {
+      clientId: 1,
+      startDate: '2026-05-26',
+      duration: 20,
+      contractEndDate: addDeliveryDays('2026-05-26', 20),
+      suspendedDates: [],
+      update: jest.fn().mockResolvedValue({}),
+    };
+    (Subscription.findOne as jest.Mock).mockResolvedValue(mockInstance);
+
+    await subscriptionService.update(1, 1, { duration: 30 });
+
+    expect(mockInstance.update).toHaveBeenCalledWith(
+      expect.objectContaining({ contractEndDate: addDeliveryDays('2026-05-26', 30) }),
+    );
+  });
+
+  it('removes suspended dates that fall before the new startDate', async () => {
+    const mockInstance = {
+      clientId: 1,
+      startDate: '2026-05-26',
+      duration: 20,
+      contractEndDate: addDeliveryDays('2026-05-26', 20),
+      suspendedDates: ['2026-05-27', '2026-06-10'],
+      update: jest.fn().mockResolvedValue({}),
+    };
+    (Subscription.findOne as jest.Mock).mockResolvedValue(mockInstance);
+
+    await subscriptionService.update(1, 1, { startDate: '2026-06-01' });
+
+    const call = mockInstance.update.mock.calls[0][0];
+    expect(call.suspendedDates).not.toContain('2026-05-27');
+    expect(call.suspendedDates).toContain('2026-06-10');
+  });
+
+  it('records plan_assigned history event when contract dates are updated', async () => {
+    const mockInstance = {
+      id: 1,
+      clientId: 1,
+      startDate: '2026-05-26',
+      duration: 20,
+      contractEndDate: addDeliveryDays('2026-05-26', 20),
+      suspendedDates: [],
+      update: jest.fn().mockResolvedValue({}),
+    };
+    (Subscription.findOne as jest.Mock).mockResolvedValue(mockInstance);
+    (ClientHistory.create as jest.Mock).mockResolvedValue({});
+
+    await subscriptionService.update(1, 1, { startDate: '2026-06-01' });
+
+    expect(ClientHistory.create).toHaveBeenCalledWith(
+      expect.objectContaining({ clientId: 1, eventType: 'plan_assigned' }),
+    );
+  });
+
+  it('does not recalculate contractEndDate when only contractDate changes', async () => {
+    const originalEnd = addDeliveryDays('2026-05-26', 20);
+    const mockInstance = {
+      clientId: 1,
+      startDate: '2026-05-26',
+      duration: 20,
+      contractEndDate: originalEnd,
+      suspendedDates: [],
+      update: jest.fn().mockResolvedValue({}),
+    };
+    (Subscription.findOne as jest.Mock).mockResolvedValue(mockInstance);
+
+    await subscriptionService.update(1, 1, { contractDate: '2026-05-20' });
+
+    const call = mockInstance.update.mock.calls[0][0];
+    expect(call.contractEndDate).toBeUndefined();
+  });
+});
+
 describe('subscriptionService.update with suspendedDates', () => {
   const baseEnd = '2026-06-22'; // Monday
 
