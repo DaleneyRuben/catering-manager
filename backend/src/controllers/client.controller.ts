@@ -77,4 +77,17 @@ const finalize = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
-export default { create, getAll, getCounts, getById, update, finalize };
+const remove = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const client = await clientService.softDelete(Number(req.params.id));
+    if (!client) {
+      sendError(res, 'Client not found', 404);
+      return;
+    }
+    sendSuccess(res, client);
+  } catch (err) {
+    next(err);
+  }
+};
+
+export default { create, getAll, getCounts, getById, update, finalize, remove };

@@ -13,5 +13,6 @@ router.get('/:id/history', historyController.getByClient);
 router.post('/', validate(createClientSchema), clientController.create);
 router.patch('/:id', validate(updateClientSchema), clientController.update);
 router.post('/:id/finalize', clientController.finalize);
+router.delete('/:id', clientController.remove);
 
 export default router;

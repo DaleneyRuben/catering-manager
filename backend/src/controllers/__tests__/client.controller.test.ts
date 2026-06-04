@@ -294,3 +294,29 @@ describe('POST /api/clients/:id/finalize', () => {
     expect(res.status).toBe(500);
   });
 });
+
+describe('DELETE /api/clients/:id', () => {
+  it('returns 200 when client is soft-deleted', async () => {
+    (clientService.softDelete as jest.Mock).mockResolvedValue({});
+
+    const res = await request(app).delete('/api/clients/1');
+
+    expect(res.status).toBe(200);
+  });
+
+  it('returns 404 when client not found', async () => {
+    (clientService.softDelete as jest.Mock).mockResolvedValue(null);
+
+    const res = await request(app).delete('/api/clients/999');
+
+    expect(res.status).toBe(404);
+  });
+
+  it('returns 500 when service throws', async () => {
+    (clientService.softDelete as jest.Mock).mockRejectedValue(new Error('db error'));
+
+    const res = await request(app).delete('/api/clients/1');
+
+    expect(res.status).toBe(500);
+  });
+});
