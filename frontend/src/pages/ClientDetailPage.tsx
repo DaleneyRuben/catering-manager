@@ -15,6 +15,7 @@ import { SuspendModal } from './SuspendModal';
 import { ClientOverviewTab } from './ClientOverviewTab';
 import { ClientHistoryTab } from './ClientHistoryTab';
 import { ClientHeader } from './ClientHeader';
+import { ConfirmModal } from '../components/ui/ConfirmModal';
 import { PageLoader } from '../components/ui/PageLoader';
 
 type TabId = 'overview' | 'plan' | 'suspensions' | 'history';
@@ -29,10 +30,12 @@ const TABS: { id: TabId; label: string }[] = [
 export function ClientDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { client, isLoading, update, isUpdating, finalize, updateSuspensions } = useClient(id!);
+  const { client, isLoading, update, isUpdating, finalize, deleteClient, updateSuspensions } =
+    useClient(id!);
   const [tab, setTab] = useState<TabId>('overview');
   const [editOpen, setEditOpen] = useState(false);
   const [finalizeOpen, setFinalizeOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
   const [suspendOpen, setSuspendOpen] = useState(false);
 
   const handleToggleActive = async () => {
@@ -86,6 +89,7 @@ export function ClientDetailPage() {
         isUpdating={isUpdating}
         onToggleActive={handleToggleActive}
         onEdit={() => setEditOpen(true)}
+        onDelete={() => setDeleteOpen(true)}
         onBack={() => navigate('/clientes')}
       />
 
@@ -290,6 +294,23 @@ export function ClientDetailPage() {
           clientName={client.name}
           onClose={() => setFinalizeOpen(false)}
           onConfirm={finalize}
+        />
+      )}
+      {deleteOpen && (
+        <ConfirmModal
+          title="Eliminar cliente"
+          message={
+            <>
+              ¿Seguro que querés eliminar a <span className="font-semibold">{client.name}</span>?
+              Esta acción no se puede deshacer.
+            </>
+          }
+          confirmLabel="Eliminar"
+          onClose={() => setDeleteOpen(false)}
+          onConfirm={async () => {
+            await deleteClient();
+            navigate('/clientes');
+          }}
         />
       )}
       {suspendOpen && sub && (
