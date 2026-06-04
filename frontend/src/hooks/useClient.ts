@@ -29,6 +29,13 @@ export function useClient(id: string | number) {
     },
   });
 
+  const deleteMutation = useMutation({
+    mutationFn: () => api.delete(`/clients/${id}`),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['clients'] });
+    },
+  });
+
   const updateSuspensionsMutation = useMutation({
     mutationFn: ({
       suspendedDates,
@@ -47,9 +54,11 @@ export function useClient(id: string | number) {
     isLoading,
     isUpdating: updateMutation.isPending,
     isFinalizing: finalizeMutation.isPending,
+    isDeleting: deleteMutation.isPending,
     isUpdatingSuspensions: updateSuspensionsMutation.isPending,
     update: (data: ClientUpdateDraft): Promise<Client> => updateMutation.mutateAsync(data),
     finalize: (): Promise<void> => finalizeMutation.mutateAsync().then(() => {}),
+    deleteClient: (): Promise<void> => deleteMutation.mutateAsync().then(() => {}),
     updateSuspensions: (subscriptionId: number, suspendedDates: string[]): Promise<void> =>
       updateSuspensionsMutation.mutateAsync({ suspendedDates, subscriptionId }).then(() => {}),
   };
