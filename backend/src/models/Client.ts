@@ -2,7 +2,7 @@ import { Table, Column, Model, DataType, HasMany } from 'sequelize-typescript';
 import ClientHistory from './ClientHistory';
 import Subscription from './Subscription';
 
-@Table({ tableName: 'clients', timestamps: true })
+@Table({ tableName: 'clients', timestamps: true, paranoid: true })
 class Client extends Model {
   @Column({ type: DataType.STRING, allowNull: false })
   declare name: string;
