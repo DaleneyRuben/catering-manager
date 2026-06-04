@@ -8,7 +8,8 @@ export type HistoryEventType =
   | 'plan_changed'
   | 'suspended'
   | 'reactivated'
-  | 'finalized';
+  | 'finalized'
+  | 'deleted';
 
 @Table({ tableName: 'client_history', timestamps: false })
 class ClientHistory extends Model {
