@@ -13,7 +13,9 @@ export const createSubscriptionSchema = z.object({
 
 export const updateSubscriptionSchema = z.object({
   planId: z.number().int().positive().optional(),
+  contractDate: dateField.optional(),
   startDate: dateField.optional(),
+  duration: z.number().int().min(1).optional(),
   contractEndDate: dateField.optional(),
   suspendedDates: z.array(dateField).optional(),
 });
