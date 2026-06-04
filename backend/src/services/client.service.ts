@@ -62,7 +62,7 @@ const findAll = (filters: FindAllFilters = {}) => {
       subscriptionRequired = false;
       andConditions.push(
         literal(
-          `NOT EXISTS (SELECT 1 FROM subscriptions s WHERE s."clientId" = "Client"."id" AND s."contractEndDate" > CURRENT_DATE)`,
+          `NOT EXISTS (SELECT 1 FROM subscriptions s WHERE s."clientId" = "Client"."id" AND s."contractEndDate" > '${todayStr}')`,
         ),
       );
       break;
