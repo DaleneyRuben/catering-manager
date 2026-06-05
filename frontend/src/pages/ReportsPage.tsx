@@ -1,10 +1,21 @@
 import { useState } from 'react';
-import { format, addDays } from 'date-fns';
+import { format, addDays, parse } from 'date-fns';
+import { es } from 'date-fns/locale';
 import { Icon } from '../components/ui/Icon';
 
 type DayOption = 'today' | 'tomorrow';
 
 const BASE = import.meta.env.VITE_API_URL || '/api';
+
+const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+
+const toSpanishFileName = (dmyDate: string): string => {
+  const d = parse(dmyDate, 'dd/MM/yyyy', new Date());
+  const day = capitalize(format(d, 'EEEE', { locale: es }));
+  const month = capitalize(format(d, 'MMMM', { locale: es }));
+  const year = format(d, 'yyyy');
+  return `${day}, ${month} - ${year}.xlsx`;
+};
 
 async function downloadDeliveryList(date: string) {
   const res = await fetch(
@@ -15,7 +26,7 @@ async function downloadDeliveryList(date: string) {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `clientes-${date}.xlsx`;
+  a.download = toSpanishFileName(date);
   a.click();
   URL.revokeObjectURL(url);
 }
