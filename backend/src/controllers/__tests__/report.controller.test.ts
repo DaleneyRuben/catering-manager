@@ -8,7 +8,7 @@ jest.mock('../../database/sequelize', () => ({ __esModule: true, default: { quer
 describe('GET /api/reports/active-clients/download', () => {
   beforeEach(() => jest.clearAllMocks());
 
-  it('returns a docx file with correct headers', async () => {
+  it('returns an xlsx file with correct headers', async () => {
     (reportService.findDeliveryClientsForDate as jest.Mock).mockResolvedValue([
       'Ana López',
       'Carlos Ríos',
@@ -18,9 +18,9 @@ describe('GET /api/reports/active-clients/download', () => {
 
     expect(res.status).toBe(200);
     expect(res.headers['content-type']).toMatch(
-      /application\/vnd\.openxmlformats-officedocument\.wordprocessingml\.document/,
+      /application\/vnd\.openxmlformats-officedocument\.spreadsheetml\.sheet/,
     );
-    expect(res.headers['content-disposition']).toMatch(/attachment.*\.docx/);
+    expect(res.headers['content-disposition']).toMatch(/attachment.*\.xlsx/);
   });
 
   it('calls service with date converted to YYYY-MM-DD', async () => {
