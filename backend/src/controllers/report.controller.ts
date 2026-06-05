@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
-import { Document, Packer, Paragraph, TextRun } from 'docx';
+import ExcelJS from 'exceljs';
 import { parse, format, isValid } from 'date-fns';
 import reportService from '../services/report.service';
 
@@ -21,21 +21,18 @@ const downloadActiveClients = async (req: Request, res: Response, next: NextFunc
 
     const names = await reportService.findDeliveryClientsForDate(iso);
 
-    const doc = new Document({
-      sections: [
-        {
-          children: names.map((name) => new Paragraph({ children: [new TextRun(name)] })),
-        },
-      ],
-    });
+    const workbook = new ExcelJS.Workbook();
+    const sheet = workbook.addWorksheet('Clientes');
+    sheet.columns = [{ header: 'Cliente', key: 'name', width: 40 }];
+    names.forEach((name) => sheet.addRow({ name }));
 
-    const buffer = await Packer.toBuffer(doc);
+    const buffer = await workbook.xlsx.writeBuffer();
 
     res.setHeader(
       'Content-Type',
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     );
-    res.setHeader('Content-Disposition', `attachment; filename="clientes-${date}.docx"`);
+    res.setHeader('Content-Disposition', `attachment; filename="clientes-${date}.xlsx"`);
     res.send(buffer);
   } catch (err) {
     next(err);
