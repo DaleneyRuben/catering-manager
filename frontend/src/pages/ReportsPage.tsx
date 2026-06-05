@@ -15,7 +15,7 @@ async function downloadDeliveryList(date: string) {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `clientes-${date}.docx`;
+  a.download = `clientes-${date}.xlsx`;
   a.click();
   URL.revokeObjectURL(url);
 }
@@ -95,7 +95,7 @@ export function ReportsPage() {
             ) : (
               <Icon name="download" size={14} />
             )}
-            Descargar .docx
+            Descargar .xlsx
           </button>
         </div>
       </div>
