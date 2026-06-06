@@ -19,7 +19,7 @@ export function useMenu() {
     menus: menusQuery.data ?? [],
     isLoading: menusQuery.isLoading,
     isSaving: saveMutation.isPending,
-    save: (draft: MenuDraft): Promise<Menu> => saveMutation.mutateAsync(draft),
+    save: (draft: MenuDraft): Promise<Menu> => saveMutation.mutateAsync(draft) as Promise<Menu>,
     error: saveMutation.error,
   };
 }
