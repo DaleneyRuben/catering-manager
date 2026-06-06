@@ -1,16 +1,17 @@
-import { AlignmentType, Document, Packer, Paragraph, TextRun, UnderlineType } from 'docx';
+import { Document, ImageRun, Packer, Paragraph, TextRun, UnderlineType } from 'docx';
 import { format, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
 import Menu from '../models/Menu';
+import { WHATSAPP_PNG_B64 } from './whatsappIcon';
 
-const PURPLE = '7030A0';
+const PURPLE = '7B3FA0';
 const GRAY = '808080';
 const RED = 'C00000';
 
 const bulletParagraph = (label: string, time: string): Paragraph =>
   new Paragraph({
-    bullet: { level: 0 },
     children: [
+      new TextRun({ text: '• ', color: GRAY }),
       new TextRun({
         text: `${label} ${time}`,
         bold: true,
@@ -38,7 +39,6 @@ export const buildMenuCardDocx = async (menu: MenuInstance, date: string): Promi
 
   children.push(
     new Paragraph({
-      alignment: AlignmentType.LEFT,
       children: [
         new TextRun({
           text: `MENÚ ${day} DE ${month}`,
@@ -67,12 +67,9 @@ export const buildMenuCardDocx = async (menu: MenuInstance, date: string): Promi
   if (salad) {
     children.push(
       new Paragraph({
-        children: [
-          new TextRun({ text: 'ENSALADA', bold: true, color: GRAY }),
-          new TextRun({ text: ': ', bold: true, color: GRAY }),
-          new TextRun({ text: salad }),
-        ],
+        children: [new TextRun({ text: 'ENSALADA:', bold: true, color: GRAY })],
       }),
+      dishParagraph(salad),
     );
   }
 
@@ -90,7 +87,7 @@ export const buildMenuCardDocx = async (menu: MenuInstance, date: string): Promi
   if (juice) {
     children.push(
       new Paragraph({
-        children: [new TextRun({ text: 'JUGO DEL DÍA:', bold: true, color: PURPLE })],
+        children: [new TextRun({ text: 'JUGO DEL DÍA:', bold: true, color: GRAY })],
       }),
       dishParagraph(juice),
     );
@@ -101,22 +98,58 @@ export const buildMenuCardDocx = async (menu: MenuInstance, date: string): Promi
   children.push(
     new Paragraph({
       children: [
-        new TextRun({ text: 'NOTA:', bold: true, color: PURPLE }),
+        new TextRun({ text: 'NOTA:', bold: true, color: PURPLE, size: 16 }),
         new TextRun({
-          text: '   SI LA PRESENTACIÓN DE SU ALIMENTACIÓN, NO COINCIDE CON EL MENÚ, SE DEBE A LOS CAMBIOS SOLICITADOS Y/O ESTABLECIDOS POR LA LICENCIADA EN NUTRICIÓN DE ACUERDO A LA EVALUACIÓN DE CADA CLIENTE.',
+          text: '   SI LA PRESENTACIÓN DE SU ALIMENTACIÓN,',
           bold: true,
           color: PURPLE,
           allCaps: true,
+          size: 16,
         }),
+        new TextRun({ break: 1 }),
+        new TextRun({
+          text: 'NO COINCIDE CON EL MENÚ, SE DEBE A LOS CAMBIOS',
+          bold: true,
+          color: PURPLE,
+          allCaps: true,
+          size: 16,
+        }),
+        new TextRun({ break: 1 }),
+        new TextRun({
+          text: 'SOLICITADOS Y/O ESTABLECIDOS POR LA LICENCIADA',
+          bold: true,
+          color: PURPLE,
+          allCaps: true,
+          size: 16,
+        }),
+        new TextRun({ break: 1 }),
+        new TextRun({
+          text: 'EN NUTRICIÓN DE ACUERDO A LA EVALUACIÓN DE CADA',
+          bold: true,
+          color: PURPLE,
+          allCaps: true,
+          size: 16,
+        }),
+        new TextRun({ break: 1 }),
+        new TextRun({ text: 'CLIENTE.', bold: true, color: PURPLE, allCaps: true, size: 16 }),
       ],
     }),
     new Paragraph({
-      bullet: { level: 0 },
-      children: [new TextRun({ text: 'Nutricionista Lic. SILVIA', color: PURPLE })],
+      children: [
+        new TextRun({ text: '• ', color: PURPLE }),
+        new TextRun({ text: 'Nutricionista Lic. SILVIA', color: PURPLE, size: 20 }),
+      ],
     }),
     emptyParagraph(),
     new Paragraph({
-      children: [new TextRun({ text: 'CEL. 62300013', bold: true, color: RED })],
+      children: [
+        new ImageRun({
+          data: Buffer.from(WHATSAPP_PNG_B64, 'base64'),
+          transformation: { width: 20, height: 20 },
+          type: 'png',
+        }),
+        new TextRun({ text: '  CEL. 62300013', bold: true, color: RED }),
+      ],
     }),
   );
 
