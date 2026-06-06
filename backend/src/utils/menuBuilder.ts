@@ -30,7 +30,7 @@ const emptyParagraph = (): Paragraph => new Paragraph({});
 
 type MenuInstance = Menu | Record<string, string | null>;
 
-export const buildMenuCardDocx = async (menu: MenuInstance, date: string): Promise<Buffer> => {
+export const buildMenu = async (menu: MenuInstance, date: string): Promise<Buffer> => {
   const parsed = parseISO(date);
   const day = format(parsed, 'dd');
   const month = format(parsed, 'MMMM', { locale: es }).toUpperCase();
@@ -157,7 +157,7 @@ export const buildMenuCardDocx = async (menu: MenuInstance, date: string): Promi
   return Buffer.from(await Packer.toBuffer(doc));
 };
 
-export const menuCardFileName = (date: string): string => {
+export const menuFileName = (date: string): string => {
   const parsed = parseISO(date);
   const dayMonth = format(parsed, 'dd-MM');
   return `Menu completo ${dayMonth}.docx`;

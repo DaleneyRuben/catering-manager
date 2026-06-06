@@ -4,7 +4,7 @@ import { parse, format, isValid, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
 import menuService from '../services/menu.service';
 import reportService from '../services/report.service';
-import { buildMenuCardDocx, menuCardFileName } from '../utils/menuCardDocx';
+import { buildMenu, menuFileName } from '../utils/menuBuilder';
 
 const parseDMY = (value: string): string | null => {
   const parsed = parse(value, 'dd/MM/yyyy', new Date());
@@ -56,7 +56,7 @@ const downloadActiveClients = async (req: Request, res: Response, next: NextFunc
 const isIsoDate = (value: string): boolean =>
   /^\d{4}-\d{2}-\d{2}$/.test(value) && isValid(parseISO(value));
 
-const downloadMenuCard = async (req: Request, res: Response, next: NextFunction) => {
+const exportMenu = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { date } = req.query;
 
@@ -71,8 +71,8 @@ const downloadMenuCard = async (req: Request, res: Response, next: NextFunction)
       return;
     }
 
-    const buffer = await buildMenuCardDocx(menu, date);
-    const fileName = menuCardFileName(date);
+    const buffer = await buildMenu(menu, date);
+    const fileName = menuFileName(date);
 
     res.setHeader(
       'Content-Type',
@@ -85,4 +85,4 @@ const downloadMenuCard = async (req: Request, res: Response, next: NextFunction)
   }
 };
 
-export default { downloadActiveClients, downloadMenuCard };
+export default { downloadActiveClients, exportMenu };
