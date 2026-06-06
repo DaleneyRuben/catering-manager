@@ -2,7 +2,9 @@ import { NextFunction, Request, Response } from 'express';
 import ExcelJS from 'exceljs';
 import { parse, format, isValid, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
+import menuService from '../services/menu.service';
 import reportService from '../services/report.service';
+import { buildMenuCardDocx, menuCardFileName } from '../utils/menuCardDocx';
 
 const parseDMY = (value: string): string | null => {
   const parsed = parse(value, 'dd/MM/yyyy', new Date());
@@ -51,4 +53,36 @@ const downloadActiveClients = async (req: Request, res: Response, next: NextFunc
   }
 };
 
-export default { downloadActiveClients };
+const isIsoDate = (value: string): boolean =>
+  /^\d{4}-\d{2}-\d{2}$/.test(value) && isValid(parseISO(value));
+
+const downloadMenuCard = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { date } = req.query;
+
+    if (typeof date !== 'string' || !isIsoDate(date)) {
+      res.status(400).json({ error: 'date param is required and must be YYYY-MM-DD' });
+      return;
+    }
+
+    const menu = await menuService.findByDate(date);
+    if (!menu) {
+      res.status(404).json({ error: 'No menu found for this date' });
+      return;
+    }
+
+    const buffer = await buildMenuCardDocx(menu, date);
+    const fileName = menuCardFileName(date);
+
+    res.setHeader(
+      'Content-Type',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    );
+    res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
+    res.send(buffer);
+  } catch (err) {
+    next(err);
+  }
+};
+
+export default { downloadActiveClients, downloadMenuCard };
