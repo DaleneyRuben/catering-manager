@@ -105,9 +105,6 @@ export function MenuImportPage() {
           Operativa diaria
         </p>
         <h1 className="font-serif text-[44px] leading-none text-ink">Menú del día</h1>
-        <p className="text-[13px] text-muted mt-2.5">
-          Registra el menú para que el sistema pueda cruzarlo con las restricciones de los clientes.
-        </p>
       </div>
 
       <div className="flex gap-2 mb-6">
