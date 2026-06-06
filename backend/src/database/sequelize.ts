@@ -2,6 +2,7 @@ import pg from 'pg';
 import { Sequelize } from 'sequelize-typescript';
 import Client from '../models/Client';
 import ClientHistory from '../models/ClientHistory';
+import Menu from '../models/Menu';
 import Plan from '../models/Plan';
 import Subscription from '../models/Subscription';
 
@@ -13,7 +14,7 @@ const sequelize = new Sequelize(process.env.DATABASE_URL as string, {
   ...(isProduction
     ? { dialectOptions: { ssl: { require: true, rejectUnauthorized: false } } }
     : {}),
-  models: [Client, ClientHistory, Plan, Subscription],
+  models: [Client, ClientHistory, Menu, Plan, Subscription],
   logging: false,
 });
 
