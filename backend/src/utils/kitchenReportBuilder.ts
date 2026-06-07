@@ -116,6 +116,9 @@ const cell = (
 
 const emptyCell = (colspan = 1): TableCell => cell(para(''), { colspan });
 
+const spacerRow = (): TableRow =>
+  new TableRow({ children: Array.from({ length: COL_WIDTHS.length }, () => emptyCell()) });
+
 const dateRow = (dateText: string, totalClients: number): TableRow =>
   new TableRow({
     children: [
@@ -221,6 +224,7 @@ const buildMealTableRows = (
   return [
     mealTableRow(config.label, dish, receiving.length),
     ...noDarTableRows(config.label, noDar),
+    spacerRow(),
   ];
 };
 
