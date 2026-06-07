@@ -2,6 +2,7 @@ import {
   Document,
   Packer,
   Paragraph,
+  ShadingType,
   Table,
   TableCell,
   TableRow,
@@ -68,6 +69,8 @@ const PRODUCCION_MEALS: MealConfig[] = [
   { key: 'dinner', label: 'CENA', menuField: 'dinner' },
 ];
 
+const MEAL_LABEL_SHADING = { type: ShadingType.CLEAR, color: 'auto', fill: 'D9D9D9' };
+
 const THIN = { style: BorderStyle.SINGLE, size: 1, color: BLACK };
 const NO_BORDER = { style: BorderStyle.NIL, size: 0, color: BLACK };
 const ALL_BORDERS = { top: THIN, bottom: THIN, left: THIN, right: THIN };
@@ -94,11 +97,20 @@ const para = (
 
 const cell = (
   content: Paragraph | Paragraph[],
-  { colspan = 1, borders = ALL_BORDERS }: { colspan?: number; borders?: typeof ALL_BORDERS } = {},
+  {
+    colspan = 1,
+    borders = ALL_BORDERS,
+    shading,
+  }: {
+    colspan?: number;
+    borders?: typeof ALL_BORDERS;
+    shading?: { type: (typeof ShadingType)[keyof typeof ShadingType]; color: string; fill: string };
+  } = {},
 ): TableCell =>
   new TableCell({
     columnSpan: colspan,
     borders,
+    ...(shading && { shading }),
     children: Array.isArray(content) ? content : [content],
   });
 
@@ -154,7 +166,7 @@ const mealTableRow = (label: string, dish: string, count: number): TableRow =>
   new TableRow({
     children: [
       emptyCell(1),
-      cell(para(`${label}: ${dish}`, { bold: true }), { colspan: 4 }),
+      cell(para(`${label}: ${dish}`, { bold: true }), { colspan: 4, shading: MEAL_LABEL_SHADING }),
       cell(para(String(count), { bold: true, color: RED, size: 32, align: AlignmentType.RIGHT })),
     ],
   });
