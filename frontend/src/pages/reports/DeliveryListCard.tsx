@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { format, addDays, parse } from 'date-fns';
+import { format, addDays, parse, isWeekend } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Icon } from '../../components/ui/Icon';
 
@@ -39,6 +39,9 @@ export function DeliveryListCard() {
   const today = new Date();
   const dateForOption = (opt: DayOption) =>
     format(opt === 'today' ? today : addDays(today, 1), 'dd/MM/yyyy');
+  const dateObjForOption = (opt: DayOption) => (opt === 'today' ? today : addDays(today, 1));
+
+  const isSelectedWeekend = isWeekend(dateObjForOption(selected));
 
   const handleDownload = async () => {
     setError(null);
@@ -81,13 +84,17 @@ export function DeliveryListCard() {
         ))}
       </div>
 
+      {isSelectedWeekend && (
+        <p className="text-[12px] text-alert mb-4">No hay entregas los fines de semana.</p>
+      )}
+
       {error && <p className="text-[12px] text-alert mb-4">{error}</p>}
 
       <div>
         <button
           type="button"
           onClick={handleDownload}
-          disabled={loading}
+          disabled={loading || isSelectedWeekend}
           className="flex items-center gap-2 px-4 py-2.5 text-[13px] font-semibold bg-olive-800 text-white rounded-md hover:bg-olive-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {loading ? (

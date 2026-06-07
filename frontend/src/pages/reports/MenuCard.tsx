@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { format, addDays } from 'date-fns';
+import { format, addDays, isWeekend } from 'date-fns';
 import { Icon } from '../../components/ui/Icon';
 import { useMenu } from '../../hooks/useMenu';
 
@@ -16,7 +16,7 @@ async function downloadMenuCard(isoDate: string) {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  const dayMonth = format(new Date(`${isoDate  }T12:00:00`), 'dd-MM');
+  const dayMonth = format(new Date(`${isoDate}T12:00:00`), 'dd-MM');
   a.download = `Menu completo ${dayMonth}.docx`;
   a.click();
   URL.revokeObjectURL(url);
@@ -35,6 +35,7 @@ export function MenuCard() {
     format(opt === 'today' ? today : addDays(today, 1), 'dd/MM/yyyy');
 
   const selectedIso = isoForOption(selected);
+  const isSelectedWeekend = isWeekend(selected === 'today' ? today : addDays(today, 1));
   const menuExists = menus.some((m) => m.date === selectedIso);
 
   const handleDownload = async () => {
@@ -78,8 +79,12 @@ export function MenuCard() {
         ))}
       </div>
 
-      {!menuExists && (
-        <p className="text-[12px] text-muted mb-4">No hay menú registrado para esta fecha.</p>
+      {isSelectedWeekend && (
+        <p className="text-[12px] text-alert mb-4">No hay entregas los fines de semana.</p>
+      )}
+
+      {!isSelectedWeekend && !menuExists && (
+        <p className="text-[12px] text-alert mb-4">No hay menú registrado para esta fecha.</p>
       )}
 
       {error && <p className="text-[12px] text-alert mb-4">{error}</p>}
@@ -88,7 +93,7 @@ export function MenuCard() {
         <button
           type="button"
           onClick={handleDownload}
-          disabled={loading || !menuExists}
+          disabled={loading || isSelectedWeekend || !menuExists}
           className="flex items-center gap-2 px-4 py-2.5 text-[13px] font-semibold bg-olive-800 text-white rounded-md hover:bg-olive-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {loading ? (
