@@ -1,0 +1,65 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`computeKitchenReportData matches snapshot 1`] = `
+{
+  "dateText": "FECHA: 04 – JUNIO – 2026",
+  "hiperproteico": [
+    "Jorge Rengel",
+  ],
+  "pasteleria": [
+    {
+      "count": 2,
+      "dish": "Queque de platano",
+      "label": "DESAYUNO",
+      "noDar": [
+        "Carmen Tapia",
+      ],
+    },
+    {
+      "count": 2,
+      "dish": "Flan de chocolate",
+      "label": "MEDIA MAÑANA",
+      "noDar": [
+        "Carmen Tapia",
+      ],
+    },
+    {
+      "count": 2,
+      "dish": "Manzana asada con canela",
+      "label": "MERIENDA TARDE",
+      "noDar": [
+        "Carmen Tapia",
+      ],
+    },
+  ],
+  "produccion": [
+    {
+      "count": 3,
+      "dish": "Boloñesa con caracolitos",
+      "label": "ALMUERZO",
+      "noDar": [],
+    },
+    {
+      "count": 3,
+      "dish": "Vainitas con zuccini",
+      "label": "ENSALADA",
+      "noDar": [],
+    },
+    {
+      "count": 3,
+      "dish": "Tortilla de coliflor con yuca",
+      "label": "CENA",
+      "noDar": [],
+    },
+  ],
+  "restrictionConflicts": [
+    {
+      "conflicts": [
+        "yuca",
+      ],
+      "name": "Carmen Tapia",
+    },
+  ],
+  "totalClients": 3,
+}
+`;
