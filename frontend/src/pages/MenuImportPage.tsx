@@ -126,48 +126,49 @@ export function MenuImportPage() {
         ))}
       </div>
 
-      <div className="bg-paper border border-rule rounded-lg p-6 mb-6">
-        <div className="grid grid-cols-1 gap-4">
-          {MEAL_FIELDS.map((field) => (
-            <div key={field}>
-              <label
-                htmlFor={`menu-field-${field}`}
-                className="block text-[10.5px] font-mono uppercase tracking-[.14em] text-muted mb-1.5"
-              >
-                {MEAL_FIELD_LABELS[field]}
-              </label>
-              <input
-                id={`menu-field-${field}`}
-                type="text"
-                value={draft[field] ?? ''}
-                onChange={(e) => handleFieldChange(field, e.target.value)}
-                className="w-full px-3 py-2.5 text-[13px] bg-white border border-rule rounded-md focus:outline-none focus:border-olive-700 text-ink transition-colors"
-              />
-            </div>
-          ))}
+      {isSelectedWeekend ? (
+        <div className="bg-paper border border-rule rounded-lg p-6 mb-6">
+          <p className="text-[13px] text-alert">No hay entregas los fines de semana.</p>
         </div>
+      ) : (
+        <div className="bg-paper border border-rule rounded-lg p-6 mb-6">
+          <div className="grid grid-cols-1 gap-4">
+            {MEAL_FIELDS.map((field) => (
+              <div key={field}>
+                <label
+                  htmlFor={`menu-field-${field}`}
+                  className="block text-[10.5px] font-mono uppercase tracking-[.14em] text-muted mb-1.5"
+                >
+                  {MEAL_FIELD_LABELS[field]}
+                </label>
+                <input
+                  id={`menu-field-${field}`}
+                  type="text"
+                  value={draft[field] ?? ''}
+                  onChange={(e) => handleFieldChange(field, e.target.value)}
+                  className="w-full px-3 py-2.5 text-[13px] bg-white border border-rule rounded-md focus:outline-none focus:border-olive-700 text-ink transition-colors"
+                />
+              </div>
+            ))}
+          </div>
 
-        <div className="flex items-center gap-3 mt-6">
-          <button
-            type="button"
-            onClick={handleSave}
-            disabled={isSaving || isSelectedWeekend}
-            className="px-4 py-2.5 text-[13px] font-semibold bg-olive-800 text-white rounded-md hover:bg-olive-700 disabled:opacity-50 transition-colors"
-          >
-            {saveLabel}
-          </button>
-          {isSelectedWeekend && (
-            <span className="text-[12px] text-alert font-mono">
-              No hay entregas los fines de semana.
-            </span>
-          )}
-          {!isSelectedWeekend && saved && (
-            <span className="text-[12px] text-olive-700 font-mono">
-              Menú guardado correctamente
-            </span>
-          )}
+          <div className="flex items-center gap-3 mt-6">
+            <button
+              type="button"
+              onClick={handleSave}
+              disabled={isSaving}
+              className="px-4 py-2.5 text-[13px] font-semibold bg-olive-800 text-white rounded-md hover:bg-olive-700 disabled:opacity-50 transition-colors"
+            >
+              {saveLabel}
+            </button>
+            {saved && (
+              <span className="text-[12px] text-olive-700 font-mono">
+                Menú guardado correctamente
+              </span>
+            )}
+          </div>
         </div>
-      </div>
+      )}
 
       {!isLoading && storedMenus.length > 0 && (
         <div>
