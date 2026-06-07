@@ -2,9 +2,11 @@ import request from 'supertest';
 import app from '../../app';
 import menuService from '../../services/menu.service';
 import reportService from '../../services/report.service';
+import * as kitchenReportBuilder from '../../utils/kitchenReportBuilder';
 
 jest.mock('../../services/menu.service');
 jest.mock('../../services/report.service');
+jest.mock('../../utils/kitchenReportBuilder');
 jest.mock('../../database/sequelize', () => ({ __esModule: true, default: { query: jest.fn() } }));
 
 const mockMenu = {
@@ -113,5 +115,59 @@ describe('GET /api/reports/menu-card/download', () => {
     const res = await request(app).get('/api/reports/menu-card/download?date=2026-06-06');
 
     expect(res.status).toBe(500);
+  });
+});
+
+describe('GET /api/reports/kitchen-report/download', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (kitchenReportBuilder.buildKitchenReport as jest.Mock).mockResolvedValue(Buffer.from('docx'));
+    (kitchenReportBuilder.kitchenReportFileName as jest.Mock).mockReturnValue('Jueves 0506.docx');
+  });
+
+  it('returns a docx file with correct headers when menu and clients exist', async () => {
+    (menuService.findByDate as jest.Mock).mockResolvedValue(mockMenu);
+    (reportService.findActiveClientsWithPlansForDate as jest.Mock).mockResolvedValue([
+      { name: 'Ana López', planMeals: ['breakfast', 'lunch'], restrictions: [] },
+    ]);
+
+    const res = await request(app).get('/api/reports/kitchen-report/download?date=2026-06-06');
+
+    expect(res.status).toBe(200);
+    expect(res.headers['content-type']).toMatch(
+      /application\/vnd\.openxmlformats-officedocument\.wordprocessingml\.document/,
+    );
+    expect(res.headers['content-disposition']).toMatch(/attachment.*\.docx/);
+  });
+
+  it('calls services with the given date', async () => {
+    (menuService.findByDate as jest.Mock).mockResolvedValue(mockMenu);
+    (reportService.findActiveClientsWithPlansForDate as jest.Mock).mockResolvedValue([]);
+
+    await request(app).get('/api/reports/kitchen-report/download?date=2026-06-06');
+
+    expect(menuService.findByDate).toHaveBeenCalledWith('2026-06-06');
+    expect(reportService.findActiveClientsWithPlansForDate).toHaveBeenCalledWith('2026-06-06');
+  });
+
+  it('returns 404 when no menu exists for the date', async () => {
+    (menuService.findByDate as jest.Mock).mockResolvedValue(null);
+    (reportService.findActiveClientsWithPlansForDate as jest.Mock).mockResolvedValue([]);
+
+    const res = await request(app).get('/api/reports/kitchen-report/download?date=2026-06-06');
+
+    expect(res.status).toBe(404);
+  });
+
+  it('returns 400 when date param is missing', async () => {
+    const res = await request(app).get('/api/reports/kitchen-report/download');
+
+    expect(res.status).toBe(400);
+  });
+
+  it('returns 400 when date format is invalid', async () => {
+    const res = await request(app).get('/api/reports/kitchen-report/download?date=06/06/2026');
+
+    expect(res.status).toBe(400);
   });
 });

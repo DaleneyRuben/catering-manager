@@ -5,6 +5,7 @@ import { es } from 'date-fns/locale';
 import menuService from '../services/menu.service';
 import reportService from '../services/report.service';
 import { buildMenu, menuFileName } from '../utils/menuBuilder';
+import { buildKitchenReport, kitchenReportFileName } from '../utils/kitchenReportBuilder';
 
 const parseDMY = (value: string): string | null => {
   const parsed = parse(value, 'dd/MM/yyyy', new Date());
@@ -85,4 +86,37 @@ const exportMenu = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
-export default { downloadActiveClients, exportMenu };
+const exportKitchenReport = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { date } = req.query;
+
+    if (typeof date !== 'string' || !isIsoDate(date)) {
+      res.status(400).json({ error: 'date param is required and must be YYYY-MM-DD' });
+      return;
+    }
+
+    const [menu, clients] = await Promise.all([
+      menuService.findByDate(date),
+      reportService.findActiveClientsWithPlansForDate(date),
+    ]);
+
+    if (!menu) {
+      res.status(404).json({ error: 'No menu found for this date' });
+      return;
+    }
+
+    const buffer = await buildKitchenReport(menu, clients, date);
+    const fileName = kitchenReportFileName(date);
+
+    res.setHeader(
+      'Content-Type',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    );
+    res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
+    res.send(buffer);
+  } catch (err) {
+    next(err);
+  }
+};
+
+export default { downloadActiveClients, exportMenu, exportKitchenReport };
