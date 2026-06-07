@@ -1,4 +1,4 @@
-import { addDays, format, parseISO } from 'date-fns';
+import { addDays, format, isWeekend, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useState, useEffect } from 'react';
 import { MEAL_LABELS } from '../constants/meals';
@@ -96,6 +96,7 @@ export function MenuImportPage() {
 
   const storedMenus = menus.filter((m) => m.date !== selectedDate);
 
+  const isSelectedWeekend = isWeekend(parseISO(selectedDate));
   const saveLabel = getSaveLabel(isSaving, !!existingMenu);
 
   return (
@@ -150,12 +151,17 @@ export function MenuImportPage() {
           <button
             type="button"
             onClick={handleSave}
-            disabled={isSaving}
+            disabled={isSaving || isSelectedWeekend}
             className="px-4 py-2.5 text-[13px] font-semibold bg-olive-800 text-white rounded-md hover:bg-olive-700 disabled:opacity-50 transition-colors"
           >
             {saveLabel}
           </button>
-          {saved && (
+          {isSelectedWeekend && (
+            <span className="text-[12px] text-alert font-mono">
+              No hay entregas los fines de semana.
+            </span>
+          )}
+          {!isSelectedWeekend && saved && (
             <span className="text-[12px] text-olive-700 font-mono">
               Menú guardado correctamente
             </span>
