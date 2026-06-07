@@ -39,9 +39,8 @@ export function DeliveryListCard() {
   const today = new Date();
   const dateForOption = (opt: DayOption) =>
     format(opt === 'today' ? today : addDays(today, 1), 'dd/MM/yyyy');
-  const dateObjForOption = (opt: DayOption) => (opt === 'today' ? today : addDays(today, 1));
 
-  const isSelectedWeekend = isWeekend(dateObjForOption(selected));
+  const isSelectedWeekend = isWeekend(selected === 'today' ? today : addDays(today, 1));
 
   const handleDownload = async () => {
     setError(null);
