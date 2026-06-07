@@ -1,4 +1,5 @@
 import { DeliveryListCard } from './reports/DeliveryListCard';
+import { KitchenReportCard } from './reports/KitchenReportCard';
 import { MenuCard } from './reports/MenuCard';
 
 export function ReportsPage() {
@@ -17,6 +18,7 @@ export function ReportsPage() {
       <div className="flex flex-wrap gap-5">
         <DeliveryListCard />
         <MenuCard />
+        <KitchenReportCard />
       </div>
     </div>
   );
