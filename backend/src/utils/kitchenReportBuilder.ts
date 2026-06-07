@@ -145,7 +145,7 @@ const specHeaderRow = (): TableRow =>
 const sectionLabelRow = (label: string): TableRow =>
   new TableRow({
     children: [
-      cell(para('CANT\nTOTAL', { bold: true, color: GRAY, align: AlignmentType.CENTER })),
+      cell(para('CANT\nTOTAL', { bold: true, color: GRAY, size: 16, align: AlignmentType.CENTER })),
       cell(para(label, { bold: true, color: RED, align: AlignmentType.CENTER }), { colspan: 5 }),
     ],
   });
