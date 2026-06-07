@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import ExcelJS from 'exceljs';
-import { parse, format, isValid, parseISO } from 'date-fns';
+import { parse, format, isValid, parseISO, isWeekend } from 'date-fns';
 import { es } from 'date-fns/locale';
 import menuService from '../services/menu.service';
 import reportService from '../services/report.service';
@@ -30,6 +30,11 @@ const downloadActiveClients = async (req: Request, res: Response, next: NextFunc
     const iso = typeof date === 'string' ? parseDMY(date) : null;
     if (!iso) {
       res.status(400).json({ error: 'date param is required and must be DD/MM/YYYY' });
+      return;
+    }
+
+    if (isWeekend(parseISO(iso))) {
+      res.status(400).json({ error: 'No hay entregas los fines de semana' });
       return;
     }
 
@@ -66,6 +71,11 @@ const exportMenu = async (req: Request, res: Response, next: NextFunction) => {
       return;
     }
 
+    if (isWeekend(parseISO(date))) {
+      res.status(400).json({ error: 'No hay entregas los fines de semana' });
+      return;
+    }
+
     const menu = await menuService.findByDate(date);
     if (!menu) {
       res.status(404).json({ error: 'No menu found for this date' });
@@ -92,6 +102,11 @@ const exportKitchenReport = async (req: Request, res: Response, next: NextFuncti
 
     if (typeof date !== 'string' || !isIsoDate(date)) {
       res.status(400).json({ error: 'date param is required and must be YYYY-MM-DD' });
+      return;
+    }
+
+    if (isWeekend(parseISO(date))) {
+      res.status(400).json({ error: 'No hay entregas los fines de semana' });
       return;
     }
 

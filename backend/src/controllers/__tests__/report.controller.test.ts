@@ -11,7 +11,7 @@ jest.mock('../../database/sequelize', () => ({ __esModule: true, default: { quer
 
 const mockMenu = {
   id: 1,
-  date: '2026-06-06',
+  date: '2026-06-05',
   breakfast: 'Queque de platano',
   morningSnack: 'Flan de chocolate',
   salad: 'Vainitas con zuccini',
@@ -42,9 +42,21 @@ describe('GET /api/reports/active-clients/download', () => {
   it('calls service with date converted to YYYY-MM-DD', async () => {
     (reportService.findDeliveryClientsForDate as jest.Mock).mockResolvedValue([]);
 
-    await request(app).get('/api/reports/active-clients/download?date=20/06/2026');
+    await request(app).get('/api/reports/active-clients/download?date=19/06/2026');
 
-    expect(reportService.findDeliveryClientsForDate).toHaveBeenCalledWith('2026-06-20');
+    expect(reportService.findDeliveryClientsForDate).toHaveBeenCalledWith('2026-06-19');
+  });
+
+  it('returns 400 when date is a saturday', async () => {
+    const res = await request(app).get('/api/reports/active-clients/download?date=06/06/2026');
+
+    expect(res.status).toBe(400);
+  });
+
+  it('returns 400 when date is a sunday', async () => {
+    const res = await request(app).get('/api/reports/active-clients/download?date=07/06/2026');
+
+    expect(res.status).toBe(400);
   });
 
   it('returns 400 when date param is missing', async () => {
@@ -72,7 +84,7 @@ describe('GET /api/reports/menu-card/download', () => {
   it('returns a docx file with correct headers when menu exists', async () => {
     (menuService.findByDate as jest.Mock).mockResolvedValue(mockMenu);
 
-    const res = await request(app).get('/api/reports/menu-card/download?date=2026-06-06');
+    const res = await request(app).get('/api/reports/menu-card/download?date=2026-06-05');
 
     expect(res.status).toBe(200);
     expect(res.headers['content-type']).toMatch(
@@ -84,15 +96,15 @@ describe('GET /api/reports/menu-card/download', () => {
   it('calls menuService with the given date', async () => {
     (menuService.findByDate as jest.Mock).mockResolvedValue(mockMenu);
 
-    await request(app).get('/api/reports/menu-card/download?date=2026-06-06');
+    await request(app).get('/api/reports/menu-card/download?date=2026-06-05');
 
-    expect(menuService.findByDate).toHaveBeenCalledWith('2026-06-06');
+    expect(menuService.findByDate).toHaveBeenCalledWith('2026-06-05');
   });
 
   it('returns 404 when no menu exists for the date', async () => {
     (menuService.findByDate as jest.Mock).mockResolvedValue(null);
 
-    const res = await request(app).get('/api/reports/menu-card/download?date=2026-06-06');
+    const res = await request(app).get('/api/reports/menu-card/download?date=2026-06-05');
 
     expect(res.status).toBe(404);
   });
@@ -109,10 +121,16 @@ describe('GET /api/reports/menu-card/download', () => {
     expect(res.status).toBe(400);
   });
 
+  it('returns 400 when date is a weekend', async () => {
+    const res = await request(app).get('/api/reports/menu-card/download?date=2026-06-06');
+
+    expect(res.status).toBe(400);
+  });
+
   it('returns 500 when service throws', async () => {
     (menuService.findByDate as jest.Mock).mockRejectedValue(new Error('db error'));
 
-    const res = await request(app).get('/api/reports/menu-card/download?date=2026-06-06');
+    const res = await request(app).get('/api/reports/menu-card/download?date=2026-06-05');
 
     expect(res.status).toBe(500);
   });
@@ -131,7 +149,7 @@ describe('GET /api/reports/kitchen-report/download', () => {
       { name: 'Ana López', planMeals: ['breakfast', 'lunch'], restrictions: [] },
     ]);
 
-    const res = await request(app).get('/api/reports/kitchen-report/download?date=2026-06-06');
+    const res = await request(app).get('/api/reports/kitchen-report/download?date=2026-06-05');
 
     expect(res.status).toBe(200);
     expect(res.headers['content-type']).toMatch(
@@ -144,17 +162,17 @@ describe('GET /api/reports/kitchen-report/download', () => {
     (menuService.findByDate as jest.Mock).mockResolvedValue(mockMenu);
     (reportService.findActiveClientsWithPlansForDate as jest.Mock).mockResolvedValue([]);
 
-    await request(app).get('/api/reports/kitchen-report/download?date=2026-06-06');
+    await request(app).get('/api/reports/kitchen-report/download?date=2026-06-05');
 
-    expect(menuService.findByDate).toHaveBeenCalledWith('2026-06-06');
-    expect(reportService.findActiveClientsWithPlansForDate).toHaveBeenCalledWith('2026-06-06');
+    expect(menuService.findByDate).toHaveBeenCalledWith('2026-06-05');
+    expect(reportService.findActiveClientsWithPlansForDate).toHaveBeenCalledWith('2026-06-05');
   });
 
   it('returns 404 when no menu exists for the date', async () => {
     (menuService.findByDate as jest.Mock).mockResolvedValue(null);
     (reportService.findActiveClientsWithPlansForDate as jest.Mock).mockResolvedValue([]);
 
-    const res = await request(app).get('/api/reports/kitchen-report/download?date=2026-06-06');
+    const res = await request(app).get('/api/reports/kitchen-report/download?date=2026-06-05');
 
     expect(res.status).toBe(404);
   });
@@ -167,6 +185,12 @@ describe('GET /api/reports/kitchen-report/download', () => {
 
   it('returns 400 when date format is invalid', async () => {
     const res = await request(app).get('/api/reports/kitchen-report/download?date=06/06/2026');
+
+    expect(res.status).toBe(400);
+  });
+
+  it('returns 400 when date is a weekend', async () => {
+    const res = await request(app).get('/api/reports/kitchen-report/download?date=2026-06-06');
 
     expect(res.status).toBe(400);
   });
