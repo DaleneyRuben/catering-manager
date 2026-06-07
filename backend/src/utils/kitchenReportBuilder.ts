@@ -174,15 +174,18 @@ const mealTableRow = (label: string, dish: string, count: number): TableRow =>
     ],
   });
 
+const NO_DAR_SIZE = 15;
+
 const clientChunkRows = (
   clients: string[],
   firstRowPrefix: [TableCell, TableCell] | null,
+  nameSize?: number,
 ): TableRow[] => {
   const rows: TableRow[] = [];
 
   for (let i = 0; i < clients.length; i += NUM_CLIENT_COLS) {
     const chunk = clients.slice(i, i + NUM_CLIENT_COLS);
-    const nameCells = chunk.map((name) => cell(para(name)));
+    const nameCells = chunk.map((name) => cell(para(name, { size: nameSize })));
     const paddingCells = Array.from({ length: NUM_CLIENT_COLS - chunk.length }, () => emptyCell());
 
     if (i === 0 && firstRowPrefix) {
@@ -199,10 +202,21 @@ const clientChunkRows = (
 
 const noDarTableRows = (label: string, clients: string[]): TableRow[] => {
   if (clients.length === 0) return [];
-  return clientChunkRows(clients, [
-    cell(para(String(clients.length), { bold: true, color: RED, align: AlignmentType.CENTER })),
-    cell(para(`NO DAR ${label}`)),
-  ]);
+  return clientChunkRows(
+    clients,
+    [
+      cell(
+        para(String(clients.length), {
+          bold: true,
+          color: RED,
+          size: NO_DAR_SIZE,
+          align: AlignmentType.CENTER,
+        }),
+      ),
+      cell(para(`NO DAR ${label}`, { size: NO_DAR_SIZE })),
+    ],
+    NO_DAR_SIZE,
+  );
 };
 
 const hiperproteicoTableRows = (clients: string[]): TableRow[] => {
