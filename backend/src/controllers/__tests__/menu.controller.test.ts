@@ -7,7 +7,7 @@ jest.mock('../../database/sequelize', () => ({ __esModule: true, default: { quer
 
 const mockMenu = {
   id: 1,
-  date: '2026-06-06',
+  date: '2026-06-05',
   breakfast: 'Queque de platano',
   morningSnack: null,
   salad: null,
@@ -27,7 +27,7 @@ describe('GET /api/menus', () => {
 
     expect(res.status).toBe(200);
     expect(res.body.data).toHaveLength(1);
-    expect(res.body.data[0]).toMatchObject({ date: '2026-06-06' });
+    expect(res.body.data[0]).toMatchObject({ date: '2026-06-05' });
   });
 
   it('returns 500 when service throws', async () => {
@@ -43,16 +43,16 @@ describe('GET /api/menus/:date', () => {
   it('returns 200 with menu when found', async () => {
     (menuService.findByDate as jest.Mock).mockResolvedValue(mockMenu);
 
-    const res = await request(app).get('/api/menus/2026-06-06');
+    const res = await request(app).get('/api/menus/2026-06-05');
 
     expect(res.status).toBe(200);
-    expect(res.body.data).toMatchObject({ date: '2026-06-06' });
+    expect(res.body.data).toMatchObject({ date: '2026-06-05' });
   });
 
   it('returns 404 when menu not found', async () => {
     (menuService.findByDate as jest.Mock).mockResolvedValue(null);
 
-    const res = await request(app).get('/api/menus/2026-06-06');
+    const res = await request(app).get('/api/menus/2026-06-05');
 
     expect(res.status).toBe(404);
   });
@@ -60,7 +60,7 @@ describe('GET /api/menus/:date', () => {
 
 describe('PUT /api/menus', () => {
   const validPayload = {
-    date: '2026-06-06',
+    date: '2026-06-05',
     breakfast: 'Queque de platano',
   };
 
@@ -70,7 +70,7 @@ describe('PUT /api/menus', () => {
     const res = await request(app).put('/api/menus').send(validPayload);
 
     expect(res.status).toBe(200);
-    expect(res.body.data).toMatchObject({ date: '2026-06-06' });
+    expect(res.body.data).toMatchObject({ date: '2026-06-05' });
   });
 
   it('returns 400 when date is missing', async () => {
@@ -83,6 +83,22 @@ describe('PUT /api/menus', () => {
     const res = await request(app)
       .put('/api/menus')
       .send({ date: '06-06-2026', breakfast: 'Queque' });
+
+    expect(res.status).toBe(400);
+  });
+
+  it('returns 400 when date is a saturday', async () => {
+    const res = await request(app)
+      .put('/api/menus')
+      .send({ date: '2026-06-06', breakfast: 'Queque' });
+
+    expect(res.status).toBe(400);
+  });
+
+  it('returns 400 when date is a sunday', async () => {
+    const res = await request(app)
+      .put('/api/menus')
+      .send({ date: '2026-06-07', breakfast: 'Queque' });
 
     expect(res.status).toBe(400);
   });
