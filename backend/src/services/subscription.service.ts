@@ -9,7 +9,8 @@ const create = async (clientId: number, data: CreateSubscriptionDto) => {
   const client = await Client.findByPk(clientId);
   if (!client) return null;
 
-  const contractEndDate = addDeliveryDays(data.startDate, data.duration);
+  // duration - 1 because startDate counts as day 1
+  const contractEndDate = addDeliveryDays(data.startDate, data.duration - 1);
 
   return Subscription.create({
     planId: data.planId,
@@ -32,7 +33,8 @@ const update = async (clientId: number, id: number, data: UpdateSubscriptionDto)
   if (startDate !== undefined || duration !== undefined) {
     const newStartDate = startDate ?? subscription.startDate;
     const newDuration = duration ?? subscription.duration;
-    const newContractEndDate = addDeliveryDays(newStartDate, newDuration);
+    // duration - 1 because startDate counts as day 1
+    const newContractEndDate = addDeliveryDays(newStartDate, newDuration - 1);
     const cleanedSuspendedDates = (subscription.suspendedDates ?? []).filter(
       (d) => d >= newStartDate,
     );

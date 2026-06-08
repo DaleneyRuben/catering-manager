@@ -15,7 +15,7 @@ beforeEach(() => {
 
 const today = format(new Date(), 'yyyy-MM-dd');
 const startDate = '2026-05-26';
-const contractEndDate = addDeliveryDays(startDate, 20);
+const contractEndDate = addDeliveryDays(startDate, 19);
 
 const mockSubscription = {
   id: 1,
@@ -150,7 +150,7 @@ describe('subscriptionService.update contract dates', () => {
       clientId: 1,
       startDate: '2026-05-26',
       duration: 20,
-      contractEndDate: addDeliveryDays('2026-05-26', 20),
+      contractEndDate: addDeliveryDays('2026-05-26', 19),
       suspendedDates: [],
       update: jest.fn().mockResolvedValue({}),
     };
@@ -159,7 +159,7 @@ describe('subscriptionService.update contract dates', () => {
     await subscriptionService.update(1, 1, { startDate: '2026-06-01' });
 
     expect(mockInstance.update).toHaveBeenCalledWith(
-      expect.objectContaining({ contractEndDate: addDeliveryDays('2026-06-01', 20) }),
+      expect.objectContaining({ contractEndDate: addDeliveryDays('2026-06-01', 19) }),
     );
   });
 
@@ -168,7 +168,7 @@ describe('subscriptionService.update contract dates', () => {
       clientId: 1,
       startDate: '2026-05-26',
       duration: 20,
-      contractEndDate: addDeliveryDays('2026-05-26', 20),
+      contractEndDate: addDeliveryDays('2026-05-26', 19),
       suspendedDates: [],
       update: jest.fn().mockResolvedValue({}),
     };
@@ -177,7 +177,7 @@ describe('subscriptionService.update contract dates', () => {
     await subscriptionService.update(1, 1, { duration: 30 });
 
     expect(mockInstance.update).toHaveBeenCalledWith(
-      expect.objectContaining({ contractEndDate: addDeliveryDays('2026-05-26', 30) }),
+      expect.objectContaining({ contractEndDate: addDeliveryDays('2026-05-26', 29) }),
     );
   });
 
@@ -186,7 +186,7 @@ describe('subscriptionService.update contract dates', () => {
       clientId: 1,
       startDate: '2026-05-26',
       duration: 20,
-      contractEndDate: addDeliveryDays('2026-05-26', 20),
+      contractEndDate: addDeliveryDays('2026-05-26', 19),
       suspendedDates: ['2026-05-27', '2026-06-10'],
       update: jest.fn().mockResolvedValue({}),
     };
@@ -205,7 +205,7 @@ describe('subscriptionService.update contract dates', () => {
       clientId: 1,
       startDate: '2026-05-26',
       duration: 20,
-      contractEndDate: addDeliveryDays('2026-05-26', 20),
+      contractEndDate: addDeliveryDays('2026-05-26', 19),
       suspendedDates: [],
       update: jest.fn().mockResolvedValue({}),
     };
@@ -220,7 +220,7 @@ describe('subscriptionService.update contract dates', () => {
   });
 
   it('does not recalculate contractEndDate when only contractDate changes', async () => {
-    const originalEnd = addDeliveryDays('2026-05-26', 20);
+    const originalEnd = addDeliveryDays('2026-05-26', 19);
     const mockInstance = {
       clientId: 1,
       startDate: '2026-05-26',
