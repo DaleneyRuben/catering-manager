@@ -11,9 +11,7 @@ const isProduction = process.env.NODE_ENV === 'production';
 const sequelize = new Sequelize(process.env.DATABASE_URL as string, {
   dialect: 'postgres',
   dialectModule: pg,
-  ...(isProduction
-    ? { dialectOptions: { ssl: { require: true, rejectUnauthorized: false } } }
-    : {}),
+  ...(isProduction ? { dialectOptions: { ssl: { require: true, rejectUnauthorized: true } } } : {}),
   models: [Client, ClientHistory, Menu, Plan, Subscription],
   logging: false,
 });
