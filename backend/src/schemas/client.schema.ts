@@ -13,8 +13,8 @@ export const createClientSchema = z.object({
   delivery: z.enum(DELIVERIES),
   nit: z.string().optional(),
   businessName: z.string().optional(),
-  underlyingDiseases: z.array(z.string()).default([]),
-  restrictions: z.array(z.string()).default([]),
+  underlyingDiseases: z.array(z.string().max(200)).max(50).default([]),
+  restrictions: z.array(z.string().max(200)).max(50).default([]),
 });
 
 export type CreateClientDto = z.infer<typeof createClientSchema>;
@@ -29,8 +29,8 @@ export const updateClientSchema = z.object({
   delivery: z.enum(DELIVERIES).optional(),
   nit: z.string().nullable().optional(),
   businessName: z.string().nullable().optional(),
-  underlyingDiseases: z.array(z.string()).optional(),
-  restrictions: z.array(z.string()).optional(),
+  underlyingDiseases: z.array(z.string().max(200)).max(50).optional(),
+  restrictions: z.array(z.string().max(200)).max(50).optional(),
   isActive: z.boolean().optional(),
 });
 
