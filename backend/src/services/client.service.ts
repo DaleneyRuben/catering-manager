@@ -39,7 +39,7 @@ const findAll = (filters: FindAllFilters = {}) => {
       subscriptionWhere.contractEndDate = { [Op.gt]: todayStr };
       andConditions.push(
         literal(
-          `"Client"."id" NOT IN (SELECT s2."clientId" FROM subscriptions s2 WHERE ${sequelize.escape(todayStr)}::date = ANY(s2."suspendedDates") AND s2."contractEndDate" > ${sequelize.escape(todayStr)})`,
+          `"Client"."id" NOT IN (SELECT s2."clientId" FROM subscriptions s2 WHERE '${todayStr}'::date = ANY(s2."suspendedDates") AND s2."contractEndDate" > '${todayStr}')`,
         ),
       );
       break;
@@ -53,7 +53,7 @@ const findAll = (filters: FindAllFilters = {}) => {
         [Op.or]: [
           { isActive: false },
           literal(
-            `"Client"."id" IN (SELECT s2."clientId" FROM subscriptions s2 WHERE ${sequelize.escape(todayStr)}::date = ANY(s2."suspendedDates") AND s2."contractEndDate" > ${sequelize.escape(todayStr)})`,
+            `"Client"."id" IN (SELECT s2."clientId" FROM subscriptions s2 WHERE '${todayStr}'::date = ANY(s2."suspendedDates") AND s2."contractEndDate" > '${todayStr}')`,
           ),
         ],
       });
@@ -62,7 +62,7 @@ const findAll = (filters: FindAllFilters = {}) => {
       subscriptionRequired = false;
       andConditions.push(
         literal(
-          `NOT EXISTS (SELECT 1 FROM subscriptions s WHERE s."clientId" = "Client"."id" AND s."contractEndDate" > ${sequelize.escape(todayStr)})`,
+          `NOT EXISTS (SELECT 1 FROM subscriptions s WHERE s."clientId" = "Client"."id" AND s."contractEndDate" > '${todayStr}')`,
         ),
       );
       break;
