@@ -1,4 +1,4 @@
-import { Op, literal, QueryTypes } from 'sequelize';
+import { Op, fn, literal, where, QueryTypes } from 'sequelize';
 import { appToday, addDeliveryDays } from '../utils/date';
 import { EXPIRY_THRESHOLD_DAYS } from '../constants/subscription.constants';
 import { CLIENT_STATUS } from '../constants/client.constants';
@@ -39,7 +39,7 @@ const findAll = (filters: FindAllFilters = {}) => {
       subscriptionWhere.contractEndDate = { [Op.gt]: todayStr };
       andConditions.push(
         literal(
-          `"Client"."id" NOT IN (SELECT s2."clientId" FROM subscriptions s2 WHERE '${todayStr}'::date = ANY(s2."suspendedDates") AND s2."contractEndDate" > '${todayStr}')`,
+          `"Client"."id" NOT IN (SELECT s2."clientId" FROM subscriptions s2 WHERE ${sequelize.escape(todayStr)}::date = ANY(s2."suspendedDates") AND s2."contractEndDate" > ${sequelize.escape(todayStr)})`,
         ),
       );
       break;
@@ -53,7 +53,7 @@ const findAll = (filters: FindAllFilters = {}) => {
         [Op.or]: [
           { isActive: false },
           literal(
-            `"Client"."id" IN (SELECT s2."clientId" FROM subscriptions s2 WHERE '${todayStr}'::date = ANY(s2."suspendedDates") AND s2."contractEndDate" > '${todayStr}')`,
+            `"Client"."id" IN (SELECT s2."clientId" FROM subscriptions s2 WHERE ${sequelize.escape(todayStr)}::date = ANY(s2."suspendedDates") AND s2."contractEndDate" > ${sequelize.escape(todayStr)})`,
           ),
         ],
       });
@@ -62,7 +62,7 @@ const findAll = (filters: FindAllFilters = {}) => {
       subscriptionRequired = false;
       andConditions.push(
         literal(
-          `NOT EXISTS (SELECT 1 FROM subscriptions s WHERE s."clientId" = "Client"."id" AND s."contractEndDate" > '${todayStr}')`,
+          `NOT EXISTS (SELECT 1 FROM subscriptions s WHERE s."clientId" = "Client"."id" AND s."contractEndDate" > ${sequelize.escape(todayStr)})`,
         ),
       );
       break;
@@ -83,7 +83,7 @@ const findAll = (filters: FindAllFilters = {}) => {
 
   if (filters.birthMonth) {
     andConditions.push(
-      literal(`EXTRACT(MONTH FROM "Client"."dateOfBirth") = ${filters.birthMonth}`),
+      where(fn('EXTRACT', literal('MONTH FROM "Client"."dateOfBirth"')), Op.eq, filters.birthMonth),
     );
   }
 
