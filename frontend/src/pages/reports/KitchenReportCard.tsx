@@ -4,9 +4,11 @@ import { es } from 'date-fns/locale';
 import { Icon } from '../../components/ui/Icon';
 import { useMenu } from '../../hooks/useMenu';
 
+import { API_BASE } from '../../utils/env';
+
 type DayOption = 'today' | 'tomorrow';
 
-const BASE = import.meta.env.VITE_API_URL || '/api';
+const BASE = API_BASE;
 
 const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 

@@ -2,10 +2,11 @@ import { useState } from 'react';
 import { format, addDays, parse, isWeekend } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Icon } from '../../components/ui/Icon';
+import { API_BASE } from '../../utils/env';
 
 type DayOption = 'today' | 'tomorrow';
 
-const BASE = import.meta.env.VITE_API_URL || '/api';
+const BASE = API_BASE;
 
 const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 

@@ -8,6 +8,7 @@ const config: Config = {
     '^@/(.*)$': '<rootDir>/src/$1',
     '\\.(css|less|scss|sass)$': 'identity-obj-proxy',
     '\\.(png|jpg|jpeg|gif|svg|ico|webp)$': '<rootDir>/src/__mocks__/fileMock.ts',
+    '.*/utils/env$': '<rootDir>/src/__mocks__/env.ts',
   },
   collectCoverageFrom: [
     'src/**/*.{ts,tsx}',

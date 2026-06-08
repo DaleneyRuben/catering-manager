@@ -1,4 +1,6 @@
-const BASE = import.meta.env.VITE_API_URL || '/api';
+import { API_BASE } from '../utils/env';
+
+const BASE = API_BASE;
 
 export interface PaginatedResponse<T> {
   data: T[];
