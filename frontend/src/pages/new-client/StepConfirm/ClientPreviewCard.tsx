@@ -14,7 +14,7 @@ export function ClientPreviewCard({ formValues, restrictions, plans }: Props) {
   const selectedPlan = plans.find((p) => p.id === formValues.planId);
   const contractEndDate =
     formValues.startDate && formValues.duration > 0
-      ? addBusinessDays(formValues.startDate, formValues.duration)
+      ? addBusinessDays(formValues.startDate, formValues.duration - 1) // duration - 1 because startDate counts as day 1
       : '—';
   const total = (selectedPlan?.price ?? 0) - (formValues.discount || 0);
 

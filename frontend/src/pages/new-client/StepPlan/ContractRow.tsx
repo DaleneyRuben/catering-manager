@@ -16,7 +16,8 @@ interface Props {
 
 export function ContractRow({ register, control, errors, startDate, duration }: Props) {
   const contractEndDate =
-    startDate && duration > 0 ? formatDate(addBusinessDays(startDate, duration)) : '—';
+    // duration - 1 because startDate counts as day 1
+    startDate && duration > 0 ? formatDate(addBusinessDays(startDate, duration - 1)) : '—';
 
   return (
     <div>
