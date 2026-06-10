@@ -1,11 +1,32 @@
-export const encodeId = (_n: number): string => {
-  throw new Error('not implemented');
+import Sqids from 'sqids';
+
+const options = process.env.SQIDS_ALPHABET
+  ? { alphabet: process.env.SQIDS_ALPHABET, minLength: 6 }
+  : { minLength: 6 };
+const sqids = new Sqids(options);
+
+export const encodeId = (n: number): string => sqids.encode([n]);
+
+export const decodeId = (s: string): number => {
+  const nums = sqids.decode(s);
+  if (nums.length === 0) throw new Error(`Invalid encoded ID: ${s}`);
+  return nums[0];
 };
 
-export const decodeId = (_s: string): number => {
-  throw new Error('not implemented');
-};
+// Matches fields named exactly "id" or ending with "Id" (e.g. clientId, planId)
+const ID_KEY = /^(id|[a-zA-Z]+Id)$/;
 
-export const encodeIds = (_value: unknown): unknown => {
-  throw new Error('not implemented');
+export const encodeIds = (value: unknown): unknown => {
+  if (value === null || value === undefined) return value;
+  if (Array.isArray(value)) return value.map(encodeIds);
+  if (typeof value === 'object') {
+    return Object.entries(value as Record<string, unknown>).reduce<Record<string, unknown>>(
+      (acc, [k, v]) => {
+        acc[k] = ID_KEY.test(k) && typeof v === 'number' ? encodeId(v) : encodeIds(v);
+        return acc;
+      },
+      {},
+    );
+  }
+  return value;
 };
