@@ -52,6 +52,22 @@ export function useClient(id: string | number) {
     },
   });
 
+  const renewMutation = useMutation({
+    mutationFn: (data: {
+      planId: number;
+      contractDate: string;
+      startDate?: string | null;
+      duration: number;
+      discount: number;
+      renewalType: 'renewal' | 'reactivation';
+    }) => api.post(`/clients/${id}/subscriptions`, data),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['clients', id] });
+      qc.invalidateQueries({ queryKey: ['clients'], exact: true });
+      qc.invalidateQueries({ queryKey: ['clients', id, 'history'] });
+    },
+  });
+
   const deleteMutation = useMutation({
     mutationFn: () => api.delete(`/clients/${id}`),
     onSuccess: () => {
@@ -89,5 +105,14 @@ export function useClient(id: string | number) {
       updateContractMutation.mutateAsync({ subscriptionId, ...draft }).then(() => {}),
     updateSuspensions: (subscriptionId: number, suspendedDates: string[]): Promise<void> =>
       updateSuspensionsMutation.mutateAsync({ suspendedDates, subscriptionId }).then(() => {}),
+    renew: (data: {
+      planId: number;
+      contractDate: string;
+      startDate?: string | null;
+      duration: number;
+      discount: number;
+      renewalType: 'renewal' | 'reactivation';
+    }): Promise<void> => renewMutation.mutateAsync(data).then(() => {}),
+    isRenewing: renewMutation.isPending,
   };
 }
