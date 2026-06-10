@@ -144,7 +144,8 @@ describe('subscriptionService.create', () => {
   });
 
   it('logs reactivated history event when renewalType is reactivation', async () => {
-    (Client.findByPk as jest.Mock).mockResolvedValue({ id: 1 });
+    const mockClient = { id: 1, update: jest.fn().mockResolvedValue({}) };
+    (Client.findByPk as jest.Mock).mockResolvedValue(mockClient);
     (Subscription.create as jest.Mock).mockResolvedValue(mockSubscription);
     (ClientHistory.create as jest.Mock).mockResolvedValue({});
 
@@ -159,6 +160,40 @@ describe('subscriptionService.create', () => {
     expect(ClientHistory.create).toHaveBeenCalledWith(
       expect.objectContaining({ clientId: 1, eventType: 'reactivated' }),
     );
+  });
+
+  it('sets client.isActive to true when renewalType is reactivation', async () => {
+    const mockClient = { id: 1, update: jest.fn().mockResolvedValue({}) };
+    (Client.findByPk as jest.Mock).mockResolvedValue(mockClient);
+    (Subscription.create as jest.Mock).mockResolvedValue(mockSubscription);
+    (ClientHistory.create as jest.Mock).mockResolvedValue({});
+
+    await subscriptionService.create(1, {
+      planId: 2,
+      startDate,
+      contractDate: today,
+      duration: 20,
+      renewalType: 'reactivation',
+    });
+
+    expect(mockClient.update).toHaveBeenCalledWith({ isActive: true });
+  });
+
+  it('does not set client.isActive when renewalType is renewal', async () => {
+    const mockClient = { id: 1, update: jest.fn().mockResolvedValue({}) };
+    (Client.findByPk as jest.Mock).mockResolvedValue(mockClient);
+    (Subscription.create as jest.Mock).mockResolvedValue(mockSubscription);
+    (ClientHistory.create as jest.Mock).mockResolvedValue({});
+
+    await subscriptionService.create(1, {
+      planId: 2,
+      startDate,
+      contractDate: today,
+      duration: 20,
+      renewalType: 'renewal',
+    });
+
+    expect(mockClient.update).not.toHaveBeenCalledWith({ isActive: true });
   });
 
   it('does not log history when renewalType is not provided', async () => {
