@@ -9,7 +9,10 @@ import Subscription from '../models/Subscription';
 import sequelize from '../database/sequelize';
 import { CreateClientDto, UpdateClientDto } from '../schemas/client.schema';
 
-const INCLUDE_SUBSCRIPTION = [{ model: Subscription, include: [Plan] }];
+// Ordered newest-first so subscriptions[0] is always the current subscription
+const INCLUDE_SUBSCRIPTION_ORDERED = [
+  { model: Subscription, include: [Plan], separate: true, order: [['id', 'DESC']] as never },
+];
 
 export interface FindAllFilters {
   status?: string;
@@ -139,10 +142,10 @@ const getCounts = async () => {
   };
 };
 
-const findById = (id: number) => Client.findByPk(id, { include: INCLUDE_SUBSCRIPTION });
+const findById = (id: number) => Client.findByPk(id, { include: INCLUDE_SUBSCRIPTION_ORDERED });
 
 const update = async (id: number, data: UpdateClientDto) => {
-  const client = await Client.findByPk(id, { include: INCLUDE_SUBSCRIPTION });
+  const client = await Client.findByPk(id, { include: INCLUDE_SUBSCRIPTION_ORDERED });
   if (!client) return null;
 
   if (data.isActive !== undefined && data.isActive !== client.isActive) {
@@ -158,7 +161,7 @@ const update = async (id: number, data: UpdateClientDto) => {
 };
 
 const finalize = async (id: number) => {
-  const client = await Client.findByPk(id, { include: INCLUDE_SUBSCRIPTION });
+  const client = await Client.findByPk(id, { include: INCLUDE_SUBSCRIPTION_ORDERED });
   if (!client) return null;
 
   const today = appToday();
