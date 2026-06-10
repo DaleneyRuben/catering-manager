@@ -18,7 +18,8 @@ const mockClient = {
   businessName: null,
   underlyingDiseases: ['diabetes'],
   restrictions: ['gluten'],
-  isActive: true,
+  pausedSince: null,
+  status: 'active',
 };
 
 const validPayload = {
@@ -130,13 +131,14 @@ describe('GET /api/clients/:id', () => {
 });
 
 describe('PATCH /api/clients/:id', () => {
-  it('returns 200 when toggling isActive', async () => {
-    (clientService.update as jest.Mock).mockResolvedValue({ ...mockClient, isActive: false });
+  it('returns 200 when setting pausedSince', async () => {
+    const pausedSince = '2026-06-10T12:00:00Z';
+    (clientService.update as jest.Mock).mockResolvedValue({ ...mockClient, pausedSince });
 
-    const res = await request(app).patch('/api/clients/1').send({ isActive: false });
+    const res = await request(app).patch('/api/clients/1').send({ pausedSince });
 
     expect(res.status).toBe(200);
-    expect(res.body.data).toMatchObject({ isActive: false });
+    expect(res.body.data).toMatchObject({ pausedSince });
   });
 
   it('returns 200 when updating identity fields', async () => {
@@ -169,13 +171,13 @@ describe('PATCH /api/clients/:id', () => {
   it('returns 404 when client not found', async () => {
     (clientService.update as jest.Mock).mockResolvedValue(null);
 
-    const res = await request(app).patch('/api/clients/999').send({ isActive: false });
+    const res = await request(app).patch('/api/clients/999').send({ name: 'Jane' });
 
     expect(res.status).toBe(404);
   });
 
   it('returns 400 with invalid body', async () => {
-    const res = await request(app).patch('/api/clients/1').send({ isActive: 'yes' });
+    const res = await request(app).patch('/api/clients/1').send({ sex: 'alien' });
 
     expect(res.status).toBe(400);
   });
@@ -183,7 +185,7 @@ describe('PATCH /api/clients/:id', () => {
   it('returns 500 when service throws', async () => {
     (clientService.update as jest.Mock).mockRejectedValue(new Error('db error'));
 
-    const res = await request(app).patch('/api/clients/1').send({ isActive: false });
+    const res = await request(app).patch('/api/clients/1').send({ name: 'Jane' });
 
     expect(res.status).toBe(500);
   });

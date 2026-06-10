@@ -162,7 +162,7 @@ describe('subscriptionService.create', () => {
     );
   });
 
-  it('sets client.isActive to true when renewalType is reactivation', async () => {
+  it('clears pausedSince when renewalType is reactivation', async () => {
     const mockClient = { id: 1, update: jest.fn().mockResolvedValue({}) };
     (Client.findByPk as jest.Mock).mockResolvedValue(mockClient);
     (Subscription.create as jest.Mock).mockResolvedValue(mockSubscription);
@@ -176,10 +176,10 @@ describe('subscriptionService.create', () => {
       renewalType: 'reactivation',
     });
 
-    expect(mockClient.update).toHaveBeenCalledWith({ isActive: true });
+    expect(mockClient.update).toHaveBeenCalledWith({ pausedSince: null });
   });
 
-  it('does not set client.isActive when renewalType is renewal', async () => {
+  it('does not update pausedSince when renewalType is renewal', async () => {
     const mockClient = { id: 1, update: jest.fn().mockResolvedValue({}) };
     (Client.findByPk as jest.Mock).mockResolvedValue(mockClient);
     (Subscription.create as jest.Mock).mockResolvedValue(mockSubscription);
@@ -193,7 +193,7 @@ describe('subscriptionService.create', () => {
       renewalType: 'renewal',
     });
 
-    expect(mockClient.update).not.toHaveBeenCalledWith({ isActive: true });
+    expect(mockClient.update).not.toHaveBeenCalledWith({ pausedSince: null });
   });
 
   it('does not log history when renewalType is not provided', async () => {

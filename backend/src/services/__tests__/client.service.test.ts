@@ -1,3 +1,4 @@
+import { Op } from 'sequelize';
 import Client from '../../models/Client';
 import ClientHistory from '../../models/ClientHistory';
 import sequelize from '../../database/sequelize';
@@ -24,7 +25,7 @@ const mockClient = {
   businessName: null,
   underlyingDiseases: ['diabetes'],
   restrictions: ['gluten'],
-  isActive: true,
+  pausedSince: null,
 };
 
 describe('clientService.create', () => {
@@ -77,6 +78,20 @@ describe('clientService.findAll', () => {
     expect(result.total).toBe(1);
   });
 
+  it('includes computed status in each row', async () => {
+    const clientWithSub = {
+      ...mockClient,
+      subscriptions: [
+        { startDate: '2026-01-01', contractEndDate: '2026-12-31', suspendedDates: [] },
+      ],
+    };
+    (Client.findAndCountAll as jest.Mock).mockResolvedValue({ rows: [clientWithSub], count: 1 });
+
+    const result = await clientService.findAll();
+
+    expect(result.rows[0]).toMatchObject({ status: expect.any(String) });
+  });
+
   it('sorts subscriptions newest-first so subscriptions[0] is the current one', async () => {
     const clientWithTwoSubs = {
       ...mockClient,
@@ -109,6 +124,19 @@ describe('clientService.findById', () => {
     expect(result).toMatchObject({ id: 1, name: 'John Doe' });
   });
 
+  it('includes computed status in the response', async () => {
+    (Client.findByPk as jest.Mock).mockResolvedValue({
+      ...mockClient,
+      subscriptions: [
+        { startDate: '2026-01-01', contractEndDate: '2026-12-31', suspendedDates: [] },
+      ],
+    });
+
+    const result = await clientService.findById(1);
+
+    expect(result).toMatchObject({ status: expect.any(String) });
+  });
+
   it('returns null when not found', async () => {
     (Client.findByPk as jest.Mock).mockResolvedValue(null);
 
@@ -119,51 +147,92 @@ describe('clientService.findById', () => {
 });
 
 describe('clientService.update', () => {
-  it('updates a client and returns the updated instance', async () => {
+  beforeEach(() => jest.clearAllMocks());
+
+  it('sets pausedSince to a date when pausing and records paused history event', async () => {
+    const pausedSince = '2026-06-10T12:00:00Z';
     const mockInstance = {
-      isActive: true,
-      update: jest.fn().mockResolvedValue({ ...mockClient, isActive: false }),
+      id: 1,
+      pausedSince: null,
+      subscriptions: [],
+      update: jest.fn().mockResolvedValue({ ...mockClient, pausedSince }),
+    };
+    (Client.findByPk as jest.Mock).mockResolvedValue(mockInstance);
+    (ClientHistory.create as jest.Mock).mockResolvedValue({});
+
+    await clientService.update(1, { pausedSince });
+
+    expect(ClientHistory.create).toHaveBeenCalledWith(
+      expect.objectContaining({ clientId: 1, eventType: 'paused' }),
+    );
+    expect(mockInstance.update).toHaveBeenCalledWith({ pausedSince });
+  });
+
+  it('sets pausedSince to null when resuming and records resumed history event', async () => {
+    const mockInstance = {
+      id: 1,
+      pausedSince: new Date('2026-06-01'),
+      subscriptions: [],
+      update: jest.fn().mockResolvedValue({ ...mockClient, pausedSince: null }),
+    };
+    (Client.findByPk as jest.Mock).mockResolvedValue(mockInstance);
+    (ClientHistory.create as jest.Mock).mockResolvedValue({});
+
+    await clientService.update(1, { pausedSince: null });
+
+    expect(ClientHistory.create).toHaveBeenCalledWith(
+      expect.objectContaining({ clientId: 1, eventType: 'resumed' }),
+    );
+    expect(mockInstance.update).toHaveBeenCalledWith({ pausedSince: null });
+  });
+
+  it('does not record a history event when non-pause fields are updated', async () => {
+    const mockInstance = {
+      id: 1,
+      pausedSince: null,
+      subscriptions: [],
+      update: jest.fn().mockResolvedValue({ ...mockClient, name: 'Jane Doe' }),
     };
     (Client.findByPk as jest.Mock).mockResolvedValue(mockInstance);
 
-    const result = await clientService.update(1, { isActive: false });
+    await clientService.update(1, { name: 'Jane Doe' });
 
-    expect(mockInstance.update).toHaveBeenCalledWith({ isActive: false });
-    expect(result).toMatchObject({ isActive: false });
+    expect(ClientHistory.create).not.toHaveBeenCalled();
+    expect(mockInstance.update).toHaveBeenCalledWith({ name: 'Jane Doe' });
   });
 
   it('returns null when client not found', async () => {
     (Client.findByPk as jest.Mock).mockResolvedValue(null);
 
-    const result = await clientService.update(999, { isActive: false });
+    const result = await clientService.update(999, { pausedSince: null });
 
     expect(result).toBeNull();
   });
 
   it('propagates db errors', async () => {
     const mockInstance = {
-      isActive: true,
+      pausedSince: null,
+      subscriptions: [],
       update: jest.fn().mockRejectedValue(new Error('db error')),
     };
     (Client.findByPk as jest.Mock).mockResolvedValue(mockInstance);
 
-    await expect(clientService.update(1, { isActive: false })).rejects.toThrow('db error');
+    await expect(clientService.update(1, { pausedSince: null })).rejects.toThrow('db error');
   });
 });
 
 describe('clientService.findAll with filters', () => {
   beforeEach(() => jest.clearAllMocks());
 
-  it('status=active passes isActive:true and required subscription', async () => {
+  it('status=active filters by pausedSince IS NULL and requires subscription', async () => {
     (Client.findAndCountAll as jest.Mock).mockResolvedValue({ rows: [], count: 0 });
 
     await clientService.findAll({ status: 'active' });
 
-    expect(Client.findAndCountAll).toHaveBeenCalledWith(
-      expect.objectContaining({
-        where: expect.objectContaining({ isActive: true }),
-        include: expect.arrayContaining([expect.objectContaining({ required: true })]),
-      }),
+    const call = (Client.findAndCountAll as jest.Mock).mock.calls[0][0];
+    expect(call.where).toMatchObject({ pausedSince: { [Op.is]: null } });
+    expect(call.include).toEqual(
+      expect.arrayContaining([expect.objectContaining({ required: true })]),
     );
   });
 
@@ -187,7 +256,6 @@ describe('clientService.findAll with filters', () => {
     const call = (Client.findAndCountAll as jest.Mock).mock.calls[0][0];
     const andConditions = call.where?.[Symbol.for('and')];
     expect(andConditions).toBeDefined();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const futureStartExclusion = andConditions.some(
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (c: any) => c?.val?.includes?.('startDate') && c?.val?.includes?.('NOT IN'),
@@ -195,14 +263,12 @@ describe('clientService.findAll with filters', () => {
     expect(futureStartExclusion).toBe(true);
   });
 
-  it('status=paused uses OR condition for paused and suspended-today clients', async () => {
+  it('status=paused uses OR condition including pausedSince IS NOT NULL', async () => {
     (Client.findAndCountAll as jest.Mock).mockResolvedValue({ rows: [], count: 0 });
 
     await clientService.findAll({ status: 'paused' });
 
     const call = (Client.findAndCountAll as jest.Mock).mock.calls[0][0];
-    expect(call.where?.isActive).toBeUndefined();
-    expect(call.include[0].required).toBe(true);
     const andConditions = call.where?.[Symbol.for('and')];
     expect(andConditions).toBeDefined();
     const hasOr = andConditions.some(
@@ -262,12 +328,13 @@ describe('clientService.findAll with filters', () => {
   });
 
   it('returns rows and total from findAndCountAll', async () => {
-    const mockClients = [{ id: 1, name: 'María García' }];
+    const mockClients = [{ id: 1, name: 'María García', pausedSince: null, subscriptions: [] }];
     (Client.findAndCountAll as jest.Mock).mockResolvedValue({ rows: mockClients, count: 42 });
 
     const result = await clientService.findAll({ status: 'active' });
 
-    expect(result.rows).toBe(mockClients);
+    expect(result.rows).toHaveLength(1);
+    expect(result.rows[0]).toMatchObject({ id: 1, name: 'María García' });
     expect(result.total).toBe(42);
   });
 
@@ -315,11 +382,11 @@ describe('clientService.getCounts', () => {
 describe('clientService.finalize', () => {
   beforeEach(() => jest.clearAllMocks());
 
-  it('sets contractEndDate to today, deactivates client, and records history', async () => {
+  it('sets contractEndDate to today, and records finalized history event', async () => {
     const mockSub = { update: jest.fn().mockResolvedValue({}) };
     const mockInstance = {
       id: 1,
-      isActive: true,
+      pausedSince: null,
       subscriptions: [mockSub],
       update: jest.fn().mockResolvedValue({}),
     };
@@ -331,7 +398,6 @@ describe('clientService.finalize', () => {
     expect(mockSub.update).toHaveBeenCalledWith(
       expect.objectContaining({ contractEndDate: expect.any(String) }),
     );
-    expect(mockInstance.update).toHaveBeenCalledWith({ isActive: false });
     expect(ClientHistory.create).toHaveBeenCalledWith(
       expect.objectContaining({ clientId: 1, eventType: 'finalized' }),
     );
