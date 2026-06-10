@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Icon } from '../components/ui/Icon';
 import { PageLoader } from '../components/ui/PageLoader';
 import { Pagination } from '../components/ui/Pagination';
@@ -16,41 +16,61 @@ type FilterValue = (typeof CLIENT_STATUS)[keyof typeof CLIENT_STATUS];
 
 export function ClientsPage() {
   const navigate = useNavigate();
-  const [q, setQ] = useState('');
-  const [filter, setFilter] = useState<FilterValue>(CLIENT_STATUS.ACTIVE);
-  const [birthMonth, setBirthMonth] = useState<string>(CLIENT_STATUS.ALL);
-  const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(25);
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const filter = (searchParams.get('status') as FilterValue) ?? CLIENT_STATUS.ACTIVE;
+  const birthMonth = searchParams.get('birthMonth') ?? CLIENT_STATUS.ALL;
+  const page = Number(searchParams.get('page') ?? '1');
+  const limit = Number(searchParams.get('limit') ?? '25');
+
+  const [q, setQ] = useState(() => searchParams.get('q') ?? '');
+  const debouncedQ = useDebounce(q);
   const [tableLoading, setTableLoading] = useState(false);
 
-  const debouncedQ = useDebounce(q);
+  const updateParams = (updates: Record<string, string | null>, resetPage = false) => {
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev);
+        if (resetPage) next.delete('page');
+        Object.entries(updates).forEach(([k, v]) => {
+          if (v === null) next.delete(k);
+          else next.set(k, v);
+        });
+        // remove defaults to keep URLs clean
+        if (next.get('status') === CLIENT_STATUS.ACTIVE) next.delete('status');
+        if (next.get('birthMonth') === CLIENT_STATUS.ALL) next.delete('birthMonth');
+        if (next.get('page') === '1') next.delete('page');
+        if (next.get('limit') === '25') next.delete('limit');
+        return next;
+      },
+      { replace: true },
+    );
+  };
 
   const changeFilter = (v: FilterValue) => {
     if (v === filter) return;
     setTableLoading(true);
-    setFilter(v);
-    setPage(1);
+    updateParams({ status: v }, true);
   };
   const changeBirthMonth = (v: string) => {
     if (v === birthMonth) return;
     setTableLoading(true);
-    setBirthMonth(v);
-    setPage(1);
+    updateParams({ birthMonth: v }, true);
   };
   const changeLimit = (v: number) => {
     if (v === limit) return;
     setTableLoading(true);
-    setLimit(v);
-    setPage(1);
+    updateParams({ limit: String(v) }, true);
   };
   const changePage = (p: number) => {
     if (p === page) return;
     setTableLoading(true);
-    setPage(p);
+    updateParams({ page: String(p) });
   };
 
   useEffect(() => {
-    setPage(1);
+    updateParams({ q: debouncedQ || null }, true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedQ]);
 
   const { clients, total, isLoading, isFetching } = useClientList({
@@ -207,7 +227,7 @@ export function ClientsPage() {
               <tbody>
                 {clients.map((c) => {
                   const sub = c.subscriptions[0];
-                  const {status} = c;
+                  const { status } = c;
                   return (
                     <tr
                       key={c.id}
