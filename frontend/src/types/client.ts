@@ -58,15 +58,15 @@ export interface ClientHistoryEntry {
   metadata: Record<string, unknown>;
 }
 
-export type ClientStatus = 'active' | 'paused' | 'expiring' | 'ended' | 'suspended';
+export type ClientStatus = 'active' | 'paused' | 'expiring' | 'ended' | 'suspended' | 'future';
 
 export function clientStatus(client: Client, today = new Date()): ClientStatus {
   const sub = client.subscriptions[0];
   if (!sub || (sub.contractEndDate && !isAfter(parseISO(sub.contractEndDate), today)))
     return CLIENT_STATUS.ENDED;
   if (!client.isActive) return CLIENT_STATUS.PAUSED;
-  // Subscription hasn't started yet — treat as paused until start date arrives
-  if (sub.startDate && isAfter(parseISO(sub.startDate), today)) return CLIENT_STATUS.PAUSED;
+  // start date hasn't arrived yet — plan is scheduled but not active
+  if (sub.startDate && isAfter(parseISO(sub.startDate), today)) return CLIENT_STATUS.FUTURE;
   const todayIso = format(today, 'yyyy-MM-dd');
   if (sub.suspendedDates?.includes(todayIso)) return CLIENT_STATUS.SUSPENDED;
   if (

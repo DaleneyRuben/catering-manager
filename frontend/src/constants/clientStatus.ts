@@ -6,6 +6,7 @@ export const CLIENT_STATUS = {
   PAUSED: 'paused',
   SUSPENDED: 'suspended',
   ENDED: 'ended',
+  FUTURE: 'future',
   ALL: 'all',
 } as const;
 
@@ -15,6 +16,7 @@ export const STATUS_LABELS: Record<ClientStatus, string> = {
   expiring: 'Por vencer',
   suspended: 'Suspendido',
   ended: 'Finalizado',
+  future: 'Programado',
 };
 
 export const STATUS_CLASSES: Record<ClientStatus, string> = {
@@ -23,4 +25,5 @@ export const STATUS_CLASSES: Record<ClientStatus, string> = {
   expiring: 'bg-warn-bg text-warn',
   suspended: 'bg-warn-bg text-warn',
   ended: 'bg-alert-bg text-alert',
+  future: 'bg-warn-bg text-warn',
 };

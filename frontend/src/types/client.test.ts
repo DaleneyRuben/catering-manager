@@ -64,4 +64,19 @@ describe('clientStatus', () => {
     });
     expect(clientStatus(client, today)).toBe('paused');
   });
+
+  it('returns future when start date is in the future', () => {
+    const client = makeClient({
+      subscriptions: [makeSub({ startDate: '2099-01-01', contractEndDate: '2099-03-01' })],
+    });
+    expect(clientStatus(client, today)).toBe('future');
+  });
+
+  it('returns paused (not future) when client is inactive even with a future start date', () => {
+    const client = makeClient({
+      isActive: false,
+      subscriptions: [makeSub({ startDate: '2099-01-01', contractEndDate: '2099-03-01' })],
+    });
+    expect(clientStatus(client, today)).toBe('paused');
+  });
 });
