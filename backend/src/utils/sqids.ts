@@ -20,7 +20,12 @@ export const encodeIds = (value: unknown): unknown => {
   if (value === null || value === undefined) return value;
   if (Array.isArray(value)) return value.map(encodeIds);
   if (typeof value === 'object') {
-    return Object.entries(value as Record<string, unknown>).reduce<Record<string, unknown>>(
+    // Sequelize model instances store data in dataValues; toJSON() returns the plain object
+    const plain =
+      typeof (value as { toJSON?: () => unknown }).toJSON === 'function'
+        ? (value as { toJSON: () => unknown }).toJSON()
+        : value;
+    return Object.entries(plain as Record<string, unknown>).reduce<Record<string, unknown>>(
       (acc, [k, v]) => {
         acc[k] = ID_KEY.test(k) && typeof v === 'number' ? encodeId(v) : encodeIds(v);
         return acc;
