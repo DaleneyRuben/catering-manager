@@ -3,11 +3,14 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.addColumn('clients', 'pausedSince', {
-      type: Sequelize.DATE,
-      allowNull: true,
-      defaultValue: null,
-    });
+    const tableDesc = await queryInterface.describeTable('clients');
+    if (!tableDesc.pausedSince) {
+      await queryInterface.addColumn('clients', 'pausedSince', {
+        type: Sequelize.DATE,
+        allowNull: true,
+        defaultValue: null,
+      });
+    }
 
     // Migrate paused clients: use the latest 'paused' history event date when available,
     // fall back to NOW() so resume logic has a valid reference point.
@@ -16,7 +19,7 @@ module.exports = {
       SET "pausedSince" = COALESCE(
         (
           SELECT h."occurredAt"
-          FROM client_histories h
+          FROM client_history h
           WHERE h."clientId" = c.id
             AND h."eventType" = 'paused'
           ORDER BY h."occurredAt" DESC
@@ -32,7 +35,10 @@ module.exports = {
         )
     `);
 
-    await queryInterface.removeColumn('clients', 'isActive');
+    const desc = await queryInterface.describeTable('clients');
+    if (desc.isActive) {
+      await queryInterface.removeColumn('clients', 'isActive');
+    }
   },
 
   async down(queryInterface, Sequelize) {
