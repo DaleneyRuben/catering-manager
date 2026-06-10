@@ -15,6 +15,7 @@ import { ClientOverviewTab } from './ClientOverviewTab';
 import { ClientHistoryTab } from './ClientHistoryTab';
 import { ClientPlanTab } from './ClientPlanTab';
 import { ClientHeader } from './ClientHeader';
+import { RenewalModal } from './RenewalModal';
 import { ConfirmModal } from '../components/ui/ConfirmModal';
 import { PageLoader } from '../components/ui/PageLoader';
 
@@ -39,12 +40,14 @@ export function ClientDetailPage() {
     deleteClient,
     updateSuspensions,
     updateContract,
+    renew,
   } = useClient(id!);
   const [tab, setTab] = useState<TabId>('overview');
   const [editOpen, setEditOpen] = useState(false);
   const [finalizeOpen, setFinalizeOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [suspendOpen, setSuspendOpen] = useState(false);
+  const [renewOpen, setRenewOpen] = useState(false);
 
   const handleToggleActive = async () => {
     if (!client) return;
@@ -100,6 +103,7 @@ export function ClientDetailPage() {
         onEdit={() => setEditOpen(true)}
         onDelete={() => setDeleteOpen(true)}
         onBack={() => navigate('/clientes')}
+        onRenew={() => setRenewOpen(true)}
       />
 
       <div role="tablist" className="flex border-b border-rule mb-5">
@@ -220,6 +224,15 @@ export function ClientDetailPage() {
           clientName={client.name}
           onClose={() => setSuspendOpen(false)}
           onSave={(dates) => updateSuspensions(sub.id, dates)}
+        />
+      )}
+      {renewOpen && (
+        <RenewalModal
+          client={client}
+          sub={sub}
+          isReactivation={status === CLIENT_STATUS.ENDED}
+          onClose={() => setRenewOpen(false)}
+          onRenew={renew}
         />
       )}
     </div>

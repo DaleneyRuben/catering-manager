@@ -13,6 +13,7 @@ interface Props {
   onEdit: () => void;
   onDelete: () => void;
   onBack: () => void;
+  onRenew: () => void;
 }
 
 export function ClientHeader({
@@ -23,6 +24,7 @@ export function ClientHeader({
   onEdit,
   onDelete,
   onBack,
+  onRenew,
 }: Props) {
   const age = differenceInYears(startOfToday(), parseISO(client.dateOfBirth));
 
@@ -88,6 +90,7 @@ export function ClientHeader({
           )}
           <button
             type="button"
+            onClick={onRenew}
             className="flex items-center gap-2 px-4 py-2.5 text-[13px] font-semibold border border-rule rounded-md text-ink hover:bg-cream-2 transition-colors"
           >
             <Icon name="refresh" size={14} />
