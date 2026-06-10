@@ -1,5 +1,6 @@
 import type { Response } from 'express';
 import { sendSuccess, sendPaginated, sendError } from '../response';
+import { encodeId } from '../sqids';
 
 const mockRes = () => {
   const json = jest.fn();
@@ -12,14 +13,14 @@ describe('sendSuccess', () => {
     const { res, status, json } = mockRes();
     sendSuccess(res, { id: 1 });
     expect(status).toHaveBeenCalledWith(200);
-    expect(json).toHaveBeenCalledWith({ data: { id: 1 } });
+    expect(json).toHaveBeenCalledWith({ data: { id: encodeId(1) } });
   });
 
   it('uses a custom status code', () => {
     const { res, status, json } = mockRes();
     sendSuccess(res, { id: 1 }, 201);
     expect(status).toHaveBeenCalledWith(201);
-    expect(json).toHaveBeenCalledWith({ data: { id: 1 } });
+    expect(json).toHaveBeenCalledWith({ data: { id: encodeId(1) } });
   });
 
   it('wraps array data', () => {
@@ -35,7 +36,12 @@ describe('sendPaginated', () => {
     const { res, status, json } = mockRes();
     sendPaginated(res, [{ id: 1 }], 50, 2, 10);
     expect(status).toHaveBeenCalledWith(200);
-    expect(json).toHaveBeenCalledWith({ data: [{ id: 1 }], total: 50, page: 2, limit: 10 });
+    expect(json).toHaveBeenCalledWith({
+      data: [{ id: encodeId(1) }],
+      total: 50,
+      page: 2,
+      limit: 10,
+    });
   });
 
   it('works with empty data array', () => {

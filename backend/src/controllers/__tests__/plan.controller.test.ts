@@ -1,9 +1,13 @@
 import request from 'supertest';
 import app from '../../app';
 import planService from '../../services/plan.service';
+import { encodeId } from '../../utils/sqids';
 
 jest.mock('../../services/plan.service');
 jest.mock('../../database/sequelize', () => ({ __esModule: true, default: { query: jest.fn() } }));
+
+const id1 = encodeId(1);
+const id999 = encodeId(999);
 
 const mockPlan = {
   id: 1,
@@ -65,16 +69,16 @@ describe('GET /api/plans/:id', () => {
   it('returns 200 with plan when found', async () => {
     (planService.findById as jest.Mock).mockResolvedValue(mockPlan);
 
-    const res = await request(app).get('/api/plans/1');
+    const res = await request(app).get(`/api/plans/${id1}`);
 
     expect(res.status).toBe(200);
-    expect(res.body.data).toMatchObject({ id: 1, name: 'Full Plan' });
+    expect(res.body.data).toMatchObject({ id: id1, name: 'Full Plan' });
   });
 
   it('returns 404 when plan not found', async () => {
     (planService.findById as jest.Mock).mockResolvedValue(null);
 
-    const res = await request(app).get('/api/plans/999');
+    const res = await request(app).get(`/api/plans/${id999}`);
 
     expect(res.status).toBe(404);
   });
@@ -82,7 +86,7 @@ describe('GET /api/plans/:id', () => {
   it('returns 500 when service throws', async () => {
     (planService.findById as jest.Mock).mockRejectedValue(new Error('db error'));
 
-    const res = await request(app).get('/api/plans/1');
+    const res = await request(app).get(`/api/plans/${id1}`);
 
     expect(res.status).toBe(500);
   });
@@ -135,7 +139,7 @@ describe('DELETE /api/plans/:id', () => {
   it('returns 204 when plan is deleted', async () => {
     (planService.remove as jest.Mock).mockResolvedValue(true);
 
-    const res = await request(app).delete('/api/plans/1');
+    const res = await request(app).delete(`/api/plans/${id1}`);
 
     expect(res.status).toBe(204);
   });
@@ -143,7 +147,7 @@ describe('DELETE /api/plans/:id', () => {
   it('returns 404 when plan not found', async () => {
     (planService.remove as jest.Mock).mockResolvedValue(false);
 
-    const res = await request(app).delete('/api/plans/999');
+    const res = await request(app).delete(`/api/plans/${id999}`);
 
     expect(res.status).toBe(404);
   });
@@ -151,7 +155,7 @@ describe('DELETE /api/plans/:id', () => {
   it('returns 500 when service throws', async () => {
     (planService.remove as jest.Mock).mockRejectedValue(new Error('db error'));
 
-    const res = await request(app).delete('/api/plans/1');
+    const res = await request(app).delete(`/api/plans/${id1}`);
 
     expect(res.status).toBe(500);
   });
@@ -162,7 +166,7 @@ describe('PATCH /api/plans/:id', () => {
     const updated = { ...mockPlan, name: 'Updated Plan' };
     (planService.update as jest.Mock).mockResolvedValue(updated);
 
-    const res = await request(app).patch('/api/plans/1').send({ name: 'Updated Plan' });
+    const res = await request(app).patch(`/api/plans/${id1}`).send({ name: 'Updated Plan' });
 
     expect(res.status).toBe(200);
     expect(res.body.data).toMatchObject({ name: 'Updated Plan' });
@@ -171,14 +175,14 @@ describe('PATCH /api/plans/:id', () => {
   it('returns 404 when plan not found', async () => {
     (planService.update as jest.Mock).mockResolvedValue(null);
 
-    const res = await request(app).patch('/api/plans/999').send({ name: 'Updated Plan' });
+    const res = await request(app).patch(`/api/plans/${id999}`).send({ name: 'Updated Plan' });
 
     expect(res.status).toBe(404);
   });
 
   it('returns 400 when meal value is invalid', async () => {
     const res = await request(app)
-      .patch('/api/plans/1')
+      .patch(`/api/plans/${id1}`)
       .send({ meals: ['breakfast', 'brunch'] });
 
     expect(res.status).toBe(400);
@@ -187,7 +191,7 @@ describe('PATCH /api/plans/:id', () => {
   it('returns 500 when service throws', async () => {
     (planService.update as jest.Mock).mockRejectedValue(new Error('db error'));
 
-    const res = await request(app).patch('/api/plans/1').send({ name: 'Updated Plan' });
+    const res = await request(app).patch(`/api/plans/${id1}`).send({ name: 'Updated Plan' });
 
     expect(res.status).toBe(500);
   });

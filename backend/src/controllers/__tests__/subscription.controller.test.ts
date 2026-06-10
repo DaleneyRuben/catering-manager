@@ -1,9 +1,14 @@
 import request from 'supertest';
 import app from '../../app';
 import subscriptionService from '../../services/subscription.service';
+import { encodeId } from '../../utils/sqids';
 
 jest.mock('../../services/subscription.service');
 jest.mock('../../database/sequelize', () => ({ __esModule: true, default: { query: jest.fn() } }));
+
+const id1 = encodeId(1);
+const id2 = encodeId(2);
+const id999 = encodeId(999);
 
 const mockSubscription = {
   id: 1,
@@ -25,23 +30,23 @@ describe('POST /api/clients/:clientId/subscriptions', () => {
   it('returns 201 with created subscription', async () => {
     (subscriptionService.create as jest.Mock).mockResolvedValue(mockSubscription);
 
-    const res = await request(app).post('/api/clients/1/subscriptions').send(validPayload);
+    const res = await request(app).post(`/api/clients/${id1}/subscriptions`).send(validPayload);
 
     expect(res.status).toBe(201);
-    expect(res.body.data).toMatchObject({ clientId: 1, planId: 2 });
+    expect(res.body.data).toMatchObject({ clientId: id1, planId: id2 });
   });
 
   it('returns 404 when client does not exist', async () => {
     (subscriptionService.create as jest.Mock).mockResolvedValue(null);
 
-    const res = await request(app).post('/api/clients/999/subscriptions').send(validPayload);
+    const res = await request(app).post(`/api/clients/${id999}/subscriptions`).send(validPayload);
 
     expect(res.status).toBe(404);
   });
 
   it('returns 400 when planId is missing', async () => {
     const res = await request(app)
-      .post('/api/clients/1/subscriptions')
+      .post(`/api/clients/${id1}/subscriptions`)
       .send({ ...validPayload, planId: undefined });
 
     expect(res.status).toBe(400);
@@ -49,7 +54,7 @@ describe('POST /api/clients/:clientId/subscriptions', () => {
 
   it('returns 400 when startDate format is invalid', async () => {
     const res = await request(app)
-      .post('/api/clients/1/subscriptions')
+      .post(`/api/clients/${id1}/subscriptions`)
       .send({ ...validPayload, startDate: '26-05-2026' });
 
     expect(res.status).toBe(400);
@@ -59,7 +64,7 @@ describe('POST /api/clients/:clientId/subscriptions', () => {
     (subscriptionService.create as jest.Mock).mockResolvedValue({ id: 1, clientId: 1, planId: 2 });
 
     const res = await request(app)
-      .post('/api/clients/1/subscriptions')
+      .post(`/api/clients/${id1}/subscriptions`)
       .send({ ...validPayload, contractDate: '2026-01-01' });
 
     expect(res.status).toBe(201);
@@ -68,7 +73,7 @@ describe('POST /api/clients/:clientId/subscriptions', () => {
   it('returns 500 when service throws', async () => {
     (subscriptionService.create as jest.Mock).mockRejectedValue(new Error('db error'));
 
-    const res = await request(app).post('/api/clients/1/subscriptions').send(validPayload);
+    const res = await request(app).post(`/api/clients/${id1}/subscriptions`).send(validPayload);
 
     expect(res.status).toBe(500);
   });
@@ -80,7 +85,7 @@ describe('PATCH /api/clients/:clientId/subscriptions/:id', () => {
     (subscriptionService.update as jest.Mock).mockResolvedValue(updated);
 
     const res = await request(app)
-      .patch('/api/clients/1/subscriptions/1')
+      .patch(`/api/clients/${id1}/subscriptions/${id1}`)
       .send({ contractEndDate: '2026-06-30' });
 
     expect(res.status).toBe(200);
@@ -91,7 +96,7 @@ describe('PATCH /api/clients/:clientId/subscriptions/:id', () => {
     (subscriptionService.update as jest.Mock).mockResolvedValue(null);
 
     const res = await request(app)
-      .patch('/api/clients/1/subscriptions/999')
+      .patch(`/api/clients/${id1}/subscriptions/${id999}`)
       .send({ contractEndDate: '2026-06-30' });
 
     expect(res.status).toBe(404);
@@ -109,7 +114,7 @@ describe('PATCH /api/clients/:clientId/subscriptions/:id', () => {
     (subscriptionService.update as jest.Mock).mockRejectedValue(new Error('db error'));
 
     const res = await request(app)
-      .patch('/api/clients/1/subscriptions/1')
+      .patch(`/api/clients/${id1}/subscriptions/${id1}`)
       .send({ contractEndDate: '2026-06-30' });
 
     expect(res.status).toBe(500);
@@ -122,7 +127,7 @@ describe('PATCH /api/clients/:clientId/subscriptions/:id with suspendedDates', (
     (subscriptionService.update as jest.Mock).mockResolvedValue(updated);
 
     const res = await request(app)
-      .patch('/api/clients/1/subscriptions/1')
+      .patch(`/api/clients/${id1}/subscriptions/${id1}`)
       .send({ suspendedDates: ['2026-06-10'] });
 
     expect(res.status).toBe(200);
@@ -135,7 +140,7 @@ describe('PATCH /api/clients/:clientId/subscriptions/:id with suspendedDates', (
 
   it('returns 400 when a suspension date has invalid format', async () => {
     const res = await request(app)
-      .patch('/api/clients/1/subscriptions/1')
+      .patch(`/api/clients/${id1}/subscriptions/${id1}`)
       .send({ suspendedDates: ['10-06-2026'] });
 
     expect(res.status).toBe(400);

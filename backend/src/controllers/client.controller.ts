@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import clientService from '../services/client.service';
 import { sendSuccess, sendPaginated, sendError } from '../utils/response';
+import { decodeId } from '../utils/sqids';
 
 const create = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -40,7 +41,7 @@ const getCounts = async (_req: Request, res: Response, next: NextFunction) => {
 
 const getById = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const client = await clientService.findById(Number(req.params.id));
+    const client = await clientService.findById(decodeId(req.params.id));
     if (!client) {
       sendError(res, 'Client not found', 404);
       return;
@@ -53,7 +54,7 @@ const getById = async (req: Request, res: Response, next: NextFunction) => {
 
 const update = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const client = await clientService.update(Number(req.params.id), req.body);
+    const client = await clientService.update(decodeId(req.params.id), req.body);
     if (!client) {
       sendError(res, 'Client not found', 404);
       return;
@@ -66,7 +67,7 @@ const update = async (req: Request, res: Response, next: NextFunction) => {
 
 const finalize = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const client = await clientService.finalize(Number(req.params.id));
+    const client = await clientService.finalize(decodeId(req.params.id));
     if (!client) {
       sendError(res, 'Client not found', 404);
       return;
@@ -79,7 +80,7 @@ const finalize = async (req: Request, res: Response, next: NextFunction) => {
 
 const remove = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const client = await clientService.softDelete(Number(req.params.id));
+    const client = await clientService.softDelete(decodeId(req.params.id));
     if (!client) {
       sendError(res, 'Client not found', 404);
       return;
