@@ -157,6 +157,22 @@ describe('clientService.findAll with filters', () => {
     expect(andConditions.some((c: any) => c?.val?.includes?.('NOT IN'))).toBe(true);
   });
 
+  it('status=active excludes clients whose subscription has not started yet', async () => {
+    (Client.findAndCountAll as jest.Mock).mockResolvedValue({ rows: [], count: 0 });
+
+    await clientService.findAll({ status: 'active' });
+
+    const call = (Client.findAndCountAll as jest.Mock).mock.calls[0][0];
+    const andConditions = call.where?.[Symbol.for('and')];
+    expect(andConditions).toBeDefined();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const futureStartExclusion = andConditions.some(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (c: any) => c?.val?.includes?.('startDate') && c?.val?.includes?.('NOT IN'),
+    );
+    expect(futureStartExclusion).toBe(true);
+  });
+
   it('status=paused uses OR condition for paused and suspended-today clients', async () => {
     (Client.findAndCountAll as jest.Mock).mockResolvedValue({ rows: [], count: 0 });
 
@@ -171,6 +187,22 @@ describe('clientService.findAll with filters', () => {
       (c: unknown) => c !== null && typeof c === 'object' && Symbol.for('or') in (c as object),
     );
     expect(hasOr).toBe(true);
+  });
+
+  it('status=paused includes clients whose subscription has not started yet', async () => {
+    (Client.findAndCountAll as jest.Mock).mockResolvedValue({ rows: [], count: 0 });
+
+    await clientService.findAll({ status: 'paused' });
+
+    const call = (Client.findAndCountAll as jest.Mock).mock.calls[0][0];
+    const andConditions = call.where?.[Symbol.for('and')];
+    const orCondition = andConditions?.find(
+      (c: unknown) => c !== null && typeof c === 'object' && Symbol.for('or') in (c as object),
+    );
+    const orEntries = orCondition?.[Symbol.for('or')];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const hasFutureStartEntry = orEntries?.some((c: any) => c?.val?.includes?.('startDate'));
+    expect(hasFutureStartEntry).toBe(true);
   });
 
   it('status=ended uses left join (required:false)', async () => {
