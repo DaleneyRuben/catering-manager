@@ -5,6 +5,7 @@ import { usePlans } from '../hooks/usePlans';
 import { addBusinessDays } from '../utils/businessDays';
 import { formatDate } from '../utils/format';
 import { initials } from '../utils/string';
+import { MEAL_LABELS } from '../constants/meals';
 import type { Client, Subscription } from '../types/client';
 
 type StartMode = 'atEnd' | 'pick' | 'undefined';
@@ -30,7 +31,6 @@ export function RenewalModal({ client, sub, isReactivation, onClose, onRenew }: 
   const [newPlanId, setNewPlanId] = useState(sub?.planId ?? plans[0]?.id ?? 0);
   const [durationStr, setDurationStr] = useState('');
   const [discountStr, setDiscountStr] = useState(String(sub?.discount ?? 0));
-  // reactivation always picks a date; renewal defaults to 'atEnd'
   const [startMode, setStartMode] = useState<StartMode>(isReactivation ? 'pick' : 'atEnd');
   const [pickedDate, setPickedDate] = useState('');
   const [isSaving, setIsSaving] = useState(false);
@@ -41,7 +41,6 @@ export function RenewalModal({ client, sub, isReactivation, onClose, onRenew }: 
   const discount = Math.max(0, parseInt(discountStr, 10) || 0);
   const total = (newPlan?.price ?? 0) - discount;
 
-  // tomorrow as ISO string — minimum selectable date
   const tomorrow = format(addDays(new Date(), 1), 'yyyy-MM-dd');
 
   let newStart: string | null = null;
@@ -89,6 +88,11 @@ export function RenewalModal({ client, sub, isReactivation, onClose, onRenew }: 
   else if (newStart && validDuration)
     vigenciaText = `${formatDate(newStart)} → ${formatDate(newEnd)} (${validDuration} días hábiles)`;
 
+  const inputCls =
+    'w-full px-3 py-2 text-[13px] font-mono border border-rule rounded-md bg-cream focus:outline-none focus:border-olive-600';
+  const readonlyCls =
+    'w-full px-3 py-2 text-[13px] font-mono border border-rule rounded-md bg-cream-2 text-ink-2';
+
   return (
     <>
       <div
@@ -99,7 +103,7 @@ export function RenewalModal({ client, sub, isReactivation, onClose, onRenew }: 
       <div
         role="dialog"
         aria-modal="true"
-        className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 bg-cream border border-rule-2 rounded-[10px] w-[min(720px,94vw)] max-h-[92vh] overflow-auto shadow-[0_20px_60px_rgba(20,40,6,0.25)]"
+        className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 bg-cream border border-rule-2 rounded-[10px] w-[min(760px,96vw)] max-h-[92vh] overflow-auto shadow-[0_20px_60px_rgba(20,40,6,0.25)]"
       >
         {/* Header */}
         <div className="sticky top-0 z-10 flex items-center gap-3 px-[22px] py-[18px] border-b border-rule bg-cream">
@@ -121,8 +125,8 @@ export function RenewalModal({ client, sub, isReactivation, onClose, onRenew }: 
           </button>
         </div>
 
-        <div className="p-[22px] flex flex-col gap-[18px]">
-          {/* Before / After cards */}
+        <div className="p-[22px] flex flex-col gap-6">
+          {/* Before / After summary cards */}
           <div className="grid grid-cols-2 gap-3.5">
             <div className="p-3.5 bg-cream-2 border border-rule rounded-md">
               <p className="text-[10px] font-mono uppercase tracking-wider text-muted mb-1.5">
@@ -160,130 +164,171 @@ export function RenewalModal({ client, sub, isReactivation, onClose, onRenew }: 
             </div>
           </div>
 
-          {/* Plan selector */}
+          {/* Plan de comidas — card grid matching StepPlan */}
           <div>
-            <p className="text-[10px] font-mono uppercase tracking-wider text-muted mb-2">Plan</p>
-            <div className="flex flex-wrap gap-1.5">
+            <p className="text-[10.5px] font-mono uppercase tracking-[.14em] text-muted mb-4">
+              Plan de comidas
+            </p>
+            <div className="grid grid-cols-3 gap-3">
               {plans.map((p) => {
-                const selected = p.id === newPlanId;
+                const isSel = p.id === newPlanId;
                 return (
                   <button
                     key={p.id}
                     type="button"
                     onClick={() => setNewPlanId(p.id)}
-                    className={`px-3 py-1.5 rounded-full border text-[12.5px] font-mono transition-colors ${
-                      selected
+                    className={`text-left p-4 rounded-md border transition-colors ${
+                      isSel
                         ? 'bg-olive-800 text-white border-olive-800'
-                        : 'bg-paper text-ink border-rule hover:bg-cream-2'
+                        : 'bg-paper text-ink border-rule hover:border-olive-700'
                     }`}
                   >
-                    {p.name} · ${p.price.toLocaleString()}
+                    <div className="font-serif text-[18px] leading-tight">{p.name}</div>
+                    <div className="font-mono text-[20px] mt-1">
+                      {p.price.toLocaleString()}
+                      <span className={`text-[11px] ${isSel ? 'opacity-60' : 'text-muted'}`}>
+                        /mes
+                      </span>
+                    </div>
+                    {p.meals.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mt-2.5">
+                        {p.meals.map((m) => (
+                          <span
+                            key={m}
+                            className={`text-[10px] font-mono px-1.5 py-0.5 rounded-full ${
+                              isSel ? 'bg-white/15' : 'bg-cream-2 text-muted'
+                            }`}
+                          >
+                            {MEAL_LABELS[m] ?? m}
+                          </span>
+                        ))}
+                      </div>
+                    )}
                   </button>
                 );
               })}
             </div>
           </div>
 
-          {/* Duration + Discount */}
-          <div className="grid grid-cols-2 gap-3.5">
-            <div>
-              <p className="text-[10px] font-mono uppercase tracking-wider text-muted mb-1.5">
-                Duración (días hábiles)
-              </p>
-              <input
-                type="text"
-                inputMode="numeric"
-                value={durationStr}
-                onChange={(e) => setDurationStr(e.target.value.replace(/\D/g, ''))}
-                placeholder="ej. 20"
-                className="w-full px-2.5 py-1.5 text-[13px] font-mono border border-rule rounded-md bg-cream focus:outline-none focus:border-olive-600"
-              />
-            </div>
-            <div>
-              <p className="text-[10px] font-mono uppercase tracking-wider text-muted mb-1.5">
-                Descuento
-              </p>
-              <input
-                type="text"
-                inputMode="numeric"
-                value={discountStr}
-                onChange={(e) => setDiscountStr(e.target.value.replace(/\D/g, ''))}
-                placeholder="0"
-                className="w-full px-2.5 py-1.5 text-[13px] font-mono border border-rule rounded-md bg-cream focus:outline-none focus:border-olive-600"
-              />
-              <p className="font-mono text-[10.5px] text-olive-700 mt-1">
-                Total: ${total.toLocaleString()}/mes
-              </p>
+          {/* Contrato */}
+          <div className="border-t border-rule pt-5">
+            <p className="text-[10.5px] font-mono uppercase tracking-[.14em] text-muted mb-4">
+              Contrato
+            </p>
+            <div className="grid grid-cols-4 gap-4 items-start">
+              {/* Inicio del servicio */}
+              <div className="col-span-2">
+                <p className="text-[10.5px] font-mono uppercase tracking-wider text-muted mb-1.5">
+                  Inicio del servicio
+                </p>
+                {!isReactivation && (
+                  <div className="flex gap-2 mb-2 flex-wrap">
+                    {(
+                      [
+                        { v: 'atEnd', l: 'Al vencer' },
+                        { v: 'pick', l: 'Elegir fecha' },
+                        { v: 'undefined', l: 'Sin fecha' },
+                      ] as { v: StartMode; l: string }[]
+                    ).map((o) => (
+                      <button
+                        key={o.v}
+                        type="button"
+                        onClick={() => setStartMode(o.v)}
+                        className={`px-2.5 py-1.5 rounded-md border text-[12px] font-semibold transition-colors ${
+                          startMode === o.v
+                            ? 'bg-olive-800 text-white border-olive-800'
+                            : 'bg-paper text-ink border-rule hover:bg-cream-2'
+                        }`}
+                      >
+                        {o.l}
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                {!isReactivation && startMode === 'atEnd' && newStart && (
+                  <p className="font-mono text-[11.5px] text-ink-2 px-2.5 py-2 bg-cream-2 rounded-md">
+                    {formatDate(newStart)}
+                  </p>
+                )}
+
+                {willBePaused && (
+                  <div className="flex items-start gap-2 px-2.5 py-2 bg-[#f3eedc] border border-[#d8c075] rounded-md">
+                    <Icon name="calendar" size={13} className="text-[#6b4f08] shrink-0 mt-0.5" />
+                    <p className="font-mono text-[11px] text-[#6b4f08]">
+                      El cliente queda pausado hasta que se active manualmente.
+                    </p>
+                  </div>
+                )}
+
+                {(isReactivation || startMode === 'pick') && (
+                  <input
+                    type="date"
+                    value={pickedDate}
+                    min={tomorrow}
+                    onChange={(e) => setPickedDate(e.target.value)}
+                    className={inputCls}
+                  />
+                )}
+              </div>
+
+              {/* Duración */}
+              <div>
+                <p className="text-[10.5px] font-mono uppercase tracking-wider text-muted mb-1.5">
+                  Duración (días)
+                </p>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  value={durationStr}
+                  onChange={(e) => setDurationStr(e.target.value.replace(/\D/g, ''))}
+                  placeholder="20"
+                  className={inputCls}
+                />
+                <p className="font-mono text-[10px] text-muted mt-1">días hábiles (L–V)</p>
+              </div>
+
+              {/* Fin de contrato */}
+              <div>
+                <p className="text-[10.5px] font-mono uppercase tracking-wider text-muted mb-1.5">
+                  Fin de contrato
+                </p>
+                <p className={readonlyCls}>{newEnd ? formatDate(newEnd) : '—'}</p>
+                <p className="font-mono text-[10px] text-olive-700 mt-1">
+                  calculado automáticamente
+                </p>
+              </div>
             </div>
           </div>
 
-          {/* Start mode (renewal only) */}
-          <div>
-            <p className="text-[10px] font-mono uppercase tracking-wider text-muted mb-2">
-              Inicio del servicio
+          {/* Facturación del plan */}
+          <div className="border-t border-rule pt-5">
+            <p className="text-[10.5px] font-mono uppercase tracking-[.14em] text-muted mb-4">
+              Facturación del plan
             </p>
-            {!isReactivation && (
-              <div className="flex flex-wrap gap-2 mb-3">
-                {(
-                  [
-                    { v: 'atEnd', l: 'Al vencer' },
-                    { v: 'pick', l: 'Elegir fecha' },
-                    { v: 'undefined', l: 'Sin fecha definida' },
-                  ] as { v: StartMode; l: string }[]
-                ).map((o) => (
-                  <button
-                    key={o.v}
-                    type="button"
-                    onClick={() => setStartMode(o.v)}
-                    className={`px-3.5 py-2 rounded-md border text-[13px] font-semibold transition-colors ${
-                      startMode === o.v
-                        ? 'bg-olive-800 text-white border-olive-800'
-                        : 'bg-paper text-ink border-rule hover:bg-cream-2'
-                    }`}
-                  >
-                    {o.l}
-                  </button>
-                ))}
-              </div>
-            )}
-
-            {/* "Al vencer" display */}
-            {!isReactivation && startMode === 'atEnd' && newStart && (
-              <div className="font-mono text-[12px] text-ink-2 px-3 py-2.5 bg-cream-2 rounded-md">
-                Inicia el primer día de reparto tras el vencimiento:{' '}
-                <strong>{formatDate(newStart)}</strong>
-              </div>
-            )}
-
-            {/* Paused banner */}
-            {willBePaused && (
-              <div className="flex items-start gap-2.5 px-3.5 py-3 bg-[#f3eedc] border border-[#d8c075] rounded-md">
-                <Icon name="calendar" size={14} className="text-[#6b4f08] shrink-0 mt-0.5" />
-                <div>
-                  <p className="text-[13px] font-semibold text-[#6b4f08]">Suscripción en pausa</p>
-                  <p className="font-mono text-[11px] text-[#6b4f08]">
-                    El cliente queda registrado con el nuevo plan en estado pausado. La fecha de
-                    inicio se define más adelante.
-                  </p>
-                </div>
-              </div>
-            )}
-
-            {/* Date picker */}
-            {(isReactivation || startMode === 'pick') && (
-              <div className="mt-2">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <p className="text-[10.5px] font-mono uppercase tracking-wider text-muted mb-1.5">
+                  Duración del descuento
+                </p>
                 <input
-                  type="date"
-                  value={pickedDate}
-                  min={tomorrow}
-                  onChange={(e) => setPickedDate(e.target.value)}
-                  className="px-2.5 py-1.5 text-[13px] font-mono border border-rule rounded-md bg-cream focus:outline-none focus:border-olive-600"
+                  type="text"
+                  inputMode="numeric"
+                  value={discountStr}
+                  onChange={(e) => setDiscountStr(e.target.value.replace(/\D/g, ''))}
+                  placeholder="0"
+                  className={inputCls}
                 />
-                <p className="font-mono text-[10.5px] text-muted mt-1.5">
-                  Solo días futuros (a partir de mañana).
+              </div>
+              <div>
+                <p className="text-[10.5px] font-mono uppercase tracking-wider text-muted mb-1.5">
+                  Total
+                </p>
+                <p className="w-full px-3 py-2 font-mono text-[15px] font-bold text-olive-800 border border-[#c8d4b0] rounded-md bg-[#f5f7f0]">
+                  ${total.toLocaleString()}/mes
                 </p>
               </div>
-            )}
+            </div>
           </div>
 
           {/* Summary */}
@@ -291,7 +336,7 @@ export function RenewalModal({ client, sub, isReactivation, onClose, onRenew }: 
             <p className="text-[10px] font-mono uppercase tracking-wider text-muted mb-2">
               Resumen
             </p>
-            <ul className="text-[13px] leading-[1.7] space-y-0">
+            <ul className="text-[13px] leading-[1.7]">
               {sub?.plan && sub.planId !== newPlanId && (
                 <li>
                   Cambio de plan:{' '}
