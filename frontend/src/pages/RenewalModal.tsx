@@ -99,11 +99,11 @@ export function RenewalModal({ client, sub, isReactivation, onClose, onRenew }: 
   if (isReactivation) confirmLabel = 'Reactivar';
   else if (willBePaused) confirmLabel = 'Crear pausado';
 
-  let newContractPreview = 'Elegí una fecha de inicio';
+  let newContractPreview = 'Sin fecha de inicio seleccionada';
   if (willBePaused) newContractPreview = 'Inicio sin definir';
   else if (newStart) newContractPreview = `${formatDate(newStart)} → ${formatDate(newEnd)}`;
 
-  let vigenciaText = '— completá los campos —';
+  let vigenciaText = '— completar los campos —';
   if (willBePaused) vigenciaText = 'pausado (sin fecha)';
   else if (newStart && validDuration)
     vigenciaText = `${formatDate(newStart)} → ${formatDate(newEnd)} (${validDuration} días hábiles)`;
