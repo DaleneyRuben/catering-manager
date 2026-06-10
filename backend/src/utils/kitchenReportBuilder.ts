@@ -352,7 +352,6 @@ export const buildKitchenReport = async (
 export const kitchenReportFileName = (date: string): string => {
   const parsed = parseISO(date);
   const dayName = format(parsed, 'EEEE', { locale: es });
-  const dayMonth = format(parsed, 'ddMM');
   const capitalized = dayName.charAt(0).toUpperCase() + dayName.slice(1);
-  return `${capitalized} ${dayMonth}.docx`;
+  return `${capitalized} ${format(parsed, 'dd-MM')}.docx`;
 };
