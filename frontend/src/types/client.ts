@@ -15,8 +15,8 @@ export interface Subscription {
   clientId: number;
   planId: number;
   contractDate: string;
-  startDate: string;
-  contractEndDate: string;
+  startDate: string | null;
+  contractEndDate: string | null;
   discount: number;
   duration: number;
   suspendedDates: string[];
@@ -62,11 +62,15 @@ export type ClientStatus = 'active' | 'paused' | 'expiring' | 'ended' | 'suspend
 
 export function clientStatus(client: Client, today = new Date()): ClientStatus {
   const sub = client.subscriptions[0];
-  if (!sub || !isAfter(parseISO(sub.contractEndDate), today)) return CLIENT_STATUS.ENDED;
+  if (!sub || (sub.contractEndDate && !isAfter(parseISO(sub.contractEndDate), today)))
+    return CLIENT_STATUS.ENDED;
   if (!client.isActive) return CLIENT_STATUS.PAUSED;
   const todayIso = format(today, 'yyyy-MM-dd');
   if (sub.suspendedDates?.includes(todayIso)) return CLIENT_STATUS.SUSPENDED;
-  if (businessDaysUntil(today, parseISO(sub.contractEndDate)) <= EXPIRY_THRESHOLD_DAYS)
+  if (
+    sub.contractEndDate &&
+    businessDaysUntil(today, parseISO(sub.contractEndDate)) <= EXPIRY_THRESHOLD_DAYS
+  )
     return CLIENT_STATUS.EXPIRING;
   return CLIENT_STATUS.ACTIVE;
 }

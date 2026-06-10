@@ -32,7 +32,7 @@ function ContractCard({
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [contractDate, setContractDate] = useState(sub.contractDate);
-  const [startDate, setStartDate] = useState(sub.startDate);
+  const [startDate, setStartDate] = useState(sub.startDate ?? '');
   const [durationStr, setDurationStr] = useState(String(sub.duration));
 
   const parsedDuration = parseInt(durationStr, 10);
@@ -55,7 +55,7 @@ function ContractCard({
 
   const handleCancel = () => {
     setContractDate(sub.contractDate);
-    setStartDate(sub.startDate);
+    setStartDate(sub.startDate ?? '');
     setDurationStr(String(sub.duration));
     setEditing(false);
   };

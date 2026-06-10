@@ -58,8 +58,8 @@ export function SuspendModal({
   const [isSaving, setIsSaving] = useState(false);
 
   const minDate = subDays(today, 7);
-  const contractStart = parseISO(sub.startDate);
-  const contractEnd = parseISO(sub.contractEndDate);
+  const contractStart = sub.startDate ? parseISO(sub.startDate) : null;
+  const contractEnd = sub.contractEndDate ? parseISO(sub.contractEndDate) : null;
 
   const toggle = (day: Date) => {
     setSelected((prev) =>
@@ -67,14 +67,18 @@ export function SuspendModal({
     );
   };
 
-  const isInContract = (d: Date) => !isBefore(d, contractStart) && !isAfter(d, contractEnd);
-  const isSelectable = (d: Date) => !isBefore(d, minDate) && !isAfter(d, contractEnd);
+  const isInContract = (d: Date) =>
+    contractStart && contractEnd ? !isBefore(d, contractStart) && !isAfter(d, contractEnd) : false;
+  const isSelectable = (d: Date) =>
+    contractEnd ? !isBefore(d, minDate) && !isAfter(d, contractEnd) : false;
   const isPickedDay = (d: Date) => selected.some((s) => isSameDay(s, d));
 
   const net = selected.length - (sub.suspendedDates ?? []).length;
   let newEndDate: string | null = null;
-  if (net > 0) newEndDate = addBusinessDays(sub.contractEndDate, net);
-  else if (net < 0) newEndDate = subtractBusinessDays(sub.contractEndDate, Math.abs(net));
+  if (sub.contractEndDate) {
+    if (net > 0) newEndDate = addBusinessDays(sub.contractEndDate, net);
+    else if (net < 0) newEndDate = subtractBusinessDays(sub.contractEndDate, Math.abs(net));
+  }
 
   const weeks = getCalendarWeeks(anchor);
 

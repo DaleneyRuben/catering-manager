@@ -1,6 +1,7 @@
 import { format, parseISO } from 'date-fns';
 
-export function formatDate(iso: string) {
+export function formatDate(iso: string | null | undefined) {
+  if (!iso) return '—';
   return format(parseISO(iso), 'dd/MM/yyyy');
 }
 

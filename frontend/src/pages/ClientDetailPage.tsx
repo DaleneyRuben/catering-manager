@@ -85,9 +85,10 @@ export function ClientDetailPage() {
     ? TABS.filter((t) => t.id !== 'plan' && t.id !== 'suspensions')
     : TABS;
   const activeTab = isEnded && (tab === 'plan' || tab === 'suspensions') ? 'overview' : tab;
-  const remaining = sub
-    ? remainingDeliveryDays(parseISO(sub.startDate), parseISO(sub.contractEndDate))
-    : 0;
+  const remaining =
+    sub && sub.startDate && sub.contractEndDate
+      ? remainingDeliveryDays(parseISO(sub.startDate), parseISO(sub.contractEndDate))
+      : 0;
 
   return (
     <div className="p-7 max-w-[1320px] mx-auto">
