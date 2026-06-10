@@ -30,7 +30,7 @@ const getClientCounts = async (): Promise<Record<number, number>> => {
     `SELECT s."planId", COUNT(c.id) AS count
      FROM subscriptions s
      JOIN clients c ON c.id = s."clientId"
-     WHERE c."isActive" = true AND s."contractEndDate" >= :today
+     WHERE c."pausedSince" IS NULL AND s."contractEndDate" >= :today
      GROUP BY s."planId"`,
     { replacements: { today }, type: QueryTypes.SELECT },
   );

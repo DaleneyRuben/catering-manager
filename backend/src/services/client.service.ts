@@ -2,6 +2,7 @@ import { Op, fn, literal, where, QueryTypes } from 'sequelize';
 import { appToday, addDeliveryDays } from '../utils/date';
 import { EXPIRY_THRESHOLD_DAYS } from '../constants/subscription.constants';
 import { CLIENT_STATUS } from '../constants/client.constants';
+import { deriveClientStatus } from '../utils/clientStatus';
 import Client from '../models/Client';
 import ClientHistory from '../models/ClientHistory';
 import Plan from '../models/Plan';
@@ -22,6 +23,31 @@ export interface FindAllFilters {
   limit?: number;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function withStatus(client: any): Record<string, unknown> {
+  const today = appToday();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const subs: any[] = client.subscriptions ?? [];
+  subs.sort((a, b) => b.id - a.id);
+  const sub = subs[0] ?? null;
+  const status = deriveClientStatus(
+    {
+      pausedSince: client.pausedSince ?? null,
+      sub: sub
+        ? {
+            startDate: sub.startDate ?? null,
+            contractEndDate: sub.contractEndDate ?? null,
+            suspendedDates: sub.suspendedDates ?? [],
+          }
+        : null,
+    },
+    today,
+  );
+  const plain: Record<string, unknown> =
+    typeof client.toJSON === 'function' ? client.toJSON() : { ...client };
+  return { ...plain, status };
+}
+
 const create = (data: CreateClientDto) => Client.create(data as never);
 
 const findAll = (filters: FindAllFilters = {}) => {
@@ -38,7 +64,7 @@ const findAll = (filters: FindAllFilters = {}) => {
 
   switch (filters.status) {
     case CLIENT_STATUS.ACTIVE:
-      clientWhere.isActive = true;
+      clientWhere.pausedSince = { [Op.is]: null };
       subscriptionWhere.contractEndDate = { [Op.gt]: todayStr };
       andConditions.push(
         literal(
@@ -51,7 +77,7 @@ const findAll = (filters: FindAllFilters = {}) => {
       );
       break;
     case CLIENT_STATUS.EXPIRING:
-      clientWhere.isActive = true;
+      clientWhere.pausedSince = { [Op.is]: null };
       subscriptionWhere.contractEndDate = { [Op.between]: [todayStr, thresholdStr] };
       andConditions.push(
         literal(
@@ -63,7 +89,7 @@ const findAll = (filters: FindAllFilters = {}) => {
       subscriptionWhere.contractEndDate = { [Op.gt]: todayStr };
       andConditions.push({
         [Op.or]: [
-          { isActive: false },
+          { pausedSince: { [Op.not]: null } },
           literal(
             `"Client"."id" IN (SELECT s2."clientId" FROM subscriptions s2 WHERE '${todayStr}'::date = ANY(s2."suspendedDates") AND s2."contractEndDate" > '${todayStr}')`,
           ),
@@ -126,12 +152,8 @@ const findAll = (filters: FindAllFilters = {}) => {
     offset,
     distinct: true,
   }).then(({ rows, count }) => {
-    // mirror INCLUDE_SUBSCRIPTION_ORDERED: newest subscription first so subscriptions[0] is current
-    rows.forEach((client) => {
-      const subs = (client as never as { subscriptions?: { id: number }[] }).subscriptions;
-      if (subs) subs.sort((a, b) => b.id - a.id);
-    });
-    return { rows, total: count };
+    const processed = rows.map(withStatus);
+    return { rows: processed, total: count };
   });
 };
 
@@ -142,11 +164,11 @@ const getCounts = async () => {
   type Row = { active: string; expiring: string; paused: string; ended: string; total: string };
   const [rows] = await sequelize.query<Row>(
     `SELECT
-      COUNT(CASE WHEN c."isActive" = true  AND s."contractEndDate" > :today AND (s."startDate" IS NULL OR s."startDate" <= :today) AND NOT (:today::date = ANY(s."suspendedDates")) THEN 1 END) AS active,
-      COUNT(CASE WHEN c."isActive" = true  AND s."contractEndDate" > :today AND (s."startDate" IS NULL OR s."startDate" <= :today) AND s."contractEndDate" <= :threshold             THEN 1 END) AS expiring,
-      COUNT(CASE WHEN (c."isActive" = false OR :today::date = ANY(s."suspendedDates") OR (s."startDate" > :today AND s."contractEndDate" > :today)) AND s."contractEndDate" > :today  THEN 1 END) AS paused,
-      COUNT(CASE WHEN s."contractEndDate" <= :today OR s."contractEndDate" IS NULL                                                                                                   THEN 1 END) AS ended,
-      COUNT(*)                                                                                                                                                                                  AS total
+      COUNT(CASE WHEN c."pausedSince" IS NULL     AND s."contractEndDate" > :today AND (s."startDate" IS NULL OR s."startDate" <= :today) AND NOT (:today::date = ANY(s."suspendedDates")) THEN 1 END) AS active,
+      COUNT(CASE WHEN c."pausedSince" IS NULL     AND s."contractEndDate" > :today AND (s."startDate" IS NULL OR s."startDate" <= :today) AND s."contractEndDate" <= :threshold             THEN 1 END) AS expiring,
+      COUNT(CASE WHEN (c."pausedSince" IS NOT NULL OR :today::date = ANY(s."suspendedDates") OR (s."startDate" > :today AND s."contractEndDate" > :today)) AND s."contractEndDate" > :today  THEN 1 END) AS paused,
+      COUNT(CASE WHEN s."contractEndDate" <= :today OR s."contractEndDate" IS NULL                                                                                                            THEN 1 END) AS ended,
+      COUNT(*)                                                                                                                                                                                            AS total
     FROM clients c
     LEFT JOIN subscriptions s ON s."id" = (SELECT MAX(s2."id") FROM subscriptions s2 WHERE s2."clientId" = c.id)`,
     { replacements: { today: todayStr, threshold: thresholdStr }, type: QueryTypes.SELECT },
@@ -162,22 +184,31 @@ const getCounts = async () => {
   };
 };
 
-const findById = (id: number) => Client.findByPk(id, { include: INCLUDE_SUBSCRIPTION_ORDERED });
+const findById = async (id: number) => {
+  const client = await Client.findByPk(id, { include: INCLUDE_SUBSCRIPTION_ORDERED });
+  if (!client) return null;
+  return withStatus(client);
+};
 
 const update = async (id: number, data: UpdateClientDto) => {
   const client = await Client.findByPk(id, { include: INCLUDE_SUBSCRIPTION_ORDERED });
   if (!client) return null;
 
-  if (data.isActive !== undefined && data.isActive !== client.isActive) {
-    await ClientHistory.create({
-      clientId: client.id,
-      eventType: data.isActive ? 'resumed' : 'paused',
-      occurredAt: new Date(),
-      metadata: {},
-    });
+  if (data.pausedSince !== undefined) {
+    const isPausing = data.pausedSince !== null && client.pausedSince === null;
+    const isResuming = data.pausedSince === null && client.pausedSince !== null;
+    if (isPausing || isResuming) {
+      await ClientHistory.create({
+        clientId: client.id,
+        eventType: isPausing ? 'paused' : 'resumed',
+        occurredAt: new Date(),
+        metadata: {},
+      });
+    }
   }
 
-  return client.update(data);
+  const updated = await client.update(data);
+  return withStatus(updated);
 };
 
 const finalize = async (id: number) => {
@@ -189,7 +220,6 @@ const finalize = async (id: number) => {
     .subscriptions?.[0];
 
   if (sub) await sub.update({ contractEndDate: today });
-  await client.update({ isActive: false });
   await ClientHistory.create({
     clientId: client.id,
     eventType: 'finalized',
@@ -197,7 +227,7 @@ const finalize = async (id: number) => {
     metadata: {},
   });
 
-  return client;
+  return withStatus(client);
 };
 
 const softDelete = async (id: number) => {

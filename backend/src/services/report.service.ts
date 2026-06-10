@@ -9,7 +9,7 @@ const findDeliveryClientsForDate = async (date: string): Promise<string[]> => {
       startDate: { [Op.lte]: date },
       contractEndDate: { [Op.gte]: date },
     },
-    include: [{ model: Client, where: { isActive: true } }],
+    include: [{ model: Client, where: { pausedSince: null } }],
   });
 
   return subscriptions
@@ -30,7 +30,7 @@ const findActiveClientsWithPlansForDate = async (date: string): Promise<ActiveCl
       startDate: { [Op.lte]: date },
       contractEndDate: { [Op.gte]: date },
     },
-    include: [{ model: Client, where: { isActive: true } }, { model: Plan }],
+    include: [{ model: Client, where: { pausedSince: null } }, { model: Plan }],
   });
 
   return subscriptions

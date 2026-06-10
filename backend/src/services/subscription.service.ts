@@ -39,7 +39,7 @@ const create = async (clientId: number, data: CreateSubscriptionDto) => {
       },
     });
     if (data.renewalType === 'reactivation') {
-      await client.update({ isActive: true });
+      await client.update({ pausedSince: null });
     }
   }
 
