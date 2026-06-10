@@ -82,7 +82,7 @@ export function ClientDetailPage() {
   }
 
   const sub = client.subscriptions[0];
-  const {status} = client;
+  const { status } = client;
   const isEnded = status === CLIENT_STATUS.ENDED;
   const visibleTabs = isEnded
     ? TABS.filter((t) => t.id !== 'plan' && t.id !== 'suspensions')
@@ -102,7 +102,7 @@ export function ClientDetailPage() {
         onToggleActive={handleToggleActive}
         onEdit={() => setEditOpen(true)}
         onDelete={() => setDeleteOpen(true)}
-        onBack={() => navigate('/clientes')}
+        onBack={() => navigate(-1)}
         onRenew={() => setRenewOpen(true)}
       />
 
