@@ -94,7 +94,7 @@ export function ClientHeader({
             className="flex items-center gap-2 px-4 py-2.5 text-[13px] font-semibold border border-rule rounded-md text-ink hover:bg-cream-2 transition-colors"
           >
             <Icon name="refresh" size={14} />
-            Renovar
+            {status === CLIENT_STATUS.ENDED ? 'Reactivar' : 'Renovar'}
           </button>
           <button
             type="button"
