@@ -21,8 +21,12 @@ export function subtractBusinessDays(dateString: string, days: number): string {
 }
 
 export function remainingDeliveryDays(startDate: Date, endDate: Date, today = new Date()): number {
-  const effectiveStart = startDate > today ? startDate : today;
-  return Math.max(0, differenceInBusinessDays(endDate, effectiveStart));
+  if (startDate > today) {
+    // plan hasn't started: startDate counts as delivery day 1
+    return Math.max(0, differenceInBusinessDays(endDate, startDate) + 1);
+  }
+  // plan has started: today's delivery is already scheduled, count strictly after today
+  return Math.max(0, differenceInBusinessDays(endDate, today));
 }
 
 export function businessDaysUntil(from: Date, to: Date): number {

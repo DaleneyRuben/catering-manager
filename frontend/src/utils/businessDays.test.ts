@@ -26,11 +26,18 @@ describe('remainingDeliveryDays', () => {
     expect(remainingDeliveryDays(start, end, today)).toBe(0);
   });
 
-  it('counts from startDate to endDate when plan has not started yet', () => {
+  it('counts from startDate to endDate inclusive when plan has not started yet', () => {
     const today = new Date(2026, 5, 1); // Mon Jun 1
     const start = new Date(2026, 5, 3); // Wed Jun 3
-    const end = new Date(2026, 5, 10); // Wed Jun 10 — Thu, Fri, Mon, Tue, Wed = 5
-    expect(remainingDeliveryDays(start, end, today)).toBe(5);
+    const end = new Date(2026, 5, 10); // Wed Jun 10 — Wed+Thu+Fri+Mon+Tue+Wed = 6
+    expect(remainingDeliveryDays(start, end, today)).toBe(6);
+  });
+
+  it('returns 20 when start is in the future and duration is 20 business days', () => {
+    const today = new Date(2026, 5, 10); // Wed Jun 10
+    const start = new Date(2026, 5, 15); // Mon Jun 15
+    const end = new Date(2026, 6, 10); // Fri Jul 10
+    expect(remainingDeliveryDays(start, end, today)).toBe(20);
   });
 
   it('counts days strictly after today when plan has started and today is a business day', () => {
