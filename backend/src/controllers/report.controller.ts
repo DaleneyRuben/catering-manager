@@ -17,10 +17,8 @@ const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
 const toSpanishFileName = (iso: string): string => {
   const d = parseISO(iso);
-  const day = capitalize(format(d, 'EEEE', { locale: es }));
-  const month = capitalize(format(d, 'MMMM', { locale: es }));
-  const year = format(d, 'yyyy');
-  return `${day}, ${month} - ${year}.xlsx`;
+  const dayName = capitalize(format(d, 'EEEE', { locale: es }));
+  return `${dayName} ${format(d, 'dd-MM')}.xlsx`;
 };
 
 const downloadActiveClients = async (req: Request, res: Response, next: NextFunction) => {
