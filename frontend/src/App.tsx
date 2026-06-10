@@ -2,7 +2,7 @@ import { Routes, Route } from 'react-router-dom';
 import { Layout } from './components/layout/Layout';
 import { DashboardPage } from './pages/DashboardPage';
 import { ClientsPage } from './pages/ClientsPage';
-import { ClientDetailPage } from './pages/ClientDetailPage';
+import { ClientDetailPage } from './pages/ClientDetail';
 import { NewClientPage } from './pages/NewClientPage';
 import { PlansPage } from './pages/PlansPage';
 import { MenuImportPage } from './pages/MenuImportPage';

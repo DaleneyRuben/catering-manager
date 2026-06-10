@@ -17,10 +17,10 @@ import {
   subMonths,
 } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { Icon } from '../components/ui/Icon';
-import { addBusinessDays, subtractBusinessDays } from '../utils/businessDays';
-import { formatDate } from '../utils/format';
-import type { Subscription } from '../types/client';
+import { Icon } from "../ui/Icon";
+import { addBusinessDays, subtractBusinessDays } from '../../utils/businessDays';
+import { formatDate } from '../../utils/format';
+import type { Subscription } from '../../types/client';
 
 const WEEKDAY_LABELS = ['LUN', 'MAR', 'MIÉ', 'JUE', 'VIE'];
 

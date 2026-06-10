@@ -1,10 +1,10 @@
-import { Icon } from '../components/ui/Icon';
-import { MEAL_LABELS } from '../constants/meals';
-import type { Client, Subscription } from '../types/client';
-import { clientStatus } from '../types/client';
-import { CLIENT_STATUS } from '../constants/clientStatus';
-import { EXPIRY_THRESHOLD_DAYS } from '../constants/subscription';
-import { formatDate } from '../utils/format';
+import { Icon } from '../../components/ui/Icon';
+import { MEAL_LABELS } from '../../constants/meals';
+import type { Client, Subscription } from '../../types/client';
+import { clientStatus } from '../../types/client';
+import { CLIENT_STATUS } from '../../constants/clientStatus';
+import { EXPIRY_THRESHOLD_DAYS } from '../../constants/subscription';
+import { formatDate } from '../../utils/format';
 
 interface Props {
   client: Client;

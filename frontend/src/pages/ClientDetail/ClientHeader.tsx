@@ -1,9 +1,9 @@
 import { differenceInYears, parseISO, startOfToday } from 'date-fns';
-import { Icon } from '../components/ui/Icon';
-import { STATUS_LABELS, STATUS_CLASSES, CLIENT_STATUS } from '../constants/clientStatus';
-import { SEX_LABELS } from '../constants/clientOptions';
-import { initials } from '../utils/string';
-import type { Client, ClientStatus } from '../types/client';
+import { Icon } from '../../components/ui/Icon';
+import { STATUS_LABELS, STATUS_CLASSES, CLIENT_STATUS } from '../../constants/clientStatus';
+import { SEX_LABELS } from '../../constants/clientOptions';
+import { initials } from '../../utils/string';
+import type { Client, ClientStatus } from '../../types/client';
 
 interface Props {
   client: Client;

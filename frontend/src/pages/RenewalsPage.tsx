@@ -5,7 +5,7 @@ import { useClient } from '../hooks/useClient';
 import { clientStatus } from '../types/client';
 import { CLIENT_STATUS } from '../constants/clientStatus';
 import { Icon } from '../components/ui/Icon';
-import { RenewalModal } from './RenewalModal';
+import { RenewalModal } from '../components/modals/RenewalModal';
 import { initials } from '../utils/string';
 import type { Client } from '../types/client';
 

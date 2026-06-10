@@ -1,23 +1,23 @@
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { parseISO } from 'date-fns';
-import { remainingDeliveryDays } from '../utils/businessDays';
-import { Icon } from '../components/ui/Icon';
-import { useClient } from '../hooks/useClient';
-import { clientStatus } from '../types/client';
-import { CLIENT_STATUS } from '../constants/clientStatus';
-import { formatDate } from '../utils/format';
-import { ClientEditModal } from './ClientEditModal';
-import type { EditDraft } from './ClientEditModal';
-import { ConfirmFinalizeModal } from './ConfirmFinalizeModal';
-import { SuspendModal } from './SuspendModal';
+import { remainingDeliveryDays } from '../../utils/businessDays';
+import { Icon } from '../../components/ui/Icon';
+import { useClient } from '../../hooks/useClient';
+import { clientStatus } from '../../types/client';
+import { CLIENT_STATUS } from '../../constants/clientStatus';
+import { formatDate } from '../../utils/format';
+import { ClientEditModal } from '../../components/modals/ClientEditModal';
+import type { EditDraft } from '../../components/modals/ClientEditModal';
+import { ConfirmFinalizeModal } from '../../components/modals/ConfirmFinalizeModal';
+import { SuspendModal } from '../../components/modals/SuspendModal';
 import { ClientOverviewTab } from './ClientOverviewTab';
 import { ClientHistoryTab } from './ClientHistoryTab';
 import { ClientPlanTab } from './ClientPlanTab';
 import { ClientHeader } from './ClientHeader';
-import { RenewalModal } from './RenewalModal';
-import { ConfirmModal } from '../components/ui/ConfirmModal';
-import { PageLoader } from '../components/ui/PageLoader';
+import { RenewalModal } from '../../components/modals/RenewalModal';
+import { ConfirmModal } from '../../components/ui/ConfirmModal';
+import { PageLoader } from '../../components/ui/PageLoader';
 
 type TabId = 'overview' | 'plan' | 'suspensions' | 'history';
 

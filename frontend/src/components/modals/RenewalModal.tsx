@@ -1,14 +1,11 @@
-import { useState, useEffect } from 'react';
-import { addDays, format } from 'date-fns';
-import { Icon } from '../components/ui/Icon';
-import { usePlans } from '../hooks/usePlans';
-import { addBusinessDays } from '../utils/businessDays';
-import { formatDate } from '../utils/format';
-import { initials } from '../utils/string';
-import { MEAL_LABELS } from '../constants/meals';
-import type { Client, Subscription } from '../types/client';
-
-type StartMode = 'atEnd' | 'pick' | 'undefined';
+import { Icon } from "../ui/Icon";
+import { usePlans } from '../../hooks/usePlans';
+import { formatDate } from '../../utils/format';
+import { initials } from '../../utils/string';
+import { MEAL_LABELS } from '../../constants/meals';
+import { useRenewalForm } from '../../hooks/useRenewalForm';
+import type { StartMode } from '../../hooks/useRenewalForm';
+import type { Client, Subscription } from '../../types/client';
 
 interface Props {
   client: Client;
@@ -25,93 +22,14 @@ interface Props {
   }) => Promise<void>;
 }
 
+const inputCls =
+  'w-full px-3 py-2 text-[13px] font-mono border border-rule rounded-md bg-cream focus:outline-none focus:border-olive-600';
+const readonlyCls =
+  'w-full px-3 py-2 text-[13px] font-mono border border-rule rounded-md bg-cream-2 text-ink-2';
+
 export function RenewalModal({ client, sub, isReactivation, onClose, onRenew }: Props) {
   const { plans } = usePlans();
-
-  const [newPlanId, setNewPlanId] = useState(sub?.planId ?? plans[0]?.id ?? 0);
-  const [durationStr, setDurationStr] = useState('');
-  // precio = what the client actually pays; discount = plan.price - precio (auto-calculated)
-  const [precioStr, setPrecioStr] = useState('');
-  const [startMode, setStartMode] = useState<StartMode>(isReactivation ? 'pick' : 'atEnd');
-  const [pickedDate, setPickedDate] = useState('');
-  const [isSaving, setIsSaving] = useState(false);
-
-  const newPlan = plans.find((p) => p.id === newPlanId);
-
-  // When plan changes, reset precio to (plan.price - previous discount) for same plan, or plan.price for a new plan
-  useEffect(() => {
-    if (!newPlan) return;
-    const defaultPrecio =
-      newPlan.id === sub?.planId ? newPlan.price - (sub?.discount ?? 0) : newPlan.price;
-    setPrecioStr(String(defaultPrecio));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [newPlanId]);
-
-  // Set initial precio on first render once plans load
-  useEffect(() => {
-    if (plans.length > 0 && precioStr === '' && newPlan) {
-      setPrecioStr(String(newPlan.price - (sub?.discount ?? 0)));
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [plans.length]);
-
-  const duration = parseInt(durationStr, 10);
-  const validDuration = !Number.isNaN(duration) && duration > 0 ? duration : null;
-  const precioNum = precioStr !== '' ? Number(precioStr) : undefined;
-  const discount = newPlan && precioNum !== undefined ? Math.max(0, newPlan.price - precioNum) : 0;
-  const total = precioNum ?? 0;
-
-  const tomorrow = format(addDays(new Date(), 1), 'yyyy-MM-dd');
-
-  let newStart: string | null = null;
-  if (startMode === 'atEnd' && sub?.contractEndDate) {
-    // first delivery day strictly after current contract end
-    newStart = addBusinessDays(sub.contractEndDate, 1);
-  } else if (startMode === 'pick') {
-    newStart = pickedDate || null;
-  }
-  // startMode === 'undefined' → newStart stays null
-
-  const newEnd = newStart && validDuration ? addBusinessDays(newStart, validDuration - 1) : null; // duration - 1 because startDate counts as day 1
-
-  const willBePaused = startMode === 'undefined';
-  const canConfirm = !!validDuration && precioNum !== undefined && (willBePaused || !!newStart);
-
-  const handleConfirm = async () => {
-    if (!canConfirm) return;
-    setIsSaving(true);
-    try {
-      await onRenew({
-        planId: newPlanId,
-        contractDate: format(new Date(), 'yyyy-MM-dd'),
-        startDate: newStart,
-        duration: validDuration!,
-        discount,
-        renewalType: isReactivation ? 'reactivation' : 'renewal',
-      });
-      onClose();
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  let confirmLabel = 'Renovar';
-  if (isReactivation) confirmLabel = 'Reactivar';
-  else if (willBePaused) confirmLabel = 'Crear pausado';
-
-  let newContractPreview = 'Sin fecha de inicio seleccionada';
-  if (willBePaused) newContractPreview = 'Inicio sin definir';
-  else if (newStart) newContractPreview = `${formatDate(newStart)} → ${formatDate(newEnd)}`;
-
-  let vigenciaText = '— completar los campos —';
-  if (willBePaused) vigenciaText = 'pausado (sin fecha)';
-  else if (newStart && validDuration)
-    vigenciaText = `${formatDate(newStart)} → ${formatDate(newEnd)} (${validDuration} días hábiles)`;
-
-  const inputCls =
-    'w-full px-3 py-2 text-[13px] font-mono border border-rule rounded-md bg-cream focus:outline-none focus:border-olive-600';
-  const readonlyCls =
-    'w-full px-3 py-2 text-[13px] font-mono border border-rule rounded-md bg-cream-2 text-ink-2';
+  const form = useRenewalForm({ plans, sub, isReactivation, onRenew, onClose });
 
   return (
     <>
@@ -170,14 +88,14 @@ export function RenewalModal({ client, sub, isReactivation, onClose, onRenew }: 
               <p className="text-[10px] font-mono uppercase tracking-wider text-olive-700 mb-1.5">
                 Nuevo contrato
               </p>
-              <p className="font-mono text-[12px] text-ink-2">{newContractPreview}</p>
-              {newPlan && (
+              <p className="font-mono text-[12px] text-ink-2">{form.newContractPreview}</p>
+              {form.newPlan && (
                 <div className="mt-2.5 flex items-center gap-2">
                   <span className="px-2 py-0.5 rounded-full text-[11px] font-mono bg-olive-800 text-white">
-                    {newPlan.name}
+                    {form.newPlan.name}
                   </span>
                   <span className="font-mono text-[12px] font-semibold text-olive-700">
-                    {precioNum !== undefined ? `$${total.toLocaleString()}/mes` : '—'}
+                    {form.precioNum !== undefined ? `$${form.total.toLocaleString()}/mes` : '—'}
                   </span>
                 </div>
               )}
@@ -191,12 +109,12 @@ export function RenewalModal({ client, sub, isReactivation, onClose, onRenew }: 
             </p>
             <div className="grid grid-cols-3 gap-3">
               {plans.map((p) => {
-                const isSel = p.id === newPlanId;
+                const isSel = p.id === form.newPlanId;
                 return (
                   <button
                     key={p.id}
                     type="button"
-                    onClick={() => setNewPlanId(p.id)}
+                    onClick={() => form.setNewPlanId(p.id)}
                     className={`text-left p-4 rounded-md border transition-colors ${
                       isSel
                         ? 'bg-olive-800 text-white border-olive-800'
@@ -253,9 +171,9 @@ export function RenewalModal({ client, sub, isReactivation, onClose, onRenew }: 
                       <button
                         key={o.v}
                         type="button"
-                        onClick={() => setStartMode(o.v)}
+                        onClick={() => form.setStartMode(o.v)}
                         className={`px-2.5 py-1.5 rounded-md border text-[12px] font-semibold transition-colors ${
-                          startMode === o.v
+                          form.startMode === o.v
                             ? 'bg-olive-800 text-white border-olive-800'
                             : 'bg-paper text-ink border-rule hover:bg-cream-2'
                         }`}
@@ -266,13 +184,13 @@ export function RenewalModal({ client, sub, isReactivation, onClose, onRenew }: 
                   </div>
                 )}
 
-                {!isReactivation && startMode === 'atEnd' && newStart && (
+                {!isReactivation && form.startMode === 'atEnd' && form.newStart && (
                   <p className="font-mono text-[11.5px] text-ink-2 px-2.5 py-2 bg-cream-2 rounded-md">
-                    {formatDate(newStart)}
+                    {formatDate(form.newStart)}
                   </p>
                 )}
 
-                {willBePaused && (
+                {form.willBePaused && (
                   <div className="flex items-start gap-2 px-2.5 py-2 bg-[#f3eedc] border border-[#d8c075] rounded-md">
                     <Icon name="calendar" size={13} className="text-[#6b4f08] shrink-0 mt-0.5" />
                     <p className="font-mono text-[11px] text-[#6b4f08]">
@@ -281,12 +199,12 @@ export function RenewalModal({ client, sub, isReactivation, onClose, onRenew }: 
                   </div>
                 )}
 
-                {(isReactivation || startMode === 'pick') && (
+                {(isReactivation || form.startMode === 'pick') && (
                   <input
                     type="date"
-                    value={pickedDate}
-                    min={tomorrow}
-                    onChange={(e) => setPickedDate(e.target.value)}
+                    value={form.pickedDate}
+                    min={form.tomorrow}
+                    onChange={(e) => form.setPickedDate(e.target.value)}
                     className={inputCls}
                   />
                 )}
@@ -300,8 +218,8 @@ export function RenewalModal({ client, sub, isReactivation, onClose, onRenew }: 
                 <input
                   type="text"
                   inputMode="numeric"
-                  value={durationStr}
-                  onChange={(e) => setDurationStr(e.target.value.replace(/\D/g, ''))}
+                  value={form.durationStr}
+                  onChange={(e) => form.setDurationStr(e.target.value.replace(/\D/g, ''))}
                   placeholder="20"
                   className={inputCls}
                 />
@@ -313,7 +231,7 @@ export function RenewalModal({ client, sub, isReactivation, onClose, onRenew }: 
                 <p className="text-[10.5px] font-mono uppercase tracking-wider text-muted mb-1.5">
                   Fin de contrato
                 </p>
-                <p className={readonlyCls}>{newEnd ? formatDate(newEnd) : '—'}</p>
+                <p className={readonlyCls}>{form.newEnd ? formatDate(form.newEnd) : '—'}</p>
                 <p className="font-mono text-[10px] text-olive-700 mt-1">
                   calculado automáticamente
                 </p>
@@ -334,10 +252,10 @@ export function RenewalModal({ client, sub, isReactivation, onClose, onRenew }: 
                 <input
                   type="number"
                   min={0}
-                  max={newPlan?.price}
-                  value={precioStr}
-                  onChange={(e) => setPrecioStr(e.target.value)}
-                  disabled={!newPlan}
+                  max={form.newPlan?.price}
+                  value={form.precioStr}
+                  onChange={(e) => form.setPrecioStr(e.target.value)}
+                  disabled={!form.newPlan}
                   placeholder="—"
                   className={inputCls}
                 />
@@ -347,7 +265,9 @@ export function RenewalModal({ client, sub, isReactivation, onClose, onRenew }: 
                   Descuento
                 </p>
                 <p className={readonlyCls}>
-                  {newPlan && precioNum !== undefined ? discount.toLocaleString() : '—'}
+                  {form.newPlan && form.precioNum !== undefined
+                    ? form.discount.toLocaleString()
+                    : '—'}
                 </p>
               </div>
               <div>
@@ -355,7 +275,7 @@ export function RenewalModal({ client, sub, isReactivation, onClose, onRenew }: 
                   Total
                 </p>
                 <p className="w-full px-3 py-2 font-mono text-[15px] font-bold text-olive-800 border border-[#c8d4b0] rounded-md bg-[#f5f7f0]">
-                  {precioNum !== undefined ? `$${total.toLocaleString()}` : '—'}
+                  {form.precioNum !== undefined ? `$${form.total.toLocaleString()}` : '—'}
                 </p>
               </div>
             </div>
@@ -367,24 +287,24 @@ export function RenewalModal({ client, sub, isReactivation, onClose, onRenew }: 
               Resumen
             </p>
             <ul className="text-[13px] leading-[1.7]">
-              {sub?.plan && sub.planId !== newPlanId && (
+              {sub?.plan && sub.planId !== form.newPlanId && (
                 <li>
                   Cambio de plan:{' '}
                   <strong>{plans.find((p) => p.id === sub.planId)?.name ?? sub.plan.name}</strong> →{' '}
-                  <strong className="text-olive-700">{newPlan?.name}</strong>
+                  <strong className="text-olive-700">{form.newPlan?.name}</strong>
                 </li>
               )}
               <li>
-                Vigencia: <span className="font-mono">{vigenciaText}</span>
+                Vigencia: <span className="font-mono">{form.vigenciaText}</span>
               </li>
               <li>
                 Facturación:{' '}
                 <span className="font-mono">
-                  {precioNum !== undefined ? `$${total.toLocaleString()}/mes` : '—'}
-                  {discount > 0 && newPlan && precioNum !== undefined && (
+                  {form.precioNum !== undefined ? `$${form.total.toLocaleString()}/mes` : '—'}
+                  {form.discount > 0 && form.newPlan && form.precioNum !== undefined && (
                     <span className="text-muted">
                       {' '}
-                      (${newPlan.price.toLocaleString()} − ${discount.toLocaleString()})
+                      (${form.newPlan.price.toLocaleString()} − ${form.discount.toLocaleString()})
                     </span>
                   )}
                 </span>
@@ -412,16 +332,16 @@ export function RenewalModal({ client, sub, isReactivation, onClose, onRenew }: 
             <div className="flex-1" />
             <button
               type="button"
-              onClick={handleConfirm}
-              disabled={!canConfirm || isSaving}
+              onClick={form.handleConfirm}
+              disabled={!form.canConfirm || form.isSaving}
               className="flex items-center gap-2 px-4 py-2.5 text-[13px] font-semibold bg-olive-800 text-white rounded-md hover:bg-olive-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isSaving ? (
+              {form.isSaving ? (
                 <span className="inline-block w-3.5 h-3.5 rounded-full border-2 border-current border-t-transparent animate-spin" />
               ) : (
                 <Icon name="refresh" size={14} />
               )}
-              {confirmLabel}
+              {form.confirmLabel}
             </button>
           </div>
         </div>

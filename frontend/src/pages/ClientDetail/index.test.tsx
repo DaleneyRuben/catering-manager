@@ -1,10 +1,10 @@
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
-import api from '../services/api';
-import { ClientDetailPage } from './ClientDetailPage';
+import api from '../../services/api';
+import { ClientDetailPage } from '.';
 
-jest.mock('../services/api', () => ({
+jest.mock('../../services/api', () => ({
   default: { get: jest.fn(), patch: jest.fn(), post: jest.fn() },
 }));
 const mockGet = api.get as jest.Mock;

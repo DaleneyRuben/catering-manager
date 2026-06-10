@@ -1,4 +1,4 @@
-import { ConfirmModal } from '../components/ui/ConfirmModal';
+import { ConfirmModal } from "../ui/ConfirmModal";
 
 export function ConfirmFinalizeModal({
   clientName,

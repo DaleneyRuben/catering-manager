@@ -1,13 +1,13 @@
 import { useState } from 'react';
 import { parseISO, startOfToday } from 'date-fns';
-import { Field, inputCls, selectCls } from '../components/ui/Field';
-import { DatePickerInput } from '../components/ui/DatePickerInput';
-import { Icon } from '../components/ui/Icon';
-import { TagInput } from '../components/ui/TagInput';
-import { ToggleGroup } from '../components/ui/ToggleGroup';
-import { DISEASES } from '../constants/diseases';
-import { ZONES, DELIVERIES, SEX_OPTIONS } from '../constants/clientOptions';
-import type { Client } from '../types/client';
+import { Field, inputCls, selectCls } from "../ui/Field";
+import { DatePickerInput } from "../ui/DatePickerInput";
+import { Icon } from "../ui/Icon";
+import { TagInput } from "../ui/TagInput";
+import { ToggleGroup } from "../ui/ToggleGroup";
+import { DISEASES } from '../../constants/diseases';
+import { ZONES, DELIVERIES, SEX_OPTIONS } from '../../constants/clientOptions';
+import type { Client } from '../../types/client';
 
 export interface EditDraft {
   name: string;

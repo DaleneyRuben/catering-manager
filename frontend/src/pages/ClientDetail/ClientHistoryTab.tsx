@@ -1,6 +1,6 @@
-import { useClientHistory } from '../hooks/useClientHistory';
-import { formatDateTime } from '../utils/format';
-import { EVENT_LABELS } from '../constants/historyEvents';
+import { useClientHistory } from '../../hooks/useClientHistory';
+import { formatDateTime } from '../../utils/format';
+import { EVENT_LABELS } from '../../constants/historyEvents';
 
 interface Props {
   clientId: number;
