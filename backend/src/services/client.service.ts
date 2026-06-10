@@ -86,16 +86,16 @@ const findAll = (filters: FindAllFilters = {}) => {
       );
       break;
     case CLIENT_STATUS.PAUSED:
-      subscriptionWhere.contractEndDate = { [Op.gt]: todayStr };
+      subscriptionWhere.contractEndDate = { [Op.gte]: todayStr };
       andConditions.push({
         [Op.or]: [
           { pausedSince: { [Op.not]: null } },
           literal(
-            `"Client"."id" IN (SELECT s2."clientId" FROM subscriptions s2 WHERE '${todayStr}'::date = ANY(s2."suspendedDates") AND s2."contractEndDate" > '${todayStr}')`,
+            `"Client"."id" IN (SELECT s2."clientId" FROM subscriptions s2 WHERE '${todayStr}'::date = ANY(s2."suspendedDates") AND s2."contractEndDate" >= '${todayStr}')`,
           ),
           // Include clients whose subscription hasn't started yet (future start date)
           literal(
-            `"Client"."id" IN (SELECT s2."clientId" FROM subscriptions s2 WHERE s2."startDate" > '${todayStr}' AND s2."contractEndDate" > '${todayStr}')`,
+            `"Client"."id" IN (SELECT s2."clientId" FROM subscriptions s2 WHERE s2."startDate" > '${todayStr}' AND s2."contractEndDate" >= '${todayStr}')`,
           ),
         ],
       });
@@ -104,7 +104,7 @@ const findAll = (filters: FindAllFilters = {}) => {
       subscriptionRequired = false;
       andConditions.push(
         literal(
-          `NOT EXISTS (SELECT 1 FROM subscriptions s WHERE s."clientId" = "Client"."id" AND s."contractEndDate" > '${todayStr}')`,
+          `NOT EXISTS (SELECT 1 FROM subscriptions s WHERE s."clientId" = "Client"."id" AND s."contractEndDate" >= '${todayStr}')`,
         ),
       );
       break;
@@ -164,10 +164,10 @@ const getCounts = async () => {
   type Row = { active: string; expiring: string; paused: string; ended: string; total: string };
   const [rows] = await sequelize.query<Row>(
     `SELECT
-      COUNT(CASE WHEN c."pausedSince" IS NULL     AND s."contractEndDate" > :today AND (s."startDate" IS NULL OR s."startDate" <= :today) AND NOT (:today::date = ANY(s."suspendedDates")) THEN 1 END) AS active,
-      COUNT(CASE WHEN c."pausedSince" IS NULL     AND s."contractEndDate" > :today AND (s."startDate" IS NULL OR s."startDate" <= :today) AND s."contractEndDate" <= :threshold             THEN 1 END) AS expiring,
-      COUNT(CASE WHEN (c."pausedSince" IS NOT NULL OR :today::date = ANY(s."suspendedDates") OR (s."startDate" > :today AND s."contractEndDate" > :today)) AND s."contractEndDate" > :today  THEN 1 END) AS paused,
-      COUNT(CASE WHEN s."contractEndDate" <= :today OR s."contractEndDate" IS NULL                                                                                                            THEN 1 END) AS ended,
+      COUNT(CASE WHEN c."pausedSince" IS NULL     AND s."contractEndDate" >= :today AND (s."startDate" IS NULL OR s."startDate" <= :today) AND NOT (:today::date = ANY(s."suspendedDates")) THEN 1 END) AS active,
+      COUNT(CASE WHEN c."pausedSince" IS NULL     AND s."contractEndDate" >= :today AND (s."startDate" IS NULL OR s."startDate" <= :today) AND s."contractEndDate" <= :threshold             THEN 1 END) AS expiring,
+      COUNT(CASE WHEN (c."pausedSince" IS NOT NULL OR :today::date = ANY(s."suspendedDates") OR (s."startDate" > :today AND s."contractEndDate" >= :today)) AND s."contractEndDate" >= :today THEN 1 END) AS paused,
+      COUNT(CASE WHEN s."contractEndDate" < :today OR s."contractEndDate" IS NULL                                                                                                             THEN 1 END) AS ended,
       COUNT(*)                                                                                                                                                                                            AS total
     FROM clients c
     LEFT JOIN subscriptions s ON s."id" = (SELECT MAX(s2."id") FROM subscriptions s2 WHERE s2."clientId" = c.id)`,

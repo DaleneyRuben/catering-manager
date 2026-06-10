@@ -263,6 +263,17 @@ describe('clientService.findAll with filters', () => {
     expect(futureStartExclusion).toBe(true);
   });
 
+  it('status=paused uses contractEndDate >= today so plans ending today are included', async () => {
+    (Client.findAndCountAll as jest.Mock).mockResolvedValue({ rows: [], count: 0 });
+
+    await clientService.findAll({ status: 'paused' });
+
+    const call = (Client.findAndCountAll as jest.Mock).mock.calls[0][0];
+    expect(call.include[0].where).toMatchObject({
+      contractEndDate: { [Op.gte]: expect.any(String) },
+    });
+  });
+
   it('status=paused uses OR condition including pausedSince IS NOT NULL', async () => {
     (Client.findAndCountAll as jest.Mock).mockResolvedValue({ rows: [], count: 0 });
 
@@ -305,7 +316,7 @@ describe('clientService.findAll with filters', () => {
     );
   });
 
-  it('status=ended uses NOT EXISTS subquery to avoid missing JOIN in count query', async () => {
+  it('status=ended uses NOT EXISTS subquery with >= today so plans ending today are not included', async () => {
     (Client.findAndCountAll as jest.Mock).mockResolvedValue({ rows: [], count: 0 });
 
     await clientService.findAll({ status: 'ended' });
@@ -314,7 +325,9 @@ describe('clientService.findAll with filters', () => {
     const andConditions = call.where?.[Symbol.for('and')];
     expect(andConditions).toBeDefined();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    expect(andConditions.some((c: any) => c?.val?.includes?.('NOT EXISTS'))).toBe(true);
+    const notExistsLiteral = andConditions.find((c: any) => c?.val?.includes?.('NOT EXISTS'));
+    expect(notExistsLiteral).toBeDefined();
+    expect(notExistsLiteral.val).toContain('>=');
   });
 
   it('no filters calls findAndCountAll without where', async () => {
