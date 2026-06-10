@@ -76,6 +76,28 @@ describe('clientService.findAll', () => {
     expect(result.rows[0]).toMatchObject({ name: 'John Doe' });
     expect(result.total).toBe(1);
   });
+
+  it('sorts subscriptions newest-first so subscriptions[0] is the current one', async () => {
+    const clientWithTwoSubs = {
+      ...mockClient,
+      subscriptions: [
+        { id: 1, contractEndDate: '2026-05-01' },
+        { id: 3, contractEndDate: '2026-08-01' },
+        { id: 2, contractEndDate: '2026-07-01' },
+      ],
+    };
+    (Client.findAndCountAll as jest.Mock).mockResolvedValue({
+      rows: [clientWithTwoSubs],
+      count: 1,
+    });
+
+    const result = await clientService.findAll();
+
+    const subs = (result.rows[0] as never as { subscriptions: { id: number }[] }).subscriptions;
+    expect(subs[0].id).toBe(3);
+    expect(subs[1].id).toBe(2);
+    expect(subs[2].id).toBe(1);
+  });
 });
 
 describe('clientService.findById', () => {

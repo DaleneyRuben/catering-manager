@@ -125,7 +125,14 @@ const findAll = (filters: FindAllFilters = {}) => {
     limit,
     offset,
     distinct: true,
-  }).then(({ rows, count }) => ({ rows, total: count }));
+  }).then(({ rows, count }) => {
+    // mirror INCLUDE_SUBSCRIPTION_ORDERED: newest subscription first so subscriptions[0] is current
+    rows.forEach((client) => {
+      const subs = (client as never as { subscriptions?: { id: number }[] }).subscriptions;
+      if (subs) subs.sort((a, b) => b.id - a.id);
+    });
+    return { rows, total: count };
+  });
 };
 
 const getCounts = async () => {
