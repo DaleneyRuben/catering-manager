@@ -65,6 +65,8 @@ export function clientStatus(client: Client, today = new Date()): ClientStatus {
   if (!sub || (sub.contractEndDate && !isAfter(parseISO(sub.contractEndDate), today)))
     return CLIENT_STATUS.ENDED;
   if (!client.isActive) return CLIENT_STATUS.PAUSED;
+  // Subscription hasn't started yet — treat as paused until start date arrives
+  if (sub.startDate && isAfter(parseISO(sub.startDate), today)) return CLIENT_STATUS.PAUSED;
   const todayIso = format(today, 'yyyy-MM-dd');
   if (sub.suspendedDates?.includes(todayIso)) return CLIENT_STATUS.SUSPENDED;
   if (
