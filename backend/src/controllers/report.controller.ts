@@ -50,7 +50,10 @@ const downloadActiveClients = async (req: Request, res: Response, next: NextFunc
       'Content-Type',
       'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     );
-    res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename*=UTF-8''${encodeURIComponent(fileName)}`,
+    );
     res.send(buffer);
   } catch (err) {
     next(err);
@@ -87,7 +90,10 @@ const exportMenu = async (req: Request, res: Response, next: NextFunction) => {
       'Content-Type',
       'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
     );
-    res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename*=UTF-8''${encodeURIComponent(fileName)}`,
+    );
     res.send(buffer);
   } catch (err) {
     next(err);
@@ -125,7 +131,10 @@ const exportKitchenReport = async (req: Request, res: Response, next: NextFuncti
       'Content-Type',
       'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
     );
-    res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename*=UTF-8''${encodeURIComponent(fileName)}`,
+    );
     res.send(buffer);
   } catch (err) {
     next(err);
