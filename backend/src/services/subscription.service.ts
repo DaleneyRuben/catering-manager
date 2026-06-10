@@ -38,6 +38,9 @@ const create = async (clientId: number, data: CreateSubscriptionDto) => {
         discount: data.discount ?? 0,
       },
     });
+    if (data.renewalType === 'reactivation') {
+      await client.update({ isActive: true });
+    }
   }
 
   return subscription;
