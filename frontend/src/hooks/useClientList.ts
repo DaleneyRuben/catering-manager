@@ -37,7 +37,7 @@ export interface ClientUpdateDraft {
   businessName?: string | null;
   underlyingDiseases?: string[];
   restrictions?: string[];
-  isActive?: boolean;
+  pausedSince?: string | null;
 }
 
 export interface ClientFilters {

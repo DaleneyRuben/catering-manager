@@ -1,8 +1,3 @@
-import { parseISO, isAfter, format } from 'date-fns';
-import { businessDaysUntil } from '../utils/businessDays';
-import { EXPIRY_THRESHOLD_DAYS } from '../constants/subscription';
-import { CLIENT_STATUS } from '../constants/clientStatus';
-
 export interface Plan {
   id: number;
   name: string;
@@ -36,8 +31,9 @@ export interface Client {
   businessName: string | null;
   underlyingDiseases: string[];
   restrictions: string[];
-  isActive: boolean;
+  pausedSince: string | null;
   subscriptions: Subscription[];
+  status: ClientStatus;
 }
 
 export type HistoryEventType =
@@ -59,20 +55,3 @@ export interface ClientHistoryEntry {
 }
 
 export type ClientStatus = 'active' | 'paused' | 'expiring' | 'ended' | 'suspended' | 'future';
-
-export function clientStatus(client: Client, today = new Date()): ClientStatus {
-  const sub = client.subscriptions[0];
-  if (!sub || (sub.contractEndDate && !isAfter(parseISO(sub.contractEndDate), today)))
-    return CLIENT_STATUS.ENDED;
-  if (!client.isActive) return CLIENT_STATUS.PAUSED;
-  // start date hasn't arrived yet — plan is scheduled but not active
-  if (sub.startDate && isAfter(parseISO(sub.startDate), today)) return CLIENT_STATUS.FUTURE;
-  const todayIso = format(today, 'yyyy-MM-dd');
-  if (sub.suspendedDates?.includes(todayIso)) return CLIENT_STATUS.SUSPENDED;
-  if (
-    sub.contractEndDate &&
-    businessDaysUntil(today, parseISO(sub.contractEndDate)) <= EXPIRY_THRESHOLD_DAYS
-  )
-    return CLIENT_STATUS.EXPIRING;
-  return CLIENT_STATUS.ACTIVE;
-}
