@@ -2,8 +2,8 @@ import { useState } from 'react';
 import { format, addDays, isWeekend } from 'date-fns';
 import { Icon } from '../../components/ui/Icon';
 import { useMenu } from '../../hooks/useMenu';
-
 import { API_BASE } from '../../utils/env';
+import { downloadReport } from '../../utils/downloadReport';
 
 type DayOption = 'today' | 'tomorrow';
 
@@ -11,17 +11,11 @@ const BASE = API_BASE;
 
 const toIso = (d: Date) => format(d, 'yyyy-MM-dd');
 
-async function downloadMenuCard(isoDate: string) {
-  const res = await fetch(`${BASE}/reports/menu-card/download?date=${encodeURIComponent(isoDate)}`);
-  if (!res.ok) throw new Error(`Error al generar el archivo: ${res.status}`);
-  const blob = await res.blob();
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  const dayMonth = format(new Date(`${isoDate}T12:00:00`), 'dd-MM');
-  a.download = `Menu completo ${dayMonth}.docx`;
-  a.click();
-  URL.revokeObjectURL(url);
+function downloadMenuCard(isoDate: string) {
+  return downloadReport(
+    `${BASE}/reports/menu-card/download?date=${encodeURIComponent(isoDate)}`,
+    'menu.docx',
+  );
 }
 
 export function MenuCard() {

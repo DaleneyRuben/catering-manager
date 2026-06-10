@@ -2,29 +2,17 @@ import { useState } from 'react';
 import { format, addDays, isWeekend } from 'date-fns';
 import { Icon } from '../../components/ui/Icon';
 import { API_BASE } from '../../utils/env';
+import { downloadReport } from '../../utils/downloadReport';
 
 type DayOption = 'today' | 'tomorrow';
 
 const BASE = API_BASE;
 
-const fileNameFromResponse = (res: Response, fallback: string): string => {
-  const cd = res.headers.get('Content-Disposition') ?? '';
-  const match = cd.match(/filename="([^"]+)"/);
-  return match ? match[1] : fallback;
-};
-
-async function downloadDeliveryList(date: string) {
-  const res = await fetch(
+function downloadDeliveryList(date: string) {
+  return downloadReport(
     `${BASE}/reports/active-clients/download?date=${encodeURIComponent(date)}`,
+    'lista-entrega.xlsx',
   );
-  if (!res.ok) throw new Error(`Error al generar el archivo: ${res.status}`);
-  const blob = await res.blob();
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = fileNameFromResponse(res, 'lista-entrega.xlsx');
-  a.click();
-  URL.revokeObjectURL(url);
 }
 
 export function DeliveryListCard() {

@@ -2,8 +2,8 @@ import { useState } from 'react';
 import { format, addDays, isWeekend } from 'date-fns';
 import { Icon } from '../../components/ui/Icon';
 import { useMenu } from '../../hooks/useMenu';
-
 import { API_BASE } from '../../utils/env';
+import { downloadReport } from '../../utils/downloadReport';
 
 type DayOption = 'today' | 'tomorrow';
 
@@ -11,24 +11,11 @@ const BASE = API_BASE;
 
 const toIso = (d: Date) => format(d, 'yyyy-MM-dd');
 
-const fileNameFromResponse = (res: Response, fallback: string): string => {
-  const cd = res.headers.get('Content-Disposition') ?? '';
-  const match = cd.match(/filename="([^"]+)"/);
-  return match ? match[1] : fallback;
-};
-
-async function downloadKitchenReport(isoDate: string) {
-  const res = await fetch(
+function downloadKitchenReport(isoDate: string) {
+  return downloadReport(
     `${BASE}/reports/kitchen-report/download?date=${encodeURIComponent(isoDate)}`,
+    'informe-cocina.docx',
   );
-  if (!res.ok) throw new Error(`Error al generar el archivo: ${res.status}`);
-  const blob = await res.blob();
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = fileNameFromResponse(res, 'informe-cocina.docx');
-  a.click();
-  URL.revokeObjectURL(url);
 }
 
 export function KitchenReportCard() {
