@@ -109,6 +109,71 @@ describe('subscriptionService.create', () => {
       subscriptionService.create(1, { planId: 2, startDate, contractDate: today, duration: 20 }),
     ).rejects.toThrow('db error');
   });
+
+  it('creates subscription with null startDate and contractEndDate when startDate is omitted', async () => {
+    (Client.findByPk as jest.Mock).mockResolvedValue({ id: 1 });
+    (Subscription.create as jest.Mock).mockResolvedValue({
+      ...mockSubscription,
+      startDate: null,
+      contractEndDate: null,
+    });
+
+    await subscriptionService.create(1, { planId: 2, contractDate: today, duration: 20 });
+
+    expect(Subscription.create).toHaveBeenCalledWith(
+      expect.objectContaining({ startDate: null, contractEndDate: null }),
+    );
+  });
+
+  it('logs plan_assigned history event when renewalType is renewal', async () => {
+    (Client.findByPk as jest.Mock).mockResolvedValue({ id: 1 });
+    (Subscription.create as jest.Mock).mockResolvedValue(mockSubscription);
+    (ClientHistory.create as jest.Mock).mockResolvedValue({});
+
+    await subscriptionService.create(1, {
+      planId: 2,
+      startDate,
+      contractDate: today,
+      duration: 20,
+      renewalType: 'renewal',
+    });
+
+    expect(ClientHistory.create).toHaveBeenCalledWith(
+      expect.objectContaining({ clientId: 1, eventType: 'plan_assigned' }),
+    );
+  });
+
+  it('logs reactivated history event when renewalType is reactivation', async () => {
+    (Client.findByPk as jest.Mock).mockResolvedValue({ id: 1 });
+    (Subscription.create as jest.Mock).mockResolvedValue(mockSubscription);
+    (ClientHistory.create as jest.Mock).mockResolvedValue({});
+
+    await subscriptionService.create(1, {
+      planId: 2,
+      startDate,
+      contractDate: today,
+      duration: 20,
+      renewalType: 'reactivation',
+    });
+
+    expect(ClientHistory.create).toHaveBeenCalledWith(
+      expect.objectContaining({ clientId: 1, eventType: 'reactivated' }),
+    );
+  });
+
+  it('does not log history when renewalType is not provided', async () => {
+    (Client.findByPk as jest.Mock).mockResolvedValue({ id: 1 });
+    (Subscription.create as jest.Mock).mockResolvedValue(mockSubscription);
+
+    await subscriptionService.create(1, {
+      planId: 2,
+      startDate,
+      contractDate: today,
+      duration: 20,
+    });
+
+    expect(ClientHistory.create).not.toHaveBeenCalled();
+  });
 });
 
 describe('subscriptionService.update', () => {
