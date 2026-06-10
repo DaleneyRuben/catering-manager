@@ -10,16 +10,37 @@ const create = async (clientId: number, data: CreateSubscriptionDto) => {
   if (!client) return null;
 
   // duration - 1 because startDate counts as day 1
-  const contractEndDate = addDeliveryDays(data.startDate, data.duration - 1);
+  const contractEndDate = data.startDate
+    ? addDeliveryDays(data.startDate, data.duration - 1)
+    : null;
 
-  return Subscription.create({
+  const subscription = await Subscription.create({
     planId: data.planId,
-    startDate: data.startDate,
+    startDate: data.startDate ?? null,
     contractDate: data.contractDate,
     discount: data.discount ?? 0,
+    duration: data.duration,
     contractEndDate,
     clientId,
   } as never);
+
+  if (data.renewalType) {
+    const eventType = data.renewalType === 'reactivation' ? 'reactivated' : 'plan_assigned';
+    await ClientHistory.create({
+      clientId,
+      eventType,
+      occurredAt: new Date(),
+      metadata: {
+        planId: data.planId,
+        startDate: data.startDate ?? null,
+        duration: data.duration,
+        contractEndDate,
+        discount: data.discount ?? 0,
+      },
+    });
+  }
+
+  return subscription;
 };
 
 const update = async (clientId: number, id: number, data: UpdateSubscriptionDto) => {
@@ -33,11 +54,16 @@ const update = async (clientId: number, id: number, data: UpdateSubscriptionDto)
   if (startDate !== undefined || duration !== undefined) {
     const newStartDate = startDate ?? subscription.startDate;
     const newDuration = duration ?? subscription.duration;
-    // duration - 1 because startDate counts as day 1
-    const newContractEndDate = addDeliveryDays(newStartDate, newDuration - 1);
-    const cleanedSuspendedDates = (subscription.suspendedDates ?? []).filter(
-      (d) => d >= newStartDate,
-    );
+
+    let newContractEndDate: string | null = null;
+    if (newStartDate) {
+      // duration - 1 because startDate counts as day 1
+      newContractEndDate = addDeliveryDays(newStartDate, newDuration - 1);
+    }
+
+    const cleanedSuspendedDates = newStartDate
+      ? (subscription.suspendedDates ?? []).filter((d) => d >= newStartDate)
+      : [];
 
     if (startDate !== undefined) base.startDate = startDate;
     if (duration !== undefined) base.duration = duration;
@@ -65,8 +91,10 @@ const update = async (clientId: number, id: number, data: UpdateSubscriptionDto)
 
     const net = added.length - removed.length;
     let { contractEndDate } = subscription;
-    if (net > 0) contractEndDate = addDeliveryDays(contractEndDate, net);
-    else if (net < 0) contractEndDate = subtractDeliveryDays(contractEndDate, Math.abs(net));
+    if (contractEndDate) {
+      if (net > 0) contractEndDate = addDeliveryDays(contractEndDate, net);
+      else if (net < 0) contractEndDate = subtractDeliveryDays(contractEndDate, Math.abs(net));
+    }
 
     if (added.length > 0) {
       await ClientHistory.create({
