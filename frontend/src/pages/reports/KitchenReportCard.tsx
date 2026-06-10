@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { format, addDays, isWeekend } from 'date-fns';
-import { es } from 'date-fns/locale';
 import { Icon } from '../../components/ui/Icon';
 import { useMenu } from '../../hooks/useMenu';
 
@@ -10,15 +9,12 @@ type DayOption = 'today' | 'tomorrow';
 
 const BASE = API_BASE;
 
-const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
-
 const toIso = (d: Date) => format(d, 'yyyy-MM-dd');
 
-const toFileName = (isoDate: string): string => {
-  const d = new Date(`${isoDate}T12:00:00`);
-  const day = capitalize(format(d, 'EEEE', { locale: es }));
-  const dayMonth = format(d, 'ddMM');
-  return `${day} ${dayMonth}.docx`;
+const fileNameFromResponse = (res: Response, fallback: string): string => {
+  const cd = res.headers.get('Content-Disposition') ?? '';
+  const match = cd.match(/filename="([^"]+)"/);
+  return match ? match[1] : fallback;
 };
 
 async function downloadKitchenReport(isoDate: string) {
@@ -30,7 +26,7 @@ async function downloadKitchenReport(isoDate: string) {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = toFileName(isoDate);
+  a.download = fileNameFromResponse(res, 'informe-cocina.docx');
   a.click();
   URL.revokeObjectURL(url);
 }
