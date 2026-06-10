@@ -1,4 +1,4 @@
-import { differenceInYears, parseISO, startOfToday } from 'date-fns';
+import { differenceInYears, format, parseISO, startOfToday } from 'date-fns';
 import { Icon } from '../../components/ui/Icon';
 import { STATUS_LABELS, STATUS_CLASSES, CLIENT_STATUS } from '../../constants/clientStatus';
 import { SEX_LABELS } from '../../constants/clientOptions';
@@ -27,6 +27,7 @@ export function ClientHeader({
   onRenew,
 }: Props) {
   const age = differenceInYears(startOfToday(), parseISO(client.dateOfBirth));
+  const sub = client.subscriptions[0];
 
   let toggleConfig: { label: string; icon: 'calendar' | 'check'; className: string } | null = null;
   if (status === CLIENT_STATUS.ACTIVE || status === CLIENT_STATUS.EXPIRING) {
@@ -121,6 +122,17 @@ export function ClientHeader({
             <p className="text-[13px] font-semibold text-[#6b4f08]">Plan en pausa</p>
             <p className="font-mono text-[11px] text-[#6b4f08]">
               El cliente no recibe entregas. Reanudá el plan cuando esté listo.
+            </p>
+          </div>
+        </div>
+      )}
+      {status === CLIENT_STATUS.FUTURE && sub?.startDate && (
+        <div className="flex items-center gap-2.5 bg-[#f3eedc] border border-[#d8c075] rounded-md px-3.5 py-3 mb-5">
+          <Icon name="calendar" size={14} className="text-[#6b4f08] shrink-0" />
+          <div>
+            <p className="text-[13px] font-semibold text-[#6b4f08]">Plan programado</p>
+            <p className="font-mono text-[11px] text-[#6b4f08]">
+              El plan inicia el {format(parseISO(sub.startDate), 'dd/MM/yyyy')}.
             </p>
           </div>
         </div>

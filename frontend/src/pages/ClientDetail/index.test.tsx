@@ -98,6 +98,24 @@ describe('ClientDetailPage', () => {
     expect(await screen.findByRole('button', { name: /reanudar/i })).toBeInTheDocument();
   });
 
+  it('does not show Reanudar button when client has a future start date', async () => {
+    const futureStartClient = {
+      ...mockClient,
+      isActive: true,
+      subscriptions: [
+        {
+          ...mockClient.subscriptions[0],
+          startDate: '2099-01-01',
+          contractEndDate: '2099-03-01',
+        },
+      ],
+    };
+    renderPage(futureStartClient);
+    await screen.findByText('John Doe');
+    expect(screen.queryByRole('button', { name: /reanudar/i })).not.toBeInTheDocument();
+    expect(screen.getByText('Plan programado')).toBeInTheDocument();
+  });
+
   it('calls PATCH on pause and toggles button', async () => {
     mockPatch.mockResolvedValue({ ...mockClient, isActive: false });
     renderPage();
