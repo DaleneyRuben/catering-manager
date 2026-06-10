@@ -18,7 +18,7 @@ export interface ClientCreateDraft {
 }
 
 export interface SubscriptionCreateDraft {
-  planId: number;
+  planId: string;
   startDate: string;
   contractDate: string;
   duration: number;
@@ -87,7 +87,7 @@ export function useClientList(filters: ClientFilters = {}) {
       client: ClientCreateDraft;
       subscription: SubscriptionCreateDraft;
     }) => {
-      const created = await api.post<{ id: number }>('/clients', client);
+      const created = await api.post<{ id: string }>('/clients', client);
       await api.post(`/clients/${created.id}/subscriptions`, subscription);
     },
     onSuccess: () => {

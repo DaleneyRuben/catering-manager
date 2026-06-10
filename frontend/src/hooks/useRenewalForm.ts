@@ -11,7 +11,7 @@ interface Options {
   sub: Subscription | undefined;
   isReactivation: boolean;
   onRenew: (data: {
-    planId: number;
+    planId: string;
     contractDate: string;
     startDate?: string | null;
     duration: number;
@@ -22,7 +22,7 @@ interface Options {
 }
 
 export function useRenewalForm({ plans, sub, isReactivation, onRenew, onClose }: Options) {
-  const [newPlanId, setNewPlanId] = useState(sub?.planId ?? plans[0]?.id ?? 0);
+  const [newPlanId, setNewPlanId] = useState(sub?.planId ?? plans[0]?.id ?? '');
   const [durationStr, setDurationStr] = useState('');
   // precio = what the client actually pays; discount = plan.price - precio (auto-calculated)
   const [precioStr, setPrecioStr] = useState('');

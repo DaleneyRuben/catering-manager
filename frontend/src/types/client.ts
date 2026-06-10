@@ -1,14 +1,14 @@
 export interface Plan {
-  id: number;
+  id: string;
   name: string;
   meals: string[];
   price: number;
 }
 
 export interface Subscription {
-  id: number;
-  clientId: number;
-  planId: number;
+  id: string;
+  clientId: string;
+  planId: string;
   contractDate: string;
   startDate: string | null;
   contractEndDate: string | null;
@@ -19,7 +19,7 @@ export interface Subscription {
 }
 
 export interface Client {
-  id: number;
+  id: string;
   name: string;
   sex: string;
   dateOfBirth: string;
@@ -47,8 +47,8 @@ export type HistoryEventType =
   | 'deleted';
 
 export interface ClientHistoryEntry {
-  id: number;
-  clientId: number;
+  id: string;
+  clientId: string;
   eventType: HistoryEventType;
   occurredAt: string;
   metadata: Record<string, unknown>;

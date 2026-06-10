@@ -13,11 +13,11 @@ export function usePlans() {
 
   const clientCountsQuery = useQuery({
     queryKey: ['plans', 'client-counts'],
-    queryFn: (): Promise<Record<number, number>> => api.get('/plans/client-counts'),
+    queryFn: (): Promise<Record<string, number>> => api.get('/plans/client-counts'),
   });
 
   const saveMutation = useMutation({
-    mutationFn: ({ id, draft }: { id: number; draft: PlanDraft }) =>
+    mutationFn: ({ id, draft }: { id: string; draft: PlanDraft }) =>
       api.patch(`/plans/${id}`, {
         name: draft.name,
         meals: draft.meals,
@@ -37,7 +37,7 @@ export function usePlans() {
   });
 
   const removeMutation = useMutation({
-    mutationFn: (id: number) => api.delete(`/plans/${id}`),
+    mutationFn: (id: string) => api.delete(`/plans/${id}`),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['plans'] }),
   });
 
@@ -46,9 +46,9 @@ export function usePlans() {
     clientCounts: clientCountsQuery.data ?? {},
     isLoading: plansQuery.isLoading,
     isSaving: saveMutation.isPending,
-    save: (id: number, draft: PlanDraft): Promise<void> =>
+    save: (id: string, draft: PlanDraft): Promise<void> =>
       saveMutation.mutateAsync({ id, draft }).then(() => {}),
     create: (draft: PlanDraft): Promise<void> => createMutation.mutateAsync(draft).then(() => {}),
-    remove: (id: number): Promise<void> => removeMutation.mutateAsync(id).then(() => {}),
+    remove: (id: string): Promise<void> => removeMutation.mutateAsync(id).then(() => {}),
   };
 }

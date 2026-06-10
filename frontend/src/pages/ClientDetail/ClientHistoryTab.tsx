@@ -3,7 +3,7 @@ import { formatDateTime } from '../../utils/format';
 import { EVENT_LABELS } from '../../constants/historyEvents';
 
 interface Props {
-  clientId: number;
+  clientId: string;
 }
 
 export function ClientHistoryTab({ clientId }: Props) {

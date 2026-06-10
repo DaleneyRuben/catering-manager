@@ -1,4 +1,4 @@
-import { Icon } from "../ui/Icon";
+import { Icon } from '../ui/Icon';
 import { usePlans } from '../../hooks/usePlans';
 import { formatDate } from '../../utils/format';
 import { initials } from '../../utils/string';
@@ -13,7 +13,7 @@ interface Props {
   isReactivation: boolean;
   onClose: () => void;
   onRenew: (data: {
-    planId: number;
+    planId: string;
     contractDate: string;
     startDate?: string | null;
     duration: number;

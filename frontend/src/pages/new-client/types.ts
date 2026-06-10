@@ -8,7 +8,7 @@ export interface NewClientFormValues {
   delivery: string;
   nit: string;
   businessName: string;
-  planId: number | null;
+  planId: string | null;
   contractDate: string;
   startDate: string;
   duration: number;
