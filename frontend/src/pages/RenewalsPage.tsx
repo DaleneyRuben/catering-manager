@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { addDays, differenceInCalendarDays, format, parseISO } from 'date-fns';
 import { useClientList } from '../hooks/useClientList';
 import { useClient } from '../hooks/useClient';
-import { clientStatus } from '../types/client';
 import { CLIENT_STATUS } from '../constants/clientStatus';
 import { Icon } from '../components/ui/Icon';
 import { RenewalModal } from '../components/modals/RenewalModal';
@@ -70,8 +69,7 @@ function CandidateRow({
 }
 
 function RenewalModalWrapper({ client, onClose }: { client: Client; onClose: () => void }) {
-  const status = clientStatus(client);
-  const isReactivation = status === CLIENT_STATUS.ENDED;
+  const isReactivation = client.status === CLIENT_STATUS.ENDED;
   const { renew } = useClient(String(client.id));
 
   return (
@@ -94,11 +92,16 @@ export function RenewalsPage() {
 
   const expiring = clients.filter((c) => {
     const sub = c.subscriptions[0];
-    if (!sub?.contractEndDate || !c.isActive) return false;
+    if (
+      !sub?.contractEndDate ||
+      c.status === CLIENT_STATUS.ENDED ||
+      c.status === CLIENT_STATUS.PAUSED
+    )
+      return false;
     return sub.contractEndDate >= today && sub.contractEndDate <= cutoff;
   });
 
-  const inactive = clients.filter((c) => clientStatus(c) === CLIENT_STATUS.ENDED);
+  const inactive = clients.filter((c) => c.status === CLIENT_STATUS.ENDED);
 
   return (
     <div className="p-7 max-w-[1320px] mx-auto">

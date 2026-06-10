@@ -5,7 +5,6 @@ import { PageLoader } from '../components/ui/PageLoader';
 import { Pagination } from '../components/ui/Pagination';
 import { useClientList, useClientCounts } from '../hooks/useClientList';
 import { useDebounce } from '../hooks/useDebounce';
-import { clientStatus } from '../types/client';
 import { formatDate } from '../utils/format';
 import { STATUS_LABELS, STATUS_CLASSES, CLIENT_STATUS } from '../constants/clientStatus';
 import { SEX_LABELS } from '../constants/clientOptions';
@@ -208,7 +207,7 @@ export function ClientsPage() {
               <tbody>
                 {clients.map((c) => {
                   const sub = c.subscriptions[0];
-                  const status = clientStatus(c);
+                  const {status} = c;
                   return (
                     <tr
                       key={c.id}

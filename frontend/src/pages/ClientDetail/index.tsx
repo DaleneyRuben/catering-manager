@@ -4,7 +4,6 @@ import { parseISO } from 'date-fns';
 import { remainingDeliveryDays } from '../../utils/businessDays';
 import { Icon } from '../../components/ui/Icon';
 import { useClient } from '../../hooks/useClient';
-import { clientStatus } from '../../types/client';
 import { CLIENT_STATUS } from '../../constants/clientStatus';
 import { formatDate } from '../../utils/format';
 import { ClientEditModal } from '../../components/modals/ClientEditModal';
@@ -51,7 +50,8 @@ export function ClientDetailPage() {
 
   const handleToggleActive = async () => {
     if (!client) return;
-    await update({ isActive: !client.isActive });
+    // pausedSince !== null means currently paused → resume (null); null means active → pause (now)
+    await update({ pausedSince: client.pausedSince !== null ? null : new Date().toISOString() });
   };
 
   const handleSave = async (draft: EditDraft) => {
@@ -82,7 +82,7 @@ export function ClientDetailPage() {
   }
 
   const sub = client.subscriptions[0];
-  const status = clientStatus(client);
+  const {status} = client;
   const isEnded = status === CLIENT_STATUS.ENDED;
   const visibleTabs = isEnded
     ? TABS.filter((t) => t.id !== 'plan' && t.id !== 'suspensions')
