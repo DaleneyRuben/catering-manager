@@ -37,8 +37,8 @@ class Client extends Model {
   @Column({ type: DataType.ARRAY(DataType.STRING), allowNull: false, defaultValue: [] })
   declare restrictions: string[];
 
-  @Column({ type: DataType.BOOLEAN, allowNull: false, defaultValue: true })
-  declare isActive: boolean;
+  @Column({ type: DataType.DATE, allowNull: true, defaultValue: null })
+  declare pausedSince: Date | null;
 
   @HasMany(() => Subscription)
   declare subscriptions: Subscription[];

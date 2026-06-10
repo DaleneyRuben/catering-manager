@@ -31,7 +31,7 @@ export const updateClientSchema = z.object({
   businessName: z.string().nullable().optional(),
   underlyingDiseases: z.array(z.string().max(200)).max(50).optional(),
   restrictions: z.array(z.string().max(200)).max(50).optional(),
-  isActive: z.boolean().optional(),
+  pausedSince: z.string().nullable().optional(),
 });
 
 export type UpdateClientDto = z.infer<typeof updateClientSchema>;
