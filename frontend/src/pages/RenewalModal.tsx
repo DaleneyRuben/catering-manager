@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { addDays, format } from 'date-fns';
 import { Icon } from '../components/ui/Icon';
 import { usePlans } from '../hooks/usePlans';
@@ -30,16 +30,36 @@ export function RenewalModal({ client, sub, isReactivation, onClose, onRenew }: 
 
   const [newPlanId, setNewPlanId] = useState(sub?.planId ?? plans[0]?.id ?? 0);
   const [durationStr, setDurationStr] = useState('');
-  const [discountStr, setDiscountStr] = useState(String(sub?.discount ?? 0));
+  // precio = what the client actually pays; discount = plan.price - precio (auto-calculated)
+  const [precioStr, setPrecioStr] = useState('');
   const [startMode, setStartMode] = useState<StartMode>(isReactivation ? 'pick' : 'atEnd');
   const [pickedDate, setPickedDate] = useState('');
   const [isSaving, setIsSaving] = useState(false);
 
   const newPlan = plans.find((p) => p.id === newPlanId);
+
+  // When plan changes, reset precio to (plan.price - previous discount) for same plan, or plan.price for a new plan
+  useEffect(() => {
+    if (!newPlan) return;
+    const defaultPrecio =
+      newPlan.id === sub?.planId ? newPlan.price - (sub?.discount ?? 0) : newPlan.price;
+    setPrecioStr(String(defaultPrecio));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [newPlanId]);
+
+  // Set initial precio on first render once plans load
+  useEffect(() => {
+    if (plans.length > 0 && precioStr === '' && newPlan) {
+      setPrecioStr(String(newPlan.price - (sub?.discount ?? 0)));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [plans.length]);
+
   const duration = parseInt(durationStr, 10);
   const validDuration = !Number.isNaN(duration) && duration > 0 ? duration : null;
-  const discount = Math.max(0, parseInt(discountStr, 10) || 0);
-  const total = (newPlan?.price ?? 0) - discount;
+  const precioNum = precioStr !== '' ? Number(precioStr) : undefined;
+  const discount = newPlan && precioNum !== undefined ? Math.max(0, newPlan.price - precioNum) : 0;
+  const total = precioNum ?? 0;
 
   const tomorrow = format(addDays(new Date(), 1), 'yyyy-MM-dd');
 
@@ -55,7 +75,7 @@ export function RenewalModal({ client, sub, isReactivation, onClose, onRenew }: 
   const newEnd = newStart && validDuration ? addBusinessDays(newStart, validDuration - 1) : null; // duration - 1 because startDate counts as day 1
 
   const willBePaused = startMode === 'undefined';
-  const canConfirm = !!validDuration && (willBePaused || !!newStart);
+  const canConfirm = !!validDuration && precioNum !== undefined && (willBePaused || !!newStart);
 
   const handleConfirm = async () => {
     if (!canConfirm) return;
@@ -157,7 +177,7 @@ export function RenewalModal({ client, sub, isReactivation, onClose, onRenew }: 
                     {newPlan.name}
                   </span>
                   <span className="font-mono text-[12px] font-semibold text-olive-700">
-                    ${total.toLocaleString()}/mes
+                    {precioNum !== undefined ? `$${total.toLocaleString()}/mes` : '—'}
                   </span>
                 </div>
               )}
@@ -306,26 +326,36 @@ export function RenewalModal({ client, sub, isReactivation, onClose, onRenew }: 
             <p className="text-[10.5px] font-mono uppercase tracking-[.14em] text-muted mb-4">
               Facturación del plan
             </p>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-3 gap-4 items-end">
               <div>
                 <p className="text-[10.5px] font-mono uppercase tracking-wider text-muted mb-1.5">
-                  Duración del descuento
+                  Precio
                 </p>
                 <input
-                  type="text"
-                  inputMode="numeric"
-                  value={discountStr}
-                  onChange={(e) => setDiscountStr(e.target.value.replace(/\D/g, ''))}
-                  placeholder="0"
+                  type="number"
+                  min={0}
+                  max={newPlan?.price}
+                  value={precioStr}
+                  onChange={(e) => setPrecioStr(e.target.value)}
+                  disabled={!newPlan}
+                  placeholder="—"
                   className={inputCls}
                 />
+              </div>
+              <div>
+                <p className="text-[10.5px] font-mono uppercase tracking-wider text-muted mb-1.5">
+                  Descuento
+                </p>
+                <p className={readonlyCls}>
+                  {newPlan && precioNum !== undefined ? discount.toLocaleString() : '—'}
+                </p>
               </div>
               <div>
                 <p className="text-[10.5px] font-mono uppercase tracking-wider text-muted mb-1.5">
                   Total
                 </p>
                 <p className="w-full px-3 py-2 font-mono text-[15px] font-bold text-olive-800 border border-[#c8d4b0] rounded-md bg-[#f5f7f0]">
-                  ${total.toLocaleString()}/mes
+                  {precioNum !== undefined ? `$${total.toLocaleString()}` : '—'}
                 </p>
               </div>
             </div>
@@ -350,11 +380,11 @@ export function RenewalModal({ client, sub, isReactivation, onClose, onRenew }: 
               <li>
                 Facturación:{' '}
                 <span className="font-mono">
-                  ${total.toLocaleString()}/mes
-                  {discount > 0 && (
+                  {precioNum !== undefined ? `$${total.toLocaleString()}/mes` : '—'}
+                  {discount > 0 && newPlan && precioNum !== undefined && (
                     <span className="text-muted">
                       {' '}
-                      (${newPlan?.price.toLocaleString()} − ${discount.toLocaleString()})
+                      (${newPlan.price.toLocaleString()} − ${discount.toLocaleString()})
                     </span>
                   )}
                 </span>
