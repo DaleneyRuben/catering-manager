@@ -263,6 +263,17 @@ describe('clientService.findAll with filters', () => {
     expect(futureStartExclusion).toBe(true);
   });
 
+  it('status=active uses contractEndDate >= today so contracts ending today are included', async () => {
+    (Client.findAndCountAll as jest.Mock).mockResolvedValue({ rows: [], count: 0 });
+
+    await clientService.findAll({ status: 'active' });
+
+    const call = (Client.findAndCountAll as jest.Mock).mock.calls[0][0];
+    expect(call.include[0].where).toMatchObject({
+      contractEndDate: { [Op.gte]: expect.any(String) },
+    });
+  });
+
   it('status=paused uses contractEndDate >= today so plans ending today are included', async () => {
     (Client.findAndCountAll as jest.Mock).mockResolvedValue({ rows: [], count: 0 });
 
