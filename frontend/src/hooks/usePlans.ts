@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import api from '../services/api';
 import type { Plan } from '../types/client';
 import type { PlanDraft } from '../pages/plans/types';
@@ -23,7 +24,10 @@ export function usePlans() {
         meals: draft.meals,
         price: Number(draft.price),
       }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['plans'] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['plans'] });
+      toast.success('Plan actualizado');
+    },
   });
 
   const createMutation = useMutation({
@@ -33,12 +37,18 @@ export function usePlans() {
         meals: draft.meals,
         price: Number(draft.price),
       }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['plans'] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['plans'] });
+      toast.success('Plan creado correctamente');
+    },
   });
 
   const removeMutation = useMutation({
     mutationFn: (id: string) => api.delete(`/plans/${id}`),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['plans'] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['plans'] });
+      toast.success('Plan eliminado');
+    },
   });
 
   return {

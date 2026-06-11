@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import api from '../services/api';
 import type { Client } from '../types/client';
 import type { ClientUpdateDraft } from './useClientList';
@@ -18,6 +19,7 @@ export function useClient(id: string | number) {
       qc.setQueryData(['clients', id], updated);
       qc.invalidateQueries({ queryKey: ['clients'], exact: true });
       qc.invalidateQueries({ queryKey: ['clients', id, 'history'] });
+      toast.success('Datos del cliente actualizados');
     },
   });
 
@@ -26,6 +28,7 @@ export function useClient(id: string | number) {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['clients', id] });
       qc.invalidateQueries({ queryKey: ['clients'], exact: true });
+      toast.success('Plan finalizado');
     },
   });
 
@@ -49,6 +52,7 @@ export function useClient(id: string | number) {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['clients', id] });
       qc.invalidateQueries({ queryKey: ['clients', id, 'history'] });
+      toast.success('Contrato actualizado');
     },
   });
 
@@ -61,10 +65,15 @@ export function useClient(id: string | number) {
       discount: number;
       renewalType: 'renewal' | 'reactivation';
     }) => api.post(`/clients/${id}/subscriptions`, data),
-    onSuccess: () => {
+    onSuccess: (_data, variables) => {
       qc.invalidateQueries({ queryKey: ['clients', id] });
       qc.invalidateQueries({ queryKey: ['clients'], exact: true });
       qc.invalidateQueries({ queryKey: ['clients', id, 'history'] });
+      toast.success(
+        variables.renewalType === 'reactivation'
+          ? 'Cliente reactivado correctamente'
+          : 'Plan renovado correctamente',
+      );
     },
   });
 
@@ -72,6 +81,7 @@ export function useClient(id: string | number) {
     mutationFn: () => api.delete(`/clients/${id}`),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['clients'] });
+      toast.success('Cliente eliminado');
     },
   });
 
@@ -85,6 +95,7 @@ export function useClient(id: string | number) {
     }) => api.patch(`/clients/${id}/subscriptions/${subscriptionId}`, { suspendedDates }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['clients', id] });
+      toast.success('Suspensiones actualizadas');
     },
   });
 

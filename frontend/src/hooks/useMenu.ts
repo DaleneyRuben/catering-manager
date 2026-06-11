@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import api from '../services/api';
 import type { Menu, MenuDraft } from '../types/menu';
 
@@ -12,7 +13,10 @@ export function useMenu() {
 
   const saveMutation = useMutation({
     mutationFn: (draft: MenuDraft) => api.put<Menu>('/menus', draft),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['menus'] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['menus'] });
+      toast.success('Menú guardado');
+    },
   });
 
   return {

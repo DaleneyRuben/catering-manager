@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import api from '../services/api';
 import type { Client } from '../types/client';
 import { CLIENT_STATUS } from '../constants/clientStatus';
@@ -92,6 +93,7 @@ export function useClientList(filters: ClientFilters = {}) {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['clients'] });
+      toast.success('Cliente registrado correctamente');
     },
   });
 
