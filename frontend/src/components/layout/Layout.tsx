@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
+import { Toaster } from 'sonner';
 import { Icon } from '../ui/Icon';
 import smallLogo from '../../assets/small_logo.png';
 
@@ -103,6 +104,17 @@ export function Layout({ children }: LayoutProps) {
         </header>
         <main className="flex-1 min-w-0 overflow-auto">{children}</main>
       </div>
+      <Toaster
+        position="bottom-center"
+        toastOptions={{
+          classNames: {
+            toast: 'font-mono text-[13px]',
+            error: '!bg-[#fae6dd] !text-[#c4341a] !border-[#f0b8a0]',
+            success: '!bg-[#dee9c8] !text-[#357e1c] !border-[#b8d099]',
+            icon: 'text-current',
+          },
+        }}
+      />
     </div>
   );
 }
