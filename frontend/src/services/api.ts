@@ -20,7 +20,8 @@ async function request<T>(method: string, url: string, body?: unknown): Promise<
     let message = `Error ${res.status}`;
     try {
       const errBody = await res.clone().json();
-      if (typeof errBody?.error === 'string') message = errBody.error;
+      if (typeof errBody?.message === 'string') message = errBody.message;
+      else if (typeof errBody?.error === 'string') message = errBody.error;
     } catch {
       // ignore — fall back to status code message
     }
