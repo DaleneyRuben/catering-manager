@@ -200,13 +200,20 @@ export function RenewalModal({ client, sub, isReactivation, onClose, onRenew }: 
                 )}
 
                 {(isReactivation || form.startMode === 'pick') && (
-                  <input
-                    type="date"
-                    value={form.pickedDate}
-                    min={form.tomorrow}
-                    onChange={(e) => form.setPickedDate(e.target.value)}
-                    className={inputCls}
-                  />
+                  <>
+                    <input
+                      type="date"
+                      value={form.pickedDate}
+                      min={form.tomorrow}
+                      onChange={(e) => form.setPickedDate(e.target.value)}
+                      className={inputCls}
+                    />
+                    {form.pickedDateIsWeekend && (
+                      <p className="font-mono text-[11px] text-alert mt-1">
+                        El inicio debe ser un día hábil (lunes a viernes).
+                      </p>
+                    )}
+                  </>
                 )}
               </div>
 
