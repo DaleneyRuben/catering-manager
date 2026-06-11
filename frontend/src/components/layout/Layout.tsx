@@ -42,13 +42,13 @@ export function Layout({ children }: LayoutProps) {
 
       <aside
         className={[
-          'fixed inset-y-0 left-0 z-40 w-56 flex flex-col bg-olive-900 border-r border-olive-800',
+          'fixed inset-y-0 left-0 z-40 w-56 flex flex-col bg-[#d8f5bd] border-r border-[#b8dba0]',
           'transition-transform duration-200',
           'md:relative md:translate-x-0',
           menuOpen ? 'translate-x-0' : '-translate-x-full',
         ].join(' ')}
       >
-        <div className="px-4 py-4 flex items-center justify-center border-b border-olive-800">
+        <div className="px-4 py-4 flex items-center justify-center border-b border-[#b8dba0]">
           <img src={smallLogo} alt="La Oliva" className="w-36 h-auto" />
         </div>
         <nav className="flex-1 py-4 flex flex-col">
@@ -61,8 +61,8 @@ export function Layout({ children }: LayoutProps) {
                 [
                   'flex items-center gap-3 pl-[13px] pr-4 py-2 text-sm transition-colors border-l-[3px]',
                   isActive
-                    ? 'border-olive-400 bg-olive-800 text-white font-semibold'
-                    : 'border-transparent text-white/60 hover:text-white hover:bg-olive-800',
+                    ? 'border-olive-700 bg-white/60 text-olive-900 font-semibold'
+                    : 'border-transparent text-olive-900/60 hover:text-olive-900 hover:bg-white/40',
                 ].join(' ')
               }
             >
@@ -71,15 +71,15 @@ export function Layout({ children }: LayoutProps) {
             </NavLink>
           ))}
         </nav>
-        <div className="border-t border-olive-800">
+        <div className="border-t border-[#b8dba0]">
           <NavLink
             to="/health"
             className={({ isActive }) =>
               [
                 'flex items-center gap-3 pl-[13px] pr-4 py-3 text-sm transition-colors border-l-[3px]',
                 isActive
-                  ? 'border-olive-400 bg-olive-800 text-white font-semibold'
-                  : 'border-transparent text-white/60 hover:text-white hover:bg-olive-800',
+                  ? 'border-olive-700 bg-olive-900 text-[#d8f5bd] font-semibold'
+                  : 'border-transparent text-olive-900/60 hover:text-olive-900 hover:bg-olive-900/10',
               ].join(' ')
             }
           >
@@ -90,11 +90,11 @@ export function Layout({ children }: LayoutProps) {
       </aside>
 
       <div className="flex flex-col flex-1 min-w-0">
-        <header className="flex items-center gap-3 px-4 h-12 bg-olive-900 border-b border-olive-800 md:hidden shrink-0">
+        <header className="flex items-center gap-3 px-4 h-12 bg-[#d8f5bd] border-b border-[#b8dba0] md:hidden shrink-0">
           <button
             type="button"
             aria-label="Abrir menú"
-            className="text-white/60 hover:text-white"
+            className="text-olive-900/60 hover:text-olive-900"
             onClick={() => setMenuOpen(true)}
           >
             <Icon name="menu" size={20} />
