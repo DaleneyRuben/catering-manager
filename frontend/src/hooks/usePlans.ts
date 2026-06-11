@@ -17,13 +17,15 @@ export function usePlans() {
     queryFn: (): Promise<Record<string, number>> => api.get('/plans/client-counts'),
   });
 
+  const planBody = (draft: PlanDraft) => ({
+    name: draft.name,
+    meals: draft.meals,
+    price: Number(draft.price),
+  });
+
   const saveMutation = useMutation({
     mutationFn: ({ id, draft }: { id: string; draft: PlanDraft }) =>
-      api.patch(`/plans/${id}`, {
-        name: draft.name,
-        meals: draft.meals,
-        price: Number(draft.price),
-      }),
+      api.patch(`/plans/${id}`, planBody(draft)),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['plans'] });
       toast.success('Plan actualizado');
@@ -31,12 +33,7 @@ export function usePlans() {
   });
 
   const createMutation = useMutation({
-    mutationFn: (draft: PlanDraft) =>
-      api.post('/plans', {
-        name: draft.name,
-        meals: draft.meals,
-        price: Number(draft.price),
-      }),
+    mutationFn: (draft: PlanDraft) => api.post('/plans', planBody(draft)),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['plans'] });
       toast.success('Plan creado correctamente');
