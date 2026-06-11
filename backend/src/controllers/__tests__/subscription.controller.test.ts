@@ -70,6 +70,32 @@ describe('POST /api/clients/:clientId/subscriptions', () => {
     expect(res.status).toBe(201);
   });
 
+  it('returns 400 when startDate is a Saturday', async () => {
+    const res = await request(app)
+      .post(`/api/clients/${id1}/subscriptions`)
+      .send({ ...validPayload, startDate: '2026-06-13' });
+
+    expect(res.status).toBe(400);
+  });
+
+  it('returns 400 when startDate is a Sunday', async () => {
+    const res = await request(app)
+      .post(`/api/clients/${id1}/subscriptions`)
+      .send({ ...validPayload, startDate: '2026-06-14' });
+
+    expect(res.status).toBe(400);
+  });
+
+  it('accepts a weekday startDate', async () => {
+    (subscriptionService.create as jest.Mock).mockResolvedValue({ id: 1, clientId: 1, planId: 2 });
+
+    const res = await request(app)
+      .post(`/api/clients/${id1}/subscriptions`)
+      .send({ ...validPayload, startDate: '2026-06-16' });
+
+    expect(res.status).toBe(201);
+  });
+
   it('returns 500 when service throws', async () => {
     (subscriptionService.create as jest.Mock).mockRejectedValue(new Error('db error'));
 
@@ -106,6 +132,14 @@ describe('PATCH /api/clients/:clientId/subscriptions/:id', () => {
     const res = await request(app)
       .patch('/api/clients/1/subscriptions/1')
       .send({ contractEndDate: '30-06-2026' });
+
+    expect(res.status).toBe(400);
+  });
+
+  it('returns 400 when startDate is a weekend', async () => {
+    const res = await request(app)
+      .patch(`/api/clients/${id1}/subscriptions/${id1}`)
+      .send({ startDate: '2026-06-13' });
 
     expect(res.status).toBe(400);
   });

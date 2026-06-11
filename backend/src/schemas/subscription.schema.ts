@@ -1,11 +1,16 @@
 import { z } from 'zod';
+import { isWeekend, parseISO } from 'date-fns';
 
 const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
 const dateField = z.string().regex(dateRegex, 'must be YYYY-MM-DD');
+const weekdayDateField = dateField.refine(
+  (v) => !isWeekend(parseISO(v)),
+  'startDate must be a weekday (Mon–Fri)',
+);
 
 export const createSubscriptionSchema = z.object({
   planId: z.number().int().positive(),
-  startDate: dateField.nullable().optional(),
+  startDate: weekdayDateField.nullable().optional(),
   contractDate: dateField,
   duration: z.number().int().min(1),
   discount: z.number().int().min(0).default(0),
@@ -15,7 +20,7 @@ export const createSubscriptionSchema = z.object({
 export const updateSubscriptionSchema = z.object({
   planId: z.number().int().positive().optional(),
   contractDate: dateField.optional(),
-  startDate: dateField.optional(),
+  startDate: weekdayDateField.optional(),
   duration: z.number().int().min(1).optional(),
   contractEndDate: dateField.optional(),
   suspendedDates: z.array(dateField).optional(),
