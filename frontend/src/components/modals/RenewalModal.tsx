@@ -153,71 +153,9 @@ export function RenewalModal({ client, sub, isReactivation, onClose, onRenew }: 
             <p className="text-[10.5px] font-mono uppercase tracking-[.14em] text-muted mb-4">
               Contrato
             </p>
-            <div className="grid grid-cols-4 gap-4 items-start">
-              {/* Inicio del servicio */}
-              <div className="col-span-2">
-                <p className="text-[10.5px] font-mono uppercase tracking-wider text-muted mb-1.5">
-                  Inicio del servicio
-                </p>
-                {!isReactivation && (
-                  <div className="flex gap-2 mb-2 flex-wrap">
-                    {(
-                      [
-                        { v: 'atEnd', l: 'Al vencer' },
-                        { v: 'pick', l: 'Elegir fecha' },
-                        { v: 'undefined', l: 'Sin fecha' },
-                      ] as { v: StartMode; l: string }[]
-                    ).map((o) => (
-                      <button
-                        key={o.v}
-                        type="button"
-                        onClick={() => form.setStartMode(o.v)}
-                        className={`px-2.5 py-1.5 rounded-md border text-[12px] font-semibold transition-colors ${
-                          form.startMode === o.v
-                            ? 'bg-olive-800 text-white border-olive-800'
-                            : 'bg-paper text-ink border-rule hover:bg-cream-2'
-                        }`}
-                      >
-                        {o.l}
-                      </button>
-                    ))}
-                  </div>
-                )}
 
-                {!isReactivation && form.startMode === 'atEnd' && form.newStart && (
-                  <p className="font-mono text-[11.5px] text-ink-2 px-2.5 py-2 bg-cream-2 rounded-md">
-                    {formatDate(form.newStart)}
-                  </p>
-                )}
-
-                {form.willBePaused && (
-                  <div className="flex items-start gap-2 px-2.5 py-2 bg-[#f3eedc] border border-[#d8c075] rounded-md">
-                    <Icon name="calendar" size={13} className="text-[#6b4f08] shrink-0 mt-0.5" />
-                    <p className="font-mono text-[11px] text-[#6b4f08]">
-                      El cliente queda pausado hasta que se active manualmente.
-                    </p>
-                  </div>
-                )}
-
-                {(isReactivation || form.startMode === 'pick') && (
-                  <>
-                    <input
-                      type="date"
-                      value={form.pickedDate}
-                      min={form.tomorrow}
-                      onChange={(e) => form.setPickedDate(e.target.value)}
-                      className={inputCls}
-                    />
-                    {form.pickedDateIsWeekend && (
-                      <p className="font-mono text-[11px] text-alert mt-1">
-                        El inicio debe ser un día hábil (lunes a viernes).
-                      </p>
-                    )}
-                  </>
-                )}
-              </div>
-
-              {/* Duración */}
+            {/* Duración + Fin de contrato */}
+            <div className="grid grid-cols-2 gap-4 mb-5">
               <div>
                 <p className="text-[10.5px] font-mono uppercase tracking-wider text-muted mb-1.5">
                   Duración (días)
@@ -232,8 +170,6 @@ export function RenewalModal({ client, sub, isReactivation, onClose, onRenew }: 
                 />
                 <p className="font-mono text-[10px] text-muted mt-1">días hábiles (L–V)</p>
               </div>
-
-              {/* Fin de contrato */}
               <div>
                 <p className="text-[10.5px] font-mono uppercase tracking-wider text-muted mb-1.5">
                   Fin de contrato
@@ -243,6 +179,71 @@ export function RenewalModal({ client, sub, isReactivation, onClose, onRenew }: 
                   calculado automáticamente
                 </p>
               </div>
+            </div>
+
+            {/* Inicio del servicio — full width section */}
+            <div>
+              <p className="text-[10.5px] font-mono uppercase tracking-wider text-muted mb-2">
+                Inicio del servicio
+              </p>
+
+              {!isReactivation && (
+                <div className="flex gap-2 mb-3 flex-wrap">
+                  {(
+                    [
+                      { v: 'atEnd', l: 'Al vencer' },
+                      { v: 'pick', l: 'Elegir fecha' },
+                      { v: 'undefined', l: 'Sin fecha' },
+                    ] as { v: StartMode; l: string }[]
+                  ).map((o) => (
+                    <button
+                      key={o.v}
+                      type="button"
+                      onClick={() => form.setStartMode(o.v)}
+                      className={`px-3 py-1.5 rounded-md border text-[12px] font-semibold transition-colors ${
+                        form.startMode === o.v
+                          ? 'bg-olive-800 text-white border-olive-800'
+                          : 'bg-paper text-ink border-rule hover:bg-cream-2'
+                      }`}
+                    >
+                      {o.l}
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {!isReactivation && form.startMode === 'atEnd' && form.newStart && (
+                <p className="font-mono text-[12px] text-ink-2 px-3 py-2.5 bg-cream-2 rounded-md border border-rule">
+                  Inicia el primer día de reparto tras el vencimiento:{' '}
+                  <strong>{formatDate(form.newStart)}</strong>
+                </p>
+              )}
+
+              {form.willBePaused && (
+                <div className="flex items-start gap-2 px-3 py-2.5 bg-[#f3eedc] border border-[#d8c075] rounded-md">
+                  <Icon name="calendar" size={13} className="text-[#6b4f08] shrink-0 mt-0.5" />
+                  <p className="font-mono text-[11px] text-[#6b4f08]">
+                    El cliente queda pausado hasta que se active manualmente.
+                  </p>
+                </div>
+              )}
+
+              {(isReactivation || form.startMode === 'pick') && (
+                <div className="max-w-xs">
+                  <input
+                    type="date"
+                    value={form.pickedDate}
+                    min={form.tomorrow}
+                    onChange={(e) => form.setPickedDate(e.target.value)}
+                    className={inputCls}
+                  />
+                  {form.pickedDateIsWeekend && (
+                    <p className="font-mono text-[11px] text-alert mt-1">
+                      El inicio debe ser un día hábil (lunes a viernes).
+                    </p>
+                  )}
+                </div>
+              )}
             </div>
           </div>
 
