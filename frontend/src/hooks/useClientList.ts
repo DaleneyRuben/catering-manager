@@ -1,5 +1,4 @@
-import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query';
-import { toast } from 'sonner';
+import { useQuery, keepPreviousData } from '@tanstack/react-query';
 import api from '../services/api';
 import type { Client } from '../types/client';
 import { CLIENT_STATUS } from '../constants/clientStatus';
@@ -58,8 +57,6 @@ export interface ClientCounts {
 }
 
 export function useClientList(filters: ClientFilters = {}) {
-  const qc = useQueryClient();
-
   const { data, isLoading, isFetching } = useQuery({
     queryKey: ['clients', filters],
     queryFn: () => {
@@ -80,31 +77,11 @@ export function useClientList(filters: ClientFilters = {}) {
   const clients = data?.data ?? [];
   const total = data?.total ?? 0;
 
-  const createMutation = useMutation({
-    mutationFn: async ({
-      client,
-      subscription,
-    }: {
-      client: ClientCreateDraft;
-      subscription: SubscriptionCreateDraft;
-    }) => {
-      const created = await api.post<{ id: string }>('/clients', client);
-      await api.post(`/clients/${created.id}/subscriptions`, subscription);
-    },
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['clients'] });
-      toast.success('Cliente registrado correctamente');
-    },
-  });
-
   return {
     clients,
     total,
     isLoading,
     isFetching,
-    isCreating: createMutation.isPending,
-    create: (client: ClientCreateDraft, subscription: SubscriptionCreateDraft): Promise<void> =>
-      createMutation.mutateAsync({ client, subscription }).then(() => {}),
   };
 }
 

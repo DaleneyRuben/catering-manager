@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { format, startOfToday } from 'date-fns';
 import { Icon } from '../components/ui/Icon';
 import { StepIndicator } from '../components/ui/StepIndicator';
-import { useClientList } from '../hooks/useClientList';
+import { useCreateClient } from '../hooks/useCreateClient';
 import { usePlans } from '../hooks/usePlans';
 import { StepConfirm } from './new-client/StepConfirm';
 import { StepIdentity } from './new-client/StepIdentity';
@@ -21,7 +21,7 @@ const STEP_FIELDS: Partial<Record<number, (keyof NewClientFormValues)[]>> = {
 
 export function NewClientPage() {
   const navigate = useNavigate();
-  const { create, isCreating } = useClientList();
+  const { create, isCreating } = useCreateClient();
   const { plans } = usePlans();
   const [step, setStep] = useState(1);
   const [restrictions, setRestrictions] = useState<RestrictionsState>({
