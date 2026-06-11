@@ -55,3 +55,12 @@ export interface ClientHistoryEntry {
 }
 
 export type ClientStatus = 'active' | 'paused' | 'expiring' | 'ended' | 'suspended' | 'future';
+
+export interface RenewalPayload {
+  planId: string;
+  contractDate: string;
+  startDate?: string | null;
+  duration: number;
+  discount: number;
+  renewalType: 'renewal' | 'reactivation';
+}

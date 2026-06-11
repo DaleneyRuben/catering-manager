@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { addDays, format, isWeekend, parseISO } from 'date-fns';
 import { addBusinessDays } from '../utils/businessDays';
 import { formatDate } from '../utils/format';
-import type { Plan, Subscription } from '../types/client';
+import type { Plan, Subscription, RenewalPayload } from '../types/client';
 
 export type StartMode = 'atEnd' | 'pick' | 'undefined';
 
@@ -10,14 +10,7 @@ interface Options {
   plans: Plan[];
   sub: Subscription | undefined;
   isReactivation: boolean;
-  onRenew: (data: {
-    planId: string;
-    contractDate: string;
-    startDate?: string | null;
-    duration: number;
-    discount: number;
-    renewalType: 'renewal' | 'reactivation';
-  }) => Promise<void>;
+  onRenew: (data: RenewalPayload) => Promise<void>;
   onClose: () => void;
 }
 

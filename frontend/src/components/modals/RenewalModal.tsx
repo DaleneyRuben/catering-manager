@@ -5,21 +5,14 @@ import { initials } from '../../utils/string';
 import { MEAL_LABELS } from '../../constants/meals';
 import { useRenewalForm } from '../../hooks/useRenewalForm';
 import type { StartMode } from '../../hooks/useRenewalForm';
-import type { Client, Subscription } from '../../types/client';
+import type { Client, Subscription, RenewalPayload } from '../../types/client';
 
 interface Props {
   client: Client;
   sub: Subscription | undefined;
   isReactivation: boolean;
   onClose: () => void;
-  onRenew: (data: {
-    planId: string;
-    contractDate: string;
-    startDate?: string | null;
-    duration: number;
-    discount: number;
-    renewalType: 'renewal' | 'reactivation';
-  }) => Promise<void>;
+  onRenew: (data: RenewalPayload) => Promise<void>;
 }
 
 const inputCls =
