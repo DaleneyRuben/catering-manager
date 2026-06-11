@@ -45,4 +45,11 @@ describe('encodeIds', () => {
     expect(encodeIds('hello')).toBe('hello');
     expect(encodeIds(42)).toBe(42);
   });
+
+  it('preserves Date objects without corrupting them into character maps', () => {
+    const date = new Date('2026-06-11T18:46:17.000Z');
+    const result = encodeIds({ occurredAt: date }) as Record<string, unknown>;
+    expect(result.occurredAt).toBeInstanceOf(Date);
+    expect((result.occurredAt as Date).toISOString()).toBe('2026-06-11T18:46:17.000Z');
+  });
 });
