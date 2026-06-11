@@ -16,7 +16,16 @@ async function request<T>(method: string, url: string, body?: unknown): Promise<
     ...(body !== undefined ? { body: JSON.stringify(body) } : {}),
   });
 
-  if (!res.ok) throw new Error(`${method} ${url} → ${res.status}`);
+  if (!res.ok) {
+    let message = `Error ${res.status}`;
+    try {
+      const errBody = await res.clone().json();
+      if (typeof errBody?.error === 'string') message = errBody.error;
+    } catch {
+      // ignore — fall back to status code message
+    }
+    throw new Error(message);
+  }
   if (res.status === 204) return undefined as unknown as T;
 
   const json = await res.json();
