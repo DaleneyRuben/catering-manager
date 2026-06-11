@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import api from '../services/api';
+import { toVoid } from '../utils/toVoid';
 import type { Client, RenewalPayload } from '../types/client';
 import type { ClientUpdateDraft } from './useClientList';
 
@@ -107,16 +108,15 @@ export function useClient(id: string | number) {
     isDeleting: deleteMutation.isPending,
     isUpdatingSuspensions: updateSuspensionsMutation.isPending,
     update: (data: ClientUpdateDraft): Promise<Client> => updateMutation.mutateAsync(data),
-    finalize: (): Promise<void> => finalizeMutation.mutateAsync().then(() => {}),
-    deleteClient: (): Promise<void> => deleteMutation.mutateAsync().then(() => {}),
+    finalize: (): Promise<void> => toVoid(finalizeMutation.mutateAsync()),
+    deleteClient: (): Promise<void> => toVoid(deleteMutation.mutateAsync()),
     updateContract: (
       subscriptionId: string,
       draft: { contractDate: string; startDate: string; duration: number },
-    ): Promise<void> =>
-      updateContractMutation.mutateAsync({ subscriptionId, ...draft }).then(() => {}),
+    ): Promise<void> => toVoid(updateContractMutation.mutateAsync({ subscriptionId, ...draft })),
     updateSuspensions: (subscriptionId: string, suspendedDates: string[]): Promise<void> =>
-      updateSuspensionsMutation.mutateAsync({ suspendedDates, subscriptionId }).then(() => {}),
-    renew: (data: RenewalPayload): Promise<void> => renewMutation.mutateAsync(data).then(() => {}),
+      toVoid(updateSuspensionsMutation.mutateAsync({ suspendedDates, subscriptionId })),
+    renew: (data: RenewalPayload): Promise<void> => toVoid(renewMutation.mutateAsync(data)),
     isRenewing: renewMutation.isPending,
   };
 }

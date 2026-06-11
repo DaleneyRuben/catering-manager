@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
+import { toVoid } from '../utils/toVoid';
 import api from '../services/api';
 import type { Plan } from '../types/client';
 import type { PlanDraft } from '../pages/plans/types';
@@ -54,8 +55,8 @@ export function usePlans() {
     isLoading: plansQuery.isLoading,
     isSaving: saveMutation.isPending,
     save: (id: string, draft: PlanDraft): Promise<void> =>
-      saveMutation.mutateAsync({ id, draft }).then(() => {}),
-    create: (draft: PlanDraft): Promise<void> => createMutation.mutateAsync(draft).then(() => {}),
-    remove: (id: string): Promise<void> => removeMutation.mutateAsync(id).then(() => {}),
+      toVoid(saveMutation.mutateAsync({ id, draft })),
+    create: (draft: PlanDraft): Promise<void> => toVoid(createMutation.mutateAsync(draft)),
+    remove: (id: string): Promise<void> => toVoid(removeMutation.mutateAsync(id)),
   };
 }
