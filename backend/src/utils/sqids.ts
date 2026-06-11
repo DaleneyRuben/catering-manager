@@ -18,6 +18,7 @@ const ID_KEY = /^(id|[a-zA-Z]+Id)$/;
 
 export const encodeIds = (value: unknown): unknown => {
   if (value === null || value === undefined) return value;
+  if (value instanceof Date) return value;
   if (Array.isArray(value)) return value.map(encodeIds);
   if (typeof value === 'object') {
     // Sequelize model instances store data in dataValues; toJSON() returns the plain object
