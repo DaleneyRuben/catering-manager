@@ -1,5 +1,5 @@
 export interface Menu {
-  id: number;
+  id: string;
   date: string;
   breakfast: string | null;
   morningSnack: string | null;
