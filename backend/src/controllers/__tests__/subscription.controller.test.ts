@@ -20,7 +20,7 @@ const mockSubscription = {
 };
 
 const validPayload = {
-  planId: 2,
+  planId: id2,
   startDate: '2026-05-26',
   contractDate: '2026-05-23',
   duration: 20,

@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { isWeekend, parseISO } from 'date-fns';
+import { decodeId } from '../utils/sqids';
 
 const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
 const dateField = z.string().regex(dateRegex, 'must be YYYY-MM-DD');
@@ -9,16 +10,19 @@ const weekdayDateField = dateField.refine(
 );
 
 export const createSubscriptionSchema = z.object({
-  planId: z.number().int().positive(),
+  planId: z.string().transform((v) => decodeId(v)),
   startDate: weekdayDateField.nullable().optional(),
   contractDate: dateField,
   duration: z.number().int().min(1),
-  discount: z.number().int().min(0).default(0),
+  discount: z.number().int().min(0).optional(),
   renewalType: z.enum(['renewal', 'reactivation']).optional(),
 });
 
 export const updateSubscriptionSchema = z.object({
-  planId: z.number().int().positive().optional(),
+  planId: z
+    .string()
+    .transform((v) => decodeId(v))
+    .optional(),
   contractDate: dateField.optional(),
   startDate: weekdayDateField.optional(),
   duration: z.number().int().min(1).optional(),
@@ -27,5 +31,5 @@ export const updateSubscriptionSchema = z.object({
   discount: z.number().int().min(0).optional(),
 });
 
-export type CreateSubscriptionDto = z.input<typeof createSubscriptionSchema>;
+export type CreateSubscriptionDto = z.infer<typeof createSubscriptionSchema>;
 export type UpdateSubscriptionDto = z.infer<typeof updateSubscriptionSchema>;
