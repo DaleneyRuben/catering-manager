@@ -5,6 +5,7 @@ export type HistoryEventType =
   | 'paused'
   | 'resumed'
   | 'plan_assigned'
+  | 'plan_renewed'
   | 'plan_changed'
   | 'suspended'
   | 'reactivated'

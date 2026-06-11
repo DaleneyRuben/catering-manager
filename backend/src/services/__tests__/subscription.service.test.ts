@@ -2,12 +2,14 @@ import { format } from 'date-fns';
 import Subscription from '../../models/Subscription';
 import Client from '../../models/Client';
 import ClientHistory from '../../models/ClientHistory';
+import Plan from '../../models/Plan';
 import subscriptionService from '../subscription.service';
 import { addDeliveryDays } from '../../utils/date';
 
 jest.mock('../../models/Subscription');
 jest.mock('../../models/Client');
 jest.mock('../../models/ClientHistory');
+jest.mock('../../models/Plan');
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -125,10 +127,11 @@ describe('subscriptionService.create', () => {
     );
   });
 
-  it('logs plan_assigned history event when renewalType is renewal', async () => {
+  it('logs plan_renewed history event with plan details when renewalType is renewal', async () => {
     (Client.findByPk as jest.Mock).mockResolvedValue({ id: 1 });
     (Subscription.create as jest.Mock).mockResolvedValue(mockSubscription);
     (ClientHistory.create as jest.Mock).mockResolvedValue({});
+    (Plan.findByPk as jest.Mock).mockResolvedValue({ id: 2, name: 'Completo', price: 5000 });
 
     await subscriptionService.create(1, {
       planId: 2,
@@ -139,15 +142,20 @@ describe('subscriptionService.create', () => {
     });
 
     expect(ClientHistory.create).toHaveBeenCalledWith(
-      expect.objectContaining({ clientId: 1, eventType: 'plan_assigned' }),
+      expect.objectContaining({
+        clientId: 1,
+        eventType: 'plan_renewed',
+        metadata: expect.objectContaining({ planName: 'Completo', planPrice: 5000 }),
+      }),
     );
   });
 
-  it('logs reactivated history event when renewalType is reactivation', async () => {
+  it('logs reactivated history event with plan details when renewalType is reactivation', async () => {
     const mockClient = { id: 1, update: jest.fn().mockResolvedValue({}) };
     (Client.findByPk as jest.Mock).mockResolvedValue(mockClient);
     (Subscription.create as jest.Mock).mockResolvedValue(mockSubscription);
     (ClientHistory.create as jest.Mock).mockResolvedValue({});
+    (Plan.findByPk as jest.Mock).mockResolvedValue({ id: 2, name: 'Completo', price: 5000 });
 
     await subscriptionService.create(1, {
       planId: 2,
@@ -158,7 +166,11 @@ describe('subscriptionService.create', () => {
     });
 
     expect(ClientHistory.create).toHaveBeenCalledWith(
-      expect.objectContaining({ clientId: 1, eventType: 'reactivated' }),
+      expect.objectContaining({
+        clientId: 1,
+        eventType: 'reactivated',
+        metadata: expect.objectContaining({ planName: 'Completo', planPrice: 5000 }),
+      }),
     );
   });
 

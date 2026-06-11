@@ -1,5 +1,6 @@
 import Client from '../models/Client';
 import ClientHistory from '../models/ClientHistory';
+import Plan from '../models/Plan';
 import Subscription from '../models/Subscription';
 import { CreateSubscriptionDto, UpdateSubscriptionDto } from '../schemas/subscription.schema';
 import { addDeliveryDays, subtractDeliveryDays } from '../utils/date';
@@ -25,13 +26,16 @@ const create = async (clientId: number, data: CreateSubscriptionDto) => {
   } as never);
 
   if (data.renewalType) {
-    const eventType = data.renewalType === 'reactivation' ? 'reactivated' : 'plan_assigned';
+    const eventType = data.renewalType === 'reactivation' ? 'reactivated' : 'plan_renewed';
+    const plan = await Plan.findByPk(data.planId);
     await ClientHistory.create({
       clientId,
       eventType,
       occurredAt: new Date(),
       metadata: {
         planId: data.planId,
+        planName: plan?.name ?? null,
+        planPrice: plan?.price ?? null,
         startDate: data.startDate ?? null,
         duration: data.duration,
         contractEndDate,
