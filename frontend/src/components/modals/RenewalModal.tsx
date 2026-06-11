@@ -165,7 +165,6 @@ export function RenewalModal({ client, sub, isReactivation, onClose, onRenew }: 
                   inputMode="numeric"
                   value={form.durationStr}
                   onChange={(e) => form.setDurationStr(e.target.value.replace(/\D/g, ''))}
-                  placeholder="20"
                   className={inputCls}
                 />
                 <p className="font-mono text-[10px] text-muted mt-1">días hábiles (L–V)</p>
