@@ -7,6 +7,15 @@ import type { ClientUpdateDraft } from './useClientList';
 export function useClient(id: string | number) {
   const qc = useQueryClient();
 
+  const invalidateClient = () => {
+    qc.invalidateQueries({ queryKey: ['clients', id] });
+    qc.invalidateQueries({ queryKey: ['clients', id, 'history'] });
+  };
+
+  const invalidateClientList = () => {
+    qc.invalidateQueries({ queryKey: ['clients'], exact: true });
+  };
+
   const { data: client, isLoading } = useQuery({
     queryKey: ['clients', id],
     queryFn: (): Promise<Client> => api.get<Client>(`/clients/${id}`),
@@ -17,7 +26,7 @@ export function useClient(id: string | number) {
       api.patch<Client>(`/clients/${id}`, data),
     onSuccess: (updated) => {
       qc.setQueryData(['clients', id], updated);
-      qc.invalidateQueries({ queryKey: ['clients'], exact: true });
+      invalidateClientList();
       qc.invalidateQueries({ queryKey: ['clients', id, 'history'] });
       toast.success('Datos del cliente actualizados');
     },
@@ -27,7 +36,7 @@ export function useClient(id: string | number) {
     mutationFn: () => api.post(`/clients/${id}/finalize`, {}),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['clients', id] });
-      qc.invalidateQueries({ queryKey: ['clients'], exact: true });
+      invalidateClientList();
       toast.success('Plan finalizado');
     },
   });
@@ -50,8 +59,7 @@ export function useClient(id: string | number) {
         duration,
       }),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['clients', id] });
-      qc.invalidateQueries({ queryKey: ['clients', id, 'history'] });
+      invalidateClient();
       toast.success('Contrato actualizado');
     },
   });
@@ -59,9 +67,8 @@ export function useClient(id: string | number) {
   const renewMutation = useMutation({
     mutationFn: (data: RenewalPayload) => api.post(`/clients/${id}/subscriptions`, data),
     onSuccess: (_data, variables) => {
-      qc.invalidateQueries({ queryKey: ['clients', id] });
-      qc.invalidateQueries({ queryKey: ['clients'], exact: true });
-      qc.invalidateQueries({ queryKey: ['clients', id, 'history'] });
+      invalidateClient();
+      invalidateClientList();
       toast.success(
         variables.renewalType === 'reactivation'
           ? 'Cliente reactivado correctamente'
@@ -87,7 +94,7 @@ export function useClient(id: string | number) {
       subscriptionId: string;
     }) => api.patch(`/clients/${id}/subscriptions/${subscriptionId}`, { suspendedDates }),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['clients', id] });
+      invalidateClient();
       toast.success('Suspensiones actualizadas');
     },
   });
