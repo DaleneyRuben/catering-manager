@@ -65,14 +65,15 @@ const findAll = (filters: FindAllFilters = {}) => {
   switch (filters.status) {
     case CLIENT_STATUS.ACTIVE:
       clientWhere.pausedSince = { [Op.is]: null };
-      subscriptionWhere.contractEndDate = { [Op.gt]: todayStr };
+      // contractEndDate >= today: end date is inclusive per business rules
+      subscriptionWhere.contractEndDate = { [Op.gte]: todayStr };
       andConditions.push(
         literal(
-          `"Client"."id" NOT IN (SELECT s2."clientId" FROM subscriptions s2 WHERE '${todayStr}'::date = ANY(s2."suspendedDates") AND s2."contractEndDate" > '${todayStr}')`,
+          `"Client"."id" NOT IN (SELECT s2."clientId" FROM subscriptions s2 WHERE '${todayStr}'::date = ANY(s2."suspendedDates") AND s2."contractEndDate" >= '${todayStr}')`,
         ),
         // Exclude clients whose subscription hasn't started yet
         literal(
-          `"Client"."id" NOT IN (SELECT s2."clientId" FROM subscriptions s2 WHERE s2."startDate" > '${todayStr}' AND s2."contractEndDate" > '${todayStr}')`,
+          `"Client"."id" NOT IN (SELECT s2."clientId" FROM subscriptions s2 WHERE s2."startDate" > '${todayStr}' AND s2."contractEndDate" >= '${todayStr}')`,
         ),
       );
       break;
