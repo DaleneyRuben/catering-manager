@@ -73,6 +73,15 @@ describe('reportService.findDeliveryClientsForDate', () => {
       }),
     );
   });
+
+  it('excludes finalized subscriptions from the query', async () => {
+    (Subscription.findAll as jest.Mock).mockResolvedValue([]);
+
+    await reportService.findDeliveryClientsForDate('2026-06-15');
+
+    const call = (Subscription.findAll as jest.Mock).mock.calls[0][0];
+    expect(call.where?.finalizedAt).toEqual({ [Symbol.for('is')]: null });
+  });
 });
 
 describe('reportService.findActiveClientsWithPlansForDate', () => {
@@ -125,5 +134,14 @@ describe('reportService.findActiveClientsWithPlansForDate', () => {
         ]),
       }),
     );
+  });
+
+  it('excludes finalized subscriptions from the query', async () => {
+    (Subscription.findAll as jest.Mock).mockResolvedValue([]);
+
+    await reportService.findActiveClientsWithPlansForDate('2026-06-15');
+
+    const call = (Subscription.findAll as jest.Mock).mock.calls[0][0];
+    expect(call.where?.finalizedAt).toEqual({ [Symbol.for('is')]: null });
   });
 });
