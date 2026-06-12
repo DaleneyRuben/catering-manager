@@ -6,6 +6,7 @@ const makeSub = (overrides = {}) => ({
   startDate: '2026-05-01',
   contractEndDate: '2026-07-01',
   suspendedDates: [] as string[],
+  finalizedAt: null as string | null,
   ...overrides,
 });
 
@@ -19,6 +20,18 @@ describe('deriveClientStatus', () => {
     expect(
       deriveClientStatus(
         { pausedSince: null, sub: makeSub({ contractEndDate: null, startDate: '2026-05-01' }) },
+        TODAY,
+      ),
+    ).toBe('ended');
+  });
+
+  it('returns ended when finalizedAt is set even if contractEndDate is today', () => {
+    expect(
+      deriveClientStatus(
+        {
+          pausedSince: null,
+          sub: makeSub({ contractEndDate: TODAY, finalizedAt: TODAY }),
+        },
         TODAY,
       ),
     ).toBe('ended');

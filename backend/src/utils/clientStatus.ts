@@ -1,4 +1,4 @@
-import { addBusinessDays , parseISO } from 'date-fns';
+import { addBusinessDays, parseISO } from 'date-fns';
 import { EXPIRY_THRESHOLD_DAYS } from '../constants/subscription.constants';
 
 export type ClientStatusValue = 'active' | 'expiring' | 'paused' | 'suspended' | 'ended' | 'future';
@@ -9,6 +9,7 @@ interface StatusInput {
     startDate: string | null;
     contractEndDate: string | null;
     suspendedDates: string[];
+    finalizedAt: string | null;
   } | null;
 }
 
@@ -16,6 +17,9 @@ export function deriveClientStatus(input: StatusInput, today: string): ClientSta
   const { pausedSince, sub } = input;
 
   if (!sub) return 'ended';
+
+  // manually finalized plans are immediately ended regardless of contractEndDate
+  if (sub.finalizedAt !== null) return 'ended';
 
   // a real past contractEndDate ends the plan even if the client is paused
   if (sub.contractEndDate && sub.contractEndDate < today) return 'ended';
