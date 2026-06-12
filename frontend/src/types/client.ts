@@ -15,6 +15,7 @@ export interface Subscription {
   discount: number;
   duration: number;
   suspendedDates: string[];
+  finalizedAt: string | null;
   plan: Plan;
 }
 
