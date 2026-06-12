@@ -339,6 +339,37 @@ describe('clientService.findAll with filters', () => {
     const notExistsLiteral = andConditions.find((c: any) => c?.val?.includes?.('NOT EXISTS'));
     expect(notExistsLiteral).toBeDefined();
     expect(notExistsLiteral.val).toContain('>=');
+    expect(notExistsLiteral.val).toContain('"finalizedAt" IS NULL');
+  });
+
+  it('status=active excludes finalized subscriptions', async () => {
+    (Client.findAndCountAll as jest.Mock).mockResolvedValue({ rows: [], count: 0 });
+
+    await clientService.findAll({ status: 'active' });
+
+    const call = (Client.findAndCountAll as jest.Mock).mock.calls[0][0];
+    const subWhere = call.include?.[0]?.where;
+    expect(subWhere?.finalizedAt).toEqual({ [Symbol.for('is')]: null });
+  });
+
+  it('status=expiring excludes finalized subscriptions', async () => {
+    (Client.findAndCountAll as jest.Mock).mockResolvedValue({ rows: [], count: 0 });
+
+    await clientService.findAll({ status: 'expiring' });
+
+    const call = (Client.findAndCountAll as jest.Mock).mock.calls[0][0];
+    const subWhere = call.include?.[0]?.where;
+    expect(subWhere?.finalizedAt).toEqual({ [Symbol.for('is')]: null });
+  });
+
+  it('status=paused excludes finalized subscriptions', async () => {
+    (Client.findAndCountAll as jest.Mock).mockResolvedValue({ rows: [], count: 0 });
+
+    await clientService.findAll({ status: 'paused' });
+
+    const call = (Client.findAndCountAll as jest.Mock).mock.calls[0][0];
+    const subWhere = call.include?.[0]?.where;
+    expect(subWhere?.finalizedAt).toEqual({ [Symbol.for('is')]: null });
   });
 
   it('no filters calls findAndCountAll without where', async () => {
