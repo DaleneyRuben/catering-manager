@@ -35,6 +35,9 @@ class Subscription extends Model {
 
   @Column({ type: DataType.ARRAY(DataType.DATEONLY), allowNull: false, defaultValue: [] })
   declare suspendedDates: string[];
+
+  @Column({ type: DataType.DATEONLY, allowNull: true, defaultValue: null })
+  declare finalizedAt: string | null;
 }
 
 export default Subscription;
