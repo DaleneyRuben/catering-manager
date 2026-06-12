@@ -154,6 +154,15 @@ describe('planService.getClientCounts', () => {
     expect(result).toEqual({});
   });
 
+  it('excludes finalized subscriptions from the count query', async () => {
+    (sequelize.query as jest.Mock).mockResolvedValue([]);
+
+    await planService.getClientCounts();
+
+    const sql: string = (sequelize.query as jest.Mock).mock.calls[0][0];
+    expect(sql).toContain('"finalizedAt" IS NULL');
+  });
+
   it('propagates db errors', async () => {
     (sequelize.query as jest.Mock).mockRejectedValue(new Error('db error'));
 
