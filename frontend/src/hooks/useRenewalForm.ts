@@ -16,7 +16,7 @@ interface Options {
 
 export function useRenewalForm({ plans, sub, isReactivation, onRenew, onClose }: Options) {
   const [newPlanId, setNewPlanId] = useState(sub?.planId ?? plans[0]?.id ?? '');
-  const [durationStr, setDurationStr] = useState('');
+  const [durationStr, setDurationStr] = useState('20');
   // precio = what the client actually pays; discount = plan.price - precio (auto-calculated)
   const [precioStr, setPrecioStr] = useState('');
   const [startMode, setStartMode] = useState<StartMode>(isReactivation ? 'pick' : 'atEnd');
