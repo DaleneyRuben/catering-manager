@@ -406,7 +406,7 @@ describe('clientService.getCounts', () => {
 describe('clientService.finalize', () => {
   beforeEach(() => jest.clearAllMocks());
 
-  it('sets contractEndDate to today, and records finalized history event', async () => {
+  it('sets contractEndDate and finalizedAt to today, and records finalized history event', async () => {
     const mockSub = { update: jest.fn().mockResolvedValue({}) };
     const mockInstance = {
       id: 1,
@@ -420,7 +420,10 @@ describe('clientService.finalize', () => {
     await clientService.finalize(1);
 
     expect(mockSub.update).toHaveBeenCalledWith(
-      expect.objectContaining({ contractEndDate: expect.any(String) }),
+      expect.objectContaining({
+        contractEndDate: expect.any(String),
+        finalizedAt: expect.any(String),
+      }),
     );
     expect(ClientHistory.create).toHaveBeenCalledWith(
       expect.objectContaining({ clientId: 1, eventType: 'finalized' }),

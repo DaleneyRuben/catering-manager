@@ -38,6 +38,7 @@ function withStatus(client: any): Record<string, unknown> {
             startDate: sub.startDate ?? null,
             contractEndDate: sub.contractEndDate ?? null,
             suspendedDates: sub.suspendedDates ?? [],
+            finalizedAt: sub.finalizedAt ?? null,
           }
         : null,
     },
@@ -216,11 +217,11 @@ const finalize = async (id: number) => {
   const client = await Client.findByPk(id, { include: INCLUDE_SUBSCRIPTION_ORDERED });
   if (!client) return null;
 
-  const today = appToday();
   const sub = (client as never as { subscriptions: { update: (d: object) => Promise<void> }[] })
     .subscriptions?.[0];
 
-  if (sub) await sub.update({ contractEndDate: today });
+  const today = appToday();
+  if (sub) await sub.update({ contractEndDate: today, finalizedAt: today });
   await ClientHistory.create({
     clientId: client.id,
     eventType: 'finalized',
