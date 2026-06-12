@@ -25,26 +25,30 @@ const create = async (clientId: number, data: CreateSubscriptionDto) => {
     clientId,
   } as never);
 
-  if (data.renewalType) {
-    const eventType = data.renewalType === 'reactivation' ? 'reactivated' : 'plan_renewed';
-    const plan = await Plan.findByPk(data.planId);
-    await ClientHistory.create({
-      clientId,
-      eventType,
-      occurredAt: new Date(),
-      metadata: {
-        planId: data.planId,
-        planName: plan?.name ?? null,
-        planPrice: plan?.price ?? null,
-        startDate: data.startDate ?? null,
-        duration: data.duration,
-        contractEndDate,
-        discount: data.discount ?? 0,
-      },
-    });
-    if (data.renewalType === 'reactivation') {
-      await client.update({ pausedSince: null });
-    }
+  const eventTypeByRenewal = {
+    reactivation: 'reactivated',
+    renewal: 'plan_renewed',
+  } as const;
+  const eventType = data.renewalType ? eventTypeByRenewal[data.renewalType] : 'plan_assigned';
+
+  const plan = await Plan.findByPk(data.planId);
+  await ClientHistory.create({
+    clientId,
+    eventType,
+    occurredAt: new Date(),
+    metadata: {
+      planId: data.planId,
+      planName: plan?.name ?? null,
+      planPrice: plan?.price ?? null,
+      startDate: data.startDate ?? null,
+      duration: data.duration,
+      contractEndDate,
+      discount: data.discount ?? 0,
+    },
+  });
+
+  if (data.renewalType === 'reactivation') {
+    await client.update({ pausedSince: null });
   }
 
   return subscription;

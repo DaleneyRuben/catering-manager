@@ -208,9 +208,11 @@ describe('subscriptionService.create', () => {
     expect(mockClient.update).not.toHaveBeenCalledWith({ pausedSince: null });
   });
 
-  it('does not log history when renewalType is not provided', async () => {
+  it('logs plan_assigned history event when renewalType is not provided', async () => {
     (Client.findByPk as jest.Mock).mockResolvedValue({ id: 1 });
     (Subscription.create as jest.Mock).mockResolvedValue(mockSubscription);
+    (ClientHistory.create as jest.Mock).mockResolvedValue({});
+    (Plan.findByPk as jest.Mock).mockResolvedValue({ id: 2, name: 'Completo', price: 5000 });
 
     await subscriptionService.create(1, {
       planId: 2,
@@ -219,7 +221,9 @@ describe('subscriptionService.create', () => {
       duration: 20,
     });
 
-    expect(ClientHistory.create).not.toHaveBeenCalled();
+    expect(ClientHistory.create).toHaveBeenCalledWith(
+      expect.objectContaining({ clientId: 1, eventType: 'plan_assigned' }),
+    );
   });
 });
 
