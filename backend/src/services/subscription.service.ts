@@ -3,12 +3,14 @@ import ClientHistory from '../models/ClientHistory';
 import Plan from '../models/Plan';
 import Subscription from '../models/Subscription';
 import { CreateSubscriptionDto, UpdateSubscriptionDto } from '../schemas/subscription.schema';
-import { addDeliveryDays, subtractDeliveryDays } from '../utils/date';
+import { appToday, addDeliveryDays, subtractDeliveryDays } from '../utils/date';
 
 // TODO: restore contractDate === today validation once backfilling of existing clients is complete
 const create = async (clientId: number, data: CreateSubscriptionDto) => {
   const client = await Client.findByPk(clientId);
   if (!client) return null;
+
+  const today = appToday();
 
   // duration - 1 because startDate counts as day 1
   const contractEndDate = data.startDate
@@ -49,6 +51,9 @@ const create = async (clientId: number, data: CreateSubscriptionDto) => {
 
   if (data.renewalType === 'reactivation') {
     await client.update({ pausedSince: null });
+  } else if (data.renewalType === 'renewal' && !data.startDate) {
+    // sin fecha renewal: pause the client until a start date is manually assigned
+    await client.update({ pausedSince: today });
   }
 
   return subscription;
@@ -80,6 +85,12 @@ const update = async (clientId: number, id: number, data: UpdateSubscriptionDto)
     if (duration !== undefined) base.duration = duration;
     base.contractEndDate = newContractEndDate;
     base.suspendedDates = cleanedSuspendedDates;
+
+    // assigning a start date activates a sin-fecha paused client
+    if (startDate) {
+      const client = await Client.findByPk(clientId);
+      if (client) await client.update({ pausedSince: null });
+    }
 
     await ClientHistory.create({
       clientId: subscription.clientId,

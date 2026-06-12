@@ -191,7 +191,7 @@ describe('subscriptionService.create', () => {
     expect(mockClient.update).toHaveBeenCalledWith({ pausedSince: null });
   });
 
-  it('does not update pausedSince when renewalType is renewal', async () => {
+  it('does not update pausedSince when renewalType is renewal with a startDate', async () => {
     const mockClient = { id: 1, update: jest.fn().mockResolvedValue({}) };
     (Client.findByPk as jest.Mock).mockResolvedValue(mockClient);
     (Subscription.create as jest.Mock).mockResolvedValue(mockSubscription);
@@ -206,6 +206,26 @@ describe('subscriptionService.create', () => {
     });
 
     expect(mockClient.update).not.toHaveBeenCalledWith({ pausedSince: null });
+  });
+
+  it('sets pausedSince to today when renewalType is renewal with no startDate', async () => {
+    const mockClient = { id: 1, update: jest.fn().mockResolvedValue({}) };
+    (Client.findByPk as jest.Mock).mockResolvedValue(mockClient);
+    (Subscription.create as jest.Mock).mockResolvedValue({
+      ...mockSubscription,
+      startDate: null,
+      contractEndDate: null,
+    });
+    (ClientHistory.create as jest.Mock).mockResolvedValue({});
+
+    await subscriptionService.create(1, {
+      planId: 2,
+      contractDate: today,
+      duration: 20,
+      renewalType: 'renewal',
+    });
+
+    expect(mockClient.update).toHaveBeenCalledWith({ pausedSince: today });
   });
 
   it('logs plan_assigned history event when renewalType is not provided', async () => {
@@ -259,7 +279,13 @@ describe('subscriptionService.update', () => {
 });
 
 describe('subscriptionService.update contract dates', () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (Client.findByPk as jest.Mock).mockResolvedValue({
+      id: 1,
+      update: jest.fn().mockResolvedValue({}),
+    });
+  });
 
   it('recalculates contractEndDate when startDate changes using existing duration', async () => {
     const mockInstance = {
@@ -333,6 +359,43 @@ describe('subscriptionService.update contract dates', () => {
     expect(ClientHistory.create).toHaveBeenCalledWith(
       expect.objectContaining({ clientId: 1, eventType: 'plan_assigned' }),
     );
+  });
+
+  it('clears client pausedSince when startDate is set to a non-null value', async () => {
+    const mockClient = { id: 1, update: jest.fn().mockResolvedValue({}) };
+    (Client.findByPk as jest.Mock).mockResolvedValue(mockClient);
+    const mockInstance = {
+      clientId: 1,
+      startDate: null,
+      duration: 20,
+      contractEndDate: null,
+      suspendedDates: [],
+      update: jest.fn().mockResolvedValue({}),
+    };
+    (Subscription.findOne as jest.Mock).mockResolvedValue(mockInstance);
+    (ClientHistory.create as jest.Mock).mockResolvedValue({});
+
+    await subscriptionService.update(1, 1, { startDate: '2026-06-15' });
+
+    expect(mockClient.update).toHaveBeenCalledWith({ pausedSince: null });
+  });
+
+  it('does not clear pausedSince when startDate is not changed', async () => {
+    const mockClient = { id: 1, update: jest.fn().mockResolvedValue({}) };
+    (Client.findByPk as jest.Mock).mockResolvedValue(mockClient);
+    const mockInstance = {
+      clientId: 1,
+      startDate: '2026-05-26',
+      duration: 20,
+      contractEndDate: addDeliveryDays('2026-05-26', 19),
+      suspendedDates: [],
+      update: jest.fn().mockResolvedValue({}),
+    };
+    (Subscription.findOne as jest.Mock).mockResolvedValue(mockInstance);
+
+    await subscriptionService.update(1, 1, { duration: 30 });
+
+    expect(mockClient.update).not.toHaveBeenCalled();
   });
 
   it('does not recalculate contractEndDate when only contractDate changes', async () => {
