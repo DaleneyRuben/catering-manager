@@ -38,6 +38,8 @@ export const buildMenu = async (menu: MenuInstance, date: string): Promise<Buffe
   const children: Paragraph[] = [];
 
   children.push(
+    emptyParagraph(),
+    emptyParagraph(),
     new Paragraph({
       children: [
         new TextRun({
