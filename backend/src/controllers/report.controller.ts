@@ -1,7 +1,8 @@
 import { NextFunction, Request, Response } from 'express';
 import ExcelJS from 'exceljs';
-import { parse, format, isValid, parseISO, isWeekend } from 'date-fns';
+import { parse, format, isValid, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { checkIsWeekend } from '../utils/devFlags';
 import menuService from '../services/menu.service';
 import reportService from '../services/report.service';
 import { buildMenu, menuFileName } from '../utils/menuBuilder';
@@ -31,7 +32,7 @@ const downloadActiveClients = async (req: Request, res: Response, next: NextFunc
       return;
     }
 
-    if (isWeekend(parseISO(iso))) {
+    if (checkIsWeekend(parseISO(iso))) {
       res.status(400).json({ error: 'No hay entregas los fines de semana' });
       return;
     }
@@ -72,7 +73,7 @@ const exportMenu = async (req: Request, res: Response, next: NextFunction) => {
       return;
     }
 
-    if (isWeekend(parseISO(date))) {
+    if (checkIsWeekend(parseISO(date))) {
       res.status(400).json({ error: 'No hay entregas los fines de semana' });
       return;
     }
@@ -109,7 +110,7 @@ const exportKitchenReport = async (req: Request, res: Response, next: NextFuncti
       return;
     }
 
-    if (isWeekend(parseISO(date))) {
+    if (checkIsWeekend(parseISO(date))) {
       res.status(400).json({ error: 'No hay entregas los fines de semana' });
       return;
     }
