@@ -8,7 +8,12 @@ import errorHandler from './middleware/error-handler';
 const app = express();
 
 app.use(helmet());
-app.use(cors({ origin: process.env.CORS_ORIGIN || 'http://localhost:3000' }));
+app.use(
+  cors({
+    origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
+    exposedHeaders: ['Content-Disposition'],
+  }),
+);
 app.use(rateLimit({ windowMs: 15 * 60 * 1000, max: 200 }));
 app.use(express.json({ limit: '1mb' }));
 
