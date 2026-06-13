@@ -153,7 +153,27 @@ export const buildMenu = async (menu: MenuInstance, date: string): Promise<Buffe
     }),
   );
 
-  const doc = new Document({ sections: [{ children }] });
+  const doc = new Document({
+    sections: [
+      {
+        properties: {
+          page: {
+            size: { width: 7881, height: 11794 },
+            margin: {
+              top: 1418,
+              right: 1701,
+              bottom: 1418,
+              left: 992,
+              header: 709,
+              footer: 709,
+              gutter: 0,
+            },
+          },
+        },
+        children,
+      },
+    ],
+  });
   return Buffer.from(await Packer.toBuffer(doc));
 };
 
