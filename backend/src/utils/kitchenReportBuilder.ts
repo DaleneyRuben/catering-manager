@@ -21,8 +21,21 @@ const RED = 'C00000';
 const GRAY = '595959';
 const BLACK = '000000';
 
-const COL_WIDTHS = [1230, 3850, 2330, 2330, 2330, 2330] as const;
-const NUM_CLIENT_COLS = 4;
+const COL_WIDTHS = [800, 3800, 3000, 3000, 3000, 800] as const;
+const NUM_CLIENT_COLS = 3;
+
+const W = {
+  count: COL_WIDTHS[0], // col 0 — left count (NO DAR, hiperproteico)
+  label: COL_WIDTHS[1], // col 1 — description / dish label
+  name: COL_WIDTHS[2], // cols 2-4 — client name columns (all equal)
+  rightCount: COL_WIDTHS[5], // col 5 — right count (per-meal total, total clients)
+  dish: COL_WIDTHS[1] + COL_WIDTHS[2] * 3,
+  sectionLabel: COL_WIDTHS.slice(1).reduce((a: number, b) => a + b, 0),
+  dateMain: COL_WIDTHS.slice(0, 5).reduce((a: number, b) => a + b, 0),
+  full: COL_WIDTHS.reduce((a: number, b) => a + b, 0),
+  restrictionName: COL_WIDTHS[1] + COL_WIDTHS[2],
+  restrictionConflicts: COL_WIDTHS[2] * 2 + COL_WIDTHS[5],
+} as const;
 
 export type MenuData = {
   breakfast: string | null;
@@ -100,30 +113,32 @@ const cell = (
   content: Paragraph | Paragraph[],
   {
     colspan = 1,
+    width,
     borders = ALL_BORDERS,
     shading,
   }: {
     colspan?: number;
+    width?: number;
     borders?: typeof ALL_BORDERS;
     shading?: { type: (typeof ShadingType)[keyof typeof ShadingType]; color: string; fill: string };
   } = {},
 ): TableCell =>
   new TableCell({
     columnSpan: colspan,
+    ...(width !== undefined && { width: { size: width, type: WidthType.DXA } }),
     borders,
     ...(shading && { shading }),
     children: Array.isArray(content) ? content : [content],
   });
 
-const emptyCell = (colspan = 1): TableCell => cell(para(''), { colspan });
+const emptyCell = (width: number, colspan = 1): TableCell => cell(para(''), { colspan, width });
 
-const spacerRow = (): TableRow =>
-  new TableRow({ children: Array.from({ length: COL_WIDTHS.length }, () => emptyCell()) });
+const spacerRow = (): TableRow => new TableRow({ children: COL_WIDTHS.map((w) => emptyCell(w)) });
 
 const dateRow = (dateText: string, totalClients: number): TableRow =>
   new TableRow({
     children: [
-      cell(para(dateText, { bold: true }), { colspan: 5 }),
+      cell(para(dateText, { bold: true }), { colspan: 5, width: W.dateMain }),
       cell(
         para(String(totalClients), {
           bold: true,
@@ -131,7 +146,7 @@ const dateRow = (dateText: string, totalClients: number): TableRow =>
           size: 40,
           align: AlignmentType.RIGHT,
         }),
-        { colspan: 1 },
+        { colspan: 1, width: W.rightCount },
       ),
     ],
   });
@@ -147,6 +162,7 @@ const specHeaderRow = (): TableRow =>
         }),
         {
           colspan: 6,
+          width: W.full,
           borders: {
             top: THIN,
             left: THIN,
@@ -161,17 +177,29 @@ const specHeaderRow = (): TableRow =>
 const sectionLabelRow = (label: string): TableRow =>
   new TableRow({
     children: [
-      cell(para('CANT\nTOTAL', { bold: true, color: GRAY, size: 16, align: AlignmentType.CENTER })),
-      cell(para(label, { bold: true, color: RED, align: AlignmentType.CENTER }), { colspan: 5 }),
+      cell(
+        para('CANT\nTOTAL', { bold: true, color: GRAY, size: 16, align: AlignmentType.CENTER }),
+        { width: W.count },
+      ),
+      cell(para(label, { bold: true, color: RED, align: AlignmentType.CENTER }), {
+        colspan: 5,
+        width: W.sectionLabel,
+      }),
     ],
   });
 
 const mealTableRow = (label: string, dish: string, count: number): TableRow =>
   new TableRow({
     children: [
-      emptyCell(1),
-      cell(para(`${label}: ${dish}`, { bold: true }), { colspan: 4, shading: MEAL_LABEL_SHADING }),
-      cell(para(String(count), { bold: true, color: RED, size: 32, align: AlignmentType.RIGHT })),
+      emptyCell(W.count),
+      cell(para(`${label}: ${dish}`, { bold: true }), {
+        colspan: 4,
+        width: W.dish,
+        shading: MEAL_LABEL_SHADING,
+      }),
+      cell(para(String(count), { bold: true, color: RED, size: 32, align: AlignmentType.RIGHT }), {
+        width: W.rightCount,
+      }),
     ],
   });
 
@@ -186,14 +214,28 @@ const clientChunkRows = (
 
   for (let i = 0; i < clients.length; i += NUM_CLIENT_COLS) {
     const chunk = clients.slice(i, i + NUM_CLIENT_COLS);
-    const nameCells = chunk.map((name) => cell(para(name, { size: nameSize })));
-    const paddingCells = Array.from({ length: NUM_CLIENT_COLS - chunk.length }, () => emptyCell());
+    const nameCells = chunk.map((name) => cell(para(name, { size: nameSize }), { width: W.name }));
+    const paddingCells = Array.from({ length: NUM_CLIENT_COLS - chunk.length }, () =>
+      emptyCell(W.name),
+    );
 
     if (i === 0 && firstRowPrefix) {
-      rows.push(new TableRow({ children: [...firstRowPrefix, ...nameCells, ...paddingCells] }));
+      rows.push(
+        new TableRow({
+          children: [...firstRowPrefix, ...nameCells, ...paddingCells, emptyCell(W.rightCount)],
+        }),
+      );
     } else {
       rows.push(
-        new TableRow({ children: [emptyCell(), emptyCell(), ...nameCells, ...paddingCells] }),
+        new TableRow({
+          children: [
+            emptyCell(W.count),
+            emptyCell(W.label),
+            ...nameCells,
+            ...paddingCells,
+            emptyCell(W.rightCount),
+          ],
+        }),
       );
     }
   }
@@ -213,8 +255,9 @@ const noDarTableRows = (label: string, clients: string[]): TableRow[] => {
           size: NO_DAR_SIZE,
           align: AlignmentType.CENTER,
         }),
+        { width: W.count },
       ),
-      cell(para(`NO DAR ${label}`, { size: NO_DAR_SIZE })),
+      cell(para(`NO DAR ${label}`, { size: NO_DAR_SIZE }), { width: W.label }),
     ],
     NO_DAR_SIZE,
   );
@@ -223,8 +266,10 @@ const noDarTableRows = (label: string, clients: string[]): TableRow[] => {
 const hiperproteicoTableRows = (clients: string[]): TableRow[] => {
   if (clients.length === 0) return [];
   return clientChunkRows(clients, [
-    cell(para(String(clients.length), { bold: true, color: RED, align: AlignmentType.CENTER })),
-    cell(para('HIPERPROTEICO', { bold: true })),
+    cell(para(String(clients.length), { bold: true, color: RED, align: AlignmentType.CENTER }), {
+      width: W.count,
+    }),
+    cell(para('HIPERPROTEICO', { bold: true }), { width: W.label }),
   ]);
 };
 
@@ -248,16 +293,19 @@ const restrictionTableRows = (conflicts: { name: string; conflicts: string[] }[]
     (c) =>
       new TableRow({
         children: [
-          emptyCell(),
-          cell(para(c.name, { bold: true }), { colspan: 2 }),
-          cell(para(c.conflicts.join(' - ').toUpperCase(), { color: GRAY }), { colspan: 3 }),
+          emptyCell(W.count),
+          cell(para(c.name, { bold: true }), { colspan: 2, width: W.restrictionName }),
+          cell(para(c.conflicts.join(' - ').toUpperCase(), { color: GRAY }), {
+            colspan: 3,
+            width: W.restrictionConflicts,
+          }),
         ],
       }),
   );
 
 const buildDocxTable = (rows: TableRow[]): Table =>
   new Table({
-    width: { size: 100, type: WidthType.PERCENTAGE },
+    width: { size: W.full, type: WidthType.DXA },
     columnWidths: [...COL_WIDTHS],
     rows,
     borders: NO_BORDERS,
