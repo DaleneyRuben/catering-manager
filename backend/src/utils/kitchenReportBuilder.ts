@@ -1,6 +1,7 @@
 import {
   Document,
   Packer,
+  PageOrientation,
   Paragraph,
   ShadingType,
   Table,
@@ -20,7 +21,7 @@ const RED = 'C00000';
 const GRAY = '595959';
 const BLACK = '000000';
 
-const COL_WIDTHS = [800, 2500, 1515, 1515, 1515, 1515] as const;
+const COL_WIDTHS = [1230, 3850, 2330, 2330, 2330, 2330] as const;
 const NUM_CLIENT_COLS = 4;
 
 export type MenuData = {
@@ -337,6 +338,20 @@ export const buildKitchenReport = async (
   const doc = new Document({
     sections: [
       {
+        properties: {
+          page: {
+            size: { width: 12240, height: 15840, orientation: PageOrientation.LANDSCAPE },
+            margin: {
+              top: 720,
+              right: 720,
+              bottom: 720,
+              left: 720,
+              header: 708,
+              footer: 708,
+              gutter: 0,
+            },
+          },
+        },
         children: [
           buildDocxTable(pastelariaRows),
           new Paragraph({ children: [new PageBreak()] }),
