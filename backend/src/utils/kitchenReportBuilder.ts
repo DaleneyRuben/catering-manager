@@ -204,6 +204,8 @@ const mealTableRow = (label: string, dish: string, count: number): TableRow =>
   });
 
 const NO_DAR_SIZE = 15;
+const CLIENTS_PER_CELL = 3;
+const CLIENTS_PER_ROW = NUM_CLIENT_COLS * CLIENTS_PER_CELL;
 
 const clientChunkRows = (
   clients: string[],
@@ -212,29 +214,29 @@ const clientChunkRows = (
 ): TableRow[] => {
   const rows: TableRow[] = [];
 
-  for (let i = 0; i < clients.length; i += NUM_CLIENT_COLS) {
-    const chunk = clients.slice(i, i + NUM_CLIENT_COLS);
-    const nameCells = chunk.map((name) => cell(para(name, { size: nameSize }), { width: W.name }));
-    const paddingCells = Array.from({ length: NUM_CLIENT_COLS - chunk.length }, () =>
-      emptyCell(W.name),
-    );
+  for (let i = 0; i < clients.length; i += CLIENTS_PER_ROW) {
+    const rowClients = clients.slice(i, i + CLIENTS_PER_ROW);
+
+    const nameCells = Array.from({ length: NUM_CLIENT_COLS }, (_, colIdx) => {
+      const cellClients = rowClients.slice(
+        colIdx * CLIENTS_PER_CELL,
+        (colIdx + 1) * CLIENTS_PER_CELL,
+      );
+      const paragraphs =
+        cellClients.length > 0
+          ? cellClients.map((name) => para(name, { size: nameSize }))
+          : [para('')];
+      return cell(paragraphs, { width: W.name });
+    });
 
     if (i === 0 && firstRowPrefix) {
       rows.push(
-        new TableRow({
-          children: [...firstRowPrefix, ...nameCells, ...paddingCells, emptyCell(W.rightCount)],
-        }),
+        new TableRow({ children: [...firstRowPrefix, ...nameCells, emptyCell(W.rightCount)] }),
       );
     } else {
       rows.push(
         new TableRow({
-          children: [
-            emptyCell(W.count),
-            emptyCell(W.label),
-            ...nameCells,
-            ...paddingCells,
-            emptyCell(W.rightCount),
-          ],
+          children: [emptyCell(W.count), emptyCell(W.label), ...nameCells, emptyCell(W.rightCount)],
         }),
       );
     }
