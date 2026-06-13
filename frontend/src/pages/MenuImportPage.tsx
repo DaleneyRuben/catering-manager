@@ -1,8 +1,9 @@
-import { addDays, format, isWeekend, parseISO } from 'date-fns';
+import { addDays, format, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useState, useEffect } from 'react';
 import { MEAL_LABELS } from '../constants/meals';
 import { useMenu } from '../hooks/useMenu';
+import { checkIsWeekend } from '../utils/devFlags';
 import type { MenuDraft } from '../types/menu';
 
 function getSaveLabel(isSaving: boolean, hasExisting: boolean): string {
@@ -96,7 +97,7 @@ export function MenuImportPage() {
 
   const storedMenus = menus.filter((m) => m.date !== selectedDate);
 
-  const isSelectedWeekend = isWeekend(parseISO(selectedDate));
+  const isSelectedWeekend = checkIsWeekend(parseISO(selectedDate));
   const saveLabel = getSaveLabel(isSaving, !!existingMenu);
 
   return (

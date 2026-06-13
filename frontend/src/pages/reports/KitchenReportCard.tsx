@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { format, addDays, isWeekend } from 'date-fns';
+import { format, addDays } from 'date-fns';
 import { Icon } from '../../components/ui/Icon';
 import { useMenu } from '../../hooks/useMenu';
 import { API_BASE } from '../../utils/env';
 import { downloadReport } from '../../utils/downloadReport';
+import { checkIsWeekend } from '../../utils/devFlags';
 
 type DayOption = 'today' | 'tomorrow';
 
@@ -29,7 +30,7 @@ export function KitchenReportCard() {
   const isoForOption = (opt: DayOption) => toIso(opt === 'today' ? today : addDays(today, 1));
 
   const selectedIso = isoForOption(selected);
-  const isSelectedWeekend = isWeekend(selected === 'today' ? today : addDays(today, 1));
+  const isSelectedWeekend = checkIsWeekend(selected === 'today' ? today : addDays(today, 1));
   const menuExists = menus.some((m) => m.date === selectedIso);
   const displayDate = (opt: DayOption) =>
     format(opt === 'today' ? today : addDays(today, 1), 'dd/MM/yyyy');

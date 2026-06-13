@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { format, addDays, isWeekend } from 'date-fns';
+import { format, addDays } from 'date-fns';
 import { Icon } from '../../components/ui/Icon';
 import { API_BASE } from '../../utils/env';
 import { downloadReport } from '../../utils/downloadReport';
+import { checkIsWeekend } from '../../utils/devFlags';
 
 type DayOption = 'today' | 'tomorrow';
 
@@ -24,7 +25,7 @@ export function DeliveryListCard() {
   const dateForOption = (opt: DayOption) =>
     format(opt === 'today' ? today : addDays(today, 1), 'dd/MM/yyyy');
 
-  const isSelectedWeekend = isWeekend(selected === 'today' ? today : addDays(today, 1));
+  const isSelectedWeekend = checkIsWeekend(selected === 'today' ? today : addDays(today, 1));
 
   const handleDownload = async () => {
     setError(null);
