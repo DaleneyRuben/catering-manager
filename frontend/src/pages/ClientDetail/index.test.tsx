@@ -24,7 +24,8 @@ const mockClient = {
   businessName: null,
   underlyingDiseases: ['diabetes'],
   restrictions: ['gluten'],
-  isActive: true,
+  pausedSince: null,
+  status: 'active',
   subscriptions: [
     {
       id: 1,
@@ -34,8 +35,10 @@ const mockClient = {
       startDate: '2026-05-26',
       contractEndDate: '2026-06-25',
       discount: 0,
+      duration: 20,
       suspendedDates: [],
-      plan: { id: 2, name: 'Plan A', price: 1200, meals: [], discount: 0 },
+      finalizedAt: null,
+      plan: { id: 2, name: 'Plan A', price: 1200, meals: [] },
     },
   ],
 };
@@ -50,7 +53,8 @@ function renderPage(client = mockClient) {
   });
   return render(
     <QueryClientProvider client={queryClient}>
-      <MemoryRouter initialEntries={['/clientes/1']}>
+      {/* two entries so navigate(-1) returns to /clientes */}
+      <MemoryRouter initialEntries={['/clientes', '/clientes/1']} initialIndex={1}>
         <Routes>
           <Route path="/clientes/:id" element={<ClientDetailPage />} />
           <Route path="/clientes" element={<div>Lista clientes</div>} />
@@ -94,14 +98,14 @@ describe('ClientDetailPage', () => {
   });
 
   it('shows Reanudar button when client is paused', async () => {
-    renderPage({ ...mockClient, isActive: false });
+    renderPage({ ...mockClient, status: 'paused', pausedSince: '2026-06-10T00:00:00.000Z' });
     expect(await screen.findByRole('button', { name: /reanudar/i })).toBeInTheDocument();
   });
 
   it('does not show Reanudar button when client has a future start date', async () => {
     const futureStartClient = {
       ...mockClient,
-      isActive: true,
+      status: 'future',
       subscriptions: [
         {
           ...mockClient.subscriptions[0],
@@ -117,11 +121,22 @@ describe('ClientDetailPage', () => {
   });
 
   it('calls PATCH on pause and toggles button', async () => {
-    mockPatch.mockResolvedValue({ ...mockClient, isActive: false });
+    mockPatch.mockResolvedValue({
+      ...mockClient,
+      status: 'paused',
+      pausedSince: '2026-06-15T00:00:00.000Z',
+    });
     renderPage();
     const btn = await screen.findByRole('button', { name: /pausar/i });
     fireEvent.click(btn);
-    await waitFor(() => expect(mockPatch).toHaveBeenCalledWith('/clients/1', { isActive: false }));
+    await waitFor(() =>
+      expect(mockPatch).toHaveBeenCalledWith(
+        '/clients/1',
+        expect.objectContaining({
+          pausedSince: expect.any(String),
+        }),
+      ),
+    );
     expect(await screen.findByRole('button', { name: /reanudar/i })).toBeInTheDocument();
   });
 
@@ -234,7 +249,7 @@ describe('ClientDetailPage', () => {
   it('does not show Finalizar plan button when client is already ended', async () => {
     renderPage({
       ...mockClient,
-      isActive: false,
+      status: 'ended',
       subscriptions: [{ ...mockClient.subscriptions[0], contractEndDate: '2020-01-01' }],
     });
     await screen.findByText('John Doe');
