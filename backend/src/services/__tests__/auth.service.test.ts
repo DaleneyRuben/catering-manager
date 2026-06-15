@@ -21,7 +21,7 @@ afterAll(() => {
 const mockUser = {
   id: 1,
   name: 'Ada Lovelace',
-  email: 'ada@example.com',
+  username: 'ada',
   password: '$2b$10$hashedpassword',
   role: 'admin' as const,
 };
@@ -32,7 +32,7 @@ describe('authService.login', () => {
     (bcrypt.compare as jest.Mock).mockResolvedValue(true);
     (jwt.sign as jest.Mock).mockReturnValue('signed-token');
 
-    const result = await authService.login('ada@example.com', 'correct-password');
+    const result = await authService.login('ada', 'correct-password');
 
     expect(result.token).toBe('signed-token');
     expect(result.user).toEqual({ id: 1, name: 'Ada Lovelace', role: 'admin' });
@@ -42,18 +42,14 @@ describe('authService.login', () => {
   it('throws INVALID_CREDENTIALS when user not found', async () => {
     (User.findOne as jest.Mock).mockResolvedValue(null);
 
-    await expect(authService.login('unknown@example.com', 'any')).rejects.toThrow(
-      'INVALID_CREDENTIALS',
-    );
+    await expect(authService.login('unknown', 'any')).rejects.toThrow('INVALID_CREDENTIALS');
   });
 
   it('throws INVALID_CREDENTIALS when password is wrong', async () => {
     (User.findOne as jest.Mock).mockResolvedValue(mockUser);
     (bcrypt.compare as jest.Mock).mockResolvedValue(false);
 
-    await expect(authService.login('ada@example.com', 'wrong-password')).rejects.toThrow(
-      'INVALID_CREDENTIALS',
-    );
+    await expect(authService.login('ada', 'wrong-password')).rejects.toThrow('INVALID_CREDENTIALS');
   });
 });
 
@@ -62,12 +58,12 @@ describe('authService.createUser', () => {
     (bcrypt.hash as jest.Mock).mockResolvedValue('$2b$10$hashed');
     (User.create as jest.Mock).mockResolvedValue({ ...mockUser, password: '$2b$10$hashed' });
 
-    await authService.createUser('Ada Lovelace', 'ada@example.com', 'plain-pass', 'admin');
+    await authService.createUser('Ada Lovelace', 'ada', 'plain-pass', 'admin');
 
     expect(bcrypt.hash).toHaveBeenCalledWith('plain-pass', 10);
     expect(User.create).toHaveBeenCalledWith({
       name: 'Ada Lovelace',
-      email: 'ada@example.com',
+      username: 'ada',
       password: '$2b$10$hashed',
       role: 'admin',
     });

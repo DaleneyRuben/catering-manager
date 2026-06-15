@@ -27,10 +27,10 @@ const signToken = (payload: TokenPayload): string =>
 const verifyToken = (token: string): TokenPayload => jwt.verify(token, getSecret()) as TokenPayload;
 
 const login = async (
-  email: string,
+  username: string,
   password: string,
 ): Promise<{ token: string; user: { id: number; name: string; role: UserRole } }> => {
-  const user = await User.findOne({ where: { email } });
+  const user = await User.findOne({ where: { username } });
   if (!user) throw new Error('INVALID_CREDENTIALS');
 
   const valid = await verifyPassword(password, user.password);
@@ -42,12 +42,12 @@ const login = async (
 
 const createUser = async (
   name: string,
-  email: string,
+  username: string,
   password: string,
   role: UserRole,
 ): Promise<User> => {
   const hashed = await hashPassword(password);
-  return User.create({ name, email, password: hashed, role });
+  return User.create({ name, username, password: hashed, role });
 };
 
 export default { login, createUser, verifyToken };

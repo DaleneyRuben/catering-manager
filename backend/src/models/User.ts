@@ -8,7 +8,7 @@ class User extends Model {
   declare name: string;
 
   @Column({ type: DataType.STRING, allowNull: false, unique: true })
-  declare email: string;
+  declare username: string;
 
   @Column({ type: DataType.STRING, allowNull: false })
   declare password: string;
