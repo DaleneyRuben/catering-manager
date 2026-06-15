@@ -2,12 +2,12 @@ import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import api from '../services/api';
 import { useClientList } from './useClientList';
+// create was extracted to useCreateClient — tested separately
 
 jest.mock('../services/api', () => ({
-  default: { get: jest.fn(), getPaginated: jest.fn(), post: jest.fn(), patch: jest.fn() },
+  default: { get: jest.fn(), getPaginated: jest.fn(), patch: jest.fn() },
 }));
 const mockGetPaginated = api.getPaginated as jest.Mock;
-const mockPost = api.post as jest.Mock;
 
 const client1 = {
   id: 1,
@@ -62,50 +62,5 @@ describe('useClientList', () => {
     renderHook(() => useClientList({ limit: 10 }), { wrapper: makeWrapper() });
     await waitFor(() => expect(mockGetPaginated).toHaveBeenCalled());
     expect(mockGetPaginated).toHaveBeenCalledWith(expect.stringContaining('limit=10'));
-  });
-
-  it('create calls POST /clients then POST /clients/:id/subscriptions', async () => {
-    mockGetPaginated.mockResolvedValue({ data: [], total: 0, page: 1, limit: 20 });
-    mockPost.mockResolvedValueOnce({ id: 42 }).mockResolvedValueOnce(undefined);
-    const { result } = renderHook(() => useClientList(), { wrapper: makeWrapper() });
-    await waitFor(() => expect(result.current.isLoading).toBe(false));
-
-    await result.current.create(
-      {
-        name: 'Ana',
-        sex: 'female',
-        dateOfBirth: '1990-01-01',
-        phoneNumber: '123',
-        address: 'Calle 1',
-        deliveryZone: 'Centro',
-        delivery: 'La Oliva',
-        underlyingDiseases: [],
-        restrictions: [],
-      },
-      {
-        planId: 1,
-        startDate: '2026-06-01',
-        contractDate: '2026-05-26',
-        contractEndDate: '2026-06-27',
-      },
-    );
-
-    expect(mockPost).toHaveBeenNthCalledWith(1, '/clients', {
-      name: 'Ana',
-      sex: 'female',
-      dateOfBirth: '1990-01-01',
-      phoneNumber: '123',
-      address: 'Calle 1',
-      deliveryZone: 'Centro',
-      delivery: 'La Oliva',
-      underlyingDiseases: [],
-      restrictions: [],
-    });
-    expect(mockPost).toHaveBeenNthCalledWith(2, '/clients/42/subscriptions', {
-      planId: 1,
-      startDate: '2026-06-01',
-      contractDate: '2026-05-26',
-      contractEndDate: '2026-06-27',
-    });
   });
 });
