@@ -104,6 +104,51 @@ select {
   animation: fade-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.42s both;
 }
 
+/* Modal entry animations */
+@keyframes modal-backdrop {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes modal-dialog {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.modal-backdrop-enter {
+  animation: modal-backdrop 0.2s ease both;
+}
+
+.modal-dialog-enter {
+  animation: modal-dialog 0.25s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Page transition */
+@keyframes page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.page-enter {
+  animation: page-enter 0.28s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
 /* Login success checkmark pop-in */
 @keyframes success-pop {
   0% {
