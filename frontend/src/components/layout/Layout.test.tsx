@@ -3,6 +3,13 @@ import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { Layout } from './Layout';
 
+jest.mock('../../contexts/AuthContext', () => ({
+  useAuth: () => ({
+    user: { id: 1, username: 'daleney', role: 'admin' },
+    clearAuth: jest.fn(),
+  }),
+}));
+
 describe('Layout', () => {
   it('renders children in the main area', () => {
     render(
@@ -66,7 +73,7 @@ describe('Layout', () => {
       </MemoryRouter>,
     );
     const clientesLink = screen.getByRole('link', { name: /clientes/i });
-    expect(clientesLink.className).toContain('border-olive-400');
+    expect(clientesLink.className).toContain('border-olive-700');
   });
 
   it('closes the sidebar when the backdrop is clicked', async () => {
