@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { format, startOfToday } from 'date-fns';
 import { Icon } from '../components/ui/Icon';
+import { Button } from '../components/ui/Button';
 import { StepIndicator } from '../components/ui/StepIndicator';
 import { useCreateClient } from '../hooks/useCreateClient';
 import { usePlans } from '../hooks/usePlans';
@@ -147,40 +148,20 @@ export function NewClientPage() {
 
       <div className="flex justify-between mt-6">
         {step > 1 ? (
-          <button
-            type="button"
-            onClick={handleBack}
-            className="flex items-center gap-2 px-4 py-2.5 text-[13px] font-semibold border border-rule rounded-md text-ink hover:bg-paper transition-colors"
-          >
-            <Icon name="arrow-left" size={14} />
+          <Button variant="secondary" onClick={handleBack} leftIcon="arrow-left">
             Atrás
-          </button>
+          </Button>
         ) : (
           <div />
         )}
         {step < 4 ? (
-          <button
-            type="button"
-            onClick={handleNext}
-            className="flex items-center gap-2 px-4 py-2.5 text-[13px] font-semibold bg-olive-800 text-white rounded-md hover:bg-olive-700 transition-colors"
-          >
+          <Button onClick={handleNext} rightIcon="arrow-right">
             Siguiente
-            <Icon name="arrow-right" size={14} />
-          </button>
+          </Button>
         ) : (
-          <button
-            type="button"
-            onClick={submit}
-            disabled={isCreating}
-            className="flex items-center gap-2 px-4 py-2.5 text-[13px] font-semibold bg-olive-800 text-white rounded-md hover:bg-olive-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
-          >
-            {isCreating ? (
-              <span className="inline-block w-3.5 h-3.5 rounded-full border-2 border-current border-t-transparent animate-spin" />
-            ) : (
-              <Icon name="check" size={14} />
-            )}
+          <Button onClick={submit} loading={isCreating} leftIcon="check">
             Guardar cliente
-          </button>
+          </Button>
         )}
       </div>
     </div>

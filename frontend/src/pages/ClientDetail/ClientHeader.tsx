@@ -1,5 +1,6 @@
 import { differenceInYears, format, parseISO, startOfToday } from 'date-fns';
 import { Icon } from '../../components/ui/Icon';
+import { Button } from '../../components/ui/Button';
 import { STATUS_LABELS, STATUS_CLASSES, CLIENT_STATUS } from '../../constants/clientStatus';
 import { SEX_LABELS } from '../../constants/clientOptions';
 import { initials } from '../../utils/string';
@@ -75,43 +76,25 @@ export function ClientHeader({
         </div>
         <div className="flex gap-2.5 flex-wrap">
           {toggleConfig && (
-            <button
-              type="button"
+            <Button
+              variant={status === CLIENT_STATUS.PAUSED ? 'primary' : 'secondary'}
               onClick={onToggleActive}
               disabled={isUpdating}
-              className={`flex items-center gap-2 px-4 py-2.5 text-[13px] font-semibold rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${toggleConfig.className}`}
+              loading={isUpdating}
+              leftIcon={toggleConfig.icon}
             >
-              {isUpdating ? (
-                <span className="inline-block w-3.5 h-3.5 rounded-full border-2 border-current border-t-transparent animate-spin" />
-              ) : (
-                <Icon name={toggleConfig.icon} size={14} />
-              )}
               {toggleConfig.label}
-            </button>
+            </Button>
           )}
-          <button
-            type="button"
-            onClick={onRenew}
-            className="flex items-center gap-2 px-4 py-2.5 text-[13px] font-semibold border border-rule rounded-md text-ink hover:bg-cream-2 transition-colors"
-          >
-            <Icon name="refresh" size={14} />
+          <Button variant="secondary" onClick={onRenew} leftIcon="refresh">
             {status === CLIENT_STATUS.ENDED ? 'Reactivar' : 'Renovar'}
-          </button>
-          <button
-            type="button"
-            onClick={onEdit}
-            className="flex items-center gap-2 px-4 py-2.5 text-[13px] font-semibold bg-olive-800 text-white rounded-md hover:bg-olive-700 transition-colors"
-          >
-            <Icon name="settings" size={14} />
+          </Button>
+          <Button onClick={onEdit} leftIcon="settings">
             Editar
-          </button>
-          <button
-            type="button"
-            onClick={onDelete}
-            className="flex items-center gap-2 px-4 py-2.5 text-[13px] font-semibold border border-[#e9c4bb] rounded-md text-alert hover:bg-cream-2 transition-colors"
-          >
+          </Button>
+          <Button variant="alert" onClick={onDelete}>
             Eliminar
-          </button>
+          </Button>
         </div>
       </div>
 

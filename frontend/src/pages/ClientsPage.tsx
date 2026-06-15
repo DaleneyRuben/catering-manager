@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Icon } from '../components/ui/Icon';
+import { Button } from '../components/ui/Button';
 import { PageLoader } from '../components/ui/PageLoader';
 import { Pagination } from '../components/ui/Pagination';
 import { useClientList, useClientCounts } from '../hooks/useClientList';
@@ -104,14 +105,9 @@ export function ClientsPage() {
           </p>
         </div>
         <div className="ml-auto flex gap-2 flex-wrap">
-          <button
-            type="button"
-            onClick={() => navigate('/clientes/nuevo')}
-            className="flex items-center gap-2 px-3.5 py-2.5 text-[13px] font-semibold bg-olive-800 text-white rounded-md hover:bg-olive-700 transition-colors"
-          >
-            <Icon name="plus" size={14} />
+          <Button onClick={() => navigate('/clientes/nuevo')} leftIcon="plus">
             Agregar cliente
-          </button>
+          </Button>
         </div>
       </div>
 

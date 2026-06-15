@@ -1,4 +1,5 @@
 import { Icon } from '../../components/ui/Icon';
+import { Button } from '../../components/ui/Button';
 import { MEAL_LABELS } from '../../constants/meals';
 import type { Client, Subscription } from '../../types/client';
 import { CLIENT_STATUS } from '../../constants/clientStatus';
@@ -14,7 +15,7 @@ interface Props {
 }
 
 export function ClientOverviewTab({ client, sub, remaining, onFinalize, onSuspend }: Props) {
-  const {status} = client;
+  const { status } = client;
   return (
     <div className="grid grid-cols-12 gap-5">
       <div className="col-span-12 lg:col-span-7 flex flex-col gap-4">
@@ -175,13 +176,9 @@ export function ClientOverviewTab({ client, sub, remaining, onFinalize, onSuspen
                 <Icon name="calendar" size={14} />
                 Suspender días
               </button>
-              <button
-                type="button"
-                onClick={onFinalize}
-                className="flex items-center gap-2 px-3 py-2.5 text-[13px] border border-[#e9c4bb] rounded-md text-alert hover:bg-cream-2 transition-colors"
-              >
+              <Button variant="alert" onClick={onFinalize}>
                 Finalizar plan
-              </button>
+              </Button>
             </div>
           </div>
         )}

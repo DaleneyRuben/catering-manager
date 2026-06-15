@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Icon } from '../components/ui/Icon';
+import { Button } from '../components/ui/Button';
 import { PageLoader } from '../components/ui/PageLoader';
 import { usePlans } from '../hooks/usePlans';
 import type { Plan } from '../types/client';
@@ -34,15 +34,9 @@ export function PlansPage() {
           </p>
         </div>
         <div className="ml-auto">
-          <button
-            type="button"
-            aria-label="Crear plan nuevo"
-            onClick={() => setCreateOpen(true)}
-            className="flex items-center gap-2 px-3.5 py-2.5 text-[13px] font-semibold bg-olive-800 text-white rounded-md hover:bg-olive-700 transition-colors"
-          >
-            <Icon name="plus" size={14} />
+          <Button aria-label="Crear plan nuevo" onClick={() => setCreateOpen(true)} leftIcon="plus">
             Crear plan
-          </button>
+          </Button>
         </div>
       </div>
 

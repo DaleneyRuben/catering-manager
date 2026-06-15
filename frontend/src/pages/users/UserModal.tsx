@@ -4,6 +4,7 @@ import { Field, inputCls } from '../../components/ui/Field';
 import type { AppUser, UserDraft, UserUpdateDraft } from '../../hooks/useUsers';
 import { ROLES, type UserRole } from '../../constants/roles';
 import { Modal } from '../../components/ui/Modal';
+import { Button } from '../../components/ui/Button';
 
 const ROLE_OPTIONS: { value: UserRole; label: string }[] = [
   { value: ROLES.ADMIN, label: 'Admin' },
@@ -137,46 +138,27 @@ export function UserModal(props: Props) {
 
         <div className="flex gap-2.5 mt-1">
           {mode === 'edit' && !isSelf && !confirmDelete && (
-            <button
-              type="button"
-              onClick={() => setConfirmDelete(true)}
-              disabled={isSaving}
-              className="px-4 py-2.5 text-[13px] font-semibold border border-rule rounded-md text-warn hover:bg-cream-2 transition-colors disabled:opacity-50"
-            >
+            <Button variant="danger" onClick={() => setConfirmDelete(true)} disabled={isSaving}>
               Eliminar
-            </button>
+            </Button>
           )}
           {mode === 'edit' && !isSelf && confirmDelete && (
-            <button
-              type="button"
-              onClick={handleDelete}
-              disabled={isSaving}
-              className="px-4 py-2.5 text-[13px] font-semibold border border-alert rounded-md text-alert hover:bg-alert-bg transition-colors disabled:opacity-50"
-            >
+            <Button variant="alert" onClick={handleDelete} disabled={isSaving}>
               ¿Confirmar?
-            </button>
+            </Button>
           )}
           <div className="flex-1" />
-          <button
-            type="button"
-            onClick={onClose}
-            className="px-4 py-2.5 text-[13px] font-semibold border border-rule rounded-md text-ink hover:bg-cream-2 transition-colors"
-          >
+          <Button variant="secondary" onClick={onClose}>
             Cancelar
-          </button>
-          <button
-            type="button"
+          </Button>
+          <Button
             onClick={handleSave}
             disabled={isSaving || !canSave}
-            className="flex items-center gap-2 px-4 py-2.5 text-[13px] font-semibold bg-olive-800 text-white rounded-md hover:bg-olive-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+            loading={isSaving}
+            leftIcon="check"
           >
-            {isSaving ? (
-              <span className="inline-block w-3.5 h-3.5 rounded-full border-2 border-current border-t-transparent animate-spin" />
-            ) : (
-              <Icon name="check" size={14} />
-            )}
             {mode === 'create' ? 'Crear' : 'Guardar'}
-          </button>
+          </Button>
         </div>
       </div>
     </Modal>

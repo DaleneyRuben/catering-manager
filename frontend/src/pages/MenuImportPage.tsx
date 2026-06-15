@@ -1,6 +1,7 @@
 import { addDays, format, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useState, useEffect } from 'react';
+import { Button } from '../components/ui/Button';
 import { MEAL_LABELS } from '../constants/meals';
 import { useMenu } from '../hooks/useMenu';
 import { checkIsWeekend } from '../utils/devFlags';
@@ -154,14 +155,9 @@ export function MenuImportPage() {
           </div>
 
           <div className="flex items-center gap-3 mt-6">
-            <button
-              type="button"
-              onClick={handleSave}
-              disabled={isSaving}
-              className="px-4 py-2.5 text-[13px] font-semibold bg-olive-800 text-white rounded-md hover:bg-olive-700 disabled:opacity-50 transition-colors"
-            >
+            <Button onClick={handleSave} loading={isSaving}>
               {saveLabel}
-            </button>
+            </Button>
             {saved && (
               <span className="text-[12px] text-olive-700 font-mono">
                 Menú guardado correctamente

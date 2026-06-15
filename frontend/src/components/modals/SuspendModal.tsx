@@ -19,6 +19,7 @@ import {
 import { es } from 'date-fns/locale';
 import { Icon } from '../ui/Icon';
 import { Modal } from '../ui/Modal';
+import { Button } from '../ui/Button';
 import { addBusinessDays, subtractBusinessDays } from '../../utils/businessDays';
 import { formatDate } from '../../utils/format';
 import type { Subscription } from '../../types/client';
@@ -236,28 +237,13 @@ export function SuspendModal({
         )}
 
         <div className="flex gap-2.5 mt-5">
-          <button
-            type="button"
-            onClick={onClose}
-            disabled={isSaving}
-            className="px-4 py-2.5 text-[13px] font-semibold border border-rule rounded-md text-ink hover:bg-paper transition-colors disabled:opacity-50"
-          >
+          <Button variant="secondary" onClick={onClose} disabled={isSaving}>
             Cancelar
-          </button>
+          </Button>
           <div className="flex-1" />
-          <button
-            type="button"
-            onClick={handleSave}
-            disabled={isSaving}
-            className="flex items-center gap-2 px-4 py-2.5 text-[13px] font-semibold bg-olive-800 text-white rounded-md hover:bg-olive-700 transition-colors disabled:opacity-60"
-          >
-            {isSaving ? (
-              <span className="inline-block w-3.5 h-3.5 rounded-full border-2 border-current border-t-transparent animate-spin" />
-            ) : (
-              <Icon name="check" size={14} />
-            )}
+          <Button onClick={handleSave} loading={isSaving} leftIcon="check">
             Guardar
-          </button>
+          </Button>
         </div>
       </div>
     </Modal>

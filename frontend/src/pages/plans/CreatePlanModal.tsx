@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Icon } from '../../components/ui/Icon';
 import { Modal } from '../../components/ui/Modal';
+import { Button } from '../../components/ui/Button';
 import { PlanEditorForm } from './PlanEditorForm';
 import type { PlanDraft } from './types';
 
@@ -47,28 +48,13 @@ export function CreatePlanModal({
       <div className="p-[22px]">
         <PlanEditorForm draft={draft} setDraft={setDraft} />
         <div className="flex gap-2.5 mt-[18px]">
-          <button
-            type="button"
-            onClick={onClose}
-            disabled={isLoading}
-            className="px-4 py-2.5 text-[13px] font-semibold border border-rule rounded-md text-ink hover:bg-paper transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          >
+          <Button variant="secondary" onClick={onClose} disabled={isLoading}>
             Cancelar
-          </button>
+          </Button>
           <div className="flex-1" />
-          <button
-            type="button"
-            onClick={handleSubmit}
-            disabled={isLoading}
-            className="flex items-center gap-2 px-4 py-2.5 text-[13px] font-semibold bg-olive-400 text-olive-900 rounded-md hover:bg-[#7ed427] transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
-          >
-            {isLoading ? (
-              <span className="inline-block w-3.5 h-3.5 rounded-full border-2 border-current border-t-transparent animate-spin" />
-            ) : (
-              <Icon name="check" size={14} />
-            )}
+          <Button onClick={handleSubmit} loading={isLoading} leftIcon="check">
             Crear plan
-          </button>
+          </Button>
         </div>
       </div>
     </Modal>

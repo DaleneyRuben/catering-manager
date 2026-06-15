@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { startOfToday } from 'date-fns';
+import { Button } from '../../components/ui/Button';
 import { MEAL_LABELS } from '../../constants/meals';
 import type { Client, Subscription } from '../../types/client';
 import { formatDate } from '../../utils/format';
@@ -113,25 +114,12 @@ function ContractCard({
             </div>
           </div>
           <div className="flex gap-2 mt-1">
-            <button
-              type="button"
-              onClick={handleCancel}
-              disabled={saving}
-              className="px-3 py-1.5 text-[12px] font-semibold border border-rule rounded-md text-ink hover:bg-cream-2 transition-colors disabled:opacity-50"
-            >
+            <Button variant="secondary" size="sm" onClick={handleCancel} disabled={saving}>
               Cancelar
-            </button>
-            <button
-              type="button"
-              onClick={handleSave}
-              disabled={saving}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-[12px] font-semibold bg-olive-800 text-white rounded-md hover:bg-olive-700 transition-colors disabled:opacity-60"
-            >
-              {saving && (
-                <span className="inline-block w-3 h-3 rounded-full border-2 border-current border-t-transparent animate-spin" />
-              )}
+            </Button>
+            <Button size="sm" onClick={handleSave} loading={saving} leftIcon="check">
               Guardar
-            </button>
+            </Button>
           </div>
         </div>
       ) : (

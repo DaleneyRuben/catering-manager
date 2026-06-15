@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Icon } from './Icon';
 import { Modal } from './Modal';
+import { Button } from './Button';
 
 interface Props {
   title: string;
@@ -32,28 +33,13 @@ export function ConfirmModal({ title, message, confirmLabel, onClose, onConfirm 
       <div className="px-[22px] py-5">
         <p className="text-[13px] text-ink">{message}</p>
         <div className="flex gap-2.5 mt-5">
-          <button
-            type="button"
-            onClick={onClose}
-            disabled={isLoading}
-            className="px-4 py-2.5 text-[13px] font-semibold border border-rule rounded-md text-ink hover:bg-paper transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          >
+          <Button variant="secondary" onClick={onClose} disabled={isLoading}>
             Cancelar
-          </button>
+          </Button>
           <div className="flex-1" />
-          <button
-            type="button"
-            onClick={handleConfirm}
-            disabled={isLoading}
-            className="flex items-center gap-2 px-4 py-2.5 text-[13px] font-semibold bg-warn text-white rounded-md hover:opacity-90 transition-opacity disabled:opacity-60 disabled:cursor-not-allowed"
-          >
-            {isLoading ? (
-              <span className="inline-block w-3.5 h-3.5 rounded-full border-2 border-current border-t-transparent animate-spin" />
-            ) : (
-              <Icon name="x" size={14} />
-            )}
+          <Button variant="destructive" onClick={handleConfirm} loading={isLoading} leftIcon="x">
             {confirmLabel}
-          </button>
+          </Button>
         </div>
       </div>
     </Modal>

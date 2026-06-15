@@ -9,6 +9,7 @@ interface Props extends ButtonHTMLAttributes<HTMLButtonElement> {
   size?: ButtonSize;
   loading?: boolean;
   leftIcon?: string;
+  rightIcon?: string;
   children: ReactNode;
 }
 
@@ -34,6 +35,7 @@ export function Button({
   size = 'md',
   loading = false,
   leftIcon,
+  rightIcon,
   disabled,
   children,
   className = '',
@@ -56,6 +58,7 @@ export function Button({
       {iconSlot}
       {leftIconSlot}
       {children}
+      {!loading && rightIcon ? <Icon name={rightIcon} size={14} /> : null}
     </button>
   );
 }
