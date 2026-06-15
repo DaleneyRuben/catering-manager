@@ -3,6 +3,16 @@ import { MemoryRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import App from './App';
 
+jest.mock('./contexts/AuthContext', () => ({
+  useAuth: () => ({
+    user: { id: 1, username: 'daleney', role: 'manager' },
+    token: 'fake-token',
+    setAuth: jest.fn(),
+    clearAuth: jest.fn(),
+  }),
+  AuthProvider: ({ children }: { children: React.ReactNode }) => children,
+}));
+
 jest.mock('./services/api', () => ({
   default: {
     get: jest.fn().mockResolvedValue([]),
