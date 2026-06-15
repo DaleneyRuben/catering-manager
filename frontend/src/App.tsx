@@ -9,7 +9,6 @@ import { NewClientPage } from './pages/NewClientPage';
 import { PlansPage } from './pages/PlansPage';
 import { MenuImportPage } from './pages/MenuImportPage';
 import { ReportsPage } from './pages/ReportsPage';
-import { RenewalsPage } from './pages/RenewalsPage';
 import { HealthPage } from './pages/HealthPage';
 import { UsersPage } from './pages/users/UsersPage';
 import { ROLES } from './constants/roles';
@@ -34,7 +33,6 @@ function App() {
                 <Route path="/planes" element={<PlansPage />} />
                 <Route path="/menu" element={<MenuImportPage />} />
                 <Route path="/informes" element={<ReportsPage />} />
-                <Route path="/renovaciones" element={<RenewalsPage />} />
                 <Route
                   path="/health"
                   element={
