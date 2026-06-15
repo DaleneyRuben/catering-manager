@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Icon } from '../../components/ui/Icon';
 import { PageLoader } from '../../components/ui/PageLoader';
 import { useUsers, type AppUser } from '../../hooks/useUsers';
+import { useAuth } from '../../contexts/AuthContext';
 import { UserModal } from './UserModal';
 import type { UserRole } from '../../contexts/AuthContext';
 
@@ -18,6 +19,7 @@ const ROLE_CLASSES: Record<UserRole, string> = {
 };
 
 export function UsersPage() {
+  const { user: currentUser } = useAuth();
   const { users, isLoading, isSaving, create, update, remove } = useUsers();
   const [createOpen, setCreateOpen] = useState(false);
   const [editUser, setEditUser] = useState<AppUser | null>(null);
@@ -115,6 +117,7 @@ export function UsersPage() {
         <UserModal
           mode="edit"
           user={editUser}
+          isSelf={String(currentUser?.id) === editUser.id}
           isSaving={isSaving}
           onSave={(draft) => update(editUser.id, draft)}
           onDelete={() => remove(editUser.id)}
