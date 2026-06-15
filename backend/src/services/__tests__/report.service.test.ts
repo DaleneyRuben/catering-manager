@@ -82,6 +82,16 @@ describe('reportService.findDeliveryClientsForDate', () => {
     const call = (Subscription.findAll as jest.Mock).mock.calls[0][0];
     expect(call.where?.finalizedAt).toEqual({ [Symbol.for('is')]: null });
   });
+
+  it('excludes paused clients via where clause on Client include', async () => {
+    (Subscription.findAll as jest.Mock).mockResolvedValue([]);
+
+    await reportService.findDeliveryClientsForDate('2026-06-15');
+
+    const call = (Subscription.findAll as jest.Mock).mock.calls[0][0];
+    const clientInclude = call.include?.find((i: { model: typeof Client }) => i.model === Client);
+    expect(clientInclude?.where).toMatchObject({ pausedSince: null });
+  });
 });
 
 describe('reportService.findActiveClientsWithPlansForDate', () => {
@@ -143,5 +153,15 @@ describe('reportService.findActiveClientsWithPlansForDate', () => {
 
     const call = (Subscription.findAll as jest.Mock).mock.calls[0][0];
     expect(call.where?.finalizedAt).toEqual({ [Symbol.for('is')]: null });
+  });
+
+  it('excludes paused clients via where clause on Client include', async () => {
+    (Subscription.findAll as jest.Mock).mockResolvedValue([]);
+
+    await reportService.findActiveClientsWithPlansForDate('2026-06-15');
+
+    const call = (Subscription.findAll as jest.Mock).mock.calls[0][0];
+    const clientInclude = call.include?.find((i: { model: typeof Client }) => i.model === Client);
+    expect(clientInclude?.where).toMatchObject({ pausedSince: null });
   });
 });
