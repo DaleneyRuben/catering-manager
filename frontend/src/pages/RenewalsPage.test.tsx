@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { addDays, format } from 'date-fns';
 import { useClientList } from '../hooks/useClientList';
@@ -12,8 +12,12 @@ jest.mock('../hooks/useClient', () => ({
   useClient: jest.fn(() => ({ renew: jest.fn() })),
 }));
 
+let capturedOnClose: (() => void) | null = null;
 jest.mock('../components/modals/RenewalModal', () => ({
-  RenewalModal: () => <div>renewal-modal</div>,
+  RenewalModal: ({ onClose }: { onClose: () => void }) => {
+    capturedOnClose = onClose;
+    return <div>renewal-modal</div>;
+  },
 }));
 
 // A date 7 days from now — always within the 14-day expiry window
@@ -33,6 +37,7 @@ function makeClient(overrides: object = {}) {
 describe('RenewalsPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    capturedOnClose = null;
   });
 
   it('shows loading indicator while fetching', () => {
@@ -76,5 +81,15 @@ describe('RenewalsPage', () => {
     render(<RenewalsPage />);
     await userEvent.click(screen.getByText('Ana García'));
     expect(screen.getByText('renewal-modal')).toBeInTheDocument();
+  });
+
+  it('closes the modal when onClose is called', async () => {
+    const client = makeClient({ status: 'active' });
+    (useClientList as jest.Mock).mockReturnValue({ clients: [client], isLoading: false });
+    render(<RenewalsPage />);
+    await userEvent.click(screen.getByText('Ana García'));
+    expect(screen.getByText('renewal-modal')).toBeInTheDocument();
+    act(() => capturedOnClose!());
+    expect(screen.queryByText('renewal-modal')).not.toBeInTheDocument();
   });
 });
