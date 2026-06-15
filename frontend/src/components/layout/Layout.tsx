@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
+import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { Toaster } from 'sonner';
 import { Icon } from '../ui/Icon';
+import { useAuth } from '../../contexts/AuthContext';
 import smallLogo from '../../assets/small_logo.png';
 
 interface NavItem {
@@ -25,6 +26,13 @@ interface LayoutProps {
 export function Layout({ children }: LayoutProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const { pathname } = useLocation();
+  const navigate = useNavigate();
+  const { user, clearAuth } = useAuth();
+
+  const handleLogout = () => {
+    clearAuth();
+    navigate('/login', { replace: true });
+  };
 
   useEffect(() => {
     setMenuOpen(false);
@@ -87,6 +95,18 @@ export function Layout({ children }: LayoutProps) {
             <Icon name="stethoscope" size={16} />
             Health
           </NavLink>
+        </div>
+        <div className="border-t border-[#b8dba0] px-4 py-3 flex items-center justify-between gap-2">
+          <span className="text-[12px] text-olive-900/70 font-medium truncate">{user?.name}</span>
+          <button
+            type="button"
+            onClick={handleLogout}
+            className="text-olive-900/50 hover:text-olive-900 transition-colors shrink-0"
+            aria-label="Cerrar sesión"
+            title="Cerrar sesión"
+          >
+            <Icon name="logout" size={16} />
+          </button>
         </div>
       </aside>
 
