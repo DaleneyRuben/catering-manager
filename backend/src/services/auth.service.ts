@@ -1,0 +1,53 @@
+import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
+import User, { type UserRole } from '../models/User';
+
+const SALT_ROUNDS = 10;
+const JWT_EXPIRY = '8h';
+
+const getSecret = (): string => {
+  const secret = process.env.JWT_SECRET;
+  if (!secret) throw new Error('JWT_SECRET is not set');
+  return secret;
+};
+
+export type TokenPayload = {
+  userId: number;
+  role: UserRole;
+};
+
+const hashPassword = (plain: string): Promise<string> => bcrypt.hash(plain, SALT_ROUNDS);
+
+const verifyPassword = (plain: string, hash: string): Promise<boolean> =>
+  bcrypt.compare(plain, hash);
+
+const signToken = (payload: TokenPayload): string =>
+  jwt.sign(payload, getSecret(), { expiresIn: JWT_EXPIRY });
+
+const verifyToken = (token: string): TokenPayload => jwt.verify(token, getSecret()) as TokenPayload;
+
+const login = async (
+  email: string,
+  password: string,
+): Promise<{ token: string; user: { id: number; name: string; role: UserRole } }> => {
+  const user = await User.findOne({ where: { email } });
+  if (!user) throw new Error('INVALID_CREDENTIALS');
+
+  const valid = await verifyPassword(password, user.password);
+  if (!valid) throw new Error('INVALID_CREDENTIALS');
+
+  const token = signToken({ userId: user.id as number, role: user.role });
+  return { token, user: { id: user.id as number, name: user.name, role: user.role } };
+};
+
+const createUser = async (
+  name: string,
+  email: string,
+  password: string,
+  role: UserRole,
+): Promise<User> => {
+  const hashed = await hashPassword(password);
+  return User.create({ name, email, password: hashed, role });
+};
+
+export default { login, createUser, verifyToken };
