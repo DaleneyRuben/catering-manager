@@ -20,6 +20,7 @@ type CreateProps = {
 type EditProps = {
   mode: 'edit';
   user: AppUser;
+  isSelf?: boolean;
   onSave: (draft: UserUpdateDraft) => Promise<void>;
   onDelete: () => Promise<void>;
   onClose: () => void;
@@ -30,6 +31,7 @@ type Props = CreateProps | EditProps;
 
 export function UserModal(props: Props) {
   const { mode, onClose, isSaving } = props;
+  const isSelf = mode === 'edit' ? ((props as EditProps).isSelf ?? false) : false;
   const initial = mode === 'edit' ? (props as EditProps).user : null;
 
   const [username, setUsername] = useState(initial?.username ?? '');
@@ -143,7 +145,7 @@ export function UserModal(props: Props) {
           </div>
 
           <div className="flex gap-2.5 mt-1">
-            {mode === 'edit' && !confirmDelete && (
+            {mode === 'edit' && !isSelf && !confirmDelete && (
               <button
                 type="button"
                 onClick={() => setConfirmDelete(true)}
@@ -153,7 +155,7 @@ export function UserModal(props: Props) {
                 Eliminar
               </button>
             )}
-            {mode === 'edit' && confirmDelete && (
+            {mode === 'edit' && !isSelf && confirmDelete && (
               <button
                 type="button"
                 onClick={handleDelete}
