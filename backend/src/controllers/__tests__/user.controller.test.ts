@@ -101,6 +101,7 @@ describe('PATCH /api/users/:id', () => {
 
     expect(res.status).toBe(200);
     expect(res.body.data).toMatchObject({ username: 'ada2', role: 'admin' });
+    expect(mockUpdate).toHaveBeenCalledWith(1, expect.objectContaining({ username: 'ada2' }));
   });
 
   it('returns 404 when user not found', async () => {
@@ -141,6 +142,7 @@ describe('DELETE /api/users/:id', () => {
     const res = await request(app).delete(`/api/users/${id1}`);
 
     expect(res.status).toBe(204);
+    expect(mockRemove).toHaveBeenCalledWith(1);
   });
 
   it('returns 404 when user not found', async () => {
