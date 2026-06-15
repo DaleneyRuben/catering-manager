@@ -11,6 +11,10 @@ jest.mock('../../database/sequelize', () => ({
   __esModule: true,
   default: { query: jest.fn() },
 }));
+jest.mock('../../utils/date', () => ({
+  ...jest.requireActual('../../utils/date'),
+  appToday: jest.fn(() => '2026-06-05'),
+}));
 
 const mockClient = {
   id: 1,
@@ -184,6 +188,53 @@ describe('clientService.update', () => {
       expect.objectContaining({ clientId: 1, eventType: 'resumed' }),
     );
     expect(mockInstance.update).toHaveBeenCalledWith({ pausedSince: null });
+  });
+
+  it('extends contractEndDate on the subscription when resuming', async () => {
+    // startDate=Mon Jun 1, duration=10, paused Wed Jun 3
+    // elapsed = differenceInBusinessDays(Jun 3, Jun 1) = 2 (Mon+Tue delivered)
+    // remaining = 10 - 2 = 8
+    // resume today (mocked to 2026-06-05 Fri)
+    // newContractEndDate = addDeliveryDays('2026-06-05', 8) = '2026-06-17'
+    const mockSub = {
+      startDate: '2026-06-01',
+      duration: 10,
+      contractEndDate: '2026-06-12',
+      update: jest.fn().mockResolvedValue({}),
+    };
+    const mockInstance = {
+      id: 1,
+      pausedSince: new Date('2026-06-03T15:00:00Z'), // Jun 3 in La Paz (UTC-4 = 11am local)
+      subscriptions: [mockSub],
+      update: jest.fn().mockResolvedValue({ ...mockClient, pausedSince: null }),
+    };
+    (Client.findByPk as jest.Mock).mockResolvedValue(mockInstance);
+    (ClientHistory.create as jest.Mock).mockResolvedValue({});
+
+    await clientService.update(1, { pausedSince: null });
+
+    expect(mockSub.update).toHaveBeenCalledWith({ contractEndDate: '2026-06-17' });
+  });
+
+  it('skips contractEndDate extension when subscription has no startDate', async () => {
+    const mockSub = {
+      startDate: null,
+      duration: 10,
+      contractEndDate: null,
+      update: jest.fn().mockResolvedValue({}),
+    };
+    const mockInstance = {
+      id: 1,
+      pausedSince: new Date('2026-06-03T15:00:00Z'),
+      subscriptions: [mockSub],
+      update: jest.fn().mockResolvedValue({ ...mockClient, pausedSince: null }),
+    };
+    (Client.findByPk as jest.Mock).mockResolvedValue(mockInstance);
+    (ClientHistory.create as jest.Mock).mockResolvedValue({});
+
+    await clientService.update(1, { pausedSince: null });
+
+    expect(mockSub.update).not.toHaveBeenCalled();
   });
 
   it('does not record a history event when non-pause fields are updated', async () => {
