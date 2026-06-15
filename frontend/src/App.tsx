@@ -34,7 +34,14 @@ function App() {
                 <Route path="/menu" element={<MenuImportPage />} />
                 <Route path="/informes" element={<ReportsPage />} />
                 <Route path="/renovaciones" element={<RenewalsPage />} />
-                <Route path="/health" element={<HealthPage />} />
+                <Route
+                  path="/health"
+                  element={
+                    <ProtectedRoute allowedRoles={['admin']}>
+                      <HealthPage />
+                    </ProtectedRoute>
+                  }
+                />
                 <Route
                   path="/usuarios"
                   element={
