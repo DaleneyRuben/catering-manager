@@ -136,7 +136,11 @@ export function Layout({ children }: LayoutProps) {
           </button>
           <img src={smallLogo} alt="La Oliva" className="h-7 w-auto" />
         </header>
-        <main className="flex-1 min-w-0 overflow-auto">{children}</main>
+        <main className="flex-1 min-w-0 overflow-auto">
+          <div key={pathname} className="page-enter">
+            {children}
+          </div>
+        </main>
       </div>
       <Toaster
         position="bottom-center"
