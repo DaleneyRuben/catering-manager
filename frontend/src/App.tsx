@@ -11,6 +11,7 @@ import { MenuImportPage } from './pages/MenuImportPage';
 import { ReportsPage } from './pages/ReportsPage';
 import { RenewalsPage } from './pages/RenewalsPage';
 import { HealthPage } from './pages/HealthPage';
+import { UsersPage } from './pages/users/UsersPage';
 
 const MANAGER_ROLES = ['admin', 'manager'] as const;
 
@@ -34,6 +35,14 @@ function App() {
                 <Route path="/informes" element={<ReportsPage />} />
                 <Route path="/renovaciones" element={<RenewalsPage />} />
                 <Route path="/health" element={<HealthPage />} />
+                <Route
+                  path="/usuarios"
+                  element={
+                    <ProtectedRoute allowedRoles={['admin']}>
+                      <UsersPage />
+                    </ProtectedRoute>
+                  }
+                />
                 <Route
                   path="/sin-acceso"
                   element={

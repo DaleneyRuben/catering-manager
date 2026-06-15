@@ -19,6 +19,8 @@ const NAV_ITEMS: NavItem[] = [
   { to: '/informes', label: 'Informes', icon: 'report' },
 ];
 
+const ADMIN_NAV_ITEMS: NavItem[] = [{ to: '/usuarios', label: 'Usuarios', icon: 'user-plus' }];
+
 interface LayoutProps {
   children: React.ReactNode;
 }
@@ -79,6 +81,28 @@ export function Layout({ children }: LayoutProps) {
               {label}
             </NavLink>
           ))}
+          {user?.role === 'admin' && (
+            <>
+              <div className="mx-4 my-2 border-t border-[#b8dba0]" />
+              {ADMIN_NAV_ITEMS.map(({ to, label, icon }) => (
+                <NavLink
+                  key={to}
+                  to={to}
+                  className={({ isActive }) =>
+                    [
+                      'flex items-center gap-3 pl-[13px] pr-4 py-2 text-sm transition-colors border-l-[3px]',
+                      isActive
+                        ? 'border-olive-700 bg-white/60 text-olive-900 font-semibold'
+                        : 'border-transparent text-olive-900/60 hover:text-olive-900 hover:bg-white/40',
+                    ].join(' ')
+                  }
+                >
+                  <Icon name={icon} size={16} />
+                  {label}
+                </NavLink>
+              ))}
+            </>
+          )}
         </nav>
         <div className="border-t border-[#b8dba0]">
           <NavLink
