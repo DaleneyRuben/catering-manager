@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { parseISO, startOfToday } from 'date-fns';
-import { Field, inputCls, selectCls } from "../ui/Field";
-import { DatePickerInput } from "../ui/DatePickerInput";
-import { Icon } from "../ui/Icon";
-import { TagInput } from "../ui/TagInput";
-import { ToggleGroup } from "../ui/ToggleGroup";
+import { Field, inputCls, selectCls } from '../ui/Field';
+import { DatePickerInput } from '../ui/DatePickerInput';
+import { Icon } from '../ui/Icon';
+import { Modal } from '../ui/Modal';
+import { TagInput } from '../ui/TagInput';
+import { ToggleGroup } from '../ui/ToggleGroup';
 import { DISEASES } from '../../constants/diseases';
 import { ZONES, DELIVERIES, SEX_OPTIONS } from '../../constants/clientOptions';
 import type { Client } from '../../types/client';
@@ -76,14 +77,8 @@ export function ClientEditModal({
   };
 
   return (
-    <>
-      <div className="fixed inset-0 bg-black/40 z-40" aria-hidden="true" onClick={onClose} />
-      <div
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="edit-modal-title"
-        className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-[min(780px,94vw)] max-h-[92vh] overflow-auto bg-cream border border-rule-2 rounded-xl shadow-2xl"
-      >
+    <Modal onClose={onClose} className="rounded-xl w-[min(780px,94vw)] max-h-[92vh] overflow-auto">
+      <div aria-labelledby="edit-modal-title">
         <div className="sticky top-0 bg-cream z-10 flex items-center gap-2.5 px-6 py-[18px] border-b border-rule">
           <Icon name="settings" size={16} />
           <div className="flex-1">
@@ -283,6 +278,6 @@ export function ClientEditModal({
           </button>
         </div>
       </div>
-    </>
+    </Modal>
   );
 }

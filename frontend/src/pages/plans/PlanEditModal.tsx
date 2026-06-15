@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Icon } from '../../components/ui/Icon';
+import { Modal } from '../../components/ui/Modal';
 import type { Plan } from '../../types/client';
 import { ConfirmDeleteModal } from './ConfirmDeleteModal';
 import { PlanEditorForm } from './PlanEditorForm';
@@ -29,15 +30,9 @@ export function PlanEditModal({
 
   return (
     <>
-      <div
-        className="fixed inset-0 z-40 bg-[rgba(20,40,6,0.32)] backdrop-blur-sm"
-        onClick={onClose}
-        aria-hidden="true"
-      />
-      <div
-        role="dialog"
-        aria-modal="true"
-        className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 bg-cream border border-rule-2 rounded-[10px] w-[min(640px,92vw)] max-h-[92vh] overflow-auto shadow-[0_20px_60px_rgba(20,40,6,0.25)]"
+      <Modal
+        onClose={onClose}
+        className="rounded-[10px] w-[min(640px,92vw)] max-h-[92vh] overflow-auto"
       >
         <div className="flex items-center gap-2.5 px-[22px] py-[18px] border-b border-rule">
           <Icon name="plan" size={16} />
@@ -87,7 +82,7 @@ export function PlanEditModal({
             {clientCount !== 1 ? 's' : ''} con contrato vigente.
           </p>
         </div>
-      </div>
+      </Modal>
 
       {confirmDeleteOpen && (
         <ConfirmDeleteModal
