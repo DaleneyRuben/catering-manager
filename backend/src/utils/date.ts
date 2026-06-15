@@ -6,6 +6,9 @@ const APP_TIMEZONE = 'America/La_Paz';
 // formatInTimeZone ensures the correct Bolivia date regardless of server timezone.
 export const appToday = (): string => formatInTimeZone(new Date(), APP_TIMEZONE, 'yyyy-MM-dd');
 
+// Converts a Date timestamp to its Bolivia calendar date string.
+export const toAppDate = (d: Date): string => formatInTimeZone(d, APP_TIMEZONE, 'yyyy-MM-dd');
+
 export const addDeliveryDays = (startDate: string, days: number): string => {
   const result = addBusinessDays(parseISO(`${startDate}T12:00:00`), days);
   return format(result, 'yyyy-MM-dd');

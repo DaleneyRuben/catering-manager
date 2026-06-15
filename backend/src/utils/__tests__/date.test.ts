@@ -1,4 +1,4 @@
-import { addDeliveryDays, subtractDeliveryDays } from '../date';
+import { addDeliveryDays, subtractDeliveryDays, toAppDate } from '../date';
 
 describe('addDeliveryDays', () => {
   it('adds business days skipping weekends', () => {
@@ -28,6 +28,18 @@ describe('addDeliveryDays', () => {
   it('handles start date on saturday by treating it as the next monday', () => {
     // Sat May 9 + 1: date-fns normalises Sat into Mon May 11 (counts as the +1)
     expect(addDeliveryDays('2026-05-09', 1)).toBe('2026-05-11');
+  });
+});
+
+describe('toAppDate', () => {
+  it('extracts the Bolivia calendar date from a UTC timestamp', () => {
+    // 2026-06-03T15:00:00Z = 2026-06-03 11:00 AM in La Paz (UTC-4)
+    expect(toAppDate(new Date('2026-06-03T15:00:00Z'))).toBe('2026-06-03');
+  });
+
+  it('handles midnight UTC crossing into the previous Bolivia day', () => {
+    // 2026-06-04T02:00:00Z = 2026-06-03 10:00 PM in La Paz (UTC-4)
+    expect(toAppDate(new Date('2026-06-04T02:00:00Z'))).toBe('2026-06-03');
   });
 });
 
