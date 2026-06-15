@@ -9,10 +9,15 @@ export interface PaginatedResponse<T> {
   limit: number;
 }
 
+const getAuthHeader = (): Record<string, string> => {
+  const token = localStorage.getItem('auth_token');
+  return token ? { Authorization: `Bearer ${token}` } : {};
+};
+
 async function request<T>(method: string, url: string, body?: unknown): Promise<T> {
   const res = await fetch(`${BASE}${url}`, {
     method,
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
     ...(body !== undefined ? { body: JSON.stringify(body) } : {}),
   });
 
@@ -36,7 +41,7 @@ async function request<T>(method: string, url: string, body?: unknown): Promise<
 async function requestPaginated<T>(url: string): Promise<PaginatedResponse<T>> {
   const res = await fetch(`${BASE}${url}`, {
     method: 'GET',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
   });
   if (!res.ok) throw new Error(`GET ${url} → ${res.status}`);
   return res.json();
