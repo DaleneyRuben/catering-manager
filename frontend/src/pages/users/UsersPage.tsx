@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Button } from '../../components/ui/Button';
 import { Icon } from '../../components/ui/Icon';
 import { PageLoader } from '../../components/ui/PageLoader';
 import { useUsers, type AppUser } from '../../hooks/useUsers';
@@ -39,14 +40,9 @@ export function UsersPage() {
           </p>
         </div>
         <div className="ml-auto">
-          <button
-            type="button"
-            onClick={() => setCreateOpen(true)}
-            className="flex items-center gap-2 px-3.5 py-2.5 text-[13px] font-semibold bg-olive-800 text-white rounded-md hover:bg-olive-700 transition-colors"
-          >
-            <Icon name="plus" size={14} />
+          <Button onClick={() => setCreateOpen(true)} leftIcon="plus">
             Agregar usuario
-          </button>
+          </Button>
         </div>
       </div>
 

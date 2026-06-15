@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { format, addDays } from 'date-fns';
+import { Button } from '../../components/ui/Button';
 import { Icon } from '../../components/ui/Icon';
 import { API_BASE } from '../../utils/env';
 import { downloadReport } from '../../utils/downloadReport';
@@ -74,21 +75,14 @@ export function DeliveryListCard() {
 
       {error && <p className="text-[12px] text-alert mb-4">{error}</p>}
 
-      <div>
-        <button
-          type="button"
-          onClick={handleDownload}
-          disabled={loading || isSelectedWeekend}
-          className="flex items-center gap-2 px-4 py-2.5 text-[13px] font-semibold bg-olive-800 text-white rounded-md hover:bg-olive-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {loading ? (
-            <span className="inline-block w-3.5 h-3.5 rounded-full border-2 border-white border-t-transparent animate-spin" />
-          ) : (
-            <Icon name="download" size={14} />
-          )}
-          Descargar .xlsx
-        </button>
-      </div>
+      <Button
+        onClick={handleDownload}
+        disabled={isSelectedWeekend}
+        loading={loading}
+        leftIcon="download"
+      >
+        Descargar .xlsx
+      </Button>
     </div>
   );
 }

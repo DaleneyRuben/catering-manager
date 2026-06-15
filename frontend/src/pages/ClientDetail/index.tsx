@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { parseISO } from 'date-fns';
 import { remainingDeliveryDays } from '../../utils/businessDays';
-import { Icon } from '../../components/ui/Icon';
 import { useClient } from '../../hooks/useClient';
 import { CLIENT_STATUS } from '../../constants/clientStatus';
 import { formatDate } from '../../utils/format';
@@ -16,6 +15,7 @@ import { ClientPlanTab } from './ClientPlanTab';
 import { ClientHeader } from './ClientHeader';
 import { RenewalModal } from '../../components/modals/RenewalModal';
 import { ConfirmModal } from '../../components/ui/ConfirmModal';
+import { Button } from '../../components/ui/Button';
 import { PageLoader } from '../../components/ui/PageLoader';
 import { Tabs } from '../../components/ui/Tabs';
 
@@ -145,14 +145,9 @@ export function ClientDetailPage() {
               </p>
             </div>
             <div className="ml-auto">
-              <button
-                type="button"
-                onClick={() => setSuspendOpen(true)}
-                className="flex items-center gap-2 px-3.5 py-2.5 text-[13px] font-semibold bg-olive-800 text-white rounded-md hover:bg-olive-700 transition-colors"
-              >
-                <Icon name="calendar" size={14} />
+              <Button onClick={() => setSuspendOpen(true)} leftIcon="calendar">
                 Suspender días
-              </button>
+              </Button>
             </div>
           </div>
           {sub && (sub.suspendedDates?.length ?? 0) > 0 ? (

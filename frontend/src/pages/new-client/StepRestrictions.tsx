@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Icon } from '../../components/ui/Icon';
+import { Button } from '../../components/ui/Button';
 import { DISEASES } from '../../constants/diseases';
 import type { RestrictionsState } from './types';
 
@@ -51,14 +51,9 @@ export function StepRestrictions({ value, onChange }: Props) {
             }}
             className="flex-1 px-3 py-2.5 border border-rule bg-paper rounded-md text-[13px] focus:outline-none focus:border-olive-700"
           />
-          <button
-            type="button"
-            onClick={add}
-            className="flex items-center gap-1.5 px-3 py-2.5 text-[13px] font-semibold bg-olive-800 text-white rounded-md hover:bg-olive-700 transition-colors"
-          >
-            <Icon name="plus" size={13} />
+          <Button onClick={add} leftIcon="plus">
             Agregar
-          </button>
+          </Button>
         </div>
 
         <div className="min-h-[80px] p-4 bg-cream-2 rounded-md border border-dashed border-rule-2">
