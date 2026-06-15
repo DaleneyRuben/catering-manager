@@ -17,6 +17,7 @@ import { ClientHeader } from './ClientHeader';
 import { RenewalModal } from '../../components/modals/RenewalModal';
 import { ConfirmModal } from '../../components/ui/ConfirmModal';
 import { PageLoader } from '../../components/ui/PageLoader';
+import { Tabs } from '../../components/ui/Tabs';
 
 type TabId = 'overview' | 'plan' | 'suspensions' | 'history';
 
@@ -106,24 +107,12 @@ export function ClientDetailPage() {
         onRenew={() => setRenewOpen(true)}
       />
 
-      <div role="tablist" className="flex border-b border-rule mb-5">
-        {visibleTabs.map(({ id: tId, label }) => (
-          <button
-            key={tId}
-            type="button"
-            role="tab"
-            aria-selected={activeTab === tId}
-            onClick={() => setTab(tId)}
-            className={`px-4 py-2.5 text-[13px] font-medium border-b-2 -mb-px transition-colors ${
-              activeTab === tId
-                ? 'border-olive-800 text-ink'
-                : 'border-transparent text-muted hover:text-ink'
-            }`}
-          >
-            {label}
-          </button>
-        ))}
-      </div>
+      <Tabs
+        tabs={visibleTabs}
+        activeId={activeTab}
+        onChange={(tabId) => setTab(tabId as TabId)}
+        className="mb-5"
+      />
 
       {activeTab === 'overview' && (
         <ClientOverviewTab
