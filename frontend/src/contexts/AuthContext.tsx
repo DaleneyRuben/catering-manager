@@ -4,7 +4,7 @@ export type UserRole = 'admin' | 'manager' | 'delivery';
 
 type AuthUser = {
   id: number;
-  name: string;
+  username: string;
   role: UserRole;
 };
 

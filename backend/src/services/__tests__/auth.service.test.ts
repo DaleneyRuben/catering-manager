@@ -20,7 +20,6 @@ afterAll(() => {
 
 const mockUser = {
   id: 1,
-  name: 'Ada Lovelace',
   username: 'ada',
   password: '$2b$10$hashedpassword',
   role: 'admin' as const,
@@ -35,7 +34,7 @@ describe('authService.login', () => {
     const result = await authService.login('ada', 'correct-password');
 
     expect(result.token).toBe('signed-token');
-    expect(result.user).toEqual({ id: 1, name: 'Ada Lovelace', role: 'admin' });
+    expect(result.user).toEqual({ id: 1, username: 'ada', role: 'admin' });
     expect(bcrypt.compare).toHaveBeenCalledWith('correct-password', mockUser.password);
   });
 
@@ -58,11 +57,10 @@ describe('authService.createUser', () => {
     (bcrypt.hash as jest.Mock).mockResolvedValue('$2b$10$hashed');
     (User.create as jest.Mock).mockResolvedValue({ ...mockUser, password: '$2b$10$hashed' });
 
-    await authService.createUser('Ada Lovelace', 'ada', 'plain-pass', 'admin');
+    await authService.createUser('ada', 'plain-pass', 'admin');
 
     expect(bcrypt.hash).toHaveBeenCalledWith('plain-pass', 10);
     expect(User.create).toHaveBeenCalledWith({
-      name: 'Ada Lovelace',
       username: 'ada',
       password: '$2b$10$hashed',
       role: 'admin',

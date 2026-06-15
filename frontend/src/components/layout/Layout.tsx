@@ -97,7 +97,9 @@ export function Layout({ children }: LayoutProps) {
           </NavLink>
         </div>
         <div className="border-t border-[#b8dba0] px-4 py-3 flex items-center justify-between gap-2">
-          <span className="text-[12px] text-olive-900/70 font-medium truncate">{user?.name}</span>
+          <span className="text-[12px] text-olive-900/70 font-medium truncate">
+            {user?.username}
+          </span>
           <button
             type="button"
             onClick={handleLogout}

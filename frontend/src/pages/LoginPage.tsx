@@ -6,7 +6,7 @@ import { Field, inputCls } from '../components/ui/Field';
 
 type LoginResponse = {
   token: string;
-  user: { id: number; name: string; role: UserRole };
+  user: { id: number; username: string; role: UserRole };
 };
 
 const redirectForRole = (role: UserRole): string => {
