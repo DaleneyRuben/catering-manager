@@ -73,6 +73,41 @@ describe('UserModal — edit mode', () => {
     expect(screen.queryByRole('button', { name: 'Eliminar' })).not.toBeInTheDocument();
   });
 
+  it('calls onSave with updated draft when Guardar is clicked', async () => {
+    const onSave = jest.fn().mockResolvedValue(undefined);
+    const onClose = jest.fn();
+    render(
+      <UserModal
+        mode="edit"
+        user={existingUser}
+        isSaving={false}
+        onSave={onSave}
+        onDelete={jest.fn()}
+        onClose={onClose}
+      />,
+    );
+    await userEvent.click(screen.getByRole('button', { name: /guardar/i }));
+    expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ username: 'daleney' }));
+    await waitFor(() => expect(onClose).toHaveBeenCalled());
+  });
+
+  it('includes password in draft when password field is filled', async () => {
+    const onSave = jest.fn().mockResolvedValue(undefined);
+    render(
+      <UserModal
+        mode="edit"
+        user={existingUser}
+        isSaving={false}
+        onSave={onSave}
+        onDelete={jest.fn()}
+        onClose={jest.fn()}
+      />,
+    );
+    await userEvent.type(screen.getByLabelText(/contraseña/i, { selector: 'input' }), 'newpass');
+    await userEvent.click(screen.getByRole('button', { name: /guardar/i }));
+    expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ password: 'newpass' }));
+  });
+
   it('calls onDelete and onClose when ¿Confirmar? is clicked', async () => {
     const onDelete = jest.fn().mockResolvedValue(undefined);
     const onClose = jest.fn();
