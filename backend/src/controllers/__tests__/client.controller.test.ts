@@ -5,6 +5,10 @@ import { encodeId } from '../../utils/sqids';
 
 jest.mock('../../services/client.service');
 jest.mock('../../database/sequelize', () => ({ __esModule: true, default: { query: jest.fn() } }));
+jest.mock('../../middleware/auth', () => ({
+  requireAuth: (_req: unknown, _res: unknown, next: () => void) => next(),
+  requireRole: () => (_req: unknown, _res: unknown, next: () => void) => next(),
+}));
 
 const id1 = encodeId(1);
 const id999 = encodeId(999);

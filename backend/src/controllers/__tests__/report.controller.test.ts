@@ -8,6 +8,10 @@ jest.mock('../../services/menu.service');
 jest.mock('../../services/report.service');
 jest.mock('../../utils/kitchenReportBuilder');
 jest.mock('../../database/sequelize', () => ({ __esModule: true, default: { query: jest.fn() } }));
+jest.mock('../../middleware/auth', () => ({
+  requireAuth: (_req: unknown, _res: unknown, next: () => void) => next(),
+  requireRole: () => (_req: unknown, _res: unknown, next: () => void) => next(),
+}));
 
 const mockMenu = {
   id: 1,
