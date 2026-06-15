@@ -1,4 +1,9 @@
-import { addBusinessDays, remainingDeliveryDays } from './businessDays';
+import {
+  addBusinessDays,
+  subtractBusinessDays,
+  remainingDeliveryDays,
+  businessDaysUntil,
+} from './businessDays';
 
 describe('addBusinessDays', () => {
   it('returns the same date for 0 days', () => {
@@ -54,5 +59,30 @@ describe('remainingDeliveryDays', () => {
     // date-fns v4 normalises the Sunday start to Monday before counting,
     // so this returns the same as Mon Jun8 → Fri Jun12 = 4 (Tue–Fri)
     expect(remainingDeliveryDays(start, end, today)).toBe(4);
+  });
+});
+
+describe('subtractBusinessDays', () => {
+  it('subtracts 1 business day: Monday − 1 = Friday', () => {
+    expect(subtractBusinessDays('2026-06-01', 1)).toBe('2026-05-29');
+  });
+
+  it('subtracts 5 business days across a weekend', () => {
+    expect(subtractBusinessDays('2026-06-08', 5)).toBe('2026-06-01');
+  });
+});
+
+describe('businessDaysUntil', () => {
+  it('counts 1 when from and to are the same weekday', () => {
+    expect(businessDaysUntil(new Date(2026, 5, 1), new Date(2026, 5, 1))).toBe(1);
+  });
+
+  it('counts 5 for Monday through Friday', () => {
+    expect(businessDaysUntil(new Date(2026, 5, 1), new Date(2026, 5, 5))).toBe(5);
+  });
+
+  it('skips Saturday and Sunday in the count', () => {
+    // Mon Jun 1 to Mon Jun 8 = 6 business days (Mon Tue Wed Thu Fri [skip Sat Sun] Mon)
+    expect(businessDaysUntil(new Date(2026, 5, 1), new Date(2026, 5, 8))).toBe(6);
   });
 });
