@@ -67,7 +67,7 @@ export function LoginPage() {
           }}
         />
         <div className="relative z-10 flex flex-col items-center gap-6 px-14 text-center">
-          <div className="w-28 h-28 rounded-full bg-paper/90 flex items-center justify-center p-2 shadow-xl ring-1 ring-white/10">
+          <div className="w-36 h-36 rounded-full bg-paper/90 flex items-center justify-center p-2 shadow-xl ring-1 ring-white/10">
             <img src={logo} alt="La Oliva" className="w-full h-auto" />
           </div>
           <div>
