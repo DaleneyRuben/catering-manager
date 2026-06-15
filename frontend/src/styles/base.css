@@ -104,6 +104,25 @@ select {
   animation: fade-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.42s both;
 }
 
+/* Login success checkmark pop-in */
+@keyframes success-pop {
+  0% {
+    transform: scale(0.7);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.login-success-pop {
+  animation: success-pop 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
 /* Sidebar active indicator — left accent bar */
 .nav-item-active::before {
   content: '';
