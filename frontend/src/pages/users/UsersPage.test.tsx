@@ -1,14 +1,23 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useUsers } from '../../hooks/useUsers';
+import { useAuth } from '../../contexts/AuthContext';
 import { UsersPage } from './UsersPage';
 
 jest.mock('../../hooks/useUsers', () => ({
   useUsers: jest.fn(),
 }));
 
+jest.mock('../../contexts/AuthContext', () => ({
+  useAuth: jest.fn(),
+}));
+
+let capturedModalProps: Record<string, unknown> = {};
 jest.mock('./UserModal', () => ({
-  UserModal: () => <div>user-modal</div>,
+  UserModal: (props: Record<string, unknown>) => {
+    capturedModalProps = props;
+    return <div>user-modal</div>;
+  },
 }));
 
 jest.mock('../../components/ui/PageLoader', () => ({
@@ -35,6 +44,8 @@ function setupUsers(overrides: object = {}) {
 describe('UsersPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    capturedModalProps = {};
+    (useAuth as jest.Mock).mockReturnValue({ user: { id: 99, username: 'admin', role: 'admin' } });
     setupUsers();
   });
 
@@ -72,5 +83,18 @@ describe('UsersPage', () => {
     render(<UsersPage />);
     await userEvent.click(screen.getByRole('button', { name: 'Editar admin' }));
     expect(screen.getByText('user-modal')).toBeInTheDocument();
+  });
+
+  it('passes isSelf=true when editing the currently logged-in user', async () => {
+    (useAuth as jest.Mock).mockReturnValue({ user: { id: 1, username: 'admin', role: 'admin' } });
+    render(<UsersPage />);
+    await userEvent.click(screen.getByRole('button', { name: 'Editar admin' }));
+    expect(capturedModalProps.isSelf).toBe(true);
+  });
+
+  it('passes isSelf=false when editing a different user', async () => {
+    render(<UsersPage />);
+    await userEvent.click(screen.getByRole('button', { name: 'Editar chef' }));
+    expect(capturedModalProps.isSelf).toBe(false);
   });
 });

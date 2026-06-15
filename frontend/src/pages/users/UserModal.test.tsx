@@ -66,6 +66,11 @@ describe('UserModal — edit mode', () => {
     expect(screen.getByRole('button', { name: 'Eliminar' })).toBeInTheDocument();
   });
 
+  it('hides Eliminar when isSelf is true', () => {
+    render(<UserModal {...editProps} isSelf />);
+    expect(screen.queryByRole('button', { name: 'Eliminar' })).not.toBeInTheDocument();
+  });
+
   it('replaces Eliminar with ¿Confirmar? after clicking Eliminar', async () => {
     render(<UserModal {...editProps} />);
     await userEvent.click(screen.getByRole('button', { name: 'Eliminar' }));
