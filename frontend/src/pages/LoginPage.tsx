@@ -91,7 +91,7 @@ export function LoginPage() {
         <div className="w-full max-w-[340px]">
           <div className="mb-8 login-fade-1">
             <h1 className="font-serif text-[40px] leading-none text-ink">Ingresar</h1>
-            <p className="text-[13px] text-muted mt-2">Ingresá tus credenciales para continuar.</p>
+            <p className="text-[13px] text-muted mt-2">Ingresa tus credenciales para continuar.</p>
           </div>
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
