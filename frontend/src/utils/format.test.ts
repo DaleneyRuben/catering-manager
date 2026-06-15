@@ -1,6 +1,14 @@
 import { formatDate, formatDateTime } from './format';
 
 describe('formatDate', () => {
+  it('returns — for null input', () => {
+    expect(formatDate(null)).toBe('—');
+  });
+
+  it('returns — for undefined input', () => {
+    expect(formatDate(undefined)).toBe('—');
+  });
+
   it('formats an ISO date as dd/MM/yyyy', () => {
     expect(formatDate('2026-06-03')).toBe('03/06/2026');
   });
