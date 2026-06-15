@@ -67,6 +67,28 @@ export function Layout({ children }: LayoutProps) {
           <img src={smallLogo} alt="La Oliva" className="w-36 h-auto" />
         </div>
         <nav className="flex-1 py-4 flex flex-col">
+          {user?.role === ROLES.ADMIN && (
+            <>
+              {ADMIN_NAV_ITEMS.map(({ to, label, icon }) => (
+                <NavLink
+                  key={to}
+                  to={to}
+                  className={({ isActive }) =>
+                    [
+                      'flex items-center gap-3 pl-[13px] pr-4 py-2 text-sm transition-colors border-l-[3px]',
+                      isActive
+                        ? 'border-olive-700 bg-white/60 text-olive-900 font-semibold'
+                        : 'border-transparent text-olive-900/60 hover:text-olive-900 hover:bg-white/40',
+                    ].join(' ')
+                  }
+                >
+                  <Icon name={icon} size={16} />
+                  {label}
+                </NavLink>
+              ))}
+              <div className="mx-4 my-2 border-t border-[#b8dba0]" />
+            </>
+          )}
           {NAV_ITEMS.map(({ to, label, icon }) => (
             <NavLink
               key={to}
@@ -85,28 +107,6 @@ export function Layout({ children }: LayoutProps) {
               {label}
             </NavLink>
           ))}
-          {user?.role === ROLES.ADMIN && (
-            <>
-              <div className="mx-4 my-2 border-t border-[#b8dba0]" />
-              {ADMIN_NAV_ITEMS.map(({ to, label, icon }) => (
-                <NavLink
-                  key={to}
-                  to={to}
-                  className={({ isActive }) =>
-                    [
-                      'flex items-center gap-3 pl-[13px] pr-4 py-2 text-sm transition-colors border-l-[3px]',
-                      isActive
-                        ? 'border-olive-700 bg-white/60 text-olive-900 font-semibold'
-                        : 'border-transparent text-olive-900/60 hover:text-olive-900 hover:bg-white/40',
-                    ].join(' ')
-                  }
-                >
-                  <Icon name={icon} size={16} />
-                  {label}
-                </NavLink>
-              ))}
-            </>
-          )}
         </nav>
         <div className="border-t border-[#b8dba0] px-4 py-3 flex items-center justify-between gap-2">
           <span className="text-[12px] text-olive-900/70 font-medium truncate">
