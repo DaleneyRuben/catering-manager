@@ -1,4 +1,14 @@
-import { encodeId, encodeIds } from '../sqids';
+import { encodeId, decodeId, encodeIds } from '../sqids';
+
+describe('decodeId', () => {
+  it('decodes a valid encoded id back to the original number', () => {
+    expect(decodeId(encodeId(42))).toBe(42);
+  });
+
+  it('throws on an invalid encoded string', () => {
+    expect(() => decodeId('!!!invalid!!!')).toThrow('Invalid encoded ID');
+  });
+});
 
 describe('encodeIds', () => {
   it('encodes top-level id field', () => {

@@ -32,6 +32,25 @@ describe('userService.findAll', () => {
   });
 });
 
+describe('userService.findById', () => {
+  it('returns user without password when found', async () => {
+    (User.findByPk as jest.Mock).mockResolvedValue(mockUser);
+
+    const result = await userService.findById(1);
+
+    expect(User.findByPk).toHaveBeenCalledWith(1, { attributes: ['id', 'username', 'role'] });
+    expect(result).toEqual(mockUser);
+  });
+
+  it('returns null when user does not exist', async () => {
+    (User.findByPk as jest.Mock).mockResolvedValue(null);
+
+    const result = await userService.findById(99);
+
+    expect(result).toBeNull();
+  });
+});
+
 describe('userService.create', () => {
   it('hashes password and creates user', async () => {
     (bcrypt.hash as jest.Mock).mockResolvedValue('$2b$10$hashed');
