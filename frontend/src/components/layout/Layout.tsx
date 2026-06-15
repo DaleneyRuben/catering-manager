@@ -20,7 +20,10 @@ const NAV_ITEMS: NavItem[] = [
   { to: '/informes', label: 'Informes', icon: 'report' },
 ];
 
-const ADMIN_NAV_ITEMS: NavItem[] = [{ to: '/usuarios', label: 'Usuarios', icon: 'user-plus' }];
+const ADMIN_NAV_ITEMS: NavItem[] = [
+  { to: '/usuarios', label: 'Usuarios', icon: 'user-plus' },
+  { to: '/health', label: 'Health', icon: 'stethoscope' },
+];
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -105,24 +108,6 @@ export function Layout({ children }: LayoutProps) {
             </>
           )}
         </nav>
-        {user?.role === ROLES.ADMIN && (
-          <div className="border-t border-[#b8dba0]">
-            <NavLink
-              to="/health"
-              className={({ isActive }) =>
-                [
-                  'flex items-center gap-3 pl-[13px] pr-4 py-3 text-sm transition-colors border-l-[3px]',
-                  isActive
-                    ? 'border-olive-700 bg-olive-900 text-[#d8f5bd] font-semibold'
-                    : 'border-transparent text-olive-900/60 hover:text-olive-900 hover:bg-olive-900/10',
-                ].join(' ')
-              }
-            >
-              <Icon name="stethoscope" size={16} />
-              Health
-            </NavLink>
-          </div>
-        )}
         <div className="border-t border-[#b8dba0] px-4 py-3 flex items-center justify-between gap-2">
           <span className="text-[12px] text-olive-900/70 font-medium truncate">
             {user?.username}
