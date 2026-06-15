@@ -5,6 +5,7 @@ import menuRoutes from './menu.routes';
 import planRoutes from './plan.routes';
 import reportRoutes from './report.routes';
 import subscriptionRoutes from './subscription.routes';
+import userRoutes from './user.routes';
 import { requireAuth, requireRole } from '../middleware/auth';
 
 const router = Router();
@@ -25,5 +26,6 @@ router.use(
 );
 router.use('/plans', requireAuth, requireRole('admin', 'manager'), planRoutes);
 router.use('/reports', requireAuth, requireRole('admin', 'manager'), reportRoutes);
+router.use('/users', requireAuth, requireRole('admin'), userRoutes);
 
 export default router;
