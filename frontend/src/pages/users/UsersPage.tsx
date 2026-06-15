@@ -117,7 +117,7 @@ export function UsersPage() {
         <UserModal
           mode="edit"
           user={editUser}
-          isSelf={String(currentUser?.id) === editUser.id}
+          isSelf={currentUser?.id === editUser.id}
           isSaving={isSaving}
           onSave={(draft) => update(editUser.id, draft)}
           onDelete={() => remove(editUser.id)}

@@ -47,7 +47,7 @@ describe('LoginPage', () => {
     global.fetch = jest.fn().mockResolvedValue({
       ok: true,
       json: () =>
-        Promise.resolve({ token: 'tok', user: { id: 1, username: 'admin', role: 'manager' } }),
+        Promise.resolve({ token: 'tok', user: { id: 'enc1', username: 'admin', role: 'manager' } }),
     }) as jest.Mock;
 
     renderPage();
@@ -57,7 +57,7 @@ describe('LoginPage', () => {
 
     await waitFor(() => {
       expect(mockSetAuth).toHaveBeenCalledWith(
-        { id: 1, username: 'admin', role: 'manager' },
+        { id: 'enc1', username: 'admin', role: 'manager' },
         'tok',
       );
       expect(mockNavigate).toHaveBeenCalledWith('/', { replace: true });
@@ -70,7 +70,7 @@ describe('LoginPage', () => {
       json: () =>
         Promise.resolve({
           token: 'tok',
-          user: { id: 2, username: 'repartidor', role: 'delivery' },
+          user: { id: 'enc2', username: 'repartidor', role: 'delivery' },
         }),
     }) as jest.Mock;
 

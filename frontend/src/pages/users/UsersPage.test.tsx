@@ -45,7 +45,7 @@ describe('UsersPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     capturedModalProps = {};
-    (useAuth as jest.Mock).mockReturnValue({ user: { id: 99, username: 'admin', role: 'admin' } });
+    (useAuth as jest.Mock).mockReturnValue({ user: { id: '1', username: 'admin', role: 'admin' } });
     setupUsers();
   });
 
@@ -86,7 +86,7 @@ describe('UsersPage', () => {
   });
 
   it('passes isSelf=true when editing the currently logged-in user', async () => {
-    (useAuth as jest.Mock).mockReturnValue({ user: { id: 1, username: 'admin', role: 'admin' } });
+    (useAuth as jest.Mock).mockReturnValue({ user: { id: '1', username: 'admin', role: 'admin' } });
     render(<UsersPage />);
     await userEvent.click(screen.getByRole('button', { name: 'Editar admin' }));
     expect(capturedModalProps.isSelf).toBe(true);
