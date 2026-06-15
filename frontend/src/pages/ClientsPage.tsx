@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Icon } from '../components/ui/Icon';
 import { Button } from '../components/ui/Button';
-import { PageLoader } from '../components/ui/PageLoader';
 import { Pagination } from '../components/ui/Pagination';
+import { ClientTableSkeleton } from './ClientTableSkeleton';
 import { useClientList, useClientCounts } from '../hooks/useClientList';
 import { useDebounce } from '../hooks/useDebounce';
 import { formatDate } from '../utils/format';
@@ -87,8 +87,6 @@ export function ClientsPage() {
   }, [isFetching]);
 
   const { counts } = useClientCounts();
-
-  if (isLoading) return <PageLoader />;
 
   return (
     <div className="p-7 max-w-[1320px] mx-auto">
@@ -182,15 +180,8 @@ export function ClientsPage() {
 
       {/* Table */}
       <div className="bg-paper border border-rule rounded-lg overflow-hidden">
-        {tableLoading && (
-          <div className="py-20 flex flex-col items-center justify-center gap-3">
-            <span className="inline-block w-5 h-5 rounded-full border-2 border-olive-800 border-t-transparent animate-spin" />
-            <p className="font-mono text-[11px] uppercase tracking-[.14em] text-muted">
-              Cargando...
-            </p>
-          </div>
-        )}
-        {!tableLoading && clients.length === 0 && (
+        {(isLoading || tableLoading) && <ClientTableSkeleton />}
+        {!isLoading && !tableLoading && clients.length === 0 && (
           <div className="py-16 text-center">
             <div className="w-12 h-12 rounded-full bg-cream mx-auto mb-3 flex items-center justify-center text-olive-700">
               <Icon name="users" size={22} />
@@ -199,7 +190,7 @@ export function ClientsPage() {
             <p className="text-sm text-muted mt-1">Prueba con otra búsqueda o quita los filtros.</p>
           </div>
         )}
-        {!tableLoading && clients.length > 0 && (
+        {!isLoading && !tableLoading && clients.length > 0 && (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
@@ -213,7 +204,7 @@ export function ClientsPage() {
                   <th className="text-right px-4 py-2.5 font-medium">Precio</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="stagger-list">
                 {clients.map((c) => {
                   const sub = c.subscriptions[0];
                   const { status } = c;
