@@ -3,7 +3,7 @@ import { createContext, useContext, useState, useCallback, useMemo, type ReactNo
 export type UserRole = 'admin' | 'manager' | 'delivery';
 
 type AuthUser = {
-  id: number;
+  id: string;
   username: string;
   role: UserRole;
 };
@@ -57,5 +57,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 export const useAuth = (): AuthContextValue => {
   const ctx = useContext(AuthContext);
   if (!ctx) throw new Error('useAuth must be used inside AuthProvider');
+
   return ctx;
 };

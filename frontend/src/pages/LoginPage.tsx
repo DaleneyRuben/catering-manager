@@ -8,7 +8,7 @@ import logo from '../assets/logo.png';
 
 type LoginResponse = {
   token: string;
-  user: { id: number; username: string; role: UserRole };
+  user: { id: string; username: string; role: UserRole };
 };
 
 const redirectForRole = (role: UserRole): string => {
