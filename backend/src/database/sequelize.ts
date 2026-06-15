@@ -5,6 +5,7 @@ import ClientHistory from '../models/ClientHistory';
 import Menu from '../models/Menu';
 import Plan from '../models/Plan';
 import Subscription from '../models/Subscription';
+import User from '../models/User';
 
 const isProduction = process.env.NODE_ENV === 'production';
 
@@ -12,7 +13,7 @@ const sequelize = new Sequelize(process.env.DATABASE_URL as string, {
   dialect: 'postgres',
   dialectModule: pg,
   ...(isProduction ? { dialectOptions: { ssl: { require: true, rejectUnauthorized: true } } } : {}),
-  models: [Client, ClientHistory, Menu, Plan, Subscription],
+  models: [Client, ClientHistory, Menu, Plan, Subscription, User],
   logging: false,
 });
 
