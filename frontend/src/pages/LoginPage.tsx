@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { API_BASE } from '../utils/env';
 import { useAuth, type UserRole } from '../contexts/AuthContext';
 import { Field, inputCls } from '../components/ui/Field';
+import { Icon } from '../components/ui/Icon';
+import logo from '../assets/logo.png';
 
 type LoginResponse = {
   token: string;
@@ -20,6 +22,7 @@ export function LoginPage() {
 
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -54,9 +57,8 @@ export function LoginPage() {
   return (
     <div className="min-h-screen bg-cream flex items-center justify-center px-4">
       <div className="w-full max-w-sm">
-        <div className="mb-8 text-center">
-          <h1 className="font-serif text-4xl text-ink font-semibold mb-1">La Oliva</h1>
-          <p className="text-[13px] text-muted">Gestión de catering</p>
+        <div className="mb-8 flex justify-center">
+          <img src={logo} alt="La Oliva" className="h-20 w-auto" />
         </div>
 
         <form
@@ -76,15 +78,26 @@ export function LoginPage() {
           </Field>
 
           <Field label="Contraseña" htmlFor="password" required>
-            <input
-              id="password"
-              type="password"
-              autoComplete="current-password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className={inputCls()}
-              disabled={loading}
-            />
+            <div className="relative">
+              <input
+                id="password"
+                type={showPassword ? 'text' : 'password'}
+                autoComplete="current-password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className={`${inputCls()} pr-9`}
+                disabled={loading}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((v) => !v)}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted hover:text-ink transition-colors"
+                tabIndex={-1}
+                aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+              >
+                <Icon name={showPassword ? 'eye-off' : 'eye'} size={15} />
+              </button>
+            </div>
           </Field>
 
           {error && (
