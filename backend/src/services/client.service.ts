@@ -1,5 +1,6 @@
+import { differenceInBusinessDays, parseISO } from 'date-fns';
 import { Op, fn, literal, where, QueryTypes } from 'sequelize';
-import { appToday, addDeliveryDays } from '../utils/date';
+import { appToday, addDeliveryDays, toAppDate } from '../utils/date';
 import { EXPIRY_THRESHOLD_DAYS } from '../constants/subscription.constants';
 import { CLIENT_STATUS } from '../constants/client.constants';
 import { deriveClientStatus } from '../utils/clientStatus';
@@ -210,6 +211,28 @@ const update = async (id: number, data: UpdateClientDto) => {
         occurredAt: new Date(),
         metadata: {},
       });
+    }
+
+    if (isResuming && client.pausedSince) {
+      type SubLike = {
+        startDate: string | null;
+        duration: number;
+        update: (d: object) => Promise<void>;
+      };
+      const subs = (client as never as { subscriptions: SubLike[] }).subscriptions ?? [];
+      const sub = subs[0];
+      if (sub?.startDate) {
+        const pausedDateStr = toAppDate(client.pausedSince);
+        const elapsed = differenceInBusinessDays(
+          parseISO(`${pausedDateStr}T12:00:00`),
+          parseISO(`${sub.startDate}T12:00:00`),
+        );
+        const remaining = sub.duration - elapsed;
+        if (remaining > 0) {
+          const newContractEndDate = addDeliveryDays(appToday(), remaining);
+          await sub.update({ contractEndDate: newContractEndDate });
+        }
+      }
     }
   }
 
