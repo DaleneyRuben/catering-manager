@@ -3,6 +3,7 @@ import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { Toaster } from 'sonner';
 import { Icon } from '../ui/Icon';
 import { useAuth } from '../../contexts/AuthContext';
+import { ROLES } from '../../constants/roles';
 import smallLogo from '../../assets/small_logo.png';
 
 interface NavItem {
@@ -81,7 +82,7 @@ export function Layout({ children }: LayoutProps) {
               {label}
             </NavLink>
           ))}
-          {user?.role === 'admin' && (
+          {user?.role === ROLES.ADMIN && (
             <>
               <div className="mx-4 my-2 border-t border-[#b8dba0]" />
               {ADMIN_NAV_ITEMS.map(({ to, label, icon }) => (
@@ -104,22 +105,24 @@ export function Layout({ children }: LayoutProps) {
             </>
           )}
         </nav>
-        <div className="border-t border-[#b8dba0]">
-          <NavLink
-            to="/health"
-            className={({ isActive }) =>
-              [
-                'flex items-center gap-3 pl-[13px] pr-4 py-3 text-sm transition-colors border-l-[3px]',
-                isActive
-                  ? 'border-olive-700 bg-olive-900 text-[#d8f5bd] font-semibold'
-                  : 'border-transparent text-olive-900/60 hover:text-olive-900 hover:bg-olive-900/10',
-              ].join(' ')
-            }
-          >
-            <Icon name="stethoscope" size={16} />
-            Health
-          </NavLink>
-        </div>
+        {user?.role === ROLES.ADMIN && (
+          <div className="border-t border-[#b8dba0]">
+            <NavLink
+              to="/health"
+              className={({ isActive }) =>
+                [
+                  'flex items-center gap-3 pl-[13px] pr-4 py-3 text-sm transition-colors border-l-[3px]',
+                  isActive
+                    ? 'border-olive-700 bg-olive-900 text-[#d8f5bd] font-semibold'
+                    : 'border-transparent text-olive-900/60 hover:text-olive-900 hover:bg-olive-900/10',
+                ].join(' ')
+              }
+            >
+              <Icon name="stethoscope" size={16} />
+              Health
+            </NavLink>
+          </div>
+        )}
         <div className="border-t border-[#b8dba0] px-4 py-3 flex items-center justify-between gap-2">
           <span className="text-[12px] text-olive-900/70 font-medium truncate">
             {user?.username}

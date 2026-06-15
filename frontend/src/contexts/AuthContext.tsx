@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useCallback, useMemo, type ReactNode } from 'react';
+import type { UserRole } from '../constants/roles';
 
-export type UserRole = 'admin' | 'manager' | 'delivery';
+export type { UserRole };
 
 type AuthUser = {
   id: string;

@@ -2,12 +2,12 @@ import { useState } from 'react';
 import { Icon } from '../../components/ui/Icon';
 import { Field, inputCls } from '../../components/ui/Field';
 import type { AppUser, UserDraft, UserUpdateDraft } from '../../hooks/useUsers';
-import type { UserRole } from '../../contexts/AuthContext';
+import { ROLES, type UserRole } from '../../constants/roles';
 
-const ROLES: { value: UserRole; label: string }[] = [
-  { value: 'admin', label: 'Admin' },
-  { value: 'manager', label: 'Manager' },
-  { value: 'delivery', label: 'Delivery' },
+const ROLE_OPTIONS: { value: UserRole; label: string }[] = [
+  { value: ROLES.ADMIN, label: 'Admin' },
+  { value: ROLES.MANAGER, label: 'Manager' },
+  { value: ROLES.DELIVERY, label: 'Delivery' },
 ];
 
 type CreateProps = {
@@ -37,7 +37,7 @@ export function UserModal(props: Props) {
   const [username, setUsername] = useState(initial?.username ?? '');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [role, setRole] = useState<UserRole>(initial?.role ?? 'manager');
+  const [role, setRole] = useState<UserRole>(initial?.role ?? ROLES.MANAGER);
   const [confirmDelete, setConfirmDelete] = useState(false);
 
   const canSave = mode === 'create' ? !!username && !!password : !!username;
@@ -126,7 +126,7 @@ export function UserModal(props: Props) {
           <div>
             <p className="text-[11px] font-mono uppercase tracking-wider text-muted mb-1.5">Rol</p>
             <div className="flex gap-2">
-              {ROLES.map((r) => (
+              {ROLE_OPTIONS.map((r) => (
                 <button
                   key={r.value}
                   type="button"

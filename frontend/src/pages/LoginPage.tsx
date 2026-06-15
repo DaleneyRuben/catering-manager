@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { API_BASE } from '../utils/env';
-import { useAuth, type UserRole } from '../contexts/AuthContext';
+import { useAuth } from '../contexts/AuthContext';
+import { ROLES, type UserRole } from '../constants/roles';
 import { Field, inputCls } from '../components/ui/Field';
 import { Icon } from '../components/ui/Icon';
 import logo from '../assets/logo.png';
@@ -12,7 +13,7 @@ type LoginResponse = {
 };
 
 const redirectForRole = (role: UserRole): string => {
-  if (role === 'delivery') return '/entregas';
+  if (role === ROLES.DELIVERY) return '/entregas';
   return '/';
 };
 

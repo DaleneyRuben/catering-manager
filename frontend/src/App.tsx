@@ -12,8 +12,9 @@ import { ReportsPage } from './pages/ReportsPage';
 import { RenewalsPage } from './pages/RenewalsPage';
 import { HealthPage } from './pages/HealthPage';
 import { UsersPage } from './pages/users/UsersPage';
+import { ROLES } from './constants/roles';
 
-const MANAGER_ROLES = ['admin', 'manager'] as const;
+const MANAGER_ROLES = [ROLES.ADMIN, ROLES.MANAGER] as const;
 
 function App() {
   return (
@@ -37,7 +38,7 @@ function App() {
                 <Route
                   path="/health"
                   element={
-                    <ProtectedRoute allowedRoles={['admin']}>
+                    <ProtectedRoute allowedRoles={[ROLES.ADMIN]}>
                       <HealthPage />
                     </ProtectedRoute>
                   }
@@ -45,7 +46,7 @@ function App() {
                 <Route
                   path="/usuarios"
                   element={
-                    <ProtectedRoute allowedRoles={['admin']}>
+                    <ProtectedRoute allowedRoles={[ROLES.ADMIN]}>
                       <UsersPage />
                     </ProtectedRoute>
                   }
