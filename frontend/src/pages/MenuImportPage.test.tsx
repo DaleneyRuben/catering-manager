@@ -72,4 +72,38 @@ describe('MenuImportPage', () => {
     await userEvent.click(screen.getByRole('button', { name: /guardar menú/i }));
     expect(await screen.findByText('Menú guardado correctamente')).toBeInTheDocument();
   });
+
+  it('updates the draft when a meal field is typed in', async () => {
+    render(<MenuImportPage />);
+    const input = screen.getByLabelText(/desayuno/i);
+    await userEvent.type(input, 'Avena');
+    expect(input).toHaveValue('Avena');
+  });
+
+  it('switches to Mañana when that button is clicked', async () => {
+    render(<MenuImportPage />);
+    const manana = screen.getByRole('button', { name: /mañana/i });
+    await userEvent.click(manana);
+    expect(manana.className).toContain('bg-olive-800');
+  });
+
+  it('renders stored menus for dates other than the selected date', () => {
+    setupMenu({
+      menus: [
+        {
+          date: '2026-01-05',
+          breakfast: 'Avena',
+          lunch: 'Arroz',
+          morningSnack: null,
+          salad: null,
+          afternoonSnack: null,
+          dinner: null,
+          juice: null,
+        },
+      ],
+    });
+    render(<MenuImportPage />);
+    expect(screen.getByText('Menús guardados')).toBeInTheDocument();
+    expect(screen.getByText('Avena')).toBeInTheDocument();
+  });
 });
