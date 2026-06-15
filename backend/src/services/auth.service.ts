@@ -1,6 +1,7 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import User, { type UserRole } from '../models/User';
+import { encodeId } from '../utils/sqids';
 
 const SALT_ROUNDS = 10;
 const JWT_EXPIRY = '8h';
@@ -29,7 +30,7 @@ const verifyToken = (token: string): TokenPayload => jwt.verify(token, getSecret
 const login = async (
   username: string,
   password: string,
-): Promise<{ token: string; user: { id: number; username: string; role: UserRole } }> => {
+): Promise<{ token: string; user: { id: string; username: string; role: UserRole } }> => {
   const user = await User.findOne({ where: { username } });
   if (!user) throw new Error('INVALID_CREDENTIALS');
 
@@ -37,7 +38,10 @@ const login = async (
   if (!valid) throw new Error('INVALID_CREDENTIALS');
 
   const token = signToken({ userId: user.id as number, role: user.role });
-  return { token, user: { id: user.id as number, username: user.username, role: user.role } };
+  return {
+    token,
+    user: { id: encodeId(user.id as number), username: user.username, role: user.role },
+  };
 };
 
 const createUser = async (username: string, password: string, role: UserRole): Promise<User> => {

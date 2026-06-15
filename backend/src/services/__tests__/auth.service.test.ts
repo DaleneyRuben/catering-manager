@@ -2,6 +2,7 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import User from '../../models/User';
 import authService from '../auth.service';
+import { encodeId } from '../../utils/sqids';
 
 jest.mock('../../models/User');
 jest.mock('bcrypt');
@@ -34,7 +35,7 @@ describe('authService.login', () => {
     const result = await authService.login('ada', 'correct-password');
 
     expect(result.token).toBe('signed-token');
-    expect(result.user).toEqual({ id: 1, username: 'ada', role: 'admin' });
+    expect(result.user).toEqual({ id: encodeId(1), username: 'ada', role: 'admin' });
     expect(bcrypt.compare).toHaveBeenCalledWith('correct-password', mockUser.password);
   });
 
