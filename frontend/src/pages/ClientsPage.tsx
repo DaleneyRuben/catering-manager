@@ -218,7 +218,7 @@ export function ClientsPage() {
         )}
         {!isLoading && !tableLoading && clients.length > 0 && (
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+            <table className="w-full text-sm min-w-[700px]">
               <thead>
                 <tr className="bg-cream-2 border-b border-rule text-[10.5px] font-mono uppercase tracking-widest text-muted">
                   <th className="text-left px-4 py-2.5 font-medium">Cliente</th>
@@ -255,7 +255,7 @@ export function ClientsPage() {
                       </td>
                       <td className="px-4 py-3">
                         {sub ? (
-                          <span className="px-2 py-0.5 rounded-full text-xs bg-olive-800 text-white font-mono">
+                          <span className="px-2 py-0.5 rounded-full text-xs bg-olive-800 text-white font-mono whitespace-nowrap">
                             {sub.plan.name}
                           </span>
                         ) : (
@@ -271,7 +271,7 @@ export function ClientsPage() {
                       </td>
                       <td className="px-4 py-3">
                         <span
-                          className={`px-2 py-0.5 rounded-full text-xs font-mono ${STATUS_CLASSES[status]}`}
+                          className={`px-2 py-0.5 rounded-full text-xs font-mono whitespace-nowrap ${STATUS_CLASSES[status]}`}
                         >
                           {STATUS_LABELS[status]}
                         </span>
