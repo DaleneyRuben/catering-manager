@@ -14,12 +14,20 @@ const getAuthHeader = (): Record<string, string> => {
   return token ? { Authorization: `Bearer ${token}` } : {};
 };
 
+function handleUnauthorized(): never {
+  localStorage.removeItem('auth_token');
+  window.location.href = '/login';
+  throw new Error('Sesión expirada');
+}
+
 async function request<T>(method: string, url: string, body?: unknown): Promise<T> {
   const res = await fetch(`${BASE}${url}`, {
     method,
     headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
     ...(body !== undefined ? { body: JSON.stringify(body) } : {}),
   });
+
+  if (res.status === 401) handleUnauthorized();
 
   if (!res.ok) {
     let message = `Error ${res.status}`;
@@ -43,6 +51,7 @@ async function requestPaginated<T>(url: string): Promise<PaginatedResponse<T>> {
     method: 'GET',
     headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
   });
+  if (res.status === 401) handleUnauthorized();
   if (!res.ok) throw new Error(`GET ${url} → ${res.status}`);
   return res.json();
 }
