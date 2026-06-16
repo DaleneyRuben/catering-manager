@@ -110,8 +110,9 @@ export function ClientsPage() {
       </div>
 
       {/* Filter bar */}
-      <div className="bg-paper border border-rule rounded-lg px-4 py-3.5 mb-4 flex flex-wrap gap-3.5 items-center">
-        <div className="relative flex-1 min-w-[240px]">
+      <div className="bg-paper border border-rule rounded-lg px-4 py-3.5 mb-4 flex flex-col gap-3 lg:flex-row lg:flex-wrap lg:items-center lg:gap-3.5">
+        {/* Search */}
+        <div className="relative lg:flex-1 lg:min-w-[240px]">
           <input
             value={q}
             onChange={(e) => setQ(e.target.value)}
@@ -125,7 +126,8 @@ export function ClientsPage() {
           />
         </div>
 
-        <div className="w-full overflow-x-auto sm:w-auto">
+        {/* Status pills — scrollable on mobile */}
+        <div className="overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
           <div className="inline-flex p-[3px] bg-cream-2 border border-rule rounded-[7px] text-[12px]">
             {(
               [
@@ -150,32 +152,34 @@ export function ClientsPage() {
           </div>
         </div>
 
-        <div className="relative shrink-0">
-          <select
-            value={birthMonth}
-            onChange={(e) => changeBirthMonth(e.target.value)}
-            style={{ fontSize: 13 }}
-            className="appearance-none py-[7px] pl-2.5 pr-7 border border-rule rounded-[5px] bg-paper cursor-pointer"
+        {/* Birth month + results count — same row on mobile */}
+        <div className="flex items-center gap-3 lg:contents">
+          <div className="relative flex-1 lg:flex-none lg:shrink-0">
+            <select
+              value={birthMonth}
+              onChange={(e) => changeBirthMonth(e.target.value)}
+              style={{ fontSize: 13 }}
+              className="appearance-none w-full py-[7px] pl-2.5 pr-7 border border-rule rounded-[5px] bg-paper cursor-pointer"
+            >
+              <option value="all">Mes de nacimiento · todos</option>
+              {MONTHS.map((m, i) => (
+                <option key={m} value={i + 1}>
+                  {m}
+                </option>
+              ))}
+            </select>
+            <Icon
+              name="chevron-down"
+              size={12}
+              className="absolute right-2 top-1/2 -translate-y-1/2 text-muted pointer-events-none"
+            />
+          </div>
+          <span
+            className={`text-[11px] font-mono shrink-0 lg:ml-auto transition-opacity ${isFetching ? 'opacity-40' : 'text-muted'}`}
           >
-            <option value="all">Mes de nacimiento · todos</option>
-            {MONTHS.map((m, i) => (
-              <option key={m} value={i + 1}>
-                {m}
-              </option>
-            ))}
-          </select>
-          <Icon
-            name="chevron-down"
-            size={12}
-            className="absolute right-2 top-1/2 -translate-y-1/2 text-muted pointer-events-none"
-          />
+            {clients.length} resultados
+          </span>
         </div>
-
-        <span
-          className={`text-[11px] font-mono ml-auto transition-opacity ${isFetching ? 'opacity-40' : 'text-muted'}`}
-        >
-          {clients.length} resultados
-        </span>
       </div>
 
       {/* Table */}
