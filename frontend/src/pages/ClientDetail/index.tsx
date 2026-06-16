@@ -104,6 +104,7 @@ export function ClientDetailPage() {
         onToggleActive={handleToggleActive}
         onEdit={() => setEditOpen(true)}
         onDelete={() => setDeleteOpen(true)}
+        onFinalize={() => setFinalizeOpen(true)}
         onBack={() => navigate(-1)}
         onRenew={() => setRenewOpen(true)}
       />
@@ -120,7 +121,6 @@ export function ClientDetailPage() {
           client={client}
           sub={sub}
           remaining={remaining}
-          onFinalize={() => setFinalizeOpen(true)}
           onSuspend={() => setSuspendOpen(true)}
         />
       )}
@@ -142,7 +142,7 @@ export function ClientDetailPage() {
               <p className="text-[10.5px] font-mono uppercase tracking-wider text-muted mb-0.5">
                 Días suspendidos
               </p>
-              <p className="font-serif text-[32px] leading-none text-alert">
+              <p className="font-serif text-[32px] leading-none text-ink">
                 {sub?.suspendedDates?.length ?? 0}
               </p>
             </div>
