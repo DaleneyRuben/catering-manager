@@ -59,25 +59,30 @@ export function ClientHeader({
         Clientes
       </button>
 
-      <div className="flex items-center gap-4 mb-6 flex-wrap">
-        <div className="w-16 h-16 rounded-full bg-olive-800 text-white flex items-center justify-center font-serif text-[26px] font-semibold shrink-0">
-          {initials(client.name)}
-        </div>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2.5 flex-wrap">
-            <h1 className="font-serif text-[36px] leading-none text-ink">{client.name}</h1>
-            <span
-              className={`px-2.5 py-0.5 rounded-full text-xs font-mono ${STATUS_CLASSES[status]}`}
-            >
-              {STATUS_LABELS[status]}
-            </span>
+      <div className="flex flex-col gap-4 mb-6 lg:flex-row lg:items-center">
+        <div className="flex items-center gap-3 flex-1 min-w-0">
+          <div className="w-12 h-12 lg:w-16 lg:h-16 rounded-full bg-olive-800 text-white flex items-center justify-center font-serif text-[20px] lg:text-[26px] font-semibold shrink-0">
+            {initials(client.name)}
           </div>
-          <p className="font-mono text-[12px] text-muted mt-1.5">
-            {age} años · {SEX_LABELS[client.sex] ?? client.sex} · {client.deliveryZone} ·{' '}
-            {client.phoneNumber}
-          </p>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 flex-wrap">
+              <h1 className="font-serif text-[24px] lg:text-[36px] leading-none text-ink">
+                {client.name}
+              </h1>
+              <span
+                className={`px-2.5 py-0.5 rounded-full text-xs font-mono ${STATUS_CLASSES[status]}`}
+              >
+                {STATUS_LABELS[status]}
+              </span>
+            </div>
+            <p className="font-mono text-[12px] text-muted mt-1.5">
+              {age} años · {SEX_LABELS[client.sex] ?? client.sex} · {client.deliveryZone} ·{' '}
+              {client.phoneNumber}
+            </p>
+          </div>
         </div>
-        <div className="flex gap-2.5 flex-wrap">
+
+        <div className="flex gap-2.5">
           {toggleConfig && (
             <Button
               variant={status === CLIENT_STATUS.PAUSED ? 'primary' : 'secondary'}
