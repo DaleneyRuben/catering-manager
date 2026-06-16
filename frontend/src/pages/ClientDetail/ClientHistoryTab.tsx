@@ -1,5 +1,5 @@
 import { useClientHistory } from '../../hooks/useClientHistory';
-import { formatDateTime } from '../../utils/format';
+import { formatDate, formatDateTime } from '../../utils/format';
 import { EVENT_LABELS } from '../../constants/historyEvents';
 
 interface Props {
@@ -37,6 +37,8 @@ export function ClientHistoryTab({ clientId }: Props) {
           const showPlanDetails =
             (entry.eventType === 'plan_renewed' || entry.eventType === 'reactivated') && planName;
 
+          const suspendedDates = Array.isArray(meta?.dates) ? (meta.dates as string[]) : null;
+
           return (
             <div key={entry.id} className="relative">
               <div
@@ -58,6 +60,19 @@ export function ClientHistoryTab({ clientId }: Props) {
                       ${(planPrice - discount).toLocaleString()}/mes
                     </span>
                   )}
+                </div>
+              )}
+              {suspendedDates && suspendedDates.length > 0 && (
+                <div className="flex flex-wrap gap-1.5 mt-1">
+                  {[...suspendedDates].sort().map((d) => (
+                    <span
+                      key={d}
+                      className="px-2 py-0.5 rounded-full text-[10px] font-mono"
+                      style={{ background: '#f3eedc', color: '#6b4f08' }}
+                    >
+                      {formatDate(d)}
+                    </span>
+                  ))}
                 </div>
               )}
             </div>
