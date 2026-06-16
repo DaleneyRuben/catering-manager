@@ -94,8 +94,10 @@ export function MenuImportPage() {
     setSaved(true);
   };
 
-  const formatDateLabel = (iso: string) =>
-    format(parseISO(iso), "EEEE d 'de' MMMM", { locale: es });
+  const formatDateLabel = (iso: string) => {
+    const s = format(parseISO(iso), "EEEE d 'de' MMMM", { locale: es });
+    return s.charAt(0).toUpperCase() + s.slice(1);
+  };
 
   const storedMenus = menus.filter((m) => m.date !== selectedDate);
 
@@ -106,20 +108,20 @@ export function MenuImportPage() {
     <div className="px-4 py-5 lg:p-7 max-w-[900px] mx-auto">
       <PageHeader label="Operativa diaria" title="Menú del día" />
 
-      <div className="flex gap-2 mb-6">
+      <div className="flex flex-col sm:flex-row gap-2 mb-6">
         {[today, tomorrow].map((date) => (
           <button
             key={date}
             type="button"
             onClick={() => handleDateChange(date)}
-            className={`px-4 py-2 rounded-md text-[13px] font-semibold border transition-colors capitalize ${
+            className={`flex-1 px-4 py-2.5 rounded-md text-[13px] font-semibold border transition-colors text-left ${
               selectedDate === date
                 ? 'bg-olive-800 text-white border-olive-800'
                 : 'bg-paper text-ink border-rule hover:border-olive-700'
             }`}
           >
-            {date === today ? 'Hoy' : 'Mañana'} —{' '}
-            <span className="font-normal">{formatDateLabel(date)}</span>
+            {date === today ? 'Hoy' : 'Mañana'}{' '}
+            <span className="font-normal">— {formatDateLabel(date)}</span>
           </button>
         ))}
       </div>
@@ -171,7 +173,7 @@ export function MenuImportPage() {
           <div className="flex flex-col gap-3">
             {storedMenus.map((menu) => (
               <div key={menu.date} className="bg-paper border border-rule rounded-lg p-4">
-                <p className="text-[11px] font-mono text-muted mb-2 capitalize">
+                <p className="text-[11px] font-mono text-muted mb-2">
                   {formatDateLabel(menu.date)}
                 </p>
                 <div className="grid grid-cols-2 gap-x-6 gap-y-1">
