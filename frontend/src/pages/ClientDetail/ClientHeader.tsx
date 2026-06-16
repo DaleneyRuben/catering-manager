@@ -14,6 +14,7 @@ interface Props {
   onToggleActive: () => void;
   onEdit: () => void;
   onDelete: () => void;
+  onFinalize: () => void;
   onBack: () => void;
   onRenew: () => void;
 }
@@ -25,6 +26,7 @@ export function ClientHeader({
   onToggleActive,
   onEdit,
   onDelete,
+  onFinalize,
   onBack,
   onRenew,
 }: Props) {
@@ -93,6 +95,16 @@ export function ClientHeader({
           <OverflowMenu
             items={[
               { label: 'Editar datos', icon: 'pencil', onClick: onEdit },
+              ...(status !== CLIENT_STATUS.ENDED
+                ? [
+                    {
+                      label: 'Finalizar plan',
+                      icon: 'x',
+                      onClick: onFinalize,
+                      variant: 'alert' as const,
+                    },
+                  ]
+                : []),
               { label: 'Eliminar', icon: 'trash', onClick: onDelete, variant: 'alert' },
             ]}
           />
