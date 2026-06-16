@@ -48,7 +48,6 @@ export function PlansPage() {
       <PageHeader
         label="Catálogo"
         title="Planes"
-        subtitle="Cada plan define qué comidas incluye. Los planes son dinámicos — combina comidas en cualquier proporción."
         action={
           <Button aria-label="Crear plan nuevo" onClick={() => setCreateOpen(true)} leftIcon="plus">
             Crear plan

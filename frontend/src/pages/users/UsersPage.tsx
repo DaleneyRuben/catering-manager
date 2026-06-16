@@ -33,7 +33,6 @@ export function UsersPage() {
       <PageHeader
         label="Administración"
         title="Usuarios"
-        subtitle="Gestioná el acceso al sistema. Solo los administradores pueden ver esta sección."
         action={
           <Button onClick={() => setCreateOpen(true)} leftIcon="plus">
             Agregar usuario

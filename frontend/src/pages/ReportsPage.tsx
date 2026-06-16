@@ -6,11 +6,7 @@ import { MenuCard } from './reports/MenuCard';
 export function ReportsPage() {
   return (
     <div className="px-4 py-5 lg:p-7 max-w-[1320px] mx-auto">
-      <PageHeader
-        label="Analítica"
-        title="Informes"
-        subtitle="Genera informes de clientes activos, vencimientos y métricas de servicio."
-      />
+      <PageHeader label="Analítica" title="Informes" />
 
       <div className="flex flex-wrap gap-5">
         <DeliveryListCard />

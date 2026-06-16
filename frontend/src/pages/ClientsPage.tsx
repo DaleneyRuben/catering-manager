@@ -5,12 +5,11 @@ import { Button } from '../components/ui/Button';
 import { PageHeader } from '../components/ui/PageHeader';
 import { Pagination } from '../components/ui/Pagination';
 import { ClientTableSkeleton } from './ClientTableSkeleton';
-import { useClientList, useClientCounts } from '../hooks/useClientList';
+import { useClientList } from '../hooks/useClientList';
 import { useDebounce } from '../hooks/useDebounce';
 import { formatDate } from '../utils/format';
 import { STATUS_LABELS, STATUS_CLASSES, CLIENT_STATUS } from '../constants/clientStatus';
 import { SEX_LABELS } from '../constants/clientOptions';
-import { EXPIRY_THRESHOLD_DAYS } from '../constants/subscription';
 import { initials } from '../utils/string';
 import { MONTHS } from '../constants/months';
 
@@ -88,14 +87,11 @@ export function ClientsPage() {
     if (!isFetching) setTableLoading(false);
   }, [isFetching]);
 
-  const { counts } = useClientCounts();
-
   return (
     <div className="px-4 py-5 lg:p-7 max-w-[1320px] mx-auto">
       <PageHeader
         label="Directorio"
         title="Clientes"
-        subtitle={`${counts?.active ?? '—'} activos · ${counts?.total ?? '—'} totales · ${counts?.expiring ?? '—'} vencen en ≤ ${EXPIRY_THRESHOLD_DAYS} días hábiles`}
         action={
           <Button onClick={() => navigate('/clientes/nuevo')} leftIcon="plus">
             Agregar cliente
