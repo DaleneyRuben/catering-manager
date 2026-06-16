@@ -131,11 +131,11 @@ export function ClientsPage() {
           <div className="inline-flex p-[3px] bg-cream-2 border border-rule rounded-[7px] text-[12px]">
             {(
               [
+                { v: CLIENT_STATUS.ALL, l: 'Todos' },
                 { v: CLIENT_STATUS.ACTIVE, l: 'Activos' },
                 { v: CLIENT_STATUS.EXPIRING, l: 'Por vencer' },
                 { v: CLIENT_STATUS.PAUSED, l: 'Pausados' },
                 { v: CLIENT_STATUS.ENDED, l: 'Finalizados' },
-                { v: CLIENT_STATUS.ALL, l: 'Todos' },
               ] as { v: FilterValue; l: string }[]
             ).map(({ v, l }) => (
               <button
