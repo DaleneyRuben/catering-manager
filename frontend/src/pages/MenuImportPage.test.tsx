@@ -1,8 +1,12 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { addDays, format } from 'date-fns';
 import { checkIsWeekend } from '../utils/devFlags';
 import { useMenu } from '../hooks/useMenu';
 import { MenuImportPage } from './MenuImportPage';
+
+const TODAY = format(new Date(), 'yyyy-MM-dd');
+const TOMORROW = format(addDays(new Date(), 1), 'yyyy-MM-dd');
 
 jest.mock('../hooks/useMenu', () => ({
   useMenu: jest.fn(),
@@ -43,10 +47,10 @@ describe('MenuImportPage', () => {
     expect(screen.getByRole('button', { name: /mañana/i })).toBeInTheDocument();
   });
 
-  it('shows meal fields on a weekday', () => {
+  it('shows empty state with Cargar menú button when no menu exists', () => {
     render(<MenuImportPage />);
-    expect(screen.getByLabelText(/desayuno/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/almuerzo/i)).toBeInTheDocument();
+    expect(screen.getByText(/no hay menú cargado/i)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /cargar menú/i })).toBeInTheDocument();
   });
 
   it('shows weekend warning when selected date is a weekend', () => {
@@ -55,26 +59,29 @@ describe('MenuImportPage', () => {
     expect(screen.getByText('No hay entregas los fines de semana.')).toBeInTheDocument();
   });
 
-  it('hides meal fields on a weekend', () => {
+  it('hides empty state on a weekend', () => {
     (checkIsWeekend as jest.Mock).mockReturnValue(true);
     render(<MenuImportPage />);
-    expect(screen.queryByLabelText(/desayuno/i)).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /cargar menú/i })).not.toBeInTheDocument();
   });
 
-  it('calls save when save button is clicked', async () => {
+  it('opens the form modal when Cargar menú is clicked', async () => {
     render(<MenuImportPage />);
+    await userEvent.click(screen.getByRole('button', { name: /cargar menú/i }));
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+    expect(screen.getByLabelText(/desayuno/i)).toBeInTheDocument();
+  });
+
+  it('calls save when save button is clicked inside modal', async () => {
+    render(<MenuImportPage />);
+    await userEvent.click(screen.getByRole('button', { name: /cargar menú/i }));
     await userEvent.click(screen.getByRole('button', { name: /guardar menú/i }));
     expect(mockSave).toHaveBeenCalledWith(expect.objectContaining({ date: expect.any(String) }));
   });
 
-  it('shows confirmation message after saving', async () => {
-    render(<MenuImportPage />);
-    await userEvent.click(screen.getByRole('button', { name: /guardar menú/i }));
-    expect(await screen.findByText('Menú guardado correctamente')).toBeInTheDocument();
-  });
-
   it('updates the draft when a meal field is typed in', async () => {
     render(<MenuImportPage />);
+    await userEvent.click(screen.getByRole('button', { name: /cargar menú/i }));
     const input = screen.getByLabelText(/desayuno/i);
     await userEvent.type(input, 'Avena');
     expect(input).toHaveValue('Avena');
@@ -87,11 +94,12 @@ describe('MenuImportPage', () => {
     expect(manana.className).toContain('bg-olive-800');
   });
 
-  it('renders stored menus for dates other than the selected date', () => {
+  it('shows menu content for the other day (tomorrow) when it exists', () => {
     setupMenu({
       menus: [
         {
-          date: '2026-01-05',
+          id: '1',
+          date: TOMORROW,
           breakfast: 'Avena',
           lunch: 'Arroz',
           morningSnack: null,
@@ -103,7 +111,26 @@ describe('MenuImportPage', () => {
       ],
     });
     render(<MenuImportPage />);
-    expect(screen.getByText('Menús guardados')).toBeInTheDocument();
     expect(screen.getByText('Avena')).toBeInTheDocument();
+  });
+
+  it('shows pencil edit button when menu exists for selected date', () => {
+    setupMenu({
+      menus: [
+        {
+          id: '1',
+          date: TODAY,
+          breakfast: 'Avena',
+          morningSnack: null,
+          salad: null,
+          lunch: null,
+          afternoonSnack: null,
+          dinner: null,
+          juice: null,
+        },
+      ],
+    });
+    render(<MenuImportPage />);
+    expect(screen.getByRole('button', { name: /editar menú/i })).toBeInTheDocument();
   });
 });

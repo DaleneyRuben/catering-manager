@@ -1,108 +1,83 @@
 import { addDays, format, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Button } from '../components/ui/Button';
+import { Icon } from '../components/ui/Icon';
 import { PageHeader } from '../components/ui/PageHeader';
-import { MEAL_LABELS } from '../constants/meals';
+import type { Menu, MenuDraft } from '../types/menu';
 import { useMenu } from '../hooks/useMenu';
 import { checkIsWeekend } from '../utils/devFlags';
-import type { MenuDraft } from '../types/menu';
-
-function getSaveLabel(isSaving: boolean, hasExisting: boolean): string {
-  if (isSaving) return 'Guardando...';
-  if (hasExisting) return 'Actualizar menú';
-  return 'Guardar menú';
-}
-
-const MEAL_FIELDS = [
-  'breakfast',
-  'morningSnack',
-  'salad',
-  'lunch',
-  'afternoonSnack',
-  'dinner',
-  'juice',
-] as const;
-
-type MealField = (typeof MEAL_FIELDS)[number];
-
-const MEAL_FIELD_LABELS: Record<MealField, string> = {
-  breakfast: MEAL_LABELS.breakfast,
-  morningSnack: MEAL_LABELS.morning_snack,
-  salad: MEAL_LABELS.salad,
-  lunch: MEAL_LABELS.lunch,
-  afternoonSnack: MEAL_LABELS.afternoon_snack,
-  dinner: MEAL_LABELS.dinner,
-  juice: MEAL_LABELS.juice,
-};
+import { MEAL_FIELDS, MEAL_FIELD_LABELS } from './menu/menuFields';
+import { MenuFormModal } from './menu/MenuFormModal';
 
 const toIso = (d: Date) => format(d, 'yyyy-MM-dd');
 
-const emptyDraft = (date: string): MenuDraft => ({
-  date,
-  breakfast: null,
-  morningSnack: null,
-  salad: null,
-  lunch: null,
-  afternoonSnack: null,
-  dinner: null,
-  juice: null,
-});
+const formatDateLabel = (iso: string) => {
+  const s = format(parseISO(iso), "EEEE d 'de' MMMM", { locale: es });
+  return s.charAt(0).toUpperCase() + s.slice(1);
+};
+
+interface MenuCardProps {
+  menu: Menu;
+  onEdit: () => void;
+}
+
+function MenuCard({ menu, onEdit }: MenuCardProps) {
+  const filled = MEAL_FIELDS.filter((f) => menu[f]);
+  return (
+    <div className="bg-paper border border-rule rounded-lg p-5">
+      <div className="flex items-center mb-4">
+        <p className="text-[11px] font-mono text-muted">{formatDateLabel(menu.date)}</p>
+        <button
+          type="button"
+          onClick={onEdit}
+          aria-label="Editar menú"
+          className="ml-auto text-muted hover:text-ink transition-colors"
+        >
+          <Icon name="pencil" size={13} />
+        </button>
+      </div>
+      {filled.length === 0 ? (
+        <p className="text-[13px] text-muted">Sin platos cargados.</p>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-3">
+          {filled.map((field) => (
+            <div key={field}>
+              <p className="text-[10.5px] font-mono uppercase tracking-[.14em] text-muted mb-0.5">
+                {MEAL_FIELD_LABELS[field]}
+              </p>
+              <p className="text-[13px] text-ink">{menu[field]}</p>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 export function MenuImportPage() {
   const today = toIso(new Date());
   const tomorrow = toIso(addDays(new Date(), 1));
 
   const [selectedDate, setSelectedDate] = useState<string>(today);
-  const [draft, setDraft] = useState<MenuDraft>(emptyDraft(today));
-  const [saved, setSaved] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editingDate, setEditingDate] = useState<string>(today);
 
-  const { menus, isLoading, isSaving, save } = useMenu();
+  const { menus, isSaving, save } = useMenu();
 
-  const existingMenu = menus.find((m) => m.date === selectedDate);
-
-  useEffect(() => {
-    if (existingMenu) {
-      setDraft({
-        date: existingMenu.date,
-        breakfast: existingMenu.breakfast,
-        morningSnack: existingMenu.morningSnack,
-        salad: existingMenu.salad,
-        lunch: existingMenu.lunch,
-        afternoonSnack: existingMenu.afternoonSnack,
-        dinner: existingMenu.dinner,
-        juice: existingMenu.juice,
-      });
-    } else {
-      setDraft(emptyDraft(selectedDate));
-    }
-    setSaved(false);
-  }, [selectedDate, existingMenu]);
-
-  const handleDateChange = (date: string) => {
-    setSelectedDate(date);
-    setSaved(false);
-  };
-
-  const handleFieldChange = (field: MealField, value: string) => {
-    setDraft((prev) => ({ ...prev, [field]: value || null }));
-    setSaved(false);
-  };
-
-  const handleSave = async () => {
-    await save({ ...draft, date: selectedDate });
-    setSaved(true);
-  };
-
-  const formatDateLabel = (iso: string) => {
-    const s = format(parseISO(iso), "EEEE d 'de' MMMM", { locale: es });
-    return s.charAt(0).toUpperCase() + s.slice(1);
-  };
-
-  const storedMenus = menus.filter((m) => m.date !== selectedDate);
-
+  const selectedMenu = menus.find((m) => m.date === selectedDate) ?? null;
+  const otherDate = selectedDate === today ? tomorrow : today;
+  const otherMenu = menus.find((m) => m.date === otherDate) ?? null;
   const isSelectedWeekend = checkIsWeekend(parseISO(selectedDate));
-  const saveLabel = getSaveLabel(isSaving, !!existingMenu);
+
+  const openModal = (date: string) => {
+    setEditingDate(date);
+    setModalOpen(true);
+  };
+
+  const handleSave = async (draft: MenuDraft) => {
+    await save(draft);
+  };
 
   return (
     <div className="px-4 py-5 lg:p-7 max-w-[900px] mx-auto">
@@ -113,7 +88,7 @@ export function MenuImportPage() {
           <button
             key={date}
             type="button"
-            onClick={() => handleDateChange(date)}
+            onClick={() => setSelectedDate(date)}
             className={`flex-1 px-4 py-2.5 rounded-md text-[13px] font-semibold border transition-colors text-left ${
               selectedDate === date
                 ? 'bg-olive-800 text-white border-olive-800'
@@ -126,71 +101,41 @@ export function MenuImportPage() {
         ))}
       </div>
 
-      {isSelectedWeekend ? (
-        <div className="bg-paper border border-rule rounded-lg p-6 mb-6">
+      {isSelectedWeekend && (
+        <div className="bg-paper border border-rule rounded-lg p-6">
           <p className="text-[13px] text-alert">No hay entregas los fines de semana.</p>
         </div>
-      ) : (
-        <div className="bg-paper border border-rule rounded-lg p-6 mb-6">
-          <div className="grid grid-cols-1 gap-4">
-            {MEAL_FIELDS.map((field) => (
-              <div key={field}>
-                <label
-                  htmlFor={`menu-field-${field}`}
-                  className="block text-[10.5px] font-mono uppercase tracking-[.14em] text-muted mb-1.5"
-                >
-                  {MEAL_FIELD_LABELS[field]}
-                </label>
-                <input
-                  id={`menu-field-${field}`}
-                  type="text"
-                  value={draft[field] ?? ''}
-                  onChange={(e) => handleFieldChange(field, e.target.value)}
-                  className="w-full px-3 py-2.5 text-[13px] bg-white border border-rule rounded-md focus:outline-none focus:border-olive-700 text-ink transition-colors"
-                />
-              </div>
-            ))}
-          </div>
-
-          <div className="flex items-center gap-3 mt-6">
-            <Button onClick={handleSave} loading={isSaving}>
-              {saveLabel}
-            </Button>
-            {saved && (
-              <span className="text-[12px] text-olive-700 font-mono">
-                Menú guardado correctamente
-              </span>
-            )}
-          </div>
+      )}
+      {!isSelectedWeekend && selectedMenu && (
+        <MenuCard menu={selectedMenu} onEdit={() => openModal(selectedDate)} />
+      )}
+      {!isSelectedWeekend && !selectedMenu && (
+        <div className="bg-paper border border-rule rounded-lg p-8 flex flex-col items-center text-center gap-3">
+          <p className="text-[13px] text-muted">No hay menú cargado para este día.</p>
+          <Button onClick={() => openModal(selectedDate)} leftIcon="plus">
+            Cargar menú
+          </Button>
         </div>
       )}
 
-      {!isLoading && storedMenus.length > 0 && (
-        <div>
+      {otherMenu && (
+        <div className="mt-6">
           <p className="text-[10.5px] font-mono uppercase tracking-[.14em] text-muted mb-3">
-            Menús guardados
+            {otherDate === today ? 'Hoy' : 'Mañana'}
           </p>
-          <div className="flex flex-col gap-3">
-            {storedMenus.map((menu) => (
-              <div key={menu.date} className="bg-paper border border-rule rounded-lg p-4">
-                <p className="text-[11px] font-mono text-muted mb-2">
-                  {formatDateLabel(menu.date)}
-                </p>
-                <div className="grid grid-cols-2 gap-x-6 gap-y-1">
-                  {MEAL_FIELDS.map((field) =>
-                    menu[field] ? (
-                      <div key={field} className="flex gap-2 text-[12.5px]">
-                        <span className="text-muted shrink-0">{MEAL_FIELD_LABELS[field]}:</span>
-                        <span className="text-ink">{menu[field]}</span>
-                      </div>
-                    ) : null,
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
+          <MenuCard menu={otherMenu} onEdit={() => openModal(otherDate)} />
         </div>
       )}
+
+      <MenuFormModal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        date={editingDate}
+        dateLabel={formatDateLabel(editingDate)}
+        initial={menus.find((m) => m.date === editingDate) ?? null}
+        onSave={handleSave}
+        isSaving={isSaving}
+      />
     </div>
   );
 }
