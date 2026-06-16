@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Button } from '../../components/ui/Button';
 import { Icon } from '../../components/ui/Icon';
+import { PageHeader } from '../../components/ui/PageHeader';
 import { PageLoader } from '../../components/ui/PageLoader';
 import { useUsers, type AppUser } from '../../hooks/useUsers';
 import { useAuth } from '../../contexts/AuthContext';
@@ -28,23 +29,17 @@ export function UsersPage() {
   if (isLoading) return <PageLoader />;
 
   return (
-    <div className="p-7 max-w-[860px] mx-auto">
-      <div className="flex items-end gap-6 mb-7 flex-wrap">
-        <div>
-          <p className="text-[10.5px] font-mono uppercase tracking-[.14em] text-muted mb-2">
-            Administración
-          </p>
-          <h1 className="font-serif text-[44px] leading-none text-ink">Usuarios</h1>
-          <p className="text-[13px] text-muted mt-2.5">
-            Gestioná el acceso al sistema. Solo los administradores pueden ver esta sección.
-          </p>
-        </div>
-        <div className="ml-auto">
+    <div className="px-4 py-5 lg:p-7 max-w-[860px] mx-auto">
+      <PageHeader
+        label="Administración"
+        title="Usuarios"
+        subtitle="Gestioná el acceso al sistema. Solo los administradores pueden ver esta sección."
+        action={
           <Button onClick={() => setCreateOpen(true)} leftIcon="plus">
             Agregar usuario
           </Button>
-        </div>
-      </div>
+        }
+      />
 
       {users.length === 0 ? (
         <div className="py-16 text-center bg-paper border border-rule rounded-lg">

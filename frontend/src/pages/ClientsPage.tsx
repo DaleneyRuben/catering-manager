@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Icon } from '../components/ui/Icon';
 import { Button } from '../components/ui/Button';
+import { PageHeader } from '../components/ui/PageHeader';
 import { Pagination } from '../components/ui/Pagination';
 import { ClientTableSkeleton } from './ClientTableSkeleton';
 import { useClientList, useClientCounts } from '../hooks/useClientList';
@@ -90,25 +91,17 @@ export function ClientsPage() {
   const { counts } = useClientCounts();
 
   return (
-    <div className="p-7 max-w-[1320px] mx-auto">
-      {/* Header */}
-      <div className="flex items-end gap-6 mb-7 flex-wrap">
-        <div>
-          <p className="text-[10.5px] font-mono uppercase tracking-[.14em] text-muted mb-2">
-            Directorio
-          </p>
-          <h1 className="font-serif text-[44px] leading-none text-ink">Clientes</h1>
-          <p className="text-[13px] text-muted mt-2.5">
-            {counts?.active ?? '—'} activos · {counts?.total ?? '—'} totales ·{' '}
-            {counts?.expiring ?? '—'} vencen en ≤ {EXPIRY_THRESHOLD_DAYS} días hábiles
-          </p>
-        </div>
-        <div className="ml-auto flex gap-2 flex-wrap">
+    <div className="px-4 py-5 lg:p-7 max-w-[1320px] mx-auto">
+      <PageHeader
+        label="Directorio"
+        title="Clientes"
+        subtitle={`${counts?.active ?? '—'} activos · ${counts?.total ?? '—'} totales · ${counts?.expiring ?? '—'} vencen en ≤ ${EXPIRY_THRESHOLD_DAYS} días hábiles`}
+        action={
           <Button onClick={() => navigate('/clientes/nuevo')} leftIcon="plus">
             Agregar cliente
           </Button>
-        </div>
-      </div>
+        }
+      />
 
       {/* Filter bar */}
       <div className="bg-paper border border-rule rounded-lg px-4 py-3.5 mb-4 flex flex-col gap-3 lg:flex-row lg:flex-wrap lg:items-center lg:gap-3.5">

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Button } from '../components/ui/Button';
+import { PageHeader } from '../components/ui/PageHeader';
 import { usePlans } from '../hooks/usePlans';
 import type { Plan } from '../types/client';
 import { CreatePlanModal } from './plans/CreatePlanModal';
@@ -43,24 +44,17 @@ export function PlansPage() {
   };
 
   return (
-    <div className="p-7 max-w-[1320px] mx-auto">
-      <div className="flex items-end gap-6 mb-7 flex-wrap">
-        <div>
-          <p className="text-[10.5px] font-mono uppercase tracking-[.14em] text-muted mb-2">
-            Catálogo
-          </p>
-          <h1 className="font-serif text-[44px] leading-none text-ink">Planes</h1>
-          <p className="text-[13px] text-muted mt-2.5 max-w-[54ch]">
-            Cada plan define qué comidas incluye. Los planes son dinámicos — combina comidas en
-            cualquier proporción.
-          </p>
-        </div>
-        <div className="ml-auto">
+    <div className="px-4 py-5 lg:p-7 max-w-[1320px] mx-auto">
+      <PageHeader
+        label="Catálogo"
+        title="Planes"
+        subtitle="Cada plan define qué comidas incluye. Los planes son dinámicos — combina comidas en cualquier proporción."
+        action={
           <Button aria-label="Crear plan nuevo" onClick={() => setCreateOpen(true)} leftIcon="plus">
             Crear plan
           </Button>
-        </div>
-      </div>
+        }
+      />
 
       {renderPlans()}
 

@@ -2,6 +2,7 @@ import { addDays, format, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useState, useEffect } from 'react';
 import { Button } from '../components/ui/Button';
+import { PageHeader } from '../components/ui/PageHeader';
 import { MEAL_LABELS } from '../constants/meals';
 import { useMenu } from '../hooks/useMenu';
 import { checkIsWeekend } from '../utils/devFlags';
@@ -102,13 +103,8 @@ export function MenuImportPage() {
   const saveLabel = getSaveLabel(isSaving, !!existingMenu);
 
   return (
-    <div className="p-7 max-w-[900px] mx-auto">
-      <div className="mb-7">
-        <p className="text-[10.5px] font-mono uppercase tracking-[.14em] text-muted mb-2">
-          Operativa diaria
-        </p>
-        <h1 className="font-serif text-[44px] leading-none text-ink">Menú del día</h1>
-      </div>
+    <div className="px-4 py-5 lg:p-7 max-w-[900px] mx-auto">
+      <PageHeader label="Operativa diaria" title="Menú del día" />
 
       <div className="flex gap-2 mb-6">
         {[today, tomorrow].map((date) => (

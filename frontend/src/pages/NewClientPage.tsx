@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { format, startOfToday } from 'date-fns';
 import { Icon } from '../components/ui/Icon';
 import { Button } from '../components/ui/Button';
+import { PageHeader } from '../components/ui/PageHeader';
 import { StepIndicator } from '../components/ui/StepIndicator';
 import { useCreateClient } from '../hooks/useCreateClient';
 import { usePlans } from '../hooks/usePlans';
@@ -101,21 +102,16 @@ export function NewClientPage() {
   });
 
   return (
-    <div className="p-7 max-w-[1320px] mx-auto">
-      <div className="mb-8">
-        <button
-          type="button"
-          onClick={() => navigate('/clientes')}
-          className="flex items-center gap-1.5 text-[13px] text-muted hover:text-ink mb-5 transition-colors"
-        >
-          <Icon name="arrow-left" size={13} />
-          Clientes
-        </button>
-        <p className="text-[10.5px] font-mono uppercase tracking-[.14em] text-muted mb-2">
-          Directorio
-        </p>
-        <h1 className="font-serif text-[44px] leading-none text-ink">Agregar cliente</h1>
-      </div>
+    <div className="px-4 py-5 lg:p-7 max-w-[1320px] mx-auto">
+      <button
+        type="button"
+        onClick={() => navigate('/clientes')}
+        className="flex items-center gap-1.5 text-[13px] text-muted hover:text-ink mb-4 lg:mb-5 transition-colors"
+      >
+        <Icon name="arrow-left" size={13} />
+        Clientes
+      </button>
+      <PageHeader label="Directorio" title="Agregar cliente" />
 
       <StepIndicator steps={STEPS} current={step} />
 
