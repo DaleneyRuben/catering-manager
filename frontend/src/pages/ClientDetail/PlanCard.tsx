@@ -63,7 +63,7 @@ export function PlanCard({ sub, onUpdateBilling }: Props) {
       </div>
       <hr className="border-rule mb-4" />
       <div className="flex items-center mb-3">
-        <p className="text-[11px] font-mono uppercase tracking-wider text-muted" />
+        <p className="text-[11px] font-mono uppercase tracking-wider text-muted">Precio</p>
         {!editing && (
           <button
             type="button"
