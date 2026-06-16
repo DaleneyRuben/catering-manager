@@ -40,6 +40,7 @@ export function ClientDetailPage() {
     deleteClient,
     updateSuspensions,
     updateContract,
+    updateBilling,
     renew,
   } = useClient(id!);
   const [tab, setTab] = useState<TabId>('overview');
@@ -130,6 +131,7 @@ export function ClientDetailPage() {
           sub={sub}
           remaining={remaining}
           onUpdateContract={(draft) => updateContract(sub!.id, draft)}
+          onUpdateBilling={(discount) => updateBilling(sub!.id, discount)}
         />
       )}
 

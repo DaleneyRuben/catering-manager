@@ -19,6 +19,7 @@ interface Props {
   sub: Subscription | undefined;
   remaining: number;
   onUpdateContract: (draft: ContractDraft) => Promise<void>;
+  onUpdateBilling: (discount: number) => Promise<void>;
 }
 
 function ContractCard({
@@ -146,7 +147,130 @@ function ContractCard({
   );
 }
 
-export function ClientPlanTab({ client, sub, remaining, onUpdateContract }: Props) {
+function BillingCard({
+  sub,
+  nit,
+  businessName,
+  onUpdateBilling,
+}: {
+  sub: Subscription;
+  nit: string | null;
+  businessName: string | null;
+  onUpdateBilling: (discount: number) => Promise<void>;
+}) {
+  const planPrice = Number(sub.plan.price);
+  const [editing, setEditing] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [priceStr, setPriceStr] = useState(String(planPrice - sub.discount));
+
+  const enteredPrice = priceStr !== '' ? Number(priceStr) : NaN;
+  const derivedDiscount = !Number.isNaN(enteredPrice) ? Math.max(0, planPrice - enteredPrice) : 0;
+
+  const handleSave = async () => {
+    if (Number.isNaN(enteredPrice)) return;
+    setSaving(true);
+    try {
+      await onUpdateBilling(derivedDiscount);
+      setEditing(false);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleCancel = () => {
+    setPriceStr(String(planPrice - sub.discount));
+    setEditing(false);
+  };
+
+  return (
+    <div className="bg-paper border border-rule rounded-lg p-5">
+      <div className="flex items-center mb-3">
+        <p className="text-[11px] font-mono uppercase tracking-wider text-muted">Facturación</p>
+        {!editing && (
+          <button
+            type="button"
+            onClick={() => setEditing(true)}
+            className="ml-auto flex items-center gap-1.5 text-[11px] font-mono text-ok hover:opacity-80 transition-colors"
+          >
+            <Icon name="settings" size={11} />
+            Editar
+          </button>
+        )}
+      </div>
+
+      {editing ? (
+        <div className="flex flex-col gap-3">
+          <div className="grid grid-cols-3 gap-3 items-end">
+            <div>
+              <p className="text-[11px] font-mono uppercase tracking-wider text-muted mb-1">
+                Precio
+              </p>
+              <input
+                type="number"
+                min={0}
+                max={planPrice}
+                value={priceStr}
+                onChange={(e) => setPriceStr(e.target.value)}
+                className="w-full px-2.5 py-1.5 text-[13px] font-mono border border-rule rounded-md bg-cream focus:outline-none focus:border-olive-600"
+              />
+            </div>
+            <div>
+              <p className="text-[11px] font-mono uppercase tracking-wider text-muted mb-1">
+                Descuento
+              </p>
+              <p className="font-mono text-[13px] py-1.5 px-2.5 bg-cream-2 rounded-md border border-rule">
+                {!Number.isNaN(enteredPrice) ? derivedDiscount : '—'}
+              </p>
+            </div>
+            <div>
+              <p className="text-[11px] font-mono uppercase tracking-wider text-muted mb-1">
+                Total
+              </p>
+              <p
+                className="font-mono text-[14px] font-bold text-olive-800 py-1.5 px-2.5 rounded-md border"
+                style={{
+                  background: 'var(--olive-50,#f5f7f0)',
+                  borderColor: 'var(--olive-200,#c8d4b0)',
+                }}
+              >
+                {!Number.isNaN(enteredPrice) ? enteredPrice : '—'}
+              </p>
+            </div>
+          </div>
+          <div className="flex gap-2 mt-1">
+            <Button variant="secondary" size="sm" onClick={handleCancel} disabled={saving}>
+              Cancelar
+            </Button>
+            <Button size="sm" onClick={handleSave} loading={saving} leftIcon="check">
+              Guardar
+            </Button>
+          </div>
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <p className="text-[11px] font-mono uppercase tracking-wider text-muted">NIT</p>
+            <p className="font-mono text-[13px]">{nit || '—'}</p>
+          </div>
+          <div>
+            <p className="text-[11px] font-mono uppercase tracking-wider text-muted">
+              Razón social
+            </p>
+            <p className="font-mono text-[13px] break-words">{businessName || '—'}</p>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export function ClientPlanTab({
+  client,
+  sub,
+  remaining,
+  onUpdateContract,
+  onUpdateBilling,
+}: Props) {
   if (!sub) {
     return <p className="text-[13px] text-muted">Sin suscripción activa.</p>;
   }
@@ -203,23 +327,12 @@ export function ClientPlanTab({ client, sub, remaining, onUpdateContract }: Prop
       </div>
       <div className="col-span-12 lg:col-span-5 flex flex-col gap-4">
         <ContractCard sub={sub} remaining={remaining} onUpdateContract={onUpdateContract} />
-        <div className="bg-paper border border-rule rounded-lg p-5">
-          <p className="text-[11px] font-mono uppercase tracking-wider text-muted mb-3">
-            Facturación
-          </p>
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <p className="text-[11px] font-mono uppercase tracking-wider text-muted">NIT</p>
-              <p className="font-mono text-[13px]">{client.nit || '—'}</p>
-            </div>
-            <div>
-              <p className="text-[11px] font-mono uppercase tracking-wider text-muted">
-                Razón social
-              </p>
-              <p className="font-mono text-[13px] break-words">{client.businessName || '—'}</p>
-            </div>
-          </div>
-        </div>
+        <BillingCard
+          sub={sub}
+          nit={client.nit}
+          businessName={client.businessName}
+          onUpdateBilling={onUpdateBilling}
+        />
       </div>
     </div>
   );
