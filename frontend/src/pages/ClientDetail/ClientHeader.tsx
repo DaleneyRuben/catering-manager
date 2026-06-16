@@ -92,8 +92,8 @@ export function ClientHeader({
           </Button>
           <OverflowMenu
             items={[
-              { label: 'Editar datos', onClick: onEdit },
-              { label: 'Eliminar', onClick: onDelete, variant: 'alert' },
+              { label: 'Editar datos', icon: 'pencil', onClick: onEdit },
+              { label: 'Eliminar', icon: 'trash', onClick: onDelete, variant: 'alert' },
             ]}
           />
         </div>

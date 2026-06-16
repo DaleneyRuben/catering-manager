@@ -4,6 +4,7 @@ import { Icon } from './Icon';
 interface MenuItem {
   label: string;
   onClick: () => void;
+  icon?: string;
   variant?: 'default' | 'alert';
 }
 
@@ -46,10 +47,11 @@ export function OverflowMenu({ items }: Props) {
                 setOpen(false);
                 item.onClick();
               }}
-              className={`w-full text-left px-3.5 py-2.5 text-[13px] transition-colors hover:bg-cream-2 ${
+              className={`w-full text-left px-3.5 py-2.5 text-[13px] transition-colors hover:bg-cream-2 flex items-center gap-2.5 ${
                 item.variant === 'alert' ? 'text-alert' : 'text-ink'
               }`}
             >
+              {item.icon && <Icon name={item.icon} size={13} stroke={1.5} />}
               {item.label}
             </button>
           ))}
