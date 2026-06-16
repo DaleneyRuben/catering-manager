@@ -55,20 +55,47 @@ function MenuCard({ menu, onEdit }: MenuCardProps) {
   );
 }
 
+interface DaySectionProps {
+  date: string;
+  menu: Menu | null;
+  isWeekend: boolean;
+  onOpen: () => void;
+}
+
+function DaySection({ date, menu, isWeekend, onOpen }: DaySectionProps) {
+  if (isWeekend) {
+    return (
+      <div className="bg-paper border border-rule rounded-lg p-6">
+        <p className="text-[13px] text-alert">No hay entregas los fines de semana.</p>
+      </div>
+    );
+  }
+  if (menu) {
+    return <MenuCard menu={menu} onEdit={onOpen} />;
+  }
+  return (
+    <div className="bg-paper border border-rule rounded-lg p-8 flex flex-col items-center text-center gap-3">
+      <p className="text-[13px] text-muted">No hay menú cargado para {formatDateLabel(date)}.</p>
+      <Button onClick={onOpen} leftIcon="plus">
+        Cargar menú
+      </Button>
+    </div>
+  );
+}
+
 export function MenuImportPage() {
   const today = toIso(new Date());
   const tomorrow = toIso(addDays(new Date(), 1));
 
-  const [selectedDate, setSelectedDate] = useState<string>(today);
   const [modalOpen, setModalOpen] = useState(false);
   const [editingDate, setEditingDate] = useState<string>(today);
 
   const { menus, isSaving, save } = useMenu();
 
-  const selectedMenu = menus.find((m) => m.date === selectedDate) ?? null;
-  const otherDate = selectedDate === today ? tomorrow : today;
-  const otherMenu = menus.find((m) => m.date === otherDate) ?? null;
-  const isSelectedWeekend = checkIsWeekend(parseISO(selectedDate));
+  const todayMenu = menus.find((m) => m.date === today) ?? null;
+  const tomorrowMenu = menus.find((m) => m.date === tomorrow) ?? null;
+  const isTodayWeekend = checkIsWeekend(parseISO(today));
+  const isTomorrowWeekend = checkIsWeekend(parseISO(tomorrow));
 
   const openModal = (date: string) => {
     setEditingDate(date);
@@ -83,49 +110,23 @@ export function MenuImportPage() {
     <div className="px-4 py-5 lg:p-7 max-w-[900px] mx-auto">
       <PageHeader label="Operativa diaria" title="Menú del día" />
 
-      <div className="flex flex-col sm:flex-row gap-2 mb-6">
-        {[today, tomorrow].map((date) => (
-          <button
-            key={date}
-            type="button"
-            onClick={() => setSelectedDate(date)}
-            className={`flex-1 px-4 py-2.5 rounded-md text-[13px] font-semibold border transition-colors text-left ${
-              selectedDate === date
-                ? 'bg-olive-800 text-white border-olive-800'
-                : 'bg-paper text-ink border-rule hover:border-olive-700'
-            }`}
-          >
-            {date === today ? 'Hoy' : 'Mañana'}{' '}
-            <span className="font-normal">— {formatDateLabel(date)}</span>
-          </button>
-        ))}
-      </div>
+      <DaySection
+        date={today}
+        menu={todayMenu}
+        isWeekend={isTodayWeekend}
+        onOpen={() => openModal(today)}
+      />
 
-      {isSelectedWeekend && (
-        <div className="bg-paper border border-rule rounded-lg p-6">
-          <p className="text-[13px] text-alert">No hay entregas los fines de semana.</p>
-        </div>
-      )}
-      {!isSelectedWeekend && selectedMenu && (
-        <MenuCard menu={selectedMenu} onEdit={() => openModal(selectedDate)} />
-      )}
-      {!isSelectedWeekend && !selectedMenu && (
-        <div className="bg-paper border border-rule rounded-lg p-8 flex flex-col items-center text-center gap-3">
-          <p className="text-[13px] text-muted">No hay menú cargado para este día.</p>
-          <Button onClick={() => openModal(selectedDate)} leftIcon="plus">
-            Cargar menú
-          </Button>
-        </div>
-      )}
+      <p className="text-[10.5px] font-mono uppercase tracking-[.14em] text-muted mt-6 mb-3">
+        Mañana
+      </p>
 
-      {otherMenu && (
-        <div className="mt-6">
-          <p className="text-[10.5px] font-mono uppercase tracking-[.14em] text-muted mb-3">
-            {otherDate === today ? 'Hoy' : 'Mañana'}
-          </p>
-          <MenuCard menu={otherMenu} onEdit={() => openModal(otherDate)} />
-        </div>
-      )}
+      <DaySection
+        date={tomorrow}
+        menu={tomorrowMenu}
+        isWeekend={isTomorrowWeekend}
+        onOpen={() => openModal(tomorrow)}
+      />
 
       <MenuFormModal
         open={modalOpen}
