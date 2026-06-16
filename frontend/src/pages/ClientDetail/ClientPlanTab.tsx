@@ -147,15 +147,29 @@ function ContractCard({
   );
 }
 
-function BillingCard({
+function BillingCard({ nit, businessName }: { nit: string | null; businessName: string | null }) {
+  return (
+    <div className="bg-paper border border-rule rounded-lg p-5">
+      <p className="text-[11px] font-mono uppercase tracking-wider text-muted mb-3">Facturación</p>
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <p className="text-[11px] font-mono uppercase tracking-wider text-muted">NIT</p>
+          <p className="font-mono text-[13px]">{nit || '—'}</p>
+        </div>
+        <div>
+          <p className="text-[11px] font-mono uppercase tracking-wider text-muted">Razón social</p>
+          <p className="font-mono text-[13px] break-words">{businessName || '—'}</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function PlanCard({
   sub,
-  nit,
-  businessName,
   onUpdateBilling,
 }: {
   sub: Subscription;
-  nit: string | null;
-  businessName: string | null;
   onUpdateBilling: (discount: number) => Promise<void>;
 }) {
   const planPrice = Number(sub.plan.price);
@@ -184,8 +198,34 @@ function BillingCard({
 
   return (
     <div className="bg-paper border border-rule rounded-lg p-5">
+      <div className="flex items-start flex-wrap gap-3 mb-4">
+        <div>
+          <p className="text-[11px] font-mono uppercase tracking-wider text-muted mb-1">
+            Plan asignado
+          </p>
+          <p className="font-serif text-[28px]">{sub.plan.name}</p>
+        </div>
+        <div className="ml-auto text-right">
+          <p className="font-mono text-[10.5px] text-muted">Total mensual</p>
+          <p className="font-serif text-[40px] text-olive-800 tabular-nums">
+            {Number(sub.plan.price) - sub.discount}
+          </p>
+        </div>
+      </div>
+      <hr className="border-rule mb-4" />
+      <div className="flex flex-wrap gap-1.5 mb-4">
+        {sub.plan.meals.map((m) => (
+          <span
+            key={m}
+            className="px-2 py-0.5 rounded-full text-[11px] font-mono bg-olive-100 border border-rule text-ink"
+          >
+            {MEAL_LABELS[m] ?? m}
+          </span>
+        ))}
+      </div>
+      <hr className="border-rule mb-4" />
       <div className="flex items-center mb-3">
-        <p className="text-[11px] font-mono uppercase tracking-wider text-muted">Facturación</p>
+        <p className="text-[11px] font-mono uppercase tracking-wider text-muted" />
         {!editing && (
           <button
             type="button"
@@ -197,7 +237,6 @@ function BillingCard({
           </button>
         )}
       </div>
-
       {editing ? (
         <div className="flex flex-col gap-3">
           <div className="grid grid-cols-3 gap-3 items-end">
@@ -247,16 +286,22 @@ function BillingCard({
           </div>
         </div>
       ) : (
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-3 gap-3">
           <div>
-            <p className="text-[11px] font-mono uppercase tracking-wider text-muted">NIT</p>
-            <p className="font-mono text-[13px]">{nit || '—'}</p>
+            <p className="text-[11px] font-mono uppercase tracking-wider text-muted">Precio</p>
+            <p className="font-mono text-[14px]">{sub.plan.price}</p>
           </div>
           <div>
-            <p className="text-[11px] font-mono uppercase tracking-wider text-muted">
-              Razón social
+            <p className="text-[11px] font-mono uppercase tracking-wider text-muted">Descuento</p>
+            <p className="font-mono text-[14px] text-muted">
+              {sub.discount > 0 ? sub.discount : '—'}
             </p>
-            <p className="font-mono text-[13px] break-words">{businessName || '—'}</p>
+          </div>
+          <div>
+            <p className="text-[11px] font-mono uppercase tracking-wider text-muted">Total</p>
+            <p className="font-mono text-[14px] font-bold text-olive-800">
+              {Number(sub.plan.price) - sub.discount}
+            </p>
           </div>
         </div>
       )}
@@ -278,61 +323,11 @@ export function ClientPlanTab({
   return (
     <div className="grid grid-cols-12 gap-5">
       <div className="col-span-12 lg:col-span-7">
-        <div className="bg-paper border border-rule rounded-lg p-5">
-          <div className="flex items-start flex-wrap gap-3 mb-4">
-            <div>
-              <p className="text-[11px] font-mono uppercase tracking-wider text-muted mb-1">
-                Plan asignado
-              </p>
-              <p className="font-serif text-[28px]">{sub.plan.name}</p>
-            </div>
-            <div className="ml-auto text-right">
-              <p className="font-mono text-[10.5px] text-muted">Total mensual</p>
-              <p className="font-serif text-[40px] text-olive-800 tabular-nums">
-                {Number(sub.plan.price) - sub.discount}
-              </p>
-            </div>
-          </div>
-          <hr className="border-rule mb-4" />
-          <div className="flex flex-wrap gap-1.5 mb-4">
-            {sub.plan.meals.map((m) => (
-              <span
-                key={m}
-                className="px-2 py-0.5 rounded-full text-[11px] font-mono bg-olive-100 border border-rule text-ink"
-              >
-                {MEAL_LABELS[m] ?? m}
-              </span>
-            ))}
-          </div>
-          <hr className="border-rule mb-4" />
-          <div className="grid grid-cols-3 gap-3">
-            <div>
-              <p className="text-[11px] font-mono uppercase tracking-wider text-muted">Precio</p>
-              <p className="font-mono text-[14px]">{sub.plan.price}</p>
-            </div>
-            <div>
-              <p className="text-[11px] font-mono uppercase tracking-wider text-muted">Descuento</p>
-              <p className="font-mono text-[14px] text-muted">
-                {sub.discount > 0 ? sub.discount : '—'}
-              </p>
-            </div>
-            <div>
-              <p className="text-[11px] font-mono uppercase tracking-wider text-muted">Total</p>
-              <p className="font-mono text-[14px] font-bold text-olive-800">
-                {Number(sub.plan.price) - sub.discount}
-              </p>
-            </div>
-          </div>
-        </div>
+        <PlanCard sub={sub} onUpdateBilling={onUpdateBilling} />
       </div>
       <div className="col-span-12 lg:col-span-5 flex flex-col gap-4">
         <ContractCard sub={sub} remaining={remaining} onUpdateContract={onUpdateContract} />
-        <BillingCard
-          sub={sub}
-          nit={client.nit}
-          businessName={client.businessName}
-          onUpdateBilling={onUpdateBilling}
-        />
+        <BillingCard nit={client.nit} businessName={client.businessName} />
       </div>
     </div>
   );
