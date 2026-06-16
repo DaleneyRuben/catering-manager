@@ -27,6 +27,7 @@ export function ClientsPage() {
   const [q, setQ] = useState(() => searchParams.get('q') ?? '');
   const debouncedQ = useDebounce(q);
   const [tableLoading, setTableLoading] = useState(false);
+  const [showSecondaryFilters, setShowSecondaryFilters] = useState(false);
 
   const updateParams = (updates: Record<string, string | null>, resetPage = false) => {
     setSearchParams(
@@ -111,50 +112,80 @@ export function ClientsPage() {
 
       {/* Filter bar */}
       <div className="bg-paper border border-rule rounded-lg px-4 py-3.5 mb-4 flex flex-col gap-3 lg:flex-row lg:flex-wrap lg:items-center lg:gap-3.5">
-        {/* Search */}
-        <div className="relative lg:flex-1 lg:min-w-[240px]">
-          <input
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            placeholder="Buscar por nombre, NIT, dirección…"
-            className="w-full pl-8 pr-3 py-2 text-[13px] border border-rule rounded-md bg-cream focus:outline-none focus:border-olive-600"
-          />
-          <Icon
-            name="search"
-            size={14}
-            className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted"
-          />
-        </div>
-
-        {/* Status pills — scrollable on mobile */}
-        <div className="overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-          <div className="inline-flex p-[3px] bg-cream-2 border border-rule rounded-[7px] text-[12px]">
-            {(
-              [
-                { v: CLIENT_STATUS.ALL, l: 'Todos' },
-                { v: CLIENT_STATUS.ACTIVE, l: 'Activos' },
-                { v: CLIENT_STATUS.EXPIRING, l: 'Por vencer' },
-                { v: CLIENT_STATUS.PAUSED, l: 'Pausados' },
-                { v: CLIENT_STATUS.ENDED, l: 'Finalizados' },
-              ] as { v: FilterValue; l: string }[]
-            ).map(({ v, l }) => (
+        {/* Search + filter toggle (toggle hidden on desktop) */}
+        <div className="flex items-center gap-2 lg:flex-1 lg:min-w-[240px]">
+          <div className="relative flex-1">
+            <input
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              placeholder="Buscar por nombre, NIT, dirección…"
+              className="w-full pl-8 pr-3 py-2 text-[13px] border border-rule rounded-md bg-cream focus:outline-none focus:border-olive-600"
+            />
+            <Icon
+              name="search"
+              size={14}
+              className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted"
+            />
+          </div>
+          {(() => {
+            const activeCount =
+              (filter !== CLIENT_STATUS.ALL ? 1 : 0) + (birthMonth !== 'all' ? 1 : 0);
+            return (
               <button
                 type="button"
-                key={v}
-                onClick={() => changeFilter(v)}
-                className={`px-3 py-1.5 rounded-[5px] font-medium whitespace-nowrap transition-all ${
-                  filter === v ? 'bg-paper text-ink shadow-sm' : 'text-muted hover:text-ink-2'
+                onClick={() => setShowSecondaryFilters((v) => !v)}
+                aria-label="Filtros"
+                className={`lg:hidden relative shrink-0 flex items-center gap-1.5 px-3 h-[34px] border rounded-md text-[12px] font-medium transition-colors ${
+                  activeCount > 0
+                    ? 'border-olive-600 bg-olive-50 text-olive-800'
+                    : 'border-rule bg-paper text-muted'
                 }`}
               >
-                {l}
+                <Icon name="filter" size={12} />
+                Filtros
+                {activeCount > 0 && (
+                  <span className="w-4 h-4 rounded-full bg-olive-800 text-white text-[10px] flex items-center justify-center">
+                    {activeCount}
+                  </span>
+                )}
               </button>
-            ))}
+            );
+          })()}
+        </div>
+
+        {/* Status pills — collapsed on mobile behind toggle */}
+        <div
+          className={`${showSecondaryFilters ? 'flex' : 'hidden'} items-center gap-2 min-w-0 lg:flex`}
+        >
+          <div className="overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] min-w-0">
+            <div className="inline-flex p-[3px] bg-cream-2 border border-rule rounded-[7px] text-[12px]">
+              {(
+                [
+                  { v: CLIENT_STATUS.ALL, l: 'Todos' },
+                  { v: CLIENT_STATUS.ACTIVE, l: 'Activos' },
+                  { v: CLIENT_STATUS.EXPIRING, l: 'Por vencer' },
+                  { v: CLIENT_STATUS.PAUSED, l: 'Pausados' },
+                  { v: CLIENT_STATUS.ENDED, l: 'Finalizados' },
+                ] as { v: FilterValue; l: string }[]
+              ).map(({ v, l }) => (
+                <button
+                  type="button"
+                  key={v}
+                  onClick={() => changeFilter(v)}
+                  className={`px-3 py-1.5 rounded-[5px] font-medium whitespace-nowrap transition-all ${
+                    filter === v ? 'bg-paper text-ink shadow-sm' : 'text-muted hover:text-ink-2'
+                  }`}
+                >
+                  {l}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 
-        {/* Birth month + results count — same row on mobile */}
-        <div className="flex items-center gap-3 lg:contents">
-          <div className="relative flex-1 lg:flex-none lg:shrink-0">
+        {/* Birth month — collapsed on mobile behind toggle */}
+        <div className={`${showSecondaryFilters ? 'block' : 'hidden'} lg:block lg:shrink-0`}>
+          <div className="relative">
             <select
               value={birthMonth}
               onChange={(e) => changeBirthMonth(e.target.value)}
@@ -174,12 +205,14 @@ export function ClientsPage() {
               className="absolute right-2 top-1/2 -translate-y-1/2 text-muted pointer-events-none"
             />
           </div>
-          <span
-            className={`text-[11px] font-mono shrink-0 lg:ml-auto transition-opacity ${isFetching ? 'opacity-40' : 'text-muted'}`}
-          >
-            {clients.length} resultados
-          </span>
         </div>
+
+        {/* Results count — always visible */}
+        <span
+          className={`text-[11px] font-mono lg:ml-auto transition-opacity ${isFetching ? 'opacity-40' : 'text-muted'}`}
+        >
+          {clients.length} resultados
+        </span>
       </div>
 
       {/* Table */}
