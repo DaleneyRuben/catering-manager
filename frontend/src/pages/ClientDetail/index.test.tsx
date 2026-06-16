@@ -140,14 +140,15 @@ describe('ClientDetailPage', () => {
     expect(await screen.findByRole('button', { name: /reanudar/i })).toBeInTheDocument();
   });
 
-  it('shows Editar button in view mode', async () => {
+  it('shows overflow menu trigger in view mode', async () => {
     renderPage();
-    expect(await screen.findByRole('button', { name: /editar/i })).toBeInTheDocument();
+    expect(await screen.findByRole('button', { name: /más acciones/i })).toBeInTheDocument();
   });
 
-  it('clicking Editar shows form with current values pre-filled', async () => {
+  it('clicking Editar datos shows form with current values pre-filled', async () => {
     renderPage();
-    fireEvent.click(await screen.findByRole('button', { name: /editar/i }));
+    fireEvent.click(await screen.findByRole('button', { name: /más acciones/i }));
+    fireEvent.click(screen.getByText('Editar datos'));
     expect(screen.getByDisplayValue('John Doe')).toBeInTheDocument();
     expect(screen.getByDisplayValue('+1234567890')).toBeInTheDocument();
     expect(screen.getByDisplayValue('123 Main St')).toBeInTheDocument();
@@ -155,23 +156,26 @@ describe('ClientDetailPage', () => {
 
   it('shows Guardar and Cancelar buttons in edit mode', async () => {
     renderPage();
-    fireEvent.click(await screen.findByRole('button', { name: /editar/i }));
+    fireEvent.click(await screen.findByRole('button', { name: /más acciones/i }));
+    fireEvent.click(screen.getByText('Editar datos'));
     expect(screen.getByRole('button', { name: /guardar/i })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /cancelar/i })).toBeInTheDocument();
   });
 
   it('Cancelar returns to view mode', async () => {
     renderPage();
-    fireEvent.click(await screen.findByRole('button', { name: /editar/i }));
+    fireEvent.click(await screen.findByRole('button', { name: /más acciones/i }));
+    fireEvent.click(screen.getByText('Editar datos'));
     fireEvent.click(screen.getByRole('button', { name: /cancelar/i }));
-    expect(screen.getByRole('button', { name: /editar/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /más acciones/i })).toBeInTheDocument();
     expect(screen.queryByDisplayValue('John Doe')).not.toBeInTheDocument();
   });
 
   it('Guardar calls PATCH with updated fields and shows new name', async () => {
     mockPatch.mockResolvedValue({ ...mockClient, name: 'Jane Doe' });
     renderPage();
-    fireEvent.click(await screen.findByRole('button', { name: /editar/i }));
+    fireEvent.click(await screen.findByRole('button', { name: /más acciones/i }));
+    fireEvent.click(screen.getByText('Editar datos'));
     fireEvent.change(screen.getByDisplayValue('John Doe'), { target: { value: 'Jane Doe' } });
     fireEvent.click(screen.getByRole('button', { name: /guardar/i }));
     await waitFor(() =>
@@ -226,16 +230,18 @@ describe('ClientDetailPage', () => {
     expect(await screen.findByText(/sin eventos/i)).toBeInTheDocument();
   });
 
-  it('clicking Editar opens a modal with Editar cliente heading', async () => {
+  it('clicking Editar datos opens a modal with Editar cliente heading', async () => {
     renderPage();
-    fireEvent.click(await screen.findByRole('button', { name: /editar/i }));
+    fireEvent.click(await screen.findByRole('button', { name: /más acciones/i }));
+    fireEvent.click(screen.getByText('Editar datos'));
     expect(screen.getByRole('dialog')).toBeInTheDocument();
     expect(screen.getByText('Editar cliente')).toBeInTheDocument();
   });
 
   it('modal shows predefined disease chips', async () => {
     renderPage();
-    fireEvent.click(await screen.findByRole('button', { name: /editar/i }));
+    fireEvent.click(await screen.findByRole('button', { name: /más acciones/i }));
+    fireEvent.click(screen.getByText('Editar datos'));
     expect(screen.getByRole('button', { name: 'Diabetes' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Hipertensión' })).toBeInTheDocument();
   });
