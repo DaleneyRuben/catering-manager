@@ -1,6 +1,7 @@
 import { Icon } from '../../components/ui/Icon';
 import { Button } from '../../components/ui/Button';
 import { MEAL_LABELS } from '../../constants/meals';
+
 import type { Client, Subscription } from '../../types/client';
 import { CLIENT_STATUS } from '../../constants/clientStatus';
 import { EXPIRY_THRESHOLD_DAYS } from '../../constants/subscription';
@@ -10,11 +11,10 @@ interface Props {
   client: Client;
   sub: Subscription | undefined;
   remaining: number;
-  onFinalize: () => void;
   onSuspend: () => void;
 }
 
-export function ClientOverviewTab({ client, sub, remaining, onFinalize, onSuspend }: Props) {
+export function ClientOverviewTab({ client, sub, remaining, onSuspend }: Props) {
   const { status } = client;
   return (
     <div className="grid grid-cols-12 gap-5">
@@ -77,8 +77,6 @@ export function ClientOverviewTab({ client, sub, remaining, onFinalize, onSuspen
             <div className="flex items-center gap-2.5">
               <Icon name="pin" size={14} />
               <span className="text-[13px]">{client.address}</span>
-              <span className="text-muted text-[13px]"> · </span>
-              <span className="text-[13px]">{client.deliveryZone}</span>
             </div>
             <div className="flex items-center gap-2.5">
               <Icon name="refresh" size={14} />
@@ -167,14 +165,9 @@ export function ClientOverviewTab({ client, sub, remaining, onFinalize, onSuspen
             <p className="text-[11px] font-mono uppercase tracking-wider text-muted mb-3">
               Acciones rápidas
             </p>
-            <div className="flex flex-col gap-2">
-              <Button variant="secondary" onClick={onSuspend} leftIcon="calendar">
-                Suspender días
-              </Button>
-              <Button variant="alert" onClick={onFinalize}>
-                Finalizar plan
-              </Button>
-            </div>
+            <Button variant="secondary" onClick={onSuspend} leftIcon="calendar">
+              Suspender días
+            </Button>
           </div>
         )}
       </div>
