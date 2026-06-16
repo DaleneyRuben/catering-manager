@@ -69,18 +69,23 @@ export function SuspendModal({
     );
   };
 
-  const isInContract = (d: Date) =>
-    contractStart && contractEnd ? !isBefore(d, contractStart) && !isAfter(d, contractEnd) : false;
-  const isSelectable = (d: Date) =>
-    contractEnd ? !isBefore(d, minDate) && !isAfter(d, contractEnd) : false;
-  const isPickedDay = (d: Date) => selected.some((s) => isSameDay(s, d));
-
+  // Compute the projected end date first so it can serve as the selectable ceiling.
+  // Each suspension picked extends the window, unlocking further dates dynamically.
   const net = selected.length - (sub.suspendedDates ?? []).length;
   let newEndDate: string | null = null;
   if (sub.contractEndDate) {
     if (net > 0) newEndDate = addBusinessDays(sub.contractEndDate, net);
     else if (net < 0) newEndDate = subtractBusinessDays(sub.contractEndDate, Math.abs(net));
   }
+  const effectiveEnd = newEndDate ? parseISO(`${newEndDate}T12:00:00`) : contractEnd;
+
+  const isInContract = (d: Date) =>
+    contractStart && effectiveEnd
+      ? !isBefore(d, contractStart) && !isAfter(d, effectiveEnd)
+      : false;
+  const isSelectable = (d: Date) =>
+    effectiveEnd ? !isBefore(d, minDate) && !isAfter(d, effectiveEnd) : false;
+  const isPickedDay = (d: Date) => selected.some((s) => isSameDay(s, d));
 
   const weeks = getCalendarWeeks(anchor);
 
