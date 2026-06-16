@@ -117,12 +117,7 @@ export function ClientDetailPage() {
       />
 
       {activeTab === 'overview' && (
-        <ClientOverviewTab
-          client={client}
-          sub={sub}
-          remaining={remaining}
-          onSuspend={() => setSuspendOpen(true)}
-        />
+        <ClientOverviewTab client={client} sub={sub} remaining={remaining} />
       )}
 
       {activeTab === 'plan' && (

@@ -1,7 +1,5 @@
 import { Icon } from '../../components/ui/Icon';
-import { Button } from '../../components/ui/Button';
 import { MEAL_LABELS } from '../../constants/meals';
-
 import type { Client, Subscription } from '../../types/client';
 import { CLIENT_STATUS } from '../../constants/clientStatus';
 import { EXPIRY_THRESHOLD_DAYS } from '../../constants/subscription';
@@ -11,10 +9,9 @@ interface Props {
   client: Client;
   sub: Subscription | undefined;
   remaining: number;
-  onSuspend: () => void;
 }
 
-export function ClientOverviewTab({ client, sub, remaining, onSuspend }: Props) {
+export function ClientOverviewTab({ client, sub, remaining }: Props) {
   const { status } = client;
   return (
     <div className="grid grid-cols-12 gap-5">
@@ -159,17 +156,6 @@ export function ClientOverviewTab({ client, sub, remaining, onSuspend }: Props) 
             </div>
           )}
         </div>
-
-        {status !== CLIENT_STATUS.ENDED && (
-          <div className="bg-paper border border-rule rounded-lg p-5">
-            <p className="text-[11px] font-mono uppercase tracking-wider text-muted mb-3">
-              Acciones rápidas
-            </p>
-            <Button variant="secondary" onClick={onSuspend} leftIcon="calendar">
-              Suspender días
-            </Button>
-          </div>
-        )}
       </div>
     </div>
   );

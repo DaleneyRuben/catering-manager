@@ -290,6 +290,7 @@ describe('ClientDetailPage', () => {
   it('Suspender días button opens suspend modal', async () => {
     renderPage();
     await screen.findByText('John Doe');
+    fireEvent.click(screen.getByRole('tab', { name: /suspensiones/i }));
     fireEvent.click(screen.getByRole('button', { name: /suspender días/i }));
     expect(await screen.findByRole('dialog')).toBeInTheDocument();
   });
@@ -298,6 +299,7 @@ describe('ClientDetailPage', () => {
     mockPatch.mockResolvedValue({});
     renderPage();
     await screen.findByText('John Doe');
+    fireEvent.click(screen.getByRole('tab', { name: /suspensiones/i }));
     fireEvent.click(screen.getByRole('button', { name: /suspender días/i }));
     await screen.findByRole('dialog');
     fireEvent.click(screen.getByRole('button', { name: /guardar/i }));
