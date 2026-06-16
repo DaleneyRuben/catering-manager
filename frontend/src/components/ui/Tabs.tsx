@@ -23,7 +23,10 @@ export function Tabs({ tabs, activeId, onChange, className = '' }: Props) {
   }, [activeId]);
 
   return (
-    <div role="tablist" className={`relative flex border-b border-rule ${className}`}>
+    <div
+      role="tablist"
+      className={`relative flex border-b border-rule overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] ${className}`}
+    >
       {tabs.map((tab) => (
         <button
           key={tab.id}
@@ -34,7 +37,7 @@ export function Tabs({ tabs, activeId, onChange, className = '' }: Props) {
           role="tab"
           aria-selected={activeId === tab.id}
           onClick={() => onChange(tab.id)}
-          className={`px-4 py-2.5 text-[13px] font-medium transition-colors ${
+          className={`px-4 py-2.5 text-[13px] font-medium transition-colors shrink-0 whitespace-nowrap ${
             activeId === tab.id ? 'text-ink' : 'text-muted hover:text-ink'
           }`}
         >
