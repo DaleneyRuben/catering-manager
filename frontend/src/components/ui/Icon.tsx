@@ -239,6 +239,8 @@ export function Icon({ name, size = 16, stroke = 1.5, className }: IconProps) {
       return (
         <svg {...props}>
           <path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z" />
+          <path d="M14.5 6L17.5 9" />
+          <path d="M4 17L7 20" />
         </svg>
       );
     case 'trash':
