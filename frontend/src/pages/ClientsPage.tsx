@@ -19,7 +19,7 @@ export function ClientsPage() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const filter = (searchParams.get('status') as FilterValue) ?? CLIENT_STATUS.ACTIVE;
+  const filter = (searchParams.get('status') as FilterValue) ?? CLIENT_STATUS.ALL;
   const birthMonth = searchParams.get('birthMonth') ?? CLIENT_STATUS.ALL;
   const page = Number(searchParams.get('page') ?? '1');
   const limit = Number(searchParams.get('limit') ?? '25');
@@ -38,7 +38,7 @@ export function ClientsPage() {
           else next.set(k, v);
         });
         // remove defaults to keep URLs clean
-        if (next.get('status') === CLIENT_STATUS.ACTIVE) next.delete('status');
+        if (next.get('status') === CLIENT_STATUS.ALL) next.delete('status');
         if (next.get('birthMonth') === CLIENT_STATUS.ALL) next.delete('birthMonth');
         if (next.get('page') === '1') next.delete('page');
         if (next.get('limit') === '25') next.delete('limit');
