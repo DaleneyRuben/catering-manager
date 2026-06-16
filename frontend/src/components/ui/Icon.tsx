@@ -241,6 +241,15 @@ export function Icon({ name, size = 16, stroke = 1.5, className }: IconProps) {
           <path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z" />
         </svg>
       );
+    case 'trash':
+      return (
+        <svg {...props}>
+          <polyline points="3 6 5 6 21 6" />
+          <path d="M19 6l-1 14H6L5 6" />
+          <path d="M10 11v6M14 11v6" />
+          <path d="M9 6V4h6v2" />
+        </svg>
+      );
     case 'more-horizontal':
       return (
         <svg {...props}>
