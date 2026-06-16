@@ -1,6 +1,7 @@
 import { differenceInYears, format, parseISO, startOfToday } from 'date-fns';
 import { Icon } from '../../components/ui/Icon';
 import { Button } from '../../components/ui/Button';
+import { OverflowMenu } from '../../components/ui/OverflowMenu';
 import { STATUS_LABELS, STATUS_CLASSES, CLIENT_STATUS } from '../../constants/clientStatus';
 import { SEX_LABELS } from '../../constants/clientOptions';
 import { initials } from '../../utils/string';
@@ -89,12 +90,12 @@ export function ClientHeader({
           <Button variant="secondary" onClick={onRenew} leftIcon="refresh">
             {status === CLIENT_STATUS.ENDED ? 'Reactivar' : 'Renovar'}
           </Button>
-          <Button onClick={onEdit} leftIcon="settings">
-            Editar
-          </Button>
-          <Button variant="alert" onClick={onDelete}>
-            Eliminar
-          </Button>
+          <OverflowMenu
+            items={[
+              { label: 'Editar datos', onClick: onEdit },
+              { label: 'Eliminar', onClick: onDelete, variant: 'alert' },
+            ]}
+          />
         </div>
       </div>
 

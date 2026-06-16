@@ -70,10 +70,10 @@ function ContractCard({
           <button
             type="button"
             onClick={() => setEditing(true)}
-            className="ml-auto flex items-center gap-1.5 text-[11px] font-mono text-ok hover:opacity-80 transition-colors"
+            aria-label="Editar"
+            className="ml-auto text-muted hover:text-ink transition-colors"
           >
-            <Icon name="settings" size={11} />
-            Editar
+            <Icon name="pencil" size={13} />
           </button>
         )}
       </div>
@@ -230,10 +230,10 @@ function PlanCard({
           <button
             type="button"
             onClick={() => setEditing(true)}
-            className="ml-auto flex items-center gap-1.5 text-[11px] font-mono text-ok hover:opacity-80 transition-colors"
+            aria-label="Editar"
+            className="ml-auto text-muted hover:text-ink transition-colors"
           >
-            <Icon name="settings" size={11} />
-            Editar
+            <Icon name="pencil" size={13} />
           </button>
         )}
       </div>
