@@ -65,7 +65,7 @@ interface DaySectionProps {
 function DaySection({ date, menu, isWeekend, onOpen }: DaySectionProps) {
   if (isWeekend) {
     return (
-      <div className="bg-paper border border-rule rounded-lg p-6">
+      <div className="bg-paper border border-rule rounded-lg px-5 py-4">
         <p className="text-[13px] text-alert">No hay entregas los fines de semana.</p>
       </div>
     );
@@ -74,9 +74,9 @@ function DaySection({ date, menu, isWeekend, onOpen }: DaySectionProps) {
     return <MenuCard menu={menu} onEdit={onOpen} />;
   }
   return (
-    <div className="bg-paper border border-rule rounded-lg p-8 flex flex-col items-center text-center gap-3">
-      <p className="text-[13px] text-muted">No hay menú cargado para {formatDateLabel(date)}.</p>
-      <Button onClick={onOpen} leftIcon="plus">
+    <div className="bg-paper border border-rule rounded-lg px-5 py-4 flex items-center gap-4">
+      <p className="text-[11px] font-mono text-muted flex-1">{formatDateLabel(date)}</p>
+      <Button onClick={onOpen} leftIcon="plus" size="sm">
         Cargar menú
       </Button>
     </div>
@@ -110,6 +110,7 @@ export function MenuImportPage() {
     <div className="px-4 py-5 lg:p-7 max-w-[900px] mx-auto">
       <PageHeader label="Operativa diaria" title="Menú del día" />
 
+      <p className="text-[10.5px] font-mono uppercase tracking-[.14em] text-muted mb-3">Hoy</p>
       <DaySection
         date={today}
         menu={todayMenu}
@@ -120,7 +121,6 @@ export function MenuImportPage() {
       <p className="text-[10.5px] font-mono uppercase tracking-[.14em] text-muted mt-6 mb-3">
         Mañana
       </p>
-
       <DaySection
         date={tomorrow}
         menu={tomorrowMenu}

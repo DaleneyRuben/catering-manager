@@ -40,8 +40,9 @@ describe('MenuImportPage', () => {
     expect(screen.getByRole('heading', { name: 'Menú del día' })).toBeInTheDocument();
   });
 
-  it('shows Mañana section label', () => {
+  it('shows Hoy and Mañana section labels', () => {
     render(<MenuImportPage />);
+    expect(screen.getByText('Hoy')).toBeInTheDocument();
     expect(screen.getByText('Mañana')).toBeInTheDocument();
   });
 
