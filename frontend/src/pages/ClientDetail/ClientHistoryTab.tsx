@@ -35,7 +35,11 @@ export function ClientHistoryTab({ clientId }: Props) {
           const planPrice = typeof meta?.planPrice === 'number' ? meta.planPrice : null;
           const discount = typeof meta?.discount === 'number' ? meta.discount : 0;
           const showPlanDetails =
-            (entry.eventType === 'plan_renewed' || entry.eventType === 'reactivated') && planName;
+            (entry.eventType === 'plan_assigned' ||
+              entry.eventType === 'plan_renewed' ||
+              entry.eventType === 'plan_changed' ||
+              entry.eventType === 'reactivated') &&
+            planName;
 
           const suspendedDates = Array.isArray(meta?.dates) ? (meta.dates as string[]) : null;
 
