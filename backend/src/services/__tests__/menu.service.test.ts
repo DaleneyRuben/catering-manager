@@ -1,11 +1,15 @@
+import { Op } from 'sequelize';
 import Menu from '../../models/Menu';
 import menuService from '../menu.service';
 
 jest.mock('../../models/Menu');
+jest.mock('../../utils/date', () => ({
+  getCurrentMenuWeek: jest.fn(() => ({ start: '2026-06-15', end: '2026-06-19' })),
+}));
 
 const makeMenu = (overrides = {}) => ({
   id: 1,
-  date: '2026-06-06',
+  date: '2026-06-16',
   breakfast: 'Queque de platano',
   morningSnack: null,
   salad: null,
@@ -23,14 +27,14 @@ describe('menuService.upsert', () => {
     (Menu.findOne as jest.Mock).mockResolvedValue(null);
     const created = makeMenu();
     (Menu.create as jest.Mock).mockResolvedValue(created);
-    (Menu.findAll as jest.Mock).mockResolvedValue([created]);
+    (Menu.destroy as jest.Mock).mockResolvedValue(undefined);
 
-    const result = await menuService.upsert('2026-06-06', { breakfast: 'Queque de platano' });
+    const result = await menuService.upsert('2026-06-16', { breakfast: 'Queque de platano' });
 
     expect(Menu.create).toHaveBeenCalledWith(
-      expect.objectContaining({ date: '2026-06-06', breakfast: 'Queque de platano' }),
+      expect.objectContaining({ date: '2026-06-16', breakfast: 'Queque de platano' }),
     );
-    expect(result).toMatchObject({ date: '2026-06-06', breakfast: 'Queque de platano' });
+    expect(result).toMatchObject({ date: '2026-06-16', breakfast: 'Queque de platano' });
   });
 
   it('updates existing menu when one already exists for the date', async () => {
@@ -39,9 +43,9 @@ describe('menuService.upsert', () => {
       update: jest.fn().mockResolvedValue(makeMenu({ breakfast: 'New dish' })),
     };
     (Menu.findOne as jest.Mock).mockResolvedValue(mockInstance);
-    (Menu.findAll as jest.Mock).mockResolvedValue([mockInstance]);
+    (Menu.destroy as jest.Mock).mockResolvedValue(undefined);
 
-    const result = await menuService.upsert('2026-06-06', { breakfast: 'New dish' });
+    const result = await menuService.upsert('2026-06-16', { breakfast: 'New dish' });
 
     expect(mockInstance.update).toHaveBeenCalledWith(
       expect.objectContaining({ breakfast: 'New dish' }),
@@ -49,47 +53,24 @@ describe('menuService.upsert', () => {
     expect(result).toMatchObject({ breakfast: 'New dish' });
   });
 
-  it('prunes old menus keeping only the 3 most recent after upsert', async () => {
-    const menus = [
-      makeMenu({ id: 4, date: '2026-06-06' }),
-      makeMenu({ id: 3, date: '2026-06-05' }),
-      makeMenu({ id: 2, date: '2026-06-04' }),
-      makeMenu({ id: 1, date: '2026-06-03' }),
-    ];
+  it('prunes menus outside the current week after upsert', async () => {
     (Menu.findOne as jest.Mock).mockResolvedValue(null);
-    (Menu.create as jest.Mock).mockResolvedValue(menus[0]);
-    const destroyMock = jest.fn().mockResolvedValue(undefined);
-    (Menu.findAll as jest.Mock).mockResolvedValue(
-      menus.map((m) => ({ ...m, destroy: destroyMock })),
-    );
+    (Menu.create as jest.Mock).mockResolvedValue(makeMenu());
+    (Menu.destroy as jest.Mock).mockResolvedValue(undefined);
 
-    await menuService.upsert('2026-06-06', { breakfast: 'Queque' });
+    await menuService.upsert('2026-06-16', { breakfast: 'Queque' });
 
-    expect(destroyMock).toHaveBeenCalledTimes(1);
-  });
-
-  it('does not prune when 3 or fewer menus exist', async () => {
-    const menus = [
-      makeMenu({ id: 3, date: '2026-06-06' }),
-      makeMenu({ id: 2, date: '2026-06-05' }),
-      makeMenu({ id: 1, date: '2026-06-04' }),
-    ];
-    (Menu.findOne as jest.Mock).mockResolvedValue(null);
-    (Menu.create as jest.Mock).mockResolvedValue(menus[0]);
-    const destroyMock = jest.fn();
-    (Menu.findAll as jest.Mock).mockResolvedValue(
-      menus.map((m) => ({ ...m, destroy: destroyMock })),
-    );
-
-    await menuService.upsert('2026-06-06', { breakfast: 'Queque' });
-
-    expect(destroyMock).not.toHaveBeenCalled();
+    expect(Menu.destroy).toHaveBeenCalledWith({
+      where: {
+        date: { [Op.notBetween]: ['2026-06-15', '2026-06-19'] },
+      },
+    });
   });
 
   it('propagates db errors', async () => {
     (Menu.findOne as jest.Mock).mockRejectedValue(new Error('db error'));
 
-    await expect(menuService.upsert('2026-06-06', {})).rejects.toThrow('db error');
+    await expect(menuService.upsert('2026-06-16', {})).rejects.toThrow('db error');
   });
 });
 
@@ -98,31 +79,42 @@ describe('menuService.findByDate', () => {
     const menu = makeMenu();
     (Menu.findOne as jest.Mock).mockResolvedValue(menu);
 
-    const result = await menuService.findByDate('2026-06-06');
+    const result = await menuService.findByDate('2026-06-16');
 
-    expect(result).toMatchObject({ date: '2026-06-06' });
+    expect(result).toMatchObject({ date: '2026-06-16' });
   });
 
   it('returns null when no menu exists for the date', async () => {
     (Menu.findOne as jest.Mock).mockResolvedValue(null);
 
-    const result = await menuService.findByDate('2026-06-06');
+    const result = await menuService.findByDate('2026-06-16');
 
     expect(result).toBeNull();
   });
 });
 
 describe('menuService.findAll', () => {
-  it('returns all stored menus ordered by date descending', async () => {
+  it('returns menus for the current week ordered by date ascending', async () => {
     const menus = [
-      makeMenu({ id: 2, date: '2026-06-06' }),
-      makeMenu({ id: 1, date: '2026-06-05' }),
+      makeMenu({ id: 1, date: '2026-06-15' }),
+      makeMenu({ id: 2, date: '2026-06-16' }),
     ];
     (Menu.findAll as jest.Mock).mockResolvedValue(menus);
 
     const result = await menuService.findAll();
 
+    expect(Menu.findAll).toHaveBeenCalledWith({
+      where: { date: { [Op.between]: ['2026-06-15', '2026-06-19'] } },
+      order: [['date', 'ASC']],
+    });
     expect(result).toHaveLength(2);
-    expect(result[0]).toMatchObject({ date: '2026-06-06' });
+  });
+
+  it('returns empty array when no menus exist for the current week', async () => {
+    (Menu.findAll as jest.Mock).mockResolvedValue([]);
+
+    const result = await menuService.findAll();
+
+    expect(result).toEqual([]);
   });
 });
