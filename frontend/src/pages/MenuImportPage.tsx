@@ -26,22 +26,35 @@ function getWeekDays(): string[] {
 
 // --- Editable day card (today / tomorrow) ---
 
+type CardVariant = 'today' | 'tomorrow' | 'default';
+
+const CARD_STYLES: Record<CardVariant, { border: string; headerBg: string; dateColor: string }> = {
+  today: {
+    border: 'border-l-[3px] border-l-olive-800',
+    headerBg: 'bg-olive-50',
+    dateColor: 'text-olive-800',
+  },
+  tomorrow: {
+    border: 'border-l-[3px] border-l-warn',
+    headerBg: 'bg-warn-bg',
+    dateColor: 'text-warn',
+  },
+  default: { border: '', headerBg: '', dateColor: 'text-ink' },
+};
+
 interface MenuCardProps {
   menu: Menu;
   onEdit: () => void;
-  isToday?: boolean;
+  variant?: CardVariant;
 }
 
-function MenuCard({ menu, onEdit, isToday }: MenuCardProps) {
+function MenuCard({ menu, onEdit, variant = 'default' }: MenuCardProps) {
   const filled = MEAL_FIELDS.filter((f) => menu[f]);
+  const { border, headerBg, dateColor } = CARD_STYLES[variant];
   return (
-    <div
-      className={`bg-paper rounded-lg overflow-hidden border border-rule ${isToday ? 'border-l-[3px] border-l-olive-800' : ''}`}
-    >
-      <div className="flex items-center px-5 pt-4 pb-3 border-b border-rule">
-        <p className={`font-serif text-[15px] ${isToday ? 'text-olive-800' : 'text-ink'}`}>
-          {formatDateLabel(menu.date)}
-        </p>
+    <div className={`bg-paper rounded-lg overflow-hidden border border-rule ${border}`}>
+      <div className={`flex items-center px-5 pt-4 pb-3 border-b border-rule ${headerBg}`}>
+        <p className={`font-serif text-[15px] ${dateColor}`}>{formatDateLabel(menu.date)}</p>
         <button
           type="button"
           onClick={onEdit}
@@ -75,11 +88,11 @@ interface DaySectionProps {
   date: string;
   menu: Menu | null;
   isWeekend: boolean;
-  isToday?: boolean;
+  variant?: CardVariant;
   onOpen: () => void;
 }
 
-function DaySection({ date, menu, isWeekend, isToday, onOpen }: DaySectionProps) {
+function DaySection({ date, menu, isWeekend, variant = 'default', onOpen }: DaySectionProps) {
   if (isWeekend) {
     return (
       <div className="bg-paper border border-rule rounded-lg px-5 py-4">
@@ -88,7 +101,7 @@ function DaySection({ date, menu, isWeekend, isToday, onOpen }: DaySectionProps)
     );
   }
   if (menu) {
-    return <MenuCard menu={menu} onEdit={onOpen} isToday={isToday} />;
+    return <MenuCard menu={menu} onEdit={onOpen} variant={variant} />;
   }
   return (
     <div className="bg-paper border border-rule rounded-lg px-5 py-4 flex items-center gap-4">
@@ -110,7 +123,27 @@ interface WeekGridProps {
   today: string;
 }
 
+type ColKind = 'past' | 'today' | 'tomorrow' | 'future';
+
+const COL_STYLES: Record<ColKind, { header: string; body: string; label: string; date: string }> = {
+  past: { header: 'bg-cream-2', body: '', label: 'text-muted', date: 'text-ink-2' },
+  today: {
+    header: 'bg-olive-50',
+    body: 'bg-olive-50/40',
+    label: 'text-olive-800',
+    date: 'text-olive-700',
+  },
+  tomorrow: {
+    header: 'bg-warn-bg',
+    body: 'bg-warn-bg/30',
+    label: 'text-warn',
+    date: 'text-warn',
+  },
+  future: { header: 'bg-cream-2', body: '', label: 'text-muted', date: 'text-ink-2' },
+};
+
 function WeekGrid({ weekDays, menus, today }: WeekGridProps) {
+  const tomorrow = toIso(addDays(new Date(), 1));
   return (
     <div data-testid="week-grid" className="border border-rule rounded-lg overflow-hidden">
       <div className="overflow-x-auto">
@@ -118,29 +151,28 @@ function WeekGrid({ weekDays, menus, today }: WeekGridProps) {
           {weekDays.map((date, i) => {
             const menu = menus.find((m) => m.date === date) ?? null;
             const filled = menu ? MEAL_FIELDS.filter((f) => menu[f]) : [];
-            const isCurrent = date === today;
+            const kind: ColKind = (() => {
+              if (date === today) return 'today';
+              if (date === tomorrow) return 'tomorrow';
+              if (date < today) return 'past';
+              return 'future';
+            })();
+            const s = COL_STYLES[kind];
             return (
               <div
                 key={date}
-                className={`flex-1 flex flex-col border-r border-rule last:border-r-0 ${isCurrent ? 'bg-olive-50' : ''}`}
+                className={`flex-1 flex flex-col border-r border-rule last:border-r-0 ${s.body}`}
               >
-                {/* Column header */}
-                <div
-                  className={`px-3 py-3 border-b border-rule ${isCurrent ? 'bg-olive-50' : 'bg-cream-2'}`}
-                >
+                <div className={`px-3 py-3 border-b border-rule ${s.header}`}>
                   <p
-                    className={`text-[9px] font-mono uppercase tracking-[.14em] font-semibold ${isCurrent ? 'text-olive-800' : 'text-muted'}`}
+                    className={`text-[9px] font-mono uppercase tracking-[.14em] font-semibold ${s.label}`}
                   >
                     {DAY_LABELS[i]}
                   </p>
-                  <p
-                    className={`text-[11px] font-mono mt-0.5 ${isCurrent ? 'text-olive-700' : 'text-ink-2'}`}
-                  >
+                  <p className={`text-[11px] font-mono mt-0.5 ${s.date}`}>
                     {format(parseISO(date), 'd MMM', { locale: es })}
                   </p>
                 </div>
-
-                {/* Column content */}
                 <div className="px-3 py-3 flex-1">
                   {filled.length === 0 ? (
                     <p className="text-[11px] text-muted italic">Sin menú</p>
@@ -197,7 +229,7 @@ export function MenuImportPage() {
         date={today}
         menu={todayMenu}
         isWeekend={isTodayWeekend}
-        isToday
+        variant="today"
         onOpen={() => openModal(today)}
       />
 
@@ -208,6 +240,7 @@ export function MenuImportPage() {
         date={tomorrow}
         menu={tomorrowMenu}
         isWeekend={isTomorrowWeekend}
+        variant="tomorrow"
         onOpen={() => openModal(tomorrow)}
       />
 
