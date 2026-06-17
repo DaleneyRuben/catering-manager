@@ -57,6 +57,14 @@ describe('planService.findAll', () => {
     expect(result).toHaveLength(1);
     expect(result[0]).toMatchObject({ name: 'Full Plan' });
   });
+
+  it('orders plans by price ascending', async () => {
+    (Plan.findAll as jest.Mock).mockResolvedValue([mockPlan]);
+
+    await planService.findAll();
+
+    expect(Plan.findAll).toHaveBeenCalledWith({ order: [['price', 'ASC']] });
+  });
 });
 
 describe('planService.findById', () => {

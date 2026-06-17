@@ -6,7 +6,7 @@ import { CreatePlanDto, UpdatePlanDto } from '../schemas/plan.schema';
 
 const create = (data: CreatePlanDto) => Plan.create(data as never);
 
-const findAll = () => Plan.findAll();
+const findAll = () => Plan.findAll({ order: [['price', 'ASC']] });
 
 const findById = (id: number) => Plan.findByPk(id);
 
