@@ -32,7 +32,7 @@ export function ClientHistoryTab({ clientId }: Props) {
         {history.map((entry, i) => {
           const meta = entry.metadata;
           const planName = typeof meta?.planName === 'string' ? meta.planName : null;
-          const planPrice = typeof meta?.planPrice === 'number' ? meta.planPrice : null;
+          const planPrice = meta?.planPrice !== null ? parseFloat(String(meta.planPrice)) : null;
           const discount = typeof meta?.discount === 'number' ? meta.discount : 0;
           const showPlanDetails =
             (entry.eventType === 'plan_assigned' ||
