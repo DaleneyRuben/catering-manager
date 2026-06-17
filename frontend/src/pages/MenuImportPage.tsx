@@ -239,7 +239,7 @@ export function MenuImportPage() {
     <div className="px-4 py-5 lg:p-7 max-w-[900px] mx-auto">
       <PageHeader label="Operativa diaria" title="Menú del día" />
 
-      <p className="text-[10.5px] font-mono uppercase tracking-[.14em] text-muted mb-3">Hoy</p>
+      <p className="text-[12px] font-mono uppercase tracking-[.14em] text-olive-800 mb-3">Hoy</p>
       <DaySection
         date={today}
         menu={todayMenu}
@@ -248,9 +248,7 @@ export function MenuImportPage() {
         onOpen={() => openModal(today)}
       />
 
-      <p className="text-[10.5px] font-mono uppercase tracking-[.14em] text-muted mt-6 mb-3">
-        Mañana
-      </p>
+      <p className="text-[12px] font-mono uppercase tracking-[.14em] text-warn mt-6 mb-3">Mañana</p>
       <DaySection
         date={tomorrow}
         menu={tomorrowMenu}
@@ -259,7 +257,7 @@ export function MenuImportPage() {
         onOpen={() => openModal(tomorrow)}
       />
 
-      <p className="text-[10.5px] font-mono uppercase tracking-[.14em] text-muted mt-8 mb-3">
+      <p className="text-[12px] font-mono uppercase tracking-[.14em] text-warn mt-8 mb-3">
         Esta semana
       </p>
       <WeekGrid weekDays={weekDays} menus={menus} today={today} />
