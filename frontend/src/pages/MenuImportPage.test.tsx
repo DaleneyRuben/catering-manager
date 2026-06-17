@@ -110,10 +110,17 @@ describe('MenuImportPage', () => {
     expect(screen.getByRole('button', { name: /editar menú/i })).toBeInTheDocument();
   });
 
-  it('shows Sin menú in week grid for all days when no menus exist', () => {
+  it('shows meal row labels in week grid', () => {
     render(<MenuImportPage />);
     const grid = screen.getByTestId('week-grid');
-    expect(within(grid).getAllByText('Sin menú')).toHaveLength(5);
+    expect(within(grid).getByText('Desayuno')).toBeInTheDocument();
+    expect(within(grid).getByText('Almuerzo')).toBeInTheDocument();
+  });
+
+  it('shows dashes in week grid for empty cells', () => {
+    render(<MenuImportPage />);
+    const grid = screen.getByTestId('week-grid');
+    expect(within(grid).getAllByText('—').length).toBeGreaterThan(0);
   });
 
   it('shows meal value in week grid for a day that has a menu', () => {
@@ -121,12 +128,5 @@ describe('MenuImportPage', () => {
     render(<MenuImportPage />);
     const grid = screen.getByTestId('week-grid');
     expect(within(grid).getByText('Pancakes')).toBeInTheDocument();
-  });
-
-  it('shows four Sin menú entries in week grid when one day has a menu', () => {
-    setupMenu({ menus: [makeMenu(MONDAY, 'Pancakes')] });
-    render(<MenuImportPage />);
-    const grid = screen.getByTestId('week-grid');
-    expect(within(grid).getAllByText('Sin menú')).toHaveLength(4);
   });
 });

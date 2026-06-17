@@ -144,55 +144,70 @@ const COL_STYLES: Record<ColKind, { header: string; body: string; label: string;
 
 function WeekGrid({ weekDays, menus, today }: WeekGridProps) {
   const tomorrow = toIso(addDays(new Date(), 1));
+
+  const kinds: ColKind[] = weekDays.map((date) => {
+    if (date === today) return 'today';
+    if (date === tomorrow) return 'tomorrow';
+    if (date < today) return 'past';
+    return 'future';
+  });
+
   return (
     <div data-testid="week-grid" className="border border-rule rounded-lg overflow-hidden">
       <div className="overflow-x-auto">
-        <div className="flex min-w-[560px]">
-          {weekDays.map((date, i) => {
-            const menu = menus.find((m) => m.date === date) ?? null;
-            const filled = menu ? MEAL_FIELDS.filter((f) => menu[f]) : [];
-            const kind: ColKind = (() => {
-              if (date === today) return 'today';
-              if (date === tomorrow) return 'tomorrow';
-              if (date < today) return 'past';
-              return 'future';
-            })();
-            const s = COL_STYLES[kind];
-            return (
-              <div
-                key={date}
-                className={`flex-1 flex flex-col border-r border-rule last:border-r-0 ${s.body}`}
-              >
-                <div className={`px-3 py-3 border-b border-rule ${s.header}`}>
-                  <p
-                    className={`text-[9px] font-mono uppercase tracking-[.14em] font-semibold ${s.label}`}
+        <table className="w-full border-collapse">
+          <thead>
+            <tr>
+              <th
+                scope="col"
+                aria-label="Tipo de comida"
+                className="bg-cream-2 border-b border-r border-rule px-4 py-3 min-w-[110px]"
+              />
+              {weekDays.map((date, i) => {
+                const s = COL_STYLES[kinds[i]];
+                return (
+                  <th
+                    key={date}
+                    className={`${s.header} border-b border-l border-rule px-3 py-3 text-left min-w-[130px]`}
                   >
-                    {DAY_LABELS[i]}
+                    <p
+                      className={`text-[9px] font-mono uppercase tracking-[.14em] font-semibold ${s.label}`}
+                    >
+                      {DAY_LABELS[i]}
+                    </p>
+                    <p className={`text-[11px] font-mono mt-0.5 ${s.date}`}>
+                      {format(parseISO(date), 'd MMM', { locale: es })}
+                    </p>
+                  </th>
+                );
+              })}
+            </tr>
+          </thead>
+          <tbody>
+            {MEAL_FIELDS.map((field) => (
+              <tr key={field} className="border-t border-rule">
+                <td className="bg-cream-2 sticky left-0 z-10 px-4 py-2.5 border-r border-rule">
+                  <p className="text-[9px] font-mono uppercase tracking-[.14em] text-muted whitespace-nowrap">
+                    {MEAL_FIELD_LABELS[field]}
                   </p>
-                  <p className={`text-[11px] font-mono mt-0.5 ${s.date}`}>
-                    {format(parseISO(date), 'd MMM', { locale: es })}
-                  </p>
-                </div>
-                <div className="px-3 py-3 flex-1">
-                  {filled.length === 0 ? (
-                    <p className="text-[11px] text-muted italic">Sin menú</p>
-                  ) : (
-                    <div className="space-y-2.5">
-                      {filled.map((field) => (
-                        <div key={field}>
-                          <p className="text-[8.5px] font-mono uppercase tracking-[.12em] text-muted leading-none mb-0.5">
-                            {MEAL_FIELD_LABELS[field]}
-                          </p>
-                          <p className="text-[12px] text-ink leading-snug">{menu![field]}</p>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-            );
-          })}
-        </div>
+                </td>
+                {weekDays.map((date, di) => {
+                  const menu = menus.find((m) => m.date === date) ?? null;
+                  const s = COL_STYLES[kinds[di]];
+                  const value = menu?.[field];
+                  return (
+                    <td
+                      key={date}
+                      className={`${s.body} border-l border-rule px-3 py-2.5 text-[13px] text-ink align-top`}
+                    >
+                      {value ?? <span className="text-muted text-[12px]">—</span>}
+                    </td>
+                  );
+                })}
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     </div>
   );
