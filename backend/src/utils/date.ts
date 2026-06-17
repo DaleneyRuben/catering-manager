@@ -1,4 +1,12 @@
-import { addBusinessDays, subBusinessDays, format, parseISO } from 'date-fns';
+import {
+  addBusinessDays,
+  subBusinessDays,
+  format,
+  parseISO,
+  getDay,
+  startOfISOWeek,
+  addDays,
+} from 'date-fns';
 import { formatInTimeZone } from 'date-fns-tz';
 
 const APP_TIMEZONE = 'America/La_Paz';
@@ -17,4 +25,15 @@ export const addDeliveryDays = (startDate: string, days: number): string => {
 export const subtractDeliveryDays = (startDate: string, days: number): string => {
   const result = subBusinessDays(parseISO(`${startDate}T12:00:00`), days);
   return format(result, 'yyyy-MM-dd');
+};
+
+// Returns the Mon–Fri bounds of the current display week (Bolivia time).
+// On Sunday the upcoming week is returned so the view resets for a fresh week.
+export const getCurrentMenuWeek = (): { start: string; end: string } => {
+  const todayStr = appToday();
+  const today = parseISO(todayStr);
+  const dayOfWeek = getDay(today); // 0=Sun, 1=Mon, …, 6=Sat
+  const monday = dayOfWeek === 0 ? addDays(today, 1) : startOfISOWeek(today);
+  const friday = addDays(monday, 4);
+  return { start: format(monday, 'yyyy-MM-dd'), end: format(friday, 'yyyy-MM-dd') };
 };
