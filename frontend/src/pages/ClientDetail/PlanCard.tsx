@@ -38,7 +38,7 @@ export function PlanCard({ sub, onUpdateBilling }: Props) {
     <div className="bg-paper border border-rule rounded-lg p-5">
       <div className="flex items-start flex-wrap gap-3 mb-4">
         <div>
-          <p className="text-[11px] font-mono uppercase tracking-wider text-muted mb-1">
+          <p className="text-[12px] font-mono uppercase tracking-wider text-olive-800 mb-1">
             Plan asignado
           </p>
           <p className="font-serif text-[28px]">{sub.plan.name}</p>
@@ -63,7 +63,7 @@ export function PlanCard({ sub, onUpdateBilling }: Props) {
       </div>
       <hr className="border-rule mb-4" />
       <div className="flex items-center mb-3">
-        <p className="text-[11px] font-mono uppercase tracking-wider text-muted">
+        <p className="text-[12px] font-mono uppercase tracking-wider text-olive-800">
           Precio y descuento
         </p>
         {!editing && (
@@ -81,7 +81,7 @@ export function PlanCard({ sub, onUpdateBilling }: Props) {
         <div className="flex flex-col gap-3">
           <div className="grid grid-cols-3 gap-3 items-end">
             <div>
-              <p className="text-[11px] font-mono uppercase tracking-wider text-muted mb-1">
+              <p className="text-[12px] font-mono uppercase tracking-wider text-olive-800 mb-1">
                 Precio
               </p>
               <input
@@ -94,7 +94,7 @@ export function PlanCard({ sub, onUpdateBilling }: Props) {
               />
             </div>
             <div>
-              <p className="text-[11px] font-mono uppercase tracking-wider text-muted mb-1">
+              <p className="text-[12px] font-mono uppercase tracking-wider text-olive-800 mb-1">
                 Descuento
               </p>
               <p className="font-mono text-[13px] py-1.5 px-2.5 bg-cream-2 rounded-md border border-rule">
@@ -102,7 +102,7 @@ export function PlanCard({ sub, onUpdateBilling }: Props) {
               </p>
             </div>
             <div>
-              <p className="text-[11px] font-mono uppercase tracking-wider text-muted mb-1">
+              <p className="text-[12px] font-mono uppercase tracking-wider text-olive-800 mb-1">
                 Total
               </p>
               <p
@@ -128,17 +128,19 @@ export function PlanCard({ sub, onUpdateBilling }: Props) {
       ) : (
         <div className="grid grid-cols-3 gap-3">
           <div>
-            <p className="text-[11px] font-mono uppercase tracking-wider text-muted">Precio</p>
+            <p className="text-[12px] font-mono uppercase tracking-wider text-olive-800">Precio</p>
             <p className="font-mono text-[14px]">{sub.plan.price}</p>
           </div>
           <div>
-            <p className="text-[11px] font-mono uppercase tracking-wider text-muted">Descuento</p>
+            <p className="text-[12px] font-mono uppercase tracking-wider text-olive-800">
+              Descuento
+            </p>
             <p className="font-mono text-[14px] text-muted">
               {sub.discount > 0 ? sub.discount : '—'}
             </p>
           </div>
           <div>
-            <p className="text-[11px] font-mono uppercase tracking-wider text-muted">Total</p>
+            <p className="text-[12px] font-mono uppercase tracking-wider text-olive-800">Total</p>
             <p className="font-mono text-[14px] font-bold text-olive-800">
               {planPrice - sub.discount}
             </p>

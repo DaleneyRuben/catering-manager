@@ -54,7 +54,7 @@ export function ContractCard({ sub, remaining, onUpdateContract }: Props) {
   return (
     <div className="bg-paper border border-rule rounded-lg p-5">
       <div className="flex items-center mb-3">
-        <p className="text-[11px] font-mono uppercase tracking-wider text-muted">Contrato</p>
+        <p className="text-[12px] font-mono uppercase tracking-wider text-olive-800">Contrato</p>
         {!editing && (
           <button
             type="button"
@@ -71,7 +71,7 @@ export function ContractCard({ sub, remaining, onUpdateContract }: Props) {
         <div className="flex flex-col gap-3">
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <p className="text-[11px] font-mono uppercase tracking-wider text-muted mb-1">
+              <p className="text-[12px] font-mono uppercase tracking-wider text-olive-800 mb-1">
                 Firma
               </p>
               <DatePickerInput
@@ -81,13 +81,13 @@ export function ContractCard({ sub, remaining, onUpdateContract }: Props) {
               />
             </div>
             <div>
-              <p className="text-[11px] font-mono uppercase tracking-wider text-muted mb-1">
+              <p className="text-[12px] font-mono uppercase tracking-wider text-olive-800 mb-1">
                 Inicio
               </p>
               <DatePickerInput value={startDate} onChange={setStartDate} />
             </div>
             <div>
-              <p className="text-[11px] font-mono uppercase tracking-wider text-muted mb-1">
+              <p className="text-[12px] font-mono uppercase tracking-wider text-olive-800 mb-1">
                 Duración (días hábiles)
               </p>
               <input
@@ -99,7 +99,9 @@ export function ContractCard({ sub, remaining, onUpdateContract }: Props) {
               />
             </div>
             <div>
-              <p className="text-[11px] font-mono uppercase tracking-wider text-muted mb-1">Fin</p>
+              <p className="text-[12px] font-mono uppercase tracking-wider text-olive-800 mb-1">
+                Fin
+              </p>
               <p className="font-mono text-[13px] py-1.5">{formatDate(previewEndDate)}</p>
             </div>
           </div>
@@ -115,19 +117,19 @@ export function ContractCard({ sub, remaining, onUpdateContract }: Props) {
       ) : (
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <p className="text-[11px] font-mono uppercase tracking-wider text-muted">Firma</p>
+            <p className="text-[12px] font-mono uppercase tracking-wider text-olive-800">Firma</p>
             <p className="font-mono text-[13px]">{formatDate(sub.contractDate)}</p>
           </div>
           <div>
-            <p className="text-[11px] font-mono uppercase tracking-wider text-muted">Inicio</p>
+            <p className="text-[12px] font-mono uppercase tracking-wider text-olive-800">Inicio</p>
             <p className="font-mono text-[13px]">{formatDate(sub.startDate)}</p>
           </div>
           <div>
-            <p className="text-[11px] font-mono uppercase tracking-wider text-muted">Fin</p>
+            <p className="text-[12px] font-mono uppercase tracking-wider text-olive-800">Fin</p>
             <p className="font-mono text-[13px]">{formatDate(sub.contractEndDate)}</p>
           </div>
           <div>
-            <p className="text-[11px] font-mono uppercase tracking-wider text-muted">Restan</p>
+            <p className="text-[12px] font-mono uppercase tracking-wider text-olive-800">Restan</p>
             <p className="font-mono text-[13px]">{remaining} d. hábiles</p>
           </div>
         </div>

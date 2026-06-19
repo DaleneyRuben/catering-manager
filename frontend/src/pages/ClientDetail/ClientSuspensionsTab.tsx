@@ -12,7 +12,7 @@ export function ClientSuspensionsTab({ sub, onSuspend }: Props) {
     <div className="bg-paper border border-rule rounded-lg p-5">
       <div className="flex items-center mb-4">
         <div>
-          <p className="text-[10.5px] font-mono uppercase tracking-wider text-muted mb-0.5">
+          <p className="text-[12px] font-mono uppercase tracking-wider text-olive-800 mb-0.5">
             Días suspendidos
           </p>
           <p className="font-serif text-[32px] leading-none text-ink">

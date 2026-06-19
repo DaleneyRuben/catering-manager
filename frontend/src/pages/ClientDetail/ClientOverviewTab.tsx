@@ -21,7 +21,7 @@ export function ClientOverviewTab({ client, sub, remaining }: Props) {
             <>
               <div className="flex items-start justify-between gap-4 mb-3">
                 <div>
-                  <p className="text-[10.5px] font-mono uppercase tracking-wider text-muted mb-1">
+                  <p className="text-[12px] font-mono uppercase tracking-wider text-olive-800 mb-1">
                     {status === CLIENT_STATUS.ENDED ? 'Último plan' : 'Plan vigente'}
                   </p>
                   <p className="font-serif text-[24px] leading-tight text-ink">{sub.plan.name}</p>
@@ -65,7 +65,9 @@ export function ClientOverviewTab({ client, sub, remaining }: Props) {
         </div>
 
         <div className="bg-paper border border-rule rounded-lg p-5">
-          <p className="text-[11px] font-mono uppercase tracking-wider text-muted mb-3">Contacto</p>
+          <p className="text-[12px] font-mono uppercase tracking-wider text-olive-800 mb-3">
+            Contacto
+          </p>
           <div className="flex flex-col gap-2.5">
             <div className="flex items-center gap-2.5">
               <Icon name="phone" size={14} />
@@ -85,16 +87,18 @@ export function ClientOverviewTab({ client, sub, remaining }: Props) {
           {(client.nit || client.businessName) && (
             <>
               <hr className="border-rule my-3" />
-              <p className="text-[11px] font-mono uppercase tracking-wider text-muted mb-2">
+              <p className="text-[12px] font-mono uppercase tracking-wider text-olive-800 mb-2">
                 Facturación
               </p>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <p className="text-[11px] font-mono uppercase tracking-wider text-muted">NIT</p>
+                  <p className="text-[12px] font-mono uppercase tracking-wider text-olive-800">
+                    NIT
+                  </p>
                   <p className="font-mono text-[13px]">{client.nit || '—'}</p>
                 </div>
                 <div>
-                  <p className="text-[11px] font-mono uppercase tracking-wider text-muted">
+                  <p className="text-[12px] font-mono uppercase tracking-wider text-olive-800">
                     Razón social
                   </p>
                   <p className="font-mono text-[13px]">{client.businessName || '—'}</p>
@@ -108,7 +112,7 @@ export function ClientOverviewTab({ client, sub, remaining }: Props) {
       <div className="col-span-12 lg:col-span-5 flex flex-col gap-4">
         <div className="bg-paper border border-rule rounded-lg p-5">
           <div className="flex items-center mb-3">
-            <p className="text-[11px] font-mono uppercase tracking-wider text-muted">
+            <p className="text-[12px] font-mono uppercase tracking-wider text-olive-800">
               Restricciones
             </p>
             <span className="ml-auto font-mono text-[10.5px] text-muted">
@@ -121,7 +125,7 @@ export function ClientOverviewTab({ client, sub, remaining }: Props) {
             <div className="space-y-3">
               {client.underlyingDiseases.length > 0 && (
                 <div>
-                  <p className="text-[11px] font-mono uppercase tracking-wider text-muted mb-1.5">
+                  <p className="text-[12px] font-mono uppercase tracking-wider text-olive-800 mb-1.5">
                     Enfermedades
                   </p>
                   <div className="flex flex-wrap gap-1.5">
@@ -138,7 +142,7 @@ export function ClientOverviewTab({ client, sub, remaining }: Props) {
               )}
               {client.restrictions.length > 0 && (
                 <div>
-                  <p className="text-[11px] font-mono uppercase tracking-wider text-muted mb-1.5">
+                  <p className="text-[12px] font-mono uppercase tracking-wider text-olive-800 mb-1.5">
                     Alergias y gustos
                   </p>
                   <div className="flex flex-wrap gap-1.5">

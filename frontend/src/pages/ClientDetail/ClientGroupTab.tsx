@@ -30,7 +30,7 @@ export function ClientGroupTab({ clientId, initialMembers }: Props) {
       <div className="grid grid-cols-2 gap-6 min-h-[200px]">
         {/* left column — current members */}
         <div>
-          <p className="text-[10.5px] font-mono uppercase tracking-wider text-muted mb-3">
+          <p className="text-[12px] font-mono uppercase tracking-wider text-olive-800 mb-3">
             En el grupo
           </p>
           {members.length === 0 ? (
@@ -57,7 +57,7 @@ export function ClientGroupTab({ clientId, initialMembers }: Props) {
 
         {/* right column — search to add */}
         <div>
-          <p className="text-[10.5px] font-mono uppercase tracking-wider text-muted mb-3">
+          <p className="text-[12px] font-mono uppercase tracking-wider text-olive-800 mb-3">
             Agregar miembro
           </p>
           <input
