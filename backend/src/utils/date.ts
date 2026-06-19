@@ -27,6 +27,12 @@ export const subtractDeliveryDays = (startDate: string, days: number): string =>
   return format(result, 'yyyy-MM-dd');
 };
 
+// startDate counts as day 1, so end = startDate + (duration - 1) delivery days
+export const calcContractEndDate = (startDate: string | null, duration: number): string | null => {
+  if (!startDate) return null;
+  return addDeliveryDays(startDate, duration - 1);
+};
+
 // Returns the Mon–Fri bounds of the current display week (Bolivia time).
 // On Sunday the upcoming week is returned so the view resets for a fresh week.
 export const getCurrentMenuWeek = (): { start: string; end: string } => {

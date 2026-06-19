@@ -1,4 +1,4 @@
-import { addDeliveryDays, subtractDeliveryDays, toAppDate } from '../date';
+import { addDeliveryDays, subtractDeliveryDays, toAppDate, calcContractEndDate } from '../date';
 
 describe('addDeliveryDays', () => {
   it('adds business days skipping weekends', () => {
@@ -40,6 +40,20 @@ describe('toAppDate', () => {
   it('handles midnight UTC crossing into the previous Bolivia day', () => {
     // 2026-06-04T02:00:00Z = 2026-06-03 10:00 PM in La Paz (UTC-4)
     expect(toAppDate(new Date('2026-06-04T02:00:00Z'))).toBe('2026-06-03');
+  });
+});
+
+describe('calcContractEndDate', () => {
+  it('returns startDate + (duration - 1) delivery days', () => {
+    expect(calcContractEndDate('2026-05-26', 20)).toBe(addDeliveryDays('2026-05-26', 19));
+  });
+
+  it('returns startDate itself when duration is 1', () => {
+    expect(calcContractEndDate('2026-05-26', 1)).toBe('2026-05-26');
+  });
+
+  it('returns null when startDate is null', () => {
+    expect(calcContractEndDate(null, 20)).toBeNull();
   });
 });
 
