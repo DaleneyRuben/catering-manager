@@ -16,3 +16,4 @@ package-lock.json
 .DS_Store
 .vscode/
 design-export/
+package-lock.json
