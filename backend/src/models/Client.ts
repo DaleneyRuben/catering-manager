@@ -40,6 +40,9 @@ class Client extends Model {
   @Column({ type: DataType.DATE, allowNull: true, defaultValue: null })
   declare pausedSince: Date | null;
 
+  @Column({ type: DataType.UUID, allowNull: true, defaultValue: null })
+  declare groupToken: string | null;
+
   @HasMany(() => Subscription)
   declare subscriptions: Subscription[];
 
