@@ -3,6 +3,7 @@ import Client from '../../models/Client';
 import ClientHistory from '../../models/ClientHistory';
 import sequelize from '../../database/sequelize';
 import clientService from '../client.service';
+import deliveryGroupService from '../deliveryGroup.service';
 
 jest.mock('../../models/Client');
 jest.mock('../../models/ClientHistory');
@@ -14,6 +15,10 @@ jest.mock('../../database/sequelize', () => ({
 jest.mock('../../utils/date', () => ({
   ...jest.requireActual('../../utils/date'),
   appToday: jest.fn(() => '2026-06-05'),
+}));
+jest.mock('../deliveryGroup.service', () => ({
+  __esModule: true,
+  default: { findMembers: jest.fn() },
 }));
 
 const mockClient = {
@@ -147,6 +152,28 @@ describe('clientService.findById', () => {
     const result = await clientService.findById(999);
 
     expect(result).toBeNull();
+  });
+
+  it('includes empty groupMembers when client has no groupToken', async () => {
+    (Client.findByPk as jest.Mock).mockResolvedValue({ ...mockClient, groupToken: null });
+
+    const result = await clientService.findById(1);
+
+    expect(result).toMatchObject({ groupMembers: [] });
+    expect(deliveryGroupService.findMembers).not.toHaveBeenCalled();
+  });
+
+  it('includes groupMembers excluding self when client has a groupToken', async () => {
+    (Client.findByPk as jest.Mock).mockResolvedValue({ ...mockClient, groupToken: 'tok-1' });
+    (deliveryGroupService.findMembers as jest.Mock).mockResolvedValue([
+      { id: 1, name: 'John Doe' },
+      { id: 2, name: 'Ana' },
+    ]);
+
+    const result = await clientService.findById(1);
+
+    expect(deliveryGroupService.findMembers).toHaveBeenCalledWith('tok-1');
+    expect(result).toMatchObject({ groupMembers: [{ id: 2, name: 'Ana' }] });
   });
 });
 

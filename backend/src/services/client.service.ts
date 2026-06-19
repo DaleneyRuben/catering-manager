@@ -10,6 +10,7 @@ import Plan from '../models/Plan';
 import Subscription from '../models/Subscription';
 import sequelize from '../database/sequelize';
 import { CreateClientDto, UpdateClientDto } from '../schemas/client.schema';
+import deliveryGroupService from './deliveryGroup.service';
 
 // Ordered newest-first so subscriptions[0] is always the current subscription
 const INCLUDE_SUBSCRIPTION_ORDERED = [
@@ -194,7 +195,11 @@ const getCounts = async () => {
 const findById = async (id: number) => {
   const client = await Client.findByPk(id, { include: INCLUDE_SUBSCRIPTION_ORDERED });
   if (!client) return null;
-  return withStatus(client);
+  const base = withStatus(client);
+  const groupMembers = client.groupToken
+    ? (await deliveryGroupService.findMembers(client.groupToken)).filter((m) => m.id !== id)
+    : [];
+  return { ...base, groupMembers };
 };
 
 const update = async (id: number, data: UpdateClientDto) => {
