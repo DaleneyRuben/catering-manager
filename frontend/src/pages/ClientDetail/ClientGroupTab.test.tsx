@@ -89,7 +89,7 @@ describe('ClientGroupTab', () => {
     expect(screen.getByText('Carlos')).toBeInTheDocument();
   });
 
-  it('calls add when + button on a search result is clicked', () => {
+  it('calls add when a search result row is clicked', () => {
     const add = jest.fn();
     mockUseClientGroup.mockReturnValue(mockHook({ add }));
     mockUseClientList.mockReturnValue({

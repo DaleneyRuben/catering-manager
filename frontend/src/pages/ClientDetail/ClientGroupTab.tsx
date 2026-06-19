@@ -68,11 +68,7 @@ export function ClientGroupTab({ clientId, initialMembers }: Props) {
           {search && searchResults.length > 0 && (
             <ul className="mt-1.5 border border-rule rounded-md overflow-hidden">
               {searchResults.map((c) => (
-                <li
-                  key={c.id}
-                  className="flex items-center justify-between px-3 py-2 hover:bg-olive-100 transition-colors"
-                >
-                  <span className="font-mono text-[13px] text-ink">{c.name}</span>
+                <li key={c.id}>
                   <Button
                     variant="secondary"
                     size="sm"
@@ -81,8 +77,9 @@ export function ClientGroupTab({ clientId, initialMembers }: Props) {
                       add({ id: c.id, name: c.name });
                       setSearch('');
                     }}
+                    className="w-full justify-start border-0 border-b border-rule rounded-none font-mono font-normal last:border-b-0"
                   >
-                    +
+                    {c.name}
                   </Button>
                 </li>
               ))}
