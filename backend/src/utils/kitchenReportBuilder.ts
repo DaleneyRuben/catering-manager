@@ -13,9 +13,17 @@ import {
   BorderStyle,
   AlignmentType,
 } from 'docx';
-import { format, parseISO } from 'date-fns';
-import { es } from 'date-fns/locale';
 import type { ActiveClientRow } from '../services/report.service';
+import {
+  type MenuData,
+  type MealConfig,
+  PASTELERIA_MEALS,
+  PRODUCCION_MEALS,
+  computeKitchenReportData,
+} from './kitchenReportData';
+
+export type { MenuData, MealSection, KitchenReportData } from './kitchenReportData';
+export { computeKitchenReportData, kitchenReportFileName } from './kitchenReportData';
 
 const RED = 'C00000';
 const GRAY = '595959';
@@ -25,10 +33,10 @@ const COL_WIDTHS = [800, 3800, 3000, 3000, 3000, 800] as const;
 const NUM_CLIENT_COLS = 3;
 
 const W = {
-  count: COL_WIDTHS[0], // col 0 — left count (NO DAR, hiperproteico)
-  label: COL_WIDTHS[1], // col 1 — description / dish label
-  name: COL_WIDTHS[2], // cols 2-4 — client name columns (all equal)
-  rightCount: COL_WIDTHS[5], // col 5 — right count (per-meal total, total clients)
+  count: COL_WIDTHS[0],
+  label: COL_WIDTHS[1],
+  name: COL_WIDTHS[2],
+  rightCount: COL_WIDTHS[5],
   dish: COL_WIDTHS[1] + COL_WIDTHS[2] * 3,
   sectionLabel: COL_WIDTHS.slice(1).reduce((a: number, b) => a + b, 0),
   dateMain: COL_WIDTHS.slice(0, 5).reduce((a: number, b) => a + b, 0),
@@ -36,52 +44,6 @@ const W = {
   restrictionName: COL_WIDTHS[1] + COL_WIDTHS[2],
   restrictionConflicts: COL_WIDTHS[2] * 2 + COL_WIDTHS[5],
 } as const;
-
-export type MenuData = {
-  breakfast: string | null;
-  morningSnack: string | null;
-  salad: string | null;
-  lunch: string | null;
-  afternoonSnack: string | null;
-  dinner: string | null;
-  juice: string | null;
-};
-
-type MealKey = 'breakfast' | 'morning_snack' | 'salad' | 'lunch' | 'afternoon_snack' | 'dinner';
-
-type MealConfig = {
-  key: MealKey;
-  label: string;
-  menuField: keyof MenuData;
-};
-
-export type MealSection = {
-  label: string;
-  dish: string;
-  count: number;
-  noDar: string[];
-};
-
-export type KitchenReportData = {
-  dateText: string;
-  totalClients: number;
-  pasteleria: MealSection[];
-  hiperproteico: string[];
-  produccion: MealSection[];
-  restrictionConflicts: { name: string; conflicts: string[] }[];
-};
-
-const PASTELERIA_MEALS: MealConfig[] = [
-  { key: 'breakfast', label: 'DESAYUNO', menuField: 'breakfast' },
-  { key: 'morning_snack', label: 'MEDIA MAÑANA', menuField: 'morningSnack' },
-  { key: 'afternoon_snack', label: 'MERIENDA TARDE', menuField: 'afternoonSnack' },
-];
-
-const PRODUCCION_MEALS: MealConfig[] = [
-  { key: 'lunch', label: 'ALMUERZO', menuField: 'lunch' },
-  { key: 'salad', label: 'ENSALADA', menuField: 'salad' },
-  { key: 'dinner', label: 'CENA', menuField: 'dinner' },
-];
 
 const MEAL_LABEL_SHADING = { type: ShadingType.CLEAR, color: 'auto', fill: 'D9D9D9' };
 
@@ -313,55 +275,6 @@ const buildDocxTable = (rows: TableRow[]): Table =>
     borders: NO_BORDERS,
   });
 
-const formatDateText = (date: string): string => {
-  const parsed = parseISO(date);
-  const day = format(parsed, 'dd');
-  const month = format(parsed, 'MMMM', { locale: es }).toUpperCase();
-  const year = format(parsed, 'yyyy');
-  return `FECHA: ${day} – ${month} – ${year}`;
-};
-
-export const computeKitchenReportData = (
-  menu: MenuData,
-  clients: ActiveClientRow[],
-  date: string,
-): KitchenReportData => {
-  const allDishes = [
-    menu.breakfast,
-    menu.morningSnack,
-    menu.salad,
-    menu.lunch,
-    menu.afternoonSnack,
-    menu.dinner,
-    menu.juice,
-  ]
-    .filter(Boolean)
-    .join(' ')
-    .toLowerCase();
-
-  const toSection = (configs: MealConfig[]): MealSection[] =>
-    configs.map((m) => ({
-      label: m.label,
-      dish: menu[m.menuField] ?? '',
-      count: clients.filter((c) => c.planMeals.includes(m.key)).length,
-      noDar: clients.filter((c) => !c.planMeals.includes(m.key)).map((c) => c.name),
-    }));
-
-  return {
-    dateText: formatDateText(date),
-    totalClients: clients.length,
-    pasteleria: toSection(PASTELERIA_MEALS),
-    hiperproteico: clients.filter((c) => c.planMeals.includes('extra')).map((c) => c.name),
-    produccion: toSection(PRODUCCION_MEALS),
-    restrictionConflicts: clients
-      .map((c) => ({
-        name: c.name,
-        conflicts: c.restrictions.filter((r) => allDishes.includes(r.toLowerCase())),
-      }))
-      .filter((c) => c.conflicts.length > 0),
-  };
-};
-
 export const buildKitchenReport = async (
   menu: MenuData,
   clients: ActiveClientRow[],
@@ -412,11 +325,4 @@ export const buildKitchenReport = async (
   });
 
   return Buffer.from(await Packer.toBuffer(doc));
-};
-
-export const kitchenReportFileName = (date: string): string => {
-  const parsed = parseISO(date);
-  const dayName = format(parsed, 'EEEE', { locale: es });
-  const capitalized = dayName.charAt(0).toUpperCase() + dayName.slice(1);
-  return `${capitalized} ${format(parsed, 'dd-MM')}.docx`;
 };
