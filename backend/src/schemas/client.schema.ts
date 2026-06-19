@@ -35,3 +35,9 @@ export const updateClientSchema = z.object({
 });
 
 export type UpdateClientDto = z.infer<typeof updateClientSchema>;
+
+export const setGroupSchema = z.object({
+  memberIds: z.array(z.string()),
+});
+
+export type SetGroupDto = z.infer<typeof setGroupSchema>;
