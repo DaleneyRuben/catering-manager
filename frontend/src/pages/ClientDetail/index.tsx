@@ -12,18 +12,20 @@ import { ClientOverviewTab } from './ClientOverviewTab';
 import { ClientHistoryTab } from './ClientHistoryTab';
 import { ClientPlanTab } from './ClientPlanTab';
 import { ClientSuspensionsTab } from './ClientSuspensionsTab';
+import { ClientGroupTab } from './ClientGroupTab';
 import { ClientHeader } from './ClientHeader';
 import { RenewalModal } from '../../components/modals/RenewalModal';
 import { ConfirmModal } from '../../components/ui/ConfirmModal';
 import { PageLoader } from '../../components/ui/PageLoader';
 import { Tabs } from '../../components/ui/Tabs';
 
-type TabId = 'overview' | 'plan' | 'suspensions' | 'history';
+type TabId = 'overview' | 'plan' | 'suspensions' | 'grupo' | 'history';
 
 const TABS: { id: TabId; label: string }[] = [
   { id: 'overview', label: 'Resumen' },
   { id: 'plan', label: 'Plan + facturación' },
   { id: 'suspensions', label: 'Suspensiones' },
+  { id: 'grupo', label: 'Grupo' },
   { id: 'history', label: 'Historial' },
 ];
 
@@ -86,9 +88,10 @@ export function ClientDetailPage() {
   const { status } = client;
   const isEnded = status === CLIENT_STATUS.ENDED;
   const visibleTabs = isEnded
-    ? TABS.filter((t) => t.id !== 'plan' && t.id !== 'suspensions')
+    ? TABS.filter((t) => t.id !== 'plan' && t.id !== 'suspensions' && t.id !== 'grupo')
     : TABS;
-  const activeTab = isEnded && (tab === 'plan' || tab === 'suspensions') ? 'overview' : tab;
+  const activeTab =
+    isEnded && (tab === 'plan' || tab === 'suspensions' || tab === 'grupo') ? 'overview' : tab;
   const remaining =
     sub && sub.startDate && sub.contractEndDate
       ? remainingDeliveryDays(parseISO(sub.startDate), parseISO(sub.contractEndDate))
@@ -131,6 +134,10 @@ export function ClientDetailPage() {
 
       {activeTab === 'suspensions' && (
         <ClientSuspensionsTab sub={sub} onSuspend={() => setSuspendOpen(true)} />
+      )}
+
+      {activeTab === 'grupo' && (
+        <ClientGroupTab clientId={client.id} initialMembers={client.groupMembers} />
       )}
 
       {activeTab === 'history' && <ClientHistoryTab clientId={client.id} />}
