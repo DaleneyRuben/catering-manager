@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import clientService from '../services/client.service';
+import deliveryGroupService from '../services/deliveryGroup.service';
 import { sendSuccess, sendPaginated, sendError } from '../utils/response';
 import { decodeId } from '../utils/sqids';
 
@@ -91,4 +92,20 @@ const remove = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
-export default { create, getAll, getCounts, getById, update, finalize, remove };
+const setGroup = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const clientId = decodeId(req.params.id);
+    const memberIds = (req.body.memberIds as string[]).map(decodeId);
+    await deliveryGroupService.setGroup(clientId, memberIds);
+    const client = await clientService.findById(clientId);
+    if (!client) {
+      sendError(res, 'Client not found', 404);
+      return;
+    }
+    sendSuccess(res, client);
+  } catch (err) {
+    next(err);
+  }
+};
+
+export default { create, getAll, getCounts, getById, update, finalize, remove, setGroup };

@@ -4,6 +4,10 @@ import clientService from '../../services/client.service';
 import { encodeId } from '../../utils/sqids';
 
 jest.mock('../../services/client.service');
+jest.mock('../../services/deliveryGroup.service', () => ({
+  __esModule: true,
+  default: { setGroup: jest.fn() },
+}));
 jest.mock('../../database/sequelize', () => ({ __esModule: true, default: { query: jest.fn() } }));
 jest.mock('../../middleware/auth', () => ({
   requireAuth: (_req: unknown, _res: unknown, next: () => void) => next(),
@@ -328,5 +332,48 @@ describe('DELETE /api/clients/:id', () => {
     const res = await request(app).delete(`/api/clients/${id1}`);
 
     expect(res.status).toBe(500);
+  });
+});
+
+describe('PUT /api/clients/:id/group', () => {
+  it('returns 200 with updated client after setting group members', async () => {
+    (clientService.findById as jest.Mock).mockResolvedValue({
+      id: 1,
+      name: 'John',
+      groupMembers: [{ id: 2, name: 'Ana' }],
+    });
+
+    const res = await request(app)
+      .put(`/api/clients/${id1}/group`)
+      .send({ memberIds: [encodeId(2)] });
+
+    expect(res.status).toBe(200);
+    expect(res.body.data).toMatchObject({ groupMembers: expect.any(Array) });
+  });
+
+  it('returns 200 with empty groupMembers when memberIds is empty', async () => {
+    (clientService.findById as jest.Mock).mockResolvedValue({
+      id: 1,
+      name: 'John',
+      groupMembers: [],
+    });
+
+    const res = await request(app).put(`/api/clients/${id1}/group`).send({ memberIds: [] });
+
+    expect(res.status).toBe(200);
+  });
+
+  it('returns 400 when memberIds is missing', async () => {
+    const res = await request(app).put(`/api/clients/${id1}/group`).send({});
+
+    expect(res.status).toBe(400);
+  });
+
+  it('returns 404 when client is not found', async () => {
+    (clientService.findById as jest.Mock).mockResolvedValue(null);
+
+    const res = await request(app).put(`/api/clients/${id999}/group`).send({ memberIds: [] });
+
+    expect(res.status).toBe(404);
   });
 });
