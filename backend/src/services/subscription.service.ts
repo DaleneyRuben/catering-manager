@@ -3,7 +3,12 @@ import ClientHistory from '../models/ClientHistory';
 import Plan from '../models/Plan';
 import Subscription from '../models/Subscription';
 import { CreateSubscriptionDto, UpdateSubscriptionDto } from '../schemas/subscription.schema';
-import { appToday, addDeliveryDays, subtractDeliveryDays } from '../utils/date';
+import {
+  appToday,
+  addDeliveryDays,
+  subtractDeliveryDays,
+  calcContractEndDate,
+} from '../utils/date';
 
 // TODO: restore contractDate === today validation once backfilling of existing clients is complete
 const create = async (clientId: number, data: CreateSubscriptionDto) => {
@@ -12,10 +17,7 @@ const create = async (clientId: number, data: CreateSubscriptionDto) => {
 
   const today = appToday();
 
-  // duration - 1 because startDate counts as day 1
-  const contractEndDate = data.startDate
-    ? addDeliveryDays(data.startDate, data.duration - 1)
-    : null;
+  const contractEndDate = calcContractEndDate(data.startDate ?? null, data.duration);
 
   const subscription = await Subscription.create({
     planId: data.planId,
@@ -71,11 +73,7 @@ const update = async (clientId: number, id: number, data: UpdateSubscriptionDto)
     const newStartDate = startDate ?? subscription.startDate;
     const newDuration = duration ?? subscription.duration;
 
-    let newContractEndDate: string | null = null;
-    if (newStartDate) {
-      // duration - 1 because startDate counts as day 1
-      newContractEndDate = addDeliveryDays(newStartDate, newDuration - 1);
-    }
+    const newContractEndDate = calcContractEndDate(newStartDate ?? null, newDuration);
 
     const cleanedSuspendedDates = newStartDate
       ? (subscription.suspendedDates ?? []).filter((d) => d >= newStartDate)
