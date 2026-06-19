@@ -1,3 +1,4 @@
+import { Op } from 'sequelize';
 import { randomUUID } from 'crypto';
 import Client from '../models/Client';
 
@@ -6,22 +7,7 @@ const setGroup = async (clientId: number, memberIds: number[]): Promise<void> =>
   if (!client) throw new Error(`Client ${clientId} not found`);
 
   const oldToken = client.groupToken;
-  let currentToken = oldToken;
 
-  // If client is in a group with others and is being reassigned, leave the old group
-  if (oldToken && memberIds.length > 0) {
-    const groupSize = await Client.count({ where: { groupToken: oldToken } });
-    if (groupSize > 1) {
-      await client.update({ groupToken: null });
-      currentToken = null;
-      const remaining = await Client.count({ where: { groupToken: oldToken } });
-      if (remaining === 1) {
-        await Client.update({ groupToken: null }, { where: { groupToken: oldToken } });
-      }
-    }
-  }
-
-  // Clear client from group entirely
   if (memberIds.length === 0) {
     if (!oldToken) return;
     await client.update({ groupToken: null });
@@ -32,11 +18,20 @@ const setGroup = async (clientId: number, memberIds: number[]): Promise<void> =>
     return;
   }
 
-  // Assign token to all new members — reuse client's current token or generate a new one
-  const token = currentToken ?? randomUUID();
-  if (!currentToken) {
+  // Reuse existing token — never change it unnecessarily
+  const token = oldToken ?? randomUUID();
+  if (!oldToken) {
     await client.update({ groupToken: token });
   }
+
+  // Evict old group members no longer in the new list
+  if (oldToken) {
+    await Client.update(
+      { groupToken: null },
+      { where: { groupToken: oldToken, id: { [Op.notIn]: [...memberIds, clientId] } } },
+    );
+  }
+
   await Client.update({ groupToken: token }, { where: { id: memberIds } });
 };
 
