@@ -19,6 +19,11 @@ export interface Subscription {
   plan: Plan;
 }
 
+export interface GroupMember {
+  id: string;
+  name: string;
+}
+
 export interface Client {
   id: string;
   name: string;
@@ -35,6 +40,7 @@ export interface Client {
   pausedSince: string | null;
   subscriptions: Subscription[];
   status: ClientStatus;
+  groupMembers: GroupMember[];
 }
 
 export type HistoryEventType =
