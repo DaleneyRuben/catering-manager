@@ -1,3 +1,4 @@
+import { Op } from 'sequelize';
 import Client from '../../models/Client';
 import deliveryGroupService from '../deliveryGroup.service';
 
@@ -51,7 +52,6 @@ describe('deliveryGroupService.setGroup', () => {
   it('assigns a new token to client and all members when none have a token', async () => {
     const clientInstance = makeClient({ id: 1, groupToken: null });
     (Client.findByPk as jest.Mock).mockResolvedValue(clientInstance);
-    (Client.count as jest.Mock).mockResolvedValue(0);
     (Client.update as jest.Mock).mockResolvedValue([1]);
 
     await deliveryGroupService.setGroup(1, [2, 3]);
@@ -61,10 +61,9 @@ describe('deliveryGroupService.setGroup', () => {
     expect(Client.update).toHaveBeenCalledWith({ groupToken: newToken }, { where: { id: [2, 3] } });
   });
 
-  it('reuses existing client token when assigning new members', async () => {
+  it('reuses existing token without touching client row when adding members', async () => {
     const clientInstance = makeClient({ id: 1, groupToken: 'existing-token' });
     (Client.findByPk as jest.Mock).mockResolvedValue(clientInstance);
-    (Client.count as jest.Mock).mockResolvedValue(1);
     (Client.update as jest.Mock).mockResolvedValue([1]);
 
     await deliveryGroupService.setGroup(1, [2]);
@@ -76,18 +75,38 @@ describe('deliveryGroupService.setGroup', () => {
     );
   });
 
-  it('clears old group before assigning new members when client switches groups', async () => {
-    const clientInstance = makeClient({ id: 1, groupToken: 'old-token' });
+  it('evicts members removed from the group without changing the token', async () => {
+    const clientInstance = makeClient({ id: 1, groupToken: 'tok' });
     (Client.findByPk as jest.Mock).mockResolvedValue(clientInstance);
-    (Client.count as jest.Mock).mockResolvedValue(2);
     (Client.update as jest.Mock).mockResolvedValue([1]);
 
-    await deliveryGroupService.setGroup(1, [3]);
+    // client 1 had members [2, 3] — now saving with only [2], so 3 should be evicted
+    await deliveryGroupService.setGroup(1, [2]);
 
-    expect(clientInstance.update).toHaveBeenCalledWith({ groupToken: null });
+    expect(clientInstance.update).not.toHaveBeenCalled();
     expect(Client.update).toHaveBeenCalledWith(
-      { groupToken: expect.any(String) },
-      { where: { id: [3] } },
+      { groupToken: null },
+      { where: { groupToken: 'tok', id: { [Op.notIn]: [2, 1] } } },
+    );
+    expect(Client.update).toHaveBeenCalledWith({ groupToken: 'tok' }, { where: { id: [2] } });
+  });
+
+  it('preserves token on re-save with same members', async () => {
+    const clientInstance = makeClient({ id: 1, groupToken: 'stable-token' });
+    (Client.findByPk as jest.Mock).mockResolvedValue(clientInstance);
+    (Client.update as jest.Mock).mockResolvedValue([1]);
+
+    await deliveryGroupService.setGroup(1, [2]);
+
+    expect(clientInstance.update).not.toHaveBeenCalled();
+    // eviction call should pass [2, 1] as the notIn list — no one is actually evicted, but the call happens
+    expect(Client.update).toHaveBeenCalledWith(
+      { groupToken: null },
+      { where: { groupToken: 'stable-token', id: { [Op.notIn]: [2, 1] } } },
+    );
+    expect(Client.update).toHaveBeenCalledWith(
+      { groupToken: 'stable-token' },
+      { where: { id: [2] } },
     );
   });
 
