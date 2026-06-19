@@ -16,11 +16,11 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const BASE_URL = 'http://localhost:3000';
 const OUT_DIR = join(__dirname, '..', 'design-export');
-const USERNAME = process.env.USERNAME;
-const PASSWORD = process.env.PASSWORD;
+const USERNAME = process.env.APP_USER;
+const PASSWORD = process.env.APP_PASS;
 
 if (!USERNAME || !PASSWORD) {
-  console.error('Usage: USERNAME=<user> PASSWORD=<pass> node scripts/capture-pages.mjs');
+  console.error('Usage: APP_USER=<user> APP_PASS=<pass> node scripts/capture-pages.mjs');
   process.exit(1);
 }
 
@@ -71,7 +71,8 @@ async function goto(page, path, waitFor) {
   await page.fill('#username', USERNAME);
   await page.fill('#password', PASSWORD);
   await page.click('button[type="submit"]');
-  await page.waitForURL(`${BASE_URL}/`, { timeout: 10000 });
+  // wait for navigation away from /login (there's a 650ms animation delay before redirect)
+  await page.waitForURL((url) => !url.pathname.includes('login'), { timeout: 15000 });
   console.log('Logged in.\n');
 
   // ── Pages to capture ────────────────────────────────────────────────────
@@ -87,20 +88,24 @@ async function goto(page, path, waitFor) {
   // For client detail we grab the first client from the list
   let clientId = null;
   try {
-    const res = await page.request.get(`${BASE_URL}/api/clients?limit=1`);
+    const token = await page.evaluate(() => localStorage.getItem('auth_token'));
+    const res = await page.request.get(`${BASE_URL}/api/clients?limit=1`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
     const json = await res.json();
-    clientId = json?.data?.[0]?.id;
+    clientId = json?.data?.[0]?.id ?? null;
+    if (clientId) console.log(`Using client ID: ${clientId}`);
   } catch {
     console.warn('Could not fetch a client ID — skipping detail pages');
   }
 
   if (clientId) {
     const detailTabs = [
-      { tab: 'overview',     filename: '07-client-overview.html' },
-      { tab: 'plan',         filename: '08-client-plan.html' },
-      { tab: 'suspensions',  filename: '09-client-suspensions.html' },
-      { tab: 'grupo',        filename: '10-client-group.html' },
-      { tab: 'history',      filename: '11-client-history.html' },
+      { tab: 'Resumen',           filename: '07-client-overview.html' },
+      { tab: 'Plan + facturación',filename: '08-client-plan.html' },
+      { tab: 'Suspensiones',      filename: '09-client-suspensions.html' },
+      { tab: 'Grupo',             filename: '10-client-group.html' },
+      { tab: 'Historial',         filename: '11-client-history.html' },
     ];
 
     for (const { tab, filename } of detailTabs) {
@@ -120,11 +125,8 @@ async function goto(page, path, waitFor) {
 
     // For client detail tabs, click the right tab before saving
     if (route.tab) {
-      const tabBtn = page.getByRole('tab', { name: new RegExp(route.tab, 'i') })
-        .or(page.locator(`button:has-text("${route.tab}")`))
-        .first();
-      await tabBtn.click().catch(() => {});
-      await page.waitForTimeout(300);
+      await page.locator(`button:has-text("${route.tab}")`).first().click().catch(() => {});
+      await page.waitForTimeout(400);
     }
 
     await savePage(page, route.filename);

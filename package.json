@@ -14,7 +14,7 @@
     "lint:fix": "yarn workspace catering-manager-frontend lint:fix && yarn workspace catering-manager-backend lint:fix",
     "format": "prettier --write \"**/*.{ts,tsx,json,css,md}\" --ignore-path .gitignore",
     "prepare": "husky",
-    "capture": "node scripts/capture-pages.mjs"
+    "capture": "APP_USER=<user> APP_PASS=<pass> node scripts/capture-pages.mjs"
   },
   "dependencies": {
     "pg": "^8.21.0",
