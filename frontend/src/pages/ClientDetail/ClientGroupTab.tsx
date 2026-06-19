@@ -3,6 +3,7 @@ import { useClientGroup } from '../../hooks/useClientGroup';
 import { useClientList } from '../../hooks/useClientList';
 import { useDebounce } from '../../hooks/useDebounce';
 import { Button } from '../../components/ui/Button';
+import { Icon } from '../../components/ui/Icon';
 import { inputCls } from '../../components/ui/Field';
 import type { GroupMember } from '../../types/client';
 
@@ -37,15 +38,16 @@ export function ClientGroupTab({ clientId, initialMembers }: Props) {
           ) : (
             <ul className="flex flex-col gap-1.5">
               {members.map((m) => (
-                <li key={m.id} className="flex items-center justify-between gap-2">
+                <li key={m.id} className="flex items-center justify-between gap-3">
                   <span className="font-mono text-[13px] text-ink">{m.name}</span>
                   <Button
-                    variant="danger"
+                    variant="secondary"
                     size="sm"
                     aria-label={`Eliminar ${m.name}`}
                     onClick={() => remove(m.id)}
+                    className="border-0 bg-transparent text-red-700 hover:text-red-700 p-1"
                   >
-                    ×
+                    <Icon name="trash" size={20} />
                   </Button>
                 </li>
               ))}
