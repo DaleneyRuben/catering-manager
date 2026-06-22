@@ -11,10 +11,13 @@ import { MenuImportPage } from './pages/MenuImportPage';
 import { ReportsPage } from './pages/ReportsPage';
 import { HealthPage } from './pages/HealthPage';
 import { UsersPage } from './pages/users/UsersPage';
+import { DeliveryPage } from './pages/DeliveryPage';
 import { ROLES } from './constants/roles';
 
 const ADMIN_ROLES = [ROLES.SUPER_ADMIN, ROLES.ADMIN] as const;
-const SHELL_ROLES = [ROLES.SUPER_ADMIN, ROLES.ADMIN, ROLES.KITCHEN] as const;
+const STAFF_ROLES = [...ADMIN_ROLES, ROLES.KITCHEN] as const;
+const DELIVERY_ROLES = [...ADMIN_ROLES, ROLES.DELIVERY] as const;
+const SHELL_ROLES = [...STAFF_ROLES, ROLES.DELIVERY] as const;
 
 function App() {
   return (
@@ -67,8 +70,30 @@ function App() {
                     </ProtectedRoute>
                   }
                 />
-                <Route path="/menu" element={<MenuImportPage />} />
-                <Route path="/informes" element={<ReportsPage />} />
+                <Route
+                  path="/menu"
+                  element={
+                    <ProtectedRoute allowedRoles={[...STAFF_ROLES]}>
+                      <MenuImportPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/informes"
+                  element={
+                    <ProtectedRoute allowedRoles={[...STAFF_ROLES]}>
+                      <ReportsPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/entregas"
+                  element={
+                    <ProtectedRoute allowedRoles={[...DELIVERY_ROLES]}>
+                      <DeliveryPage />
+                    </ProtectedRoute>
+                  }
+                />
                 <Route
                   path="/health"
                   element={

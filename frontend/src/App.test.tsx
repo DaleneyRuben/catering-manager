@@ -67,4 +67,24 @@ describe('App', () => {
     renderAt('/clientes', 'kitchen');
     expect(await screen.findByText('No tenés acceso a esta sección.')).toBeInTheDocument();
   });
+
+  it('lets delivery role reach /entregas', async () => {
+    renderAt('/entregas', 'delivery');
+    expect(await screen.findByRole('heading', { name: 'Entregas' })).toBeInTheDocument();
+  });
+
+  it('blocks delivery role from the menu page', async () => {
+    renderAt('/menu', 'delivery');
+    expect(await screen.findByText('No tenés acceso a esta sección.')).toBeInTheDocument();
+  });
+
+  it('lets admin role reach /entregas', async () => {
+    renderAt('/entregas', 'admin');
+    expect(await screen.findByRole('heading', { name: 'Entregas' })).toBeInTheDocument();
+  });
+
+  it('lets super_admin role reach /entregas', async () => {
+    renderAt('/entregas', 'super_admin');
+    expect(await screen.findByRole('heading', { name: 'Entregas' })).toBeInTheDocument();
+  });
 });
