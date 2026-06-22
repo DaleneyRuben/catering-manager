@@ -67,7 +67,7 @@ export function UserModal(props: Props) {
     <Modal onClose={onClose} className="rounded-[10px] w-[min(480px,92vw)]">
       <div className="flex items-center gap-2.5 px-[22px] py-[18px] border-b border-rule">
         <Icon name="users" size={16} />
-        <p className="flex-1 font-serif text-[20px] leading-tight text-ink">
+        <p className="flex-1 font-serif font-semibold text-[23px] leading-tight text-ink">
           {mode === 'create' ? 'Nuevo usuario' : 'Editar usuario'}
         </p>
         <button
