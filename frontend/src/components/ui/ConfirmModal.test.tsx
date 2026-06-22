@@ -20,6 +20,20 @@ describe('ConfirmModal', () => {
     expect(screen.getByText('¿Seguro que querés eliminar este plan?')).toBeInTheDocument();
   });
 
+  it('renders a danger icon badge', () => {
+    render(
+      <ConfirmModal
+        title="Eliminar plan"
+        message="¿Seguro?"
+        confirmLabel="Eliminar"
+        onClose={noop}
+        onConfirm={noopAsync}
+      />,
+    );
+    const badge = screen.getByTestId('confirm-modal-icon-badge');
+    expect(badge.className).toContain('bg-danger-bg');
+  });
+
   it('renders the confirm button with the given label', () => {
     render(
       <ConfirmModal

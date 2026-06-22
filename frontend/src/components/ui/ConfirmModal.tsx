@@ -25,19 +25,23 @@ export function ConfirmModal({ title, message, confirmLabel, onClose, onConfirm 
   };
 
   return (
-    <Modal onClose={onClose} className="rounded-[10px] w-[min(420px,92vw)]">
-      <div className="flex items-center gap-2.5 px-[22px] py-[18px] border-b border-rule">
-        <Icon name="alert" size={16} className="text-warn" />
-        <p className="font-serif text-[20px] leading-tight text-ink">{title}</p>
-      </div>
-      <div className="px-[22px] py-5">
-        <p className="text-[13px] text-ink">{message}</p>
-        <div className="flex gap-2.5 mt-5">
+    <Modal onClose={onClose} className="w-[min(420px,92vw)]">
+      <div className="px-[28px] py-[26px]">
+        <div className="flex items-center gap-3 mb-3.5">
+          <span
+            data-testid="confirm-modal-icon-badge"
+            className="w-10 h-10 rounded-[11px] bg-danger-bg text-danger flex items-center justify-center shrink-0"
+          >
+            <Icon name="trash" size={20} stroke={1.9} />
+          </span>
+          <p className="font-serif font-semibold text-[24px] leading-[1.05] text-ink">{title}</p>
+        </div>
+        <p className="text-[13.5px] text-ink-2 leading-[1.55]">{message}</p>
+        <div className="flex justify-end gap-2.5 mt-[22px]">
           <Button variant="secondary" onClick={onClose} disabled={isLoading}>
             Cancelar
           </Button>
-          <div className="flex-1" />
-          <Button variant="destructive" onClick={handleConfirm} loading={isLoading} leftIcon="x">
+          <Button variant="destructive" onClick={handleConfirm} loading={isLoading}>
             {confirmLabel}
           </Button>
         </div>
