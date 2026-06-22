@@ -5,13 +5,12 @@ import { PageHeader } from '../components/ui/PageHeader';
 import { ConfirmModal } from '../components/ui/ConfirmModal';
 import { usePlans } from '../hooks/usePlans';
 import type { Plan } from '../types/client';
-import { CreatePlanModal } from './plans/CreatePlanModal';
 import { PlanCard } from './plans/PlanCard';
 import { PlanCardSkeleton } from './plans/PlanCardSkeleton';
-import { PlanEditModal } from './plans/PlanEditModal';
+import { PlanModal } from './plans/PlanModal';
 
 export function PlansPage() {
-  const { plans, clientCounts, isLoading, isSaving, save, create, remove } = usePlans();
+  const { plans, clientCounts, isLoading, isSaving, isCreating, save, create, remove } = usePlans();
   const [editPlan, setEditPlan] = useState<Plan | null>(null);
   const [deletePlan, setDeletePlan] = useState<Plan | null>(null);
   const [createOpen, setCreateOpen] = useState(false);
@@ -83,9 +82,17 @@ export function PlansPage() {
 
       {renderPlans()}
 
-      {createOpen && <CreatePlanModal onClose={() => setCreateOpen(false)} onSave={create} />}
+      {createOpen && (
+        <PlanModal
+          mode="create"
+          isSaving={isCreating}
+          onSave={create}
+          onClose={() => setCreateOpen(false)}
+        />
+      )}
       {editPlan && (
-        <PlanEditModal
+        <PlanModal
+          mode="edit"
           plan={editPlan}
           clientCount={clientCounts[editPlan.id] ?? 0}
           isSaving={isSaving}

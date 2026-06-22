@@ -6,26 +6,43 @@ import type { Plan } from '../../types/client';
 import { PlanEditorForm } from './PlanEditorForm';
 import type { MealKey, PlanDraft } from './types';
 
-export function PlanEditModal({
-  plan,
-  clientCount,
-  isSaving,
-  onSave,
-  onClose,
-}: {
+const EMPTY_DRAFT: PlanDraft = { name: '', meals: [], price: '0' };
+
+type CreateProps = {
+  mode: 'create';
+  isSaving: boolean;
+  onSave: (draft: PlanDraft) => Promise<void>;
+  onClose: () => void;
+};
+
+type EditProps = {
+  mode: 'edit';
   plan: Plan;
   clientCount: number;
   isSaving: boolean;
-  onSave: (draft: PlanDraft) => void;
+  onSave: (draft: PlanDraft) => Promise<void>;
   onClose: () => void;
-}) {
-  const [draft, setDraft] = useState<PlanDraft>({
-    name: plan.name,
-    meals: plan.meals as MealKey[],
-    price: String(plan.price),
-  });
+};
+
+type Props = CreateProps | EditProps;
+
+export function PlanModal(props: Props) {
+  const { mode, onClose, isSaving, onSave } = props;
+  const plan = mode === 'edit' ? (props as EditProps).plan : null;
+  const clientCount = mode === 'edit' ? (props as EditProps).clientCount : 0;
+
+  const [draft, setDraft] = useState<PlanDraft>(
+    plan
+      ? { name: plan.name, meals: plan.meals as MealKey[], price: String(plan.price) }
+      : EMPTY_DRAFT,
+  );
 
   const clientsLabel = clientCount === 1 ? '1 cliente activo' : `${clientCount} clientes activos`;
+
+  const handleSubmit = async () => {
+    await onSave(draft);
+    onClose();
+  };
 
   return (
     <Modal onClose={onClose} className="w-[min(520px,92vw)] max-h-[92vh] overflow-auto">
@@ -35,11 +52,13 @@ export function PlanEditModal({
         </span>
         <div className="flex-1">
           <h3 className="font-serif font-semibold text-[23px] leading-none text-ink">
-            Editar plan
+            {mode === 'create' ? 'Nuevo plan' : 'Editar plan'}
           </h3>
-          <p className="font-mono text-[11px] text-faint mt-[3px]">
-            {plan.name} · {clientsLabel}
-          </p>
+          {mode === 'edit' && (
+            <p className="font-mono text-[11px] text-faint mt-[3px]">
+              {plan!.name} · {clientsLabel}
+            </p>
+          )}
         </div>
         <button
           type="button"
@@ -53,13 +72,12 @@ export function PlanEditModal({
 
       <div className="px-[28px] py-[22px]">
         <PlanEditorForm draft={draft} setDraft={setDraft} />
-
         <div className="flex justify-end gap-2.5 mt-[18px]">
           <Button variant="secondary" onClick={onClose} disabled={isSaving}>
             Cancelar
           </Button>
-          <Button onClick={() => onSave(draft)} loading={isSaving} leftIcon="check">
-            Guardar cambios
+          <Button onClick={handleSubmit} loading={isSaving} leftIcon="check">
+            {mode === 'create' ? 'Crear plan' : 'Guardar cambios'}
           </Button>
         </div>
       </div>
