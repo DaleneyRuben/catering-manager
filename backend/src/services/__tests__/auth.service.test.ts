@@ -3,6 +3,7 @@ import jwt from 'jsonwebtoken';
 import User from '../../models/User';
 import authService from '../auth.service';
 import { encodeId } from '../../utils/sqids';
+import { ROLES } from '../../constants/roles';
 
 jest.mock('../../models/User');
 jest.mock('bcrypt');
@@ -23,7 +24,7 @@ const mockUser = {
   id: 1,
   username: 'ada',
   password: '$2b$10$hashedpassword',
-  role: 'admin' as const,
+  role: ROLES.ADMIN,
 };
 
 describe('authService.login', () => {
@@ -35,7 +36,7 @@ describe('authService.login', () => {
     const result = await authService.login('ada', 'correct-password');
 
     expect(result.token).toBe('signed-token');
-    expect(result.user).toEqual({ id: encodeId(1), username: 'ada', role: 'admin' });
+    expect(result.user).toEqual({ id: encodeId(1), username: 'ada', role: ROLES.ADMIN });
     expect(bcrypt.compare).toHaveBeenCalledWith('correct-password', mockUser.password);
   });
 
@@ -58,20 +59,20 @@ describe('authService.createUser', () => {
     (bcrypt.hash as jest.Mock).mockResolvedValue('$2b$10$hashed');
     (User.create as jest.Mock).mockResolvedValue({ ...mockUser, password: '$2b$10$hashed' });
 
-    await authService.createUser('ada', 'plain-pass', 'admin');
+    await authService.createUser('ada', 'plain-pass', ROLES.ADMIN);
 
     expect(bcrypt.hash).toHaveBeenCalledWith('plain-pass', 10);
     expect(User.create).toHaveBeenCalledWith({
       username: 'ada',
       password: '$2b$10$hashed',
-      role: 'admin',
+      role: ROLES.ADMIN,
     });
   });
 });
 
 describe('authService.verifyToken', () => {
   it('returns payload for valid token', () => {
-    const payload = { userId: 1, role: 'manager' as const };
+    const payload = { userId: 1, role: ROLES.KITCHEN };
     (jwt.verify as jest.Mock).mockReturnValue(payload);
 
     const result = authService.verifyToken('valid-token');

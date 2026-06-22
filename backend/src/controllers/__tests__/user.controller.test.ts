@@ -2,6 +2,7 @@ import request from 'supertest';
 import app from '../../app';
 import userService from '../../services/user.service';
 import { encodeId } from '../../utils/sqids';
+import { ROLES } from '../../constants/roles';
 
 jest.mock('../../services/user.service');
 jest.mock('../../database/sequelize', () => ({ __esModule: true, default: { query: jest.fn() } }));
@@ -18,7 +19,7 @@ const mockRemove = userService.remove as jest.Mock;
 const id1 = encodeId(1);
 const id999 = encodeId(999);
 
-const mockUser = { id: 1, username: 'ada', role: 'manager' };
+const mockUser = { id: 1, username: 'ada', role: ROLES.KITCHEN };
 
 beforeEach(() => jest.clearAllMocks());
 
@@ -30,7 +31,7 @@ describe('GET /api/users', () => {
 
     expect(res.status).toBe(200);
     expect(res.body.data).toHaveLength(1);
-    expect(res.body.data[0]).toMatchObject({ username: 'ada', role: 'manager' });
+    expect(res.body.data[0]).toMatchObject({ username: 'ada', role: 'kitchen' });
   });
 
   it('returns 500 when service throws', async () => {
@@ -43,22 +44,22 @@ describe('GET /api/users', () => {
 });
 
 describe('POST /api/users', () => {
-  const validPayload = { username: 'grace', password: 'secret123', role: 'manager' };
+  const validPayload = { username: 'grace', password: 'secret123', role: ROLES.KITCHEN };
 
   it('creates a user and returns 201', async () => {
-    mockCreate.mockResolvedValue({ id: 2, username: 'grace', role: 'manager' });
+    mockCreate.mockResolvedValue({ id: 2, username: 'grace', role: ROLES.KITCHEN });
 
     const res = await request(app).post('/api/users').send(validPayload);
 
     expect(res.status).toBe(201);
-    expect(res.body.data).toMatchObject({ username: 'grace', role: 'manager' });
+    expect(res.body.data).toMatchObject({ username: 'grace', role: ROLES.KITCHEN });
     expect(mockCreate).toHaveBeenCalledWith(validPayload);
   });
 
   it('returns 400 when username is missing', async () => {
     const res = await request(app)
       .post('/api/users')
-      .send({ password: 'secret123', role: 'manager' });
+      .send({ password: 'secret123', role: ROLES.KITCHEN });
 
     expect(res.status).toBe(400);
     expect(mockCreate).not.toHaveBeenCalled();
@@ -67,7 +68,7 @@ describe('POST /api/users', () => {
   it('returns 400 when password is too short', async () => {
     const res = await request(app)
       .post('/api/users')
-      .send({ username: 'grace', password: '123', role: 'manager' });
+      .send({ username: 'grace', password: '123', role: ROLES.KITCHEN });
 
     expect(res.status).toBe(400);
     expect(mockCreate).not.toHaveBeenCalled();
@@ -77,6 +78,15 @@ describe('POST /api/users', () => {
     const res = await request(app)
       .post('/api/users')
       .send({ username: 'grace', password: 'secret123', role: 'superuser' });
+
+    expect(res.status).toBe(400);
+    expect(mockCreate).not.toHaveBeenCalled();
+  });
+
+  it('returns 400 when role is the retired manager role', async () => {
+    const res = await request(app)
+      .post('/api/users')
+      .send({ username: 'grace', password: 'secret123', role: 'manager' });
 
     expect(res.status).toBe(400);
     expect(mockCreate).not.toHaveBeenCalled();
@@ -93,14 +103,14 @@ describe('POST /api/users', () => {
 
 describe('PATCH /api/users/:id', () => {
   it('updates a user and returns 200', async () => {
-    mockUpdate.mockResolvedValue({ id: 1, username: 'ada2', role: 'admin' });
+    mockUpdate.mockResolvedValue({ id: 1, username: 'ada2', role: ROLES.ADMIN });
 
     const res = await request(app)
       .patch(`/api/users/${id1}`)
-      .send({ username: 'ada2', role: 'admin' });
+      .send({ username: 'ada2', role: ROLES.ADMIN });
 
     expect(res.status).toBe(200);
-    expect(res.body.data).toMatchObject({ username: 'ada2', role: 'admin' });
+    expect(res.body.data).toMatchObject({ username: 'ada2', role: ROLES.ADMIN });
     expect(mockUpdate).toHaveBeenCalledWith(1, expect.objectContaining({ username: 'ada2' }));
   });
 

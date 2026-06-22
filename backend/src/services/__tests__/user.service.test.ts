@@ -1,6 +1,7 @@
 import bcrypt from 'bcrypt';
 import User from '../../models/User';
 import userService from '../user.service';
+import { ROLES } from '../../constants/roles';
 
 jest.mock('../../models/User');
 jest.mock('bcrypt');
@@ -8,7 +9,7 @@ jest.mock('bcrypt');
 const mockUser = {
   id: 1,
   username: 'ada',
-  role: 'manager' as const,
+  role: ROLES.KITCHEN,
   password: '$2b$10$hashed',
   update: jest.fn(),
   destroy: jest.fn(),
@@ -56,13 +57,13 @@ describe('userService.create', () => {
     (bcrypt.hash as jest.Mock).mockResolvedValue('$2b$10$hashed');
     (User.create as jest.Mock).mockResolvedValue(mockUser);
 
-    await userService.create({ username: 'ada', password: 'secret123', role: 'manager' });
+    await userService.create({ username: 'ada', password: 'secret123', role: ROLES.KITCHEN });
 
     expect(bcrypt.hash).toHaveBeenCalledWith('secret123', 10);
     expect(User.create).toHaveBeenCalledWith({
       username: 'ada',
       password: '$2b$10$hashed',
-      role: 'manager',
+      role: ROLES.KITCHEN,
     });
   });
 });
@@ -73,10 +74,10 @@ describe('userService.update', () => {
       .mockResolvedValueOnce(mockUser)
       .mockResolvedValueOnce({ ...mockUser, username: 'ada2' });
 
-    const result = await userService.update(1, { username: 'ada2', role: 'admin' });
+    const result = await userService.update(1, { username: 'ada2', role: ROLES.ADMIN });
 
     expect(bcrypt.hash).not.toHaveBeenCalled();
-    expect(mockUser.update).toHaveBeenCalledWith({ username: 'ada2', role: 'admin' });
+    expect(mockUser.update).toHaveBeenCalledWith({ username: 'ada2', role: ROLES.ADMIN });
     expect(result).toMatchObject({ username: 'ada2' });
   });
 

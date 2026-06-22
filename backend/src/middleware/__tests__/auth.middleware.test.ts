@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { requireAuth, requireRole } from '../auth';
 import authService from '../../services/auth.service';
+import { ROLES } from '../../constants/roles';
 
 jest.mock('../../services/auth.service');
 
@@ -22,7 +23,7 @@ describe('requireAuth', () => {
   beforeEach(() => jest.clearAllMocks());
 
   it('calls next when token is valid', () => {
-    const payload = { userId: 1, role: 'admin' as const };
+    const payload = { userId: 1, role: ROLES.ADMIN };
     mockVerifyToken.mockReturnValue(payload);
     const req = makeReq('Bearer valid-token');
     const res = mockRes();
@@ -78,26 +79,26 @@ describe('requireAuth', () => {
 describe('requireRole', () => {
   beforeEach(() => jest.clearAllMocks());
 
-  const makeAuthedReq = (role: 'admin' | 'manager' | 'delivery'): Request =>
+  const makeAuthedReq = (role: (typeof ROLES)[keyof typeof ROLES]): Request =>
     ({ headers: {}, user: { userId: 1, role } }) as unknown as Request;
 
   it('calls next when user has an allowed role', () => {
-    const req = makeAuthedReq('admin');
+    const req = makeAuthedReq(ROLES.ADMIN);
     const res = mockRes();
     const next = mockNext();
 
-    requireRole('admin', 'manager')(req, res, next);
+    requireRole(ROLES.SUPER_ADMIN, ROLES.ADMIN)(req, res, next);
 
     expect(next).toHaveBeenCalled();
     expect(res.status).not.toHaveBeenCalled();
   });
 
   it('returns 403 when user role is not in allowed list', () => {
-    const req = makeAuthedReq('delivery');
+    const req = makeAuthedReq(ROLES.DELIVERY);
     const res = mockRes();
     const next = mockNext();
 
-    requireRole('admin', 'manager')(req, res, next);
+    requireRole(ROLES.SUPER_ADMIN, ROLES.ADMIN)(req, res, next);
 
     expect(res.status).toHaveBeenCalledWith(403);
     expect(res.json).toHaveBeenCalledWith({ error: 'Acceso denegado' });
@@ -109,19 +110,19 @@ describe('requireRole', () => {
     const res = mockRes();
     const next = mockNext();
 
-    requireRole('admin')(req, res, next);
+    requireRole(ROLES.ADMIN)(req, res, next);
 
     expect(res.status).toHaveBeenCalledWith(403);
     expect(res.json).toHaveBeenCalledWith({ error: 'Acceso denegado' });
     expect(next).not.toHaveBeenCalled();
   });
 
-  it('allows manager when manager is in the allowed roles', () => {
-    const req = makeAuthedReq('manager');
+  it('allows kitchen when kitchen is in the allowed roles', () => {
+    const req = makeAuthedReq(ROLES.KITCHEN);
     const res = mockRes();
     const next = mockNext();
 
-    requireRole('admin', 'manager')(req, res, next);
+    requireRole(ROLES.ADMIN, ROLES.KITCHEN)(req, res, next);
 
     expect(next).toHaveBeenCalled();
   });
