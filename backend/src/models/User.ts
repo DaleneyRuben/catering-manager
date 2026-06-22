@@ -1,6 +1,7 @@
 import { Table, Column, Model, DataType } from 'sequelize-typescript';
+import { ROLE_VALUES, type UserRole } from '../constants/roles';
 
-export type UserRole = 'admin' | 'manager' | 'delivery';
+export type { UserRole };
 
 @Table({ tableName: 'users', timestamps: true })
 class User extends Model {
@@ -10,7 +11,7 @@ class User extends Model {
   @Column({ type: DataType.STRING, allowNull: false })
   declare password: string;
 
-  @Column({ type: DataType.ENUM('admin', 'manager', 'delivery'), allowNull: false })
+  @Column({ type: DataType.ENUM(...ROLE_VALUES), allowNull: false })
   declare role: UserRole;
 }
 
