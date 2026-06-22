@@ -211,6 +211,21 @@ export function Icon({ name, size = 16, stroke = 1.5, className }: IconProps) {
           <path d="M12 2 4 6v6c0 5 3.5 8 8 10 4.5-2 8-5 8-10V6Z" />
         </svg>
       );
+    case 'clipboard-check':
+      return (
+        <svg {...props}>
+          <path d="M9 11l3 3L22 4" />
+          <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
+        </svg>
+      );
+    case 'dome':
+      return (
+        <svg {...props}>
+          <path d="M4 8c0-3 3.5-4 8-4s8 1 8 4" />
+          <path d="M4 8h16v2a8 8 0 0 1-16 0V8Z" />
+          <path d="M7 20h10" />
+        </svg>
+      );
     case 'utensils':
       return (
         <svg {...props}>
