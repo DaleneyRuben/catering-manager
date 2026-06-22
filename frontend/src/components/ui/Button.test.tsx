@@ -27,7 +27,7 @@ describe('Button', () => {
 
   it('applies destructive variant', () => {
     render(<Button variant="destructive">Confirmar</Button>);
-    expect(screen.getByRole('button')).toHaveClass('bg-warn');
+    expect(screen.getByRole('button')).toHaveClass('bg-danger');
   });
 
   it('applies alert variant', () => {
