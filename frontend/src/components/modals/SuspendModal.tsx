@@ -100,10 +100,7 @@ export function SuspendModal({
   };
 
   return (
-    <Modal
-      onClose={onClose}
-      className="rounded-[10px] w-[min(580px,92vw)] max-h-[92vh] overflow-auto"
-    >
+    <Modal onClose={onClose} className="w-[min(580px,92vw)] max-h-[92vh] overflow-auto">
       <div className="flex items-center gap-2.5 px-[22px] py-[18px] border-b border-rule">
         <Icon name="calendar" size={16} />
         <div className="flex-1">

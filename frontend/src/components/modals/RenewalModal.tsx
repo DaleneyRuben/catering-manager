@@ -27,10 +27,7 @@ export function RenewalModal({ client, sub, isReactivation, onClose, onRenew }: 
   const form = useRenewalForm({ plans, sub, isReactivation, onRenew, onClose });
 
   return (
-    <Modal
-      onClose={onClose}
-      className="rounded-[10px] w-[min(760px,96vw)] max-h-[92vh] overflow-auto"
-    >
+    <Modal onClose={onClose} className="w-[min(760px,96vw)] max-h-[92vh] overflow-auto">
       {/* Header */}
       <div className="sticky top-0 z-10 flex items-center gap-3 px-[22px] py-[18px] border-b border-rule bg-cream">
         <div className="w-11 h-11 rounded-full bg-olive-800 text-white flex items-center justify-center font-serif text-[18px] font-semibold shrink-0">
