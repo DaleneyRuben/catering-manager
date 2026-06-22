@@ -6,6 +6,7 @@ import planRoutes from './plan.routes';
 import reportRoutes from './report.routes';
 import subscriptionRoutes from './subscription.routes';
 import userRoutes from './user.routes';
+import healthController from '../controllers/health.controller';
 import { requireAuth, requireRole } from '../middleware/auth';
 import { ROLES } from '../constants/roles';
 
@@ -14,6 +15,13 @@ const router = Router();
 router.get('/health', (_, res) => {
   res.json({ status: 'ok' });
 });
+
+router.get(
+  '/health/status',
+  requireAuth,
+  requireRole(ROLES.SUPER_ADMIN),
+  healthController.getStatus,
+);
 
 router.use('/auth', authRoutes);
 
