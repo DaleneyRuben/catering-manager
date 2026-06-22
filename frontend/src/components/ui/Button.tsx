@@ -14,7 +14,7 @@ interface Props extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const BASE =
-  'inline-flex items-center justify-center gap-2 font-semibold rounded-md transition active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60 disabled:active:scale-100';
+  'inline-flex items-center justify-center gap-[9px] font-semibold leading-none rounded-[9px] transition active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60 disabled:active:scale-100';
 
 const VARIANT_CLS: Record<ButtonVariant, string> = {
   primary: 'bg-olive-700 text-white hover:bg-olive-800',
@@ -26,7 +26,12 @@ const VARIANT_CLS: Record<ButtonVariant, string> = {
 
 const SIZE_CLS: Record<ButtonSize, string> = {
   sm: 'px-3 py-2 text-[12px]',
-  md: 'px-4 py-2.5 text-[13px]',
+  md: 'px-[20px] py-[12px] text-[13.5px]',
+};
+
+const ICON_SIZE: Record<ButtonSize, number> = {
+  sm: 14,
+  md: 16,
 };
 
 export function Button({
@@ -45,7 +50,8 @@ export function Button({
     <span className="inline-block w-3.5 h-3.5 rounded-full border-2 border-current border-t-transparent animate-spin" />
   ) : null;
 
-  const leftIconSlot = !loading && leftIcon ? <Icon name={leftIcon} size={14} /> : null;
+  const leftIconSlot =
+    !loading && leftIcon ? <Icon name={leftIcon} size={ICON_SIZE[size]} /> : null;
 
   return (
     <button
@@ -58,7 +64,7 @@ export function Button({
       {iconSlot}
       {leftIconSlot}
       {children}
-      {!loading && rightIcon ? <Icon name={rightIcon} size={14} /> : null}
+      {!loading && rightIcon ? <Icon name={rightIcon} size={ICON_SIZE[size]} /> : null}
     </button>
   );
 }

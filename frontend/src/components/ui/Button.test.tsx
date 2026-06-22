@@ -40,6 +40,17 @@ describe('Button', () => {
     expect(screen.getByRole('button')).toHaveClass('px-3', 'py-2');
   });
 
+  it('applies md size matching the design spec', () => {
+    render(<Button>Agregar usuario</Button>);
+    expect(screen.getByRole('button')).toHaveClass(
+      'px-[20px]',
+      'py-[12px]',
+      'text-[13.5px]',
+      'rounded-[9px]',
+      'gap-[9px]',
+    );
+  });
+
   it('is disabled and shows spinner when loading', () => {
     render(<Button loading>Guardar</Button>);
     const btn = screen.getByRole('button');
