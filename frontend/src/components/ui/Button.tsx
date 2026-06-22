@@ -18,7 +18,7 @@ const BASE =
 
 const VARIANT_CLS: Record<ButtonVariant, string> = {
   primary: 'bg-olive-700 text-white hover:bg-olive-800',
-  secondary: 'border border-rule text-ink hover:bg-cream-2',
+  secondary: 'text-muted hover:text-ink-2',
   danger: 'border border-rule text-warn hover:bg-cream-2',
   destructive: 'bg-warn text-white hover:opacity-90',
   alert: 'border border-[#e9c4bb] text-alert hover:bg-cream-2',

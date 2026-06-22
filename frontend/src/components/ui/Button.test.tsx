@@ -16,7 +16,8 @@ describe('Button', () => {
 
   it('applies secondary variant', () => {
     render(<Button variant="secondary">Cancelar</Button>);
-    expect(screen.getByRole('button')).toHaveClass('border-rule', 'text-ink');
+    expect(screen.getByRole('button')).toHaveClass('text-muted');
+    expect(screen.getByRole('button')).not.toHaveClass('border');
   });
 
   it('applies danger variant', () => {
