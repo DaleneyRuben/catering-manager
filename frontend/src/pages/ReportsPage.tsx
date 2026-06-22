@@ -12,7 +12,7 @@ export function ReportsPage() {
     <div className="px-4 py-5 lg:px-[44px] lg:py-[34px]">
       <PageHeader label="Analítica" title="Informes" />
 
-      <div className="flex flex-wrap gap-5">
+      <div className="flex flex-wrap items-start gap-5">
         <DeliveryListCard />
         <MenuCard />
         {user?.role !== ROLES.KITCHEN && <KitchenReportCard />}
