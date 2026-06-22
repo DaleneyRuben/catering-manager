@@ -9,7 +9,7 @@ export interface PaginatedResponse<T> {
   limit: number;
 }
 
-const getAuthHeader = (): Record<string, string> => {
+export const getAuthHeader = (): Record<string, string> => {
   const token = localStorage.getItem('auth_token');
   return token ? { Authorization: `Bearer ${token}` } : {};
 };

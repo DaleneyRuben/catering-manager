@@ -1,3 +1,5 @@
+import { getAuthHeader } from '../services/api';
+
 const parseFileName = (cd: string, fallback: string): string => {
   // RFC 5987: filename*=UTF-8''encoded-name (handles non-ASCII characters)
   const rfc5987 = cd.match(/filename\*=UTF-8''([^;]+)/i);
@@ -7,7 +9,7 @@ const parseFileName = (cd: string, fallback: string): string => {
 };
 
 export async function downloadReport(url: string, fallbackFileName: string): Promise<void> {
-  const res = await fetch(url);
+  const res = await fetch(url, { headers: getAuthHeader() });
   if (!res.ok) throw new Error(`Error al generar el archivo: ${res.status}`);
 
   const cd = res.headers.get('Content-Disposition') ?? '';

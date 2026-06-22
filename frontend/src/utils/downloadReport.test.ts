@@ -70,4 +70,16 @@ describe('downloadReport', () => {
     );
     expect(mockClick).not.toHaveBeenCalled();
   });
+
+  it('sends the auth token as a Bearer header', async () => {
+    localStorage.setItem('auth_token', 'fake-token');
+    mockFetch('');
+
+    await downloadReport('/api/report', 'fallback.docx');
+
+    expect(global.fetch).toHaveBeenCalledWith('/api/report', {
+      headers: { Authorization: 'Bearer fake-token' },
+    });
+    localStorage.removeItem('auth_token');
+  });
 });
