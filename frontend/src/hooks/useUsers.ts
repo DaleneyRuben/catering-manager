@@ -8,6 +8,8 @@ export type AppUser = {
   id: string;
   username: string;
   role: UserRole;
+  lastLoginAt: string | null;
+  deletedAt: string | null;
 };
 
 export type UserDraft = {
