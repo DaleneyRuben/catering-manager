@@ -9,14 +9,7 @@ import { UserModal } from './UserModal';
 import { initials } from '../../utils/string';
 import { formatDateTime } from '../../utils/format';
 import type { UserRole } from '../../contexts/AuthContext';
-import { ROLES } from '../../constants/roles';
-
-const ROLE_LABELS: Record<UserRole, string> = {
-  super_admin: 'Super admin',
-  admin: 'Admin',
-  kitchen: 'Cocina',
-  delivery: 'Delivery',
-};
+import { ROLES, ROLE_LABELS } from '../../constants/roles';
 
 const ROLE_CLASSES: Record<UserRole, string> = {
   super_admin: 'bg-ok-bg text-ok',
