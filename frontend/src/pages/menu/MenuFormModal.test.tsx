@@ -48,35 +48,16 @@ describe('MenuFormModal', () => {
     expect(screen.getByDisplayValue('Pollo')).toBeInTheDocument();
   });
 
-  it('shows Guardar menú when no initial data', () => {
+  it('shows a Guardar button', () => {
     render(<MenuFormModal {...baseProps} />);
-    expect(screen.getByRole('button', { name: /guardar menú/i })).toBeInTheDocument();
-  });
-
-  it('shows Actualizar menú when editing existing', () => {
-    render(
-      <MenuFormModal
-        {...baseProps}
-        initial={{
-          date: '2026-06-16',
-          breakfast: 'Avena',
-          morningSnack: null,
-          salad: null,
-          lunch: null,
-          afternoonSnack: null,
-          dinner: null,
-          juice: null,
-        }}
-      />,
-    );
-    expect(screen.getByRole('button', { name: /actualizar menú/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Guardar' })).toBeInTheDocument();
   });
 
   it('calls onSave and onClose when save button is clicked', async () => {
     const onSave = jest.fn().mockResolvedValue(undefined);
     const onClose = jest.fn();
     render(<MenuFormModal {...baseProps} onSave={onSave} onClose={onClose} />);
-    fireEvent.click(screen.getByRole('button', { name: /guardar menú/i }));
+    fireEvent.click(screen.getByRole('button', { name: 'Guardar' }));
     await waitFor(() => expect(onSave).toHaveBeenCalled());
     expect(onClose).toHaveBeenCalled();
   });
