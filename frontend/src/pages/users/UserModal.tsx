@@ -104,16 +104,16 @@ export function UserModal(props: Props) {
               type={showPassword ? 'text' : 'password'}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className={`${inputCls()} pr-9`}
+              className={`${inputCls()} pr-[42px]`}
               autoComplete="new-password"
             />
             <button
               type="button"
               onClick={() => setShowPassword((v) => !v)}
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-faint hover:text-ink-2 transition-colors"
+              className="absolute right-[8px] top-1/2 -translate-y-1/2 p-[5px] flex items-center justify-center text-faint hover:text-ink-2 transition-colors"
               tabIndex={-1}
             >
-              <Icon name={showPassword ? 'eye-off' : 'eye'} size={15} />
+              <Icon name={showPassword ? 'eye-off' : 'eye'} size={17} />
             </button>
           </div>
         </Field>
