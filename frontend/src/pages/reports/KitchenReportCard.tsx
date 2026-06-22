@@ -6,8 +6,8 @@ import { useMenu } from '../../hooks/useMenu';
 import { API_BASE } from '../../utils/env';
 import { downloadReport } from '../../utils/downloadReport';
 import { checkIsWeekend } from '../../utils/devFlags';
-
-type DayOption = 'today' | 'tomorrow';
+import { DaySelector, type DayOption } from './DaySelector';
+import { ReportNotice } from './ReportNotice';
 
 const BASE = API_BASE;
 
@@ -33,8 +33,8 @@ export function KitchenReportCard() {
   const selectedIso = isoForOption(selected);
   const isSelectedWeekend = checkIsWeekend(selected === 'today' ? today : addDays(today, 1));
   const menuExists = menus.some((m) => m.date === selectedIso);
-  const displayDate = (opt: DayOption) =>
-    format(opt === 'today' ? today : addDays(today, 1), 'dd/MM/yyyy');
+  const shortDateForOption = (opt: DayOption) =>
+    format(opt === 'today' ? today : addDays(today, 1), 'dd/MM');
 
   const handleDownload = async () => {
     setError(null);
@@ -49,40 +49,24 @@ export function KitchenReportCard() {
   };
 
   return (
-    <div className="bg-paper border border-rule rounded-lg p-6 max-w-md">
-      <div className="flex items-center gap-2 mb-1">
-        <Icon name="chef" size={16} className="text-olive-800" />
-        <h2 className="text-[14px] font-semibold text-ink">Informe de cocina</h2>
+    <div className="flex-[1_1_340px] min-w-[320px] bg-paper border border-rule rounded-[14px] px-[26px] py-[24px] flex flex-col">
+      <div className="flex items-center gap-[11px] mb-3">
+        <span className="w-9 h-9 rounded-[10px] bg-warn-bg text-warn flex items-center justify-center shrink-0">
+          <Icon name="utensils" size={18} stroke={1.7} />
+        </span>
+        <h2 className="font-serif font-semibold text-[21px] text-ink">Informe de cocina</h2>
       </div>
-      <p className="text-[12px] text-muted mb-5">
-        Descarga el informe de producción para la fecha seleccionada en formato Word.
+      <p className="text-[13px] text-muted leading-[1.5] mb-[18px]">
+        Descarga el informe de cocina para la fecha seleccionada en formato Word.
       </p>
 
-      <div className="inline-flex p-[3px] bg-cream-2 border border-rule rounded-[7px] text-[12px] mb-5">
-        {(['today', 'tomorrow'] as DayOption[]).map((opt) => (
-          <button
-            key={opt}
-            type="button"
-            onClick={() => setSelected(opt)}
-            className={[
-              'px-4 py-1.5 rounded-[5px] font-semibold transition-colors',
-              selected === opt ? 'bg-white text-ink shadow-sm' : 'text-muted hover:text-ink',
-            ].join(' ')}
-          >
-            {opt === 'today' ? 'Hoy' : 'Mañana'}
-            <span className="ml-1.5 font-mono font-normal text-[10.5px] text-muted">
-              {displayDate(opt)}
-            </span>
-          </button>
-        ))}
-      </div>
+      <p className="font-mono text-[10px] tracking-[.1em] uppercase text-faint mb-[9px]">Fecha</p>
+      <DaySelector selected={selected} onSelect={setSelected} dateLabel={shortDateForOption} />
 
-      {isSelectedWeekend && (
-        <p className="text-[12px] text-alert mb-4">No hay entregas los fines de semana.</p>
-      )}
+      {isSelectedWeekend && <ReportNotice>No hay entregas los fines de semana.</ReportNotice>}
 
       {!isSelectedWeekend && !menuExists && (
-        <p className="text-[12px] text-alert mb-4">No hay menú registrado para esta fecha.</p>
+        <ReportNotice>No hay menú registrado para esta fecha.</ReportNotice>
       )}
 
       {error && <p className="text-[12px] text-alert mb-4">{error}</p>}
@@ -92,6 +76,7 @@ export function KitchenReportCard() {
         disabled={isSelectedWeekend || !menuExists}
         loading={loading}
         leftIcon="download"
+        className="mt-auto"
       >
         Descargar .docx
       </Button>

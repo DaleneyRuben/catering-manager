@@ -61,7 +61,7 @@ describe('KitchenReportCard', () => {
     render(<KitchenReportCard />);
     const manana = screen.getByRole('button', { name: /mañana/i });
     await userEvent.click(manana);
-    expect(manana.className).toContain('bg-white');
+    expect(manana.className).toContain('bg-olive-100');
   });
 
   it('shows error when download fails', async () => {
