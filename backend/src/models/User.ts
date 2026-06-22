@@ -3,7 +3,7 @@ import { ROLE_VALUES, type UserRole } from '../constants/roles';
 
 export type { UserRole };
 
-@Table({ tableName: 'users', timestamps: true })
+@Table({ tableName: 'users', timestamps: true, paranoid: true })
 class User extends Model {
   @Column({ type: DataType.STRING, allowNull: false, unique: true })
   declare username: string;
@@ -13,6 +13,9 @@ class User extends Model {
 
   @Column({ type: DataType.ENUM(...ROLE_VALUES), allowNull: false })
   declare role: UserRole;
+
+  @Column({ type: DataType.DATE, allowNull: true })
+  declare lastLoginAt: Date | null;
 }
 
 export default User;
