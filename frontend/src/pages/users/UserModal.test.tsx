@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event';
 import { UserModal } from './UserModal';
 import type { AppUser } from '../../hooks/useUsers';
 
-const existingUser: AppUser = { id: '1', username: 'daleney', role: 'manager' };
+const existingUser: AppUser = { id: '1', username: 'daleney', role: 'kitchen' };
 
 const createProps = {
   mode: 'create' as const,
@@ -44,7 +44,7 @@ describe('UserModal — create mode', () => {
     expect(onSave).toHaveBeenCalledWith({
       username: 'nuevo',
       password: 'pass123',
-      role: 'manager',
+      role: 'admin',
     });
     await waitFor(() => expect(onClose).toHaveBeenCalled());
   });

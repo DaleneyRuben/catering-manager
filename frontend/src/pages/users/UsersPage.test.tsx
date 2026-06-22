@@ -26,7 +26,7 @@ jest.mock('../../components/ui/PageLoader', () => ({
 
 const defaultUsers = [
   { id: '1', username: 'admin', role: 'admin' as const },
-  { id: '2', username: 'chef', role: 'manager' as const },
+  { id: '2', username: 'chef', role: 'kitchen' as const },
 ];
 
 function setupUsers(overrides: object = {}) {

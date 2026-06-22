@@ -7,8 +7,9 @@ import { Modal } from '../../components/ui/Modal';
 import { Button } from '../../components/ui/Button';
 
 const ROLE_OPTIONS: { value: UserRole; label: string }[] = [
+  { value: ROLES.SUPER_ADMIN, label: 'Super admin' },
   { value: ROLES.ADMIN, label: 'Admin' },
-  { value: ROLES.MANAGER, label: 'Manager' },
+  { value: ROLES.KITCHEN, label: 'Cocina' },
   { value: ROLES.DELIVERY, label: 'Delivery' },
 ];
 
@@ -39,7 +40,7 @@ export function UserModal(props: Props) {
   const [username, setUsername] = useState(initial?.username ?? '');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [role, setRole] = useState<UserRole>(initial?.role ?? ROLES.MANAGER);
+  const [role, setRole] = useState<UserRole>(initial?.role ?? ROLES.ADMIN);
   const [confirmDelete, setConfirmDelete] = useState(false);
 
   const canSave = mode === 'create' ? !!username && !!password : !!username;

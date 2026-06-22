@@ -9,15 +9,17 @@ import { UserModal } from './UserModal';
 import type { UserRole } from '../../contexts/AuthContext';
 
 const ROLE_LABELS: Record<UserRole, string> = {
+  super_admin: 'Super admin',
   admin: 'Admin',
-  manager: 'Manager',
+  kitchen: 'Cocina',
   delivery: 'Delivery',
 };
 
 const ROLE_CLASSES: Record<UserRole, string> = {
-  admin: 'bg-olive-100 text-olive-800',
-  manager: 'bg-cream-2 text-ink-2',
-  delivery: 'bg-warn-bg text-warn',
+  super_admin: 'bg-ok-bg text-ok',
+  admin: 'bg-olive-100 text-olive-700',
+  kitchen: 'bg-warn-bg text-warn',
+  delivery: 'bg-taupe-bg text-taupe',
 };
 
 export function UsersPage() {
