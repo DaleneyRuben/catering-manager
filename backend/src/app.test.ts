@@ -4,11 +4,10 @@ import app from './app';
 jest.mock('./database/sequelize', () => ({ __esModule: true, default: { query: jest.fn() } }));
 
 describe('GET /api/health', () => {
-  it('returns status ok', async () => {
+  it('requires authentication', async () => {
     const res = await request(app).get('/api/health');
 
-    expect(res.status).toBe(200);
-    expect(res.body).toEqual({ status: 'ok' });
+    expect(res.status).toBe(401);
   });
 });
 

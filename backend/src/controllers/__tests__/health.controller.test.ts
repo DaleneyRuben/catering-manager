@@ -23,11 +23,11 @@ const sampleReport = {
 
 beforeEach(() => jest.clearAllMocks());
 
-describe('GET /api/health/status', () => {
+describe('GET /api/health', () => {
   it('returns the health report as json', async () => {
     mockGetReport.mockResolvedValue(sampleReport);
 
-    const res = await request(app).get('/api/health/status');
+    const res = await request(app).get('/api/health');
 
     expect(res.status).toBe(200);
     expect(res.body).toEqual(sampleReport);
@@ -36,7 +36,7 @@ describe('GET /api/health/status', () => {
   it('returns 500 when the health service throws', async () => {
     mockGetReport.mockRejectedValue(new Error('unexpected'));
 
-    const res = await request(app).get('/api/health/status');
+    const res = await request(app).get('/api/health');
 
     expect(res.status).toBe(500);
   });

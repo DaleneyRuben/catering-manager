@@ -12,16 +12,7 @@ import { ROLES } from '../constants/roles';
 
 const router = Router();
 
-router.get('/health', (_, res) => {
-  res.json({ status: 'ok' });
-});
-
-router.get(
-  '/health/status',
-  requireAuth,
-  requireRole(ROLES.SUPER_ADMIN),
-  healthController.getStatus,
-);
+router.get('/health', requireAuth, requireRole(ROLES.SUPER_ADMIN), healthController.getStatus);
 
 router.use('/auth', authRoutes);
 
