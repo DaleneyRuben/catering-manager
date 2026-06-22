@@ -101,6 +101,13 @@ export function Icon({ name, size = 16, stroke = 1.5, className }: IconProps) {
           <path d="M6 6l12 12M6 18 18 6" />
         </svg>
       );
+    case 'no-entry':
+      return (
+        <svg {...props}>
+          <circle cx="12" cy="12" r="9" />
+          <path d="M5.6 5.6l12.8 12.8" />
+        </svg>
+      );
     case 'plus':
       return (
         <svg {...props}>
