@@ -43,11 +43,11 @@ describe('LoginPage', () => {
     expect(screen.getByRole('button', { name: 'Ingresar' })).not.toBeDisabled();
   });
 
-  it('calls setAuth and navigates to / on successful manager login', async () => {
+  it('calls setAuth and navigates to / on successful admin login', async () => {
     global.fetch = jest.fn().mockResolvedValue({
       ok: true,
       json: () =>
-        Promise.resolve({ token: 'tok', user: { id: 'enc1', username: 'admin', role: 'manager' } }),
+        Promise.resolve({ token: 'tok', user: { id: 'enc1', username: 'admin', role: 'admin' } }),
     }) as jest.Mock;
 
     renderPage();
@@ -57,10 +57,30 @@ describe('LoginPage', () => {
 
     await waitFor(() => {
       expect(mockSetAuth).toHaveBeenCalledWith(
-        { id: 'enc1', username: 'admin', role: 'manager' },
+        { id: 'enc1', username: 'admin', role: 'admin' },
         'tok',
       );
       expect(mockNavigate).toHaveBeenCalledWith('/', { replace: true });
+    });
+  });
+
+  it('navigates to /menu for kitchen role', async () => {
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: true,
+      json: () =>
+        Promise.resolve({
+          token: 'tok',
+          user: { id: 'enc3', username: 'cocina', role: 'kitchen' },
+        }),
+    }) as jest.Mock;
+
+    renderPage();
+    await userEvent.type(screen.getByLabelText(/usuario/i, { selector: 'input' }), 'cocina');
+    await userEvent.type(screen.getByLabelText(/contraseña/i, { selector: 'input' }), 'secret');
+    await userEvent.click(screen.getByRole('button', { name: 'Ingresar' }));
+
+    await waitFor(() => {
+      expect(mockNavigate).toHaveBeenCalledWith('/menu', { replace: true });
     });
   });
 

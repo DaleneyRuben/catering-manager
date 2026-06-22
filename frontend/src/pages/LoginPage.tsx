@@ -16,6 +16,7 @@ type SubmitState = 'idle' | 'loading' | 'success';
 
 const redirectForRole = (role: UserRole): string => {
   if (role === ROLES.DELIVERY) return '/entregas';
+  if (role === ROLES.KITCHEN) return '/menu';
   return '/';
 };
 
