@@ -22,7 +22,7 @@ describe('Button', () => {
 
   it('applies danger variant', () => {
     render(<Button variant="danger">Eliminar</Button>);
-    expect(screen.getByRole('button')).toHaveClass('text-warn');
+    expect(screen.getByRole('button')).toHaveClass('text-danger', 'border-danger-border');
   });
 
   it('applies destructive variant', () => {

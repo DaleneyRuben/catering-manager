@@ -31,6 +31,9 @@
   --color-ok-bg: #dee9c8;
   --color-taupe: #7b6a4e;
   --color-taupe-bg: #efe9dd;
+  --color-danger: #a8512f;
+  --color-danger-bg: #f3ddd2;
+  --color-danger-border: #e3c3b4;
 
   /* Fonts */
   --font-sans: 'Manrope', system-ui, sans-serif;
