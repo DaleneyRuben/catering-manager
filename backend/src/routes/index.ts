@@ -7,6 +7,7 @@ import reportRoutes from './report.routes';
 import subscriptionRoutes from './subscription.routes';
 import userRoutes from './user.routes';
 import { requireAuth, requireRole } from '../middleware/auth';
+import { ROLES } from '../constants/roles';
 
 const router = Router();
 
@@ -16,16 +17,26 @@ router.get('/health', (_, res) => {
 
 router.use('/auth', authRoutes);
 
-router.use('/clients', requireAuth, requireRole('admin', 'manager'), clientRoutes);
-router.use('/menus', requireAuth, requireRole('admin', 'manager'), menuRoutes);
+router.use('/clients', requireAuth, requireRole(ROLES.SUPER_ADMIN, ROLES.ADMIN), clientRoutes);
+router.use(
+  '/menus',
+  requireAuth,
+  requireRole(ROLES.SUPER_ADMIN, ROLES.ADMIN, ROLES.KITCHEN),
+  menuRoutes,
+);
 router.use(
   '/clients/:clientId/subscriptions',
   requireAuth,
-  requireRole('admin', 'manager'),
+  requireRole(ROLES.SUPER_ADMIN, ROLES.ADMIN),
   subscriptionRoutes,
 );
-router.use('/plans', requireAuth, requireRole('admin', 'manager'), planRoutes);
-router.use('/reports', requireAuth, requireRole('admin', 'manager'), reportRoutes);
-router.use('/users', requireAuth, requireRole('admin'), userRoutes);
+router.use('/plans', requireAuth, requireRole(ROLES.SUPER_ADMIN, ROLES.ADMIN), planRoutes);
+router.use(
+  '/reports',
+  requireAuth,
+  requireRole(ROLES.SUPER_ADMIN, ROLES.ADMIN, ROLES.KITCHEN),
+  reportRoutes,
+);
+router.use('/users', requireAuth, requireRole(ROLES.SUPER_ADMIN), userRoutes);
 
 export default router;
