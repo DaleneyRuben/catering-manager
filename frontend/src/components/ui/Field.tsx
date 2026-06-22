@@ -1,10 +1,10 @@
 export const inputCls = (hasError?: boolean) =>
-  `w-full border rounded-md px-3 py-2 text-[13px] bg-cream focus:outline-none transition-colors ${
+  `w-full border rounded-[9px] px-[14px] py-[11px] text-[14px] bg-white focus:outline-none transition-colors ${
     hasError ? 'border-warn focus:border-warn' : 'border-rule focus:border-olive-600'
   }`;
 
 export const selectCls = (hasError?: boolean) =>
-  `w-full border rounded-md px-3 py-2 text-[13px] bg-cream focus:outline-none transition-colors cursor-pointer ${
+  `w-full border rounded-[9px] px-[14px] py-[11px] text-[14px] bg-white focus:outline-none transition-colors cursor-pointer ${
     hasError ? 'border-warn focus:border-warn' : 'border-rule focus:border-olive-600'
   }`;
 
