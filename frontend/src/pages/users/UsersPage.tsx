@@ -99,81 +99,83 @@ export function UsersPage() {
         </div>
       ) : (
         <div className="bg-paper border border-rule rounded-[13px] overflow-hidden">
-          <table className="w-full">
-            <thead>
-              <tr className="bg-olive-50">
-                <th className="text-left px-[22px] py-[13px] text-[10px] font-mono font-semibold uppercase tracking-[.13em] text-muted border-b border-rule">
-                  Usuario
-                </th>
-                <th className="text-left px-[22px] py-[13px] text-[10px] font-mono font-semibold uppercase tracking-[.13em] text-muted border-b border-rule">
-                  Rol
-                </th>
-                <th className="text-left px-[22px] py-[13px] text-[10px] font-mono font-semibold uppercase tracking-[.13em] text-muted border-b border-rule">
-                  Último acceso
-                </th>
-                <th className="text-left px-[22px] py-[13px] text-[10px] font-mono font-semibold uppercase tracking-[.13em] text-muted border-b border-rule">
-                  Estado
-                </th>
-                <th className="w-12 border-b border-rule" scope="col">
-                  <span className="sr-only">Acciones</span>
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredUsers.map((u) => {
-                const isActive = !u.deletedAt;
-                return (
-                  <tr
-                    key={u.id}
-                    className="border-b border-cream-2 last:border-0 hover:bg-[#f5f7f0] transition-colors"
-                  >
-                    <td className="px-[22px] py-[13px]">
-                      <div className="flex items-center gap-3">
-                        <div
-                          className={`w-9 h-9 rounded-full flex items-center justify-center font-mono text-[12px] font-semibold shrink-0 ${ROLE_CLASSES[u.role]}`}
-                        >
-                          {initials(u.username)}
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="bg-olive-50">
+                  <th className="text-left px-[22px] py-[13px] text-[10px] font-mono font-semibold uppercase tracking-[.13em] text-muted border-b border-rule">
+                    Usuario
+                  </th>
+                  <th className="text-left px-[22px] py-[13px] text-[10px] font-mono font-semibold uppercase tracking-[.13em] text-muted border-b border-rule">
+                    Rol
+                  </th>
+                  <th className="text-left px-[22px] py-[13px] text-[10px] font-mono font-semibold uppercase tracking-[.13em] text-muted border-b border-rule">
+                    Último acceso
+                  </th>
+                  <th className="text-left px-[22px] py-[13px] text-[10px] font-mono font-semibold uppercase tracking-[.13em] text-muted border-b border-rule">
+                    Estado
+                  </th>
+                  <th className="w-12 border-b border-rule" scope="col">
+                    <span className="sr-only">Acciones</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredUsers.map((u) => {
+                  const isActive = !u.deletedAt;
+                  return (
+                    <tr
+                      key={u.id}
+                      className="border-b border-cream-2 last:border-0 hover:bg-[#f5f7f0] transition-colors"
+                    >
+                      <td className="px-[22px] py-[13px]">
+                        <div className="flex items-center gap-3">
+                          <div
+                            className={`w-9 h-9 rounded-full flex items-center justify-center font-mono text-[12px] font-semibold shrink-0 ${ROLE_CLASSES[u.role]}`}
+                          >
+                            {initials(u.username)}
+                          </div>
+                          <p className="text-[14px] font-semibold text-ink">{u.username}</p>
                         </div>
-                        <p className="text-[14px] font-semibold text-ink">{u.username}</p>
-                      </div>
-                    </td>
-                    <td className="px-[22px] py-[13px]">
-                      <span
-                        className={`inline-flex items-center px-3 py-1 rounded-[7px] text-[12.5px] font-semibold ${ROLE_CLASSES[u.role]}`}
-                      >
-                        {ROLE_LABELS[u.role]}
-                      </span>
-                    </td>
-                    <td className="px-[22px] py-[13px] text-[12px] font-mono text-muted tabular-nums whitespace-nowrap">
-                      {u.lastLoginAt ? formatDateTime(u.lastLoginAt) : 'Nunca'}
-                    </td>
-                    <td className="px-[22px] py-[13px]">
-                      <span
-                        className={`inline-flex items-center gap-[7px] text-[12.5px] font-semibold ${
-                          isActive ? 'text-ok' : 'text-faint'
-                        }`}
-                      >
+                      </td>
+                      <td className="px-[22px] py-[13px]">
                         <span
-                          className={`w-[7px] h-[7px] rounded-full ${isActive ? 'bg-ok' : 'bg-rule-2'}`}
-                        />
-                        {isActive ? 'Activo' : 'Inactivo'}
-                      </span>
-                    </td>
-                    <td className="px-[22px] py-[13px] text-right">
-                      <button
-                        type="button"
-                        onClick={() => setEditUser(u)}
-                        className="w-8 h-8 flex items-center justify-center rounded-lg text-faint hover:text-ink-2 hover:bg-cream-2 transition-colors"
-                        aria-label={`Editar ${u.username}`}
-                      >
-                        <Icon name="settings" size={15} />
-                      </button>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+                          className={`inline-flex items-center px-3 py-1 rounded-[7px] text-[12.5px] font-semibold ${ROLE_CLASSES[u.role]}`}
+                        >
+                          {ROLE_LABELS[u.role]}
+                        </span>
+                      </td>
+                      <td className="px-[22px] py-[13px] text-[12px] font-mono text-muted tabular-nums whitespace-nowrap">
+                        {u.lastLoginAt ? formatDateTime(u.lastLoginAt) : 'Nunca'}
+                      </td>
+                      <td className="px-[22px] py-[13px]">
+                        <span
+                          className={`inline-flex items-center gap-[7px] text-[12.5px] font-semibold ${
+                            isActive ? 'text-ok' : 'text-faint'
+                          }`}
+                        >
+                          <span
+                            className={`w-[7px] h-[7px] rounded-full ${isActive ? 'bg-ok' : 'bg-rule-2'}`}
+                          />
+                          {isActive ? 'Activo' : 'Inactivo'}
+                        </span>
+                      </td>
+                      <td className="px-[22px] py-[13px] text-right">
+                        <button
+                          type="button"
+                          onClick={() => setEditUser(u)}
+                          className="w-8 h-8 flex items-center justify-center rounded-lg text-faint hover:text-ink-2 hover:bg-cream-2 transition-colors"
+                          aria-label={`Editar ${u.username}`}
+                        >
+                          <Icon name="settings" size={15} />
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
 
