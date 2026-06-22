@@ -13,7 +13,8 @@ import { HealthPage } from './pages/HealthPage';
 import { UsersPage } from './pages/users/UsersPage';
 import { ROLES } from './constants/roles';
 
-const MANAGER_ROLES = [ROLES.ADMIN, ROLES.MANAGER] as const;
+const ADMIN_ROLES = [ROLES.SUPER_ADMIN, ROLES.ADMIN] as const;
+const SHELL_ROLES = [ROLES.SUPER_ADMIN, ROLES.ADMIN, ROLES.KITCHEN] as const;
 
 function App() {
   return (
@@ -23,20 +24,55 @@ function App() {
       <Route
         path="/*"
         element={
-          <ProtectedRoute allowedRoles={[...MANAGER_ROLES]}>
+          <ProtectedRoute allowedRoles={[...SHELL_ROLES]}>
             <Layout>
               <Routes>
-                <Route path="/" element={<DashboardPage />} />
-                <Route path="/clientes" element={<ClientsPage />} />
-                <Route path="/clientes/nuevo" element={<NewClientPage />} />
-                <Route path="/clientes/:id" element={<ClientDetailPage />} />
-                <Route path="/planes" element={<PlansPage />} />
+                <Route
+                  path="/"
+                  element={
+                    <ProtectedRoute allowedRoles={[...ADMIN_ROLES]}>
+                      <DashboardPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/clientes"
+                  element={
+                    <ProtectedRoute allowedRoles={[...ADMIN_ROLES]}>
+                      <ClientsPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/clientes/nuevo"
+                  element={
+                    <ProtectedRoute allowedRoles={[...ADMIN_ROLES]}>
+                      <NewClientPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/clientes/:id"
+                  element={
+                    <ProtectedRoute allowedRoles={[...ADMIN_ROLES]}>
+                      <ClientDetailPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/planes"
+                  element={
+                    <ProtectedRoute allowedRoles={[...ADMIN_ROLES]}>
+                      <PlansPage />
+                    </ProtectedRoute>
+                  }
+                />
                 <Route path="/menu" element={<MenuImportPage />} />
                 <Route path="/informes" element={<ReportsPage />} />
                 <Route
                   path="/health"
                   element={
-                    <ProtectedRoute allowedRoles={[ROLES.ADMIN]}>
+                    <ProtectedRoute allowedRoles={[ROLES.SUPER_ADMIN]}>
                       <HealthPage />
                     </ProtectedRoute>
                   }
@@ -44,7 +80,7 @@ function App() {
                 <Route
                   path="/usuarios"
                   element={
-                    <ProtectedRoute allowedRoles={[ROLES.ADMIN]}>
+                    <ProtectedRoute allowedRoles={[ROLES.SUPER_ADMIN]}>
                       <UsersPage />
                     </ProtectedRoute>
                   }

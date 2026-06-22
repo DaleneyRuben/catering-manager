@@ -2,14 +2,10 @@ import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import App from './App';
+import { useAuth } from './contexts/AuthContext';
 
 jest.mock('./contexts/AuthContext', () => ({
-  useAuth: () => ({
-    user: { id: 1, username: 'daleney', role: 'manager' },
-    token: 'fake-token',
-    setAuth: jest.fn(),
-    clearAuth: jest.fn(),
-  }),
+  useAuth: jest.fn(),
   AuthProvider: ({ children }: { children: React.ReactNode }) => children,
 }));
 
@@ -20,7 +16,15 @@ jest.mock('./services/api', () => ({
   },
 }));
 
-function renderAt(path: string) {
+const mockUseAuth = useAuth as jest.Mock;
+
+function renderAt(path: string, role: string = 'admin') {
+  mockUseAuth.mockReturnValue({
+    user: { id: 1, username: 'daleney', role },
+    token: 'fake-token',
+    setAuth: jest.fn(),
+    clearAuth: jest.fn(),
+  });
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false } },
   });
@@ -47,5 +51,20 @@ describe('App', () => {
   it('renders the plans page at /planes', async () => {
     renderAt('/planes');
     expect(await screen.findByRole('heading', { name: 'Planes' })).toBeInTheDocument();
+  });
+
+  it('lets kitchen role reach the menu page', async () => {
+    renderAt('/menu', 'kitchen');
+    expect(await screen.findByRole('heading', { name: 'Menú del día' })).toBeInTheDocument();
+  });
+
+  it('lets kitchen role reach the reports page', async () => {
+    renderAt('/informes', 'kitchen');
+    expect(await screen.findByRole('heading', { name: 'Informes' })).toBeInTheDocument();
+  });
+
+  it('blocks kitchen role from the clients page', async () => {
+    renderAt('/clientes', 'kitchen');
+    expect(await screen.findByText('No tenés acceso a esta sección.')).toBeInTheDocument();
   });
 });
