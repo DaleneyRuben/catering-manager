@@ -17,7 +17,7 @@ const BASE =
   'inline-flex items-center justify-center gap-2 font-semibold rounded-md transition active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60 disabled:active:scale-100';
 
 const VARIANT_CLS: Record<ButtonVariant, string> = {
-  primary: 'bg-olive-800 text-white hover:bg-olive-700',
+  primary: 'bg-olive-700 text-white hover:bg-olive-800',
   secondary: 'border border-rule text-ink hover:bg-cream-2',
   danger: 'border border-rule text-warn hover:bg-cream-2',
   destructive: 'bg-warn text-white hover:opacity-90',
