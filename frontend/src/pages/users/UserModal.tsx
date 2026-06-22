@@ -73,7 +73,7 @@ export function UserModal(props: Props) {
         <button
           type="button"
           onClick={onClose}
-          className="w-[34px] h-[34px] flex items-center justify-center border border-rule rounded-md bg-paper hover:bg-cream-2 transition-colors"
+          className="w-[34px] h-[34px] flex items-center justify-center border border-rule rounded-md bg-paper text-faint hover:text-ink-2 hover:bg-cream-2 transition-colors"
         >
           <Icon name="x" size={14} />
         </button>
@@ -108,7 +108,7 @@ export function UserModal(props: Props) {
             <button
               type="button"
               onClick={() => setShowPassword((v) => !v)}
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted hover:text-ink transition-colors"
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-faint hover:text-ink-2 transition-colors"
               tabIndex={-1}
             >
               <Icon name={showPassword ? 'eye-off' : 'eye'} size={15} />
@@ -125,10 +125,10 @@ export function UserModal(props: Props) {
                 type="button"
                 onClick={() => setRole(r.value)}
                 className={[
-                  'flex-1 py-2 text-[12px] font-medium rounded-md border transition-colors',
+                  'flex-1 py-2 text-[12.5px] rounded-md border transition-colors',
                   role === r.value
-                    ? 'bg-olive-800 text-white border-olive-800'
-                    : 'bg-paper text-ink border-rule hover:bg-cream-2',
+                    ? 'bg-olive-800 text-olive-50 font-semibold border-olive-800'
+                    : 'bg-white text-muted font-medium border-rule hover:bg-cream-2',
                 ].join(' ')}
               >
                 {r.label}

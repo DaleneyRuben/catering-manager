@@ -39,7 +39,7 @@ export function UsersPage() {
   const filteredUsers = users.filter((u) => u.username.toLowerCase().includes(query.toLowerCase()));
 
   return (
-    <div className="px-4 py-5 lg:p-7 max-w-[1320px] mx-auto">
+    <div className="px-4 py-5 lg:px-[44px] lg:py-[34px]">
       <PageHeader
         label="Equipo"
         title="Usuarios"
@@ -77,12 +77,12 @@ export function UsersPage() {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Buscar usuario…"
-            className="w-full pl-[38px] pr-3 py-2.5 text-[13.5px] border border-rule rounded-[9px] bg-paper focus:outline-none focus:border-olive-600"
+            className="w-full pl-[38px] pr-3 py-2.5 text-[13.5px] border border-rule rounded-[9px] bg-paper placeholder:text-faint focus:outline-none focus:border-olive-600"
           />
           <Icon
             name="search"
             size={16}
-            className="absolute left-[13px] top-1/2 -translate-y-1/2 text-muted"
+            className="absolute left-[13px] top-1/2 -translate-y-1/2 text-faint"
           />
         </div>
         <p className="text-[11.5px] font-mono uppercase tracking-[.04em] text-muted">
@@ -150,7 +150,7 @@ export function UsersPage() {
                     <td className="px-[22px] py-[13px]">
                       <span
                         className={`inline-flex items-center gap-[7px] text-[12.5px] font-semibold ${
-                          isActive ? 'text-ok' : 'text-muted'
+                          isActive ? 'text-ok' : 'text-faint'
                         }`}
                       >
                         <span
@@ -163,7 +163,7 @@ export function UsersPage() {
                       <button
                         type="button"
                         onClick={() => setEditUser(u)}
-                        className="w-8 h-8 flex items-center justify-center rounded-lg text-muted hover:text-ink-2 hover:bg-cream-2 transition-colors"
+                        className="w-8 h-8 flex items-center justify-center rounded-lg text-faint hover:text-ink-2 hover:bg-cream-2 transition-colors"
                         aria-label={`Editar ${u.username}`}
                       >
                         <Icon name="settings" size={15} />
