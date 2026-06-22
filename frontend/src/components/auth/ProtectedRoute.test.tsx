@@ -17,7 +17,7 @@ function renderRoute(user: { id: number; username: string; role: string } | null
         <Route
           path="/protegido"
           element={
-            <ProtectedRoute allowedRoles={['admin', 'manager']}>
+            <ProtectedRoute allowedRoles={['admin', 'kitchen']}>
               <div>contenido protegido</div>
             </ProtectedRoute>
           }
@@ -35,8 +35,8 @@ describe('ProtectedRoute', () => {
     expect(screen.getByText('contenido protegido')).toBeInTheDocument();
   });
 
-  it('renders children when user has manager role', () => {
-    renderRoute({ id: 2, username: 'staff', role: 'manager' });
+  it('renders children when user has kitchen role', () => {
+    renderRoute({ id: 2, username: 'staff', role: 'kitchen' });
     expect(screen.getByText('contenido protegido')).toBeInTheDocument();
   });
 

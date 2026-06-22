@@ -13,7 +13,7 @@ const mockPatch = api.patch as jest.Mock;
 const mockDelete = api.delete as jest.Mock;
 
 const user1 = { id: '1', username: 'ada', role: 'admin' as const };
-const user2 = { id: '2', username: 'grace', role: 'manager' as const };
+const user2 = { id: '2', username: 'grace', role: 'kitchen' as const };
 
 function makeWrapper() {
   const queryClient = new QueryClient({
