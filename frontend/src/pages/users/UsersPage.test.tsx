@@ -25,8 +25,21 @@ jest.mock('../../components/ui/PageLoader', () => ({
 }));
 
 const defaultUsers = [
-  { id: '1', username: 'admin', role: 'admin' as const },
-  { id: '2', username: 'chef', role: 'kitchen' as const },
+  {
+    id: '1',
+    username: 'admin',
+    role: 'admin' as const,
+    lastLoginAt: '2026-06-20T14:30:00',
+    deletedAt: null,
+  },
+  { id: '2', username: 'chef', role: 'kitchen' as const, lastLoginAt: null, deletedAt: null },
+  {
+    id: '3',
+    username: 'rocio',
+    role: 'kitchen' as const,
+    lastLoginAt: null,
+    deletedAt: '2026-06-10T00:00:00.000Z',
+  },
 ];
 
 function setupUsers(overrides: object = {}) {
@@ -96,5 +109,43 @@ describe('UsersPage', () => {
     render(<UsersPage />);
     await userEvent.click(screen.getByRole('button', { name: 'Editar chef' }));
     expect(capturedModalProps.isSelf).toBe(false);
+  });
+
+  it('shows a role summary card with the count of users per role', () => {
+    render(<UsersPage />);
+    const kitchenCard = screen.getAllByText('Cocina')[0].closest('div');
+    expect(kitchenCard).toHaveTextContent('2');
+  });
+
+  it('shows the total user count', () => {
+    render(<UsersPage />);
+    expect(screen.getByText('3 usuarios')).toBeInTheDocument();
+  });
+
+  it('filters the table by username when searching', async () => {
+    render(<UsersPage />);
+    await userEvent.type(screen.getByPlaceholderText(/buscar usuario/i), 'chef');
+    expect(screen.getByText('chef')).toBeInTheDocument();
+    expect(screen.queryByText('admin')).not.toBeInTheDocument();
+  });
+
+  it('shows the formatted last login date', () => {
+    render(<UsersPage />);
+    expect(screen.getByText('20/06/2026 14:30')).toBeInTheDocument();
+  });
+
+  it('shows Nunca when the user has never logged in', () => {
+    render(<UsersPage />);
+    expect(screen.getAllByText('Nunca')).toHaveLength(2);
+  });
+
+  it('shows Activo for users without a deletedAt', () => {
+    render(<UsersPage />);
+    expect(screen.getAllByText('Activo')).toHaveLength(2);
+  });
+
+  it('shows Inactivo for soft-deleted users', () => {
+    render(<UsersPage />);
+    expect(screen.getByText('Inactivo')).toBeInTheDocument();
   });
 });
