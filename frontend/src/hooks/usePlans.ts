@@ -10,7 +10,10 @@ export function usePlans() {
 
   const plansQuery = useQuery({
     queryKey: ['plans'],
-    queryFn: (): Promise<Plan[]> => api.get<Plan[]>('/plans'),
+    queryFn: async (): Promise<Plan[]> => {
+      const plans = await api.get<Plan[]>('/plans');
+      return plans.map((p) => ({ ...p, price: Number(p.price) }));
+    },
   });
 
   const clientCountsQuery = useQuery({

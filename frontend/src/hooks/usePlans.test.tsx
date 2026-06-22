@@ -39,6 +39,18 @@ describe('usePlans', () => {
     expect(result.current.plans).toEqual([plan1, plan2]);
   });
 
+  it('normalizes price to a number when the API returns a decimal string', async () => {
+    mockGet.mockImplementation((url: string) => {
+      if (url === '/plans') return Promise.resolve([{ ...plan1, price: '1200.00' }]);
+      if (url === '/plans/client-counts') return Promise.resolve({});
+      return Promise.reject(new Error(`Unknown URL: ${url}`));
+    });
+    const { result } = renderHook(() => usePlans(), { wrapper: makeWrapper() });
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    expect(result.current.plans[0].price).toBe(1200);
+  });
+
   it('isLoading is true initially', () => {
     const { result } = renderHook(() => usePlans(), { wrapper: makeWrapper() });
     expect(result.current.isLoading).toBe(true);
