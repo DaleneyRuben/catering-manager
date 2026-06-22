@@ -19,8 +19,19 @@ const NAV_ITEMS: NavItem[] = [
   { to: '/', label: 'Panel', icon: 'dashboard', allowedRoles: ADMIN_ROLES },
   { to: '/clientes', label: 'Clientes', icon: 'users', allowedRoles: ADMIN_ROLES },
   { to: '/planes', label: 'Planes', icon: 'plan', allowedRoles: ADMIN_ROLES },
-  { to: '/menu', label: 'Menú', icon: 'chef' },
-  { to: '/informes', label: 'Informes', icon: 'report' },
+  { to: '/menu', label: 'Menú', icon: 'chef', allowedRoles: [...ADMIN_ROLES, ROLES.KITCHEN] },
+  {
+    to: '/informes',
+    label: 'Informes',
+    icon: 'report',
+    allowedRoles: [...ADMIN_ROLES, ROLES.KITCHEN],
+  },
+  {
+    to: '/entregas',
+    label: 'Entregas',
+    icon: 'motorcycle',
+    allowedRoles: [...ADMIN_ROLES, ROLES.DELIVERY],
+  },
 ];
 
 const SUPER_ADMIN_NAV_ITEMS: NavItem[] = [

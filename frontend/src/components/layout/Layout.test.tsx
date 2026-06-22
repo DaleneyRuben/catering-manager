@@ -142,4 +142,56 @@ describe('Layout', () => {
     expect(screen.getByText('Usuarios')).toBeInTheDocument();
     expect(screen.getByText('Health')).toBeInTheDocument();
   });
+
+  it('shows only Entregas for the delivery role', () => {
+    mockUserRole('delivery');
+    render(
+      <MemoryRouter>
+        <Layout>
+          <span />
+        </Layout>
+      </MemoryRouter>,
+    );
+    expect(screen.queryByText('Panel')).not.toBeInTheDocument();
+    expect(screen.queryByText('Clientes')).not.toBeInTheDocument();
+    expect(screen.queryByText('Planes')).not.toBeInTheDocument();
+    expect(screen.queryByText('Menú')).not.toBeInTheDocument();
+    expect(screen.queryByText('Informes')).not.toBeInTheDocument();
+    expect(screen.getByText('Entregas')).toBeInTheDocument();
+  });
+
+  it('shows Entregas alongside everything else for the admin role', () => {
+    render(
+      <MemoryRouter>
+        <Layout>
+          <span />
+        </Layout>
+      </MemoryRouter>,
+    );
+    expect(screen.getByText('Entregas')).toBeInTheDocument();
+  });
+
+  it('shows Entregas alongside everything else for the super_admin role', () => {
+    mockUserRole('super_admin');
+    render(
+      <MemoryRouter>
+        <Layout>
+          <span />
+        </Layout>
+      </MemoryRouter>,
+    );
+    expect(screen.getByText('Entregas')).toBeInTheDocument();
+  });
+
+  it('shows the logout button for the delivery role', () => {
+    mockUserRole('delivery');
+    render(
+      <MemoryRouter>
+        <Layout>
+          <span />
+        </Layout>
+      </MemoryRouter>,
+    );
+    expect(screen.getByRole('button', { name: 'Cerrar sesión' })).toBeInTheDocument();
+  });
 });
