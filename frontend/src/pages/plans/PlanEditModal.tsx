@@ -3,7 +3,6 @@ import { Icon } from '../../components/ui/Icon';
 import { Modal } from '../../components/ui/Modal';
 import { Button } from '../../components/ui/Button';
 import type { Plan } from '../../types/client';
-import { ConfirmDeleteModal } from './ConfirmDeleteModal';
 import { PlanEditorForm } from './PlanEditorForm';
 import type { MealKey, PlanDraft } from './types';
 
@@ -12,14 +11,12 @@ export function PlanEditModal({
   clientCount,
   isSaving,
   onSave,
-  onDelete,
   onClose,
 }: {
   plan: Plan;
   clientCount: number;
   isSaving: boolean;
   onSave: (draft: PlanDraft) => void;
-  onDelete: () => Promise<void>;
   onClose: () => void;
 }) {
   const [draft, setDraft] = useState<PlanDraft>({
@@ -27,53 +24,45 @@ export function PlanEditModal({
     meals: plan.meals as MealKey[],
     price: String(plan.price),
   });
-  const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
+
+  const clientsLabel = clientCount === 1 ? '1 cliente activo' : `${clientCount} clientes activos`;
 
   return (
-    <>
-      <Modal onClose={onClose} className="w-[min(640px,92vw)] max-h-[92vh] overflow-auto">
-        <div className="flex items-center gap-2.5 px-[22px] py-[18px] border-b border-rule">
-          <Icon name="plan" size={16} />
-          <div className="flex-1">
-            <p className="font-serif text-[20px] leading-tight text-ink">Editar plan</p>
-            <p className="font-mono text-[11px] text-muted">{plan.name}</p>
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="w-[34px] h-[34px] flex items-center justify-center border border-rule rounded-md bg-paper hover:bg-cream-2 transition-colors"
-          >
-            <Icon name="x" size={14} />
-          </button>
-        </div>
-
-        <div className="p-[22px]">
-          <PlanEditorForm draft={draft} setDraft={setDraft} />
-
-          <div className="flex gap-2.5 mt-[18px]">
-            <Button variant="danger" onClick={() => setConfirmDeleteOpen(true)} disabled={isSaving}>
-              Eliminar
-            </Button>
-            <div className="flex-1" />
-            <Button onClick={() => onSave(draft)} loading={isSaving} leftIcon="check">
-              Guardar cambios
-            </Button>
-          </div>
-
-          <p className="font-mono text-[11px] text-muted mt-3.5 px-3 py-2.5 bg-cream-2 rounded-md">
-            ⓘ Modificar este plan afectará a {clientCount} cliente
-            {clientCount !== 1 ? 's' : ''} con contrato vigente.
+    <Modal onClose={onClose} className="w-[min(640px,92vw)] max-h-[92vh] overflow-auto">
+      <div className="flex items-center gap-3 px-[28px] py-[22px] border-b border-[#e4e1d3]">
+        <span className="w-[34px] h-[34px] rounded-[9px] bg-olive-100 text-olive-700 flex items-center justify-center shrink-0">
+          <Icon name="plan" size={17} stroke={1.8} />
+        </span>
+        <div className="flex-1">
+          <h3 className="font-serif font-semibold text-[23px] leading-none text-ink">
+            Editar plan
+          </h3>
+          <p className="font-mono text-[11px] text-faint mt-[3px]">
+            {plan.name} · {clientsLabel}
           </p>
         </div>
-      </Modal>
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Cerrar"
+          className="p-1 flex items-center justify-center text-faint hover:text-ink-2 transition-colors"
+        >
+          <Icon name="x" size={20} stroke={1.8} />
+        </button>
+      </div>
 
-      {confirmDeleteOpen && (
-        <ConfirmDeleteModal
-          planName={plan.name}
-          onClose={() => setConfirmDeleteOpen(false)}
-          onConfirm={onDelete}
-        />
-      )}
-    </>
+      <div className="px-[28px] py-[22px]">
+        <PlanEditorForm draft={draft} setDraft={setDraft} />
+
+        <div className="flex justify-end gap-2.5 mt-[18px]">
+          <Button variant="secondary" onClick={onClose} disabled={isSaving}>
+            Cancelar
+          </Button>
+          <Button onClick={() => onSave(draft)} loading={isSaving} leftIcon="check">
+            Guardar cambios
+          </Button>
+        </div>
+      </div>
+    </Modal>
   );
 }

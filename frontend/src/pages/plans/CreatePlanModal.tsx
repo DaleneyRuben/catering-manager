@@ -27,28 +27,29 @@ export function CreatePlanModal({
 
   return (
     <Modal onClose={onClose} className="w-[min(640px,92vw)] max-h-[92vh] overflow-auto">
-      <div className="flex items-center gap-2.5 px-[22px] py-[18px] border-b border-rule">
-        <Icon name="plan" size={16} />
-        <div className="flex-1">
-          <p className="font-serif text-[20px] leading-tight text-ink">Crear plan</p>
-          <p className="font-mono text-[11px] text-muted">Define nombre, comidas y precio</p>
-        </div>
+      <div className="flex items-center gap-3 px-[28px] py-[22px] border-b border-[#e4e1d3]">
+        <span className="w-[34px] h-[34px] rounded-[9px] bg-olive-100 text-olive-700 flex items-center justify-center shrink-0">
+          <Icon name="plan" size={17} stroke={1.8} />
+        </span>
+        <h3 className="flex-1 font-serif font-semibold text-[23px] leading-none text-ink">
+          Nuevo plan
+        </h3>
         <button
           type="button"
           onClick={onClose}
-          className="w-[34px] h-[34px] flex items-center justify-center border border-rule rounded-md bg-paper hover:bg-cream-2 transition-colors"
+          aria-label="Cerrar"
+          className="p-1 flex items-center justify-center text-faint hover:text-ink-2 transition-colors"
         >
-          <Icon name="x" size={14} />
+          <Icon name="x" size={20} stroke={1.8} />
         </button>
       </div>
 
-      <div className="p-[22px]">
+      <div className="px-[28px] py-[22px]">
         <PlanEditorForm draft={draft} setDraft={setDraft} />
-        <div className="flex gap-2.5 mt-[18px]">
+        <div className="flex justify-end gap-2.5 mt-[18px]">
           <Button variant="secondary" onClick={onClose} disabled={isLoading}>
             Cancelar
           </Button>
-          <div className="flex-1" />
           <Button onClick={handleSubmit} loading={isLoading} leftIcon="check">
             Crear plan
           </Button>
