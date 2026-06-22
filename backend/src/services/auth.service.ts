@@ -37,6 +37,8 @@ const login = async (
   const valid = await verifyPassword(password, user.password);
   if (!valid) throw new Error('INVALID_CREDENTIALS');
 
+  await user.update({ lastLoginAt: new Date() });
+
   const token = signToken({ userId: user.id as number, role: user.role });
   return {
     token,

@@ -25,6 +25,7 @@ const mockUser = {
   username: 'ada',
   password: '$2b$10$hashedpassword',
   role: ROLES.ADMIN,
+  update: jest.fn(),
 };
 
 describe('authService.login', () => {
@@ -38,6 +39,16 @@ describe('authService.login', () => {
     expect(result.token).toBe('signed-token');
     expect(result.user).toEqual({ id: encodeId(1), username: 'ada', role: ROLES.ADMIN });
     expect(bcrypt.compare).toHaveBeenCalledWith('correct-password', mockUser.password);
+  });
+
+  it('updates lastLoginAt on successful login', async () => {
+    (User.findOne as jest.Mock).mockResolvedValue(mockUser);
+    (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+    (jwt.sign as jest.Mock).mockReturnValue('signed-token');
+
+    await authService.login('ada', 'correct-password');
+
+    expect(mockUser.update).toHaveBeenCalledWith({ lastLoginAt: expect.any(Date) });
   });
 
   it('throws INVALID_CREDENTIALS when user not found', async () => {
