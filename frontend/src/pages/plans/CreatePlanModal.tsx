@@ -26,7 +26,7 @@ export function CreatePlanModal({
   };
 
   return (
-    <Modal onClose={onClose} className="w-[min(640px,92vw)] max-h-[92vh] overflow-auto">
+    <Modal onClose={onClose} className="w-[min(520px,92vw)] max-h-[92vh] overflow-auto">
       <div className="flex items-center gap-3 px-[28px] py-[22px] border-b border-[#e4e1d3]">
         <span className="w-[34px] h-[34px] rounded-[9px] bg-olive-100 text-olive-700 flex items-center justify-center shrink-0">
           <Icon name="plan" size={17} stroke={1.8} />
