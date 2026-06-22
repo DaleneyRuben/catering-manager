@@ -80,6 +80,17 @@ describe('usePlans', () => {
     expect(mockPost).toHaveBeenCalledWith('/plans', { name: 'Nuevo', meals: [], price: 500 });
   });
 
+  it('isCreating is true while POST is in flight', async () => {
+    mockPost.mockReturnValue(new Promise(() => {}));
+    const { result } = renderHook(() => usePlans(), { wrapper: makeWrapper() });
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    expect(result.current.isCreating).toBe(false);
+    result.current.create({ name: 'Nuevo', meals: [], price: '500' });
+
+    await waitFor(() => expect(result.current.isCreating).toBe(true));
+  });
+
   it('remove calls DELETE /plans/:id', async () => {
     mockDelete.mockResolvedValue({});
     const { result } = renderHook(() => usePlans(), { wrapper: makeWrapper() });

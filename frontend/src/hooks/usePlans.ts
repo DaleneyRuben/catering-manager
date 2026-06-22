@@ -57,6 +57,7 @@ export function usePlans() {
     clientCounts: clientCountsQuery.data ?? {},
     isLoading: plansQuery.isLoading,
     isSaving: saveMutation.isPending,
+    isCreating: createMutation.isPending,
     save: (id: string, draft: PlanDraft): Promise<void> =>
       toVoid(saveMutation.mutateAsync({ id, draft })),
     create: (draft: PlanDraft): Promise<void> => toVoid(createMutation.mutateAsync(draft)),
