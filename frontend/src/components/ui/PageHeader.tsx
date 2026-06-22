@@ -13,7 +13,7 @@ export function PageHeader({ label, title, action }: Props) {
         <p className="text-[11px] font-mono uppercase tracking-[.18em] text-olive-600 mb-0.5 lg:mb-[10px]">
           {label}
         </p>
-        <h1 className="font-serif text-[28px] lg:text-[42px] leading-none tracking-[.005em] text-ink">
+        <h1 className="font-serif font-semibold text-[28px] lg:text-[42px] leading-none tracking-[.005em] text-ink">
           {title}
         </h1>
       </div>
