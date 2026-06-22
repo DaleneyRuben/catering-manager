@@ -3,24 +3,27 @@ import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { Toaster } from 'sonner';
 import { Icon } from '../ui/Icon';
 import { useAuth } from '../../contexts/AuthContext';
-import { ROLES } from '../../constants/roles';
+import { ROLES, type UserRole } from '../../constants/roles';
 import smallLogo from '../../assets/small_logo.png';
 
 interface NavItem {
   to: string;
   label: string;
   icon: string;
+  allowedRoles?: UserRole[];
 }
 
+const ADMIN_ROLES: UserRole[] = [ROLES.SUPER_ADMIN, ROLES.ADMIN];
+
 const NAV_ITEMS: NavItem[] = [
-  { to: '/', label: 'Panel', icon: 'dashboard' },
-  { to: '/clientes', label: 'Clientes', icon: 'users' },
-  { to: '/planes', label: 'Planes', icon: 'plan' },
+  { to: '/', label: 'Panel', icon: 'dashboard', allowedRoles: ADMIN_ROLES },
+  { to: '/clientes', label: 'Clientes', icon: 'users', allowedRoles: ADMIN_ROLES },
+  { to: '/planes', label: 'Planes', icon: 'plan', allowedRoles: ADMIN_ROLES },
   { to: '/menu', label: 'Menú', icon: 'chef' },
   { to: '/informes', label: 'Informes', icon: 'report' },
 ];
 
-const ADMIN_NAV_ITEMS: NavItem[] = [
+const SUPER_ADMIN_NAV_ITEMS: NavItem[] = [
   { to: '/usuarios', label: 'Usuarios', icon: 'user-plus' },
   { to: '/health', label: 'Health', icon: 'stethoscope' },
 ];
@@ -67,9 +70,9 @@ export function Layout({ children }: LayoutProps) {
           <img src={smallLogo} alt="La Oliva" className="w-36 h-auto" />
         </div>
         <nav className="flex-1 py-4 flex flex-col">
-          {user?.role === ROLES.ADMIN && (
+          {user?.role === ROLES.SUPER_ADMIN && (
             <>
-              {ADMIN_NAV_ITEMS.map(({ to, label, icon }) => (
+              {SUPER_ADMIN_NAV_ITEMS.map(({ to, label, icon }) => (
                 <NavLink
                   key={to}
                   to={to}
@@ -89,7 +92,9 @@ export function Layout({ children }: LayoutProps) {
               <div className="mx-4 my-2 border-t border-[#b8dba0]" />
             </>
           )}
-          {NAV_ITEMS.map(({ to, label, icon }) => (
+          {NAV_ITEMS.filter(
+            ({ allowedRoles }) => !allowedRoles || (user && allowedRoles.includes(user.role)),
+          ).map(({ to, label, icon }) => (
             <NavLink
               key={to}
               to={to}

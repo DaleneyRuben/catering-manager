@@ -2,15 +2,26 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { Layout } from './Layout';
+import { useAuth } from '../../contexts/AuthContext';
 
 jest.mock('../../contexts/AuthContext', () => ({
-  useAuth: () => ({
-    user: { id: 1, username: 'daleney', role: 'admin' },
-    clearAuth: jest.fn(),
-  }),
+  useAuth: jest.fn(),
 }));
 
+const mockUseAuth = useAuth as jest.Mock;
+
+function mockUserRole(role: string) {
+  mockUseAuth.mockReturnValue({
+    user: { id: 1, username: 'daleney', role },
+    clearAuth: jest.fn(),
+  });
+}
+
 describe('Layout', () => {
+  beforeEach(() => {
+    mockUserRole('admin');
+  });
+
   it('renders children in the main area', () => {
     render(
       <MemoryRouter>
@@ -89,5 +100,46 @@ describe('Layout', () => {
     await user.click(screen.getByTestId('sidebar-backdrop'));
     const aside = screen.getByRole('complementary');
     expect(aside.className).toContain('-translate-x-full');
+  });
+
+  it('shows only Menú and Informes for the kitchen role', () => {
+    mockUserRole('kitchen');
+    render(
+      <MemoryRouter>
+        <Layout>
+          <span />
+        </Layout>
+      </MemoryRouter>,
+    );
+    expect(screen.queryByText('Panel')).not.toBeInTheDocument();
+    expect(screen.queryByText('Clientes')).not.toBeInTheDocument();
+    expect(screen.queryByText('Planes')).not.toBeInTheDocument();
+    expect(screen.getByText('Menú')).toBeInTheDocument();
+    expect(screen.getByText('Informes')).toBeInTheDocument();
+  });
+
+  it('does not show Usuarios/Health nav items for the admin role', () => {
+    render(
+      <MemoryRouter>
+        <Layout>
+          <span />
+        </Layout>
+      </MemoryRouter>,
+    );
+    expect(screen.queryByText('Usuarios')).not.toBeInTheDocument();
+    expect(screen.queryByText('Health')).not.toBeInTheDocument();
+  });
+
+  it('shows Usuarios/Health nav items for the super_admin role', () => {
+    mockUserRole('super_admin');
+    render(
+      <MemoryRouter>
+        <Layout>
+          <span />
+        </Layout>
+      </MemoryRouter>,
+    );
+    expect(screen.getByText('Usuarios')).toBeInTheDocument();
+    expect(screen.getByText('Health')).toBeInTheDocument();
   });
 });
