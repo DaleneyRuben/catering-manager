@@ -65,7 +65,7 @@ export function UsersPage() {
               <p className="font-serif font-semibold text-[26px] leading-none text-ink">
                 {users.filter((u) => u.role === role).length}
               </p>
-              <p className="text-xs text-muted mt-1">{ROLE_LABELS[role]}</p>
+              <p className="text-[12px] text-muted mt-1">{ROLE_LABELS[role]}</p>
             </div>
           </div>
         ))}
@@ -130,11 +130,11 @@ export function UsersPage() {
                     <td className="px-[22px] py-[13px]">
                       <div className="flex items-center gap-3">
                         <div
-                          className={`w-9 h-9 rounded-full flex items-center justify-center font-mono text-xs font-semibold shrink-0 ${ROLE_CLASSES[u.role]}`}
+                          className={`w-9 h-9 rounded-full flex items-center justify-center font-mono text-[12px] font-semibold shrink-0 ${ROLE_CLASSES[u.role]}`}
                         >
                           {initials(u.username)}
                         </div>
-                        <p className="text-sm font-semibold text-ink">{u.username}</p>
+                        <p className="text-[14px] font-semibold text-ink">{u.username}</p>
                       </div>
                     </td>
                     <td className="px-[22px] py-[13px]">
