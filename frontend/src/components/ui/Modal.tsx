@@ -13,7 +13,8 @@ export function Modal({ onClose, children, className = '' }: Props) {
   return createPortal(
     <>
       <div
-        className="fixed inset-0 z-50 bg-[rgba(20,40,6,0.32)] backdrop-blur-sm modal-backdrop-enter"
+        data-testid="modal-backdrop"
+        className="fixed inset-0 z-50 bg-[rgba(21,42,6,0.42)] backdrop-blur-[3px] modal-backdrop-enter"
         onClick={onClose}
         aria-hidden="true"
       />
@@ -21,7 +22,7 @@ export function Modal({ onClose, children, className = '' }: Props) {
         <div
           role="dialog"
           aria-modal="true"
-          className={`pointer-events-auto bg-cream border border-rule-2 shadow-[0_20px_60px_rgba(20,40,6,0.25)] modal-dialog-enter ${className}`}
+          className={`pointer-events-auto bg-cream rounded-[16px] shadow-[0_24px_60px_rgba(20,40,6,0.32)] modal-dialog-enter ${className}`}
         >
           {children}
         </div>
