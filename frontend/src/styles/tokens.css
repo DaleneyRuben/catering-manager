@@ -28,6 +28,8 @@
   --color-warn-bg: #f4ead0;
   --color-ok: #357e1c;
   --color-ok-bg: #dee9c8;
+  --color-taupe: #7b6a4e;
+  --color-taupe-bg: #efe9dd;
 
   /* Fonts */
   --font-sans: 'Manrope', system-ui, sans-serif;
