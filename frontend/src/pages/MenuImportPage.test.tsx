@@ -78,10 +78,11 @@ describe('MenuImportPage', () => {
     expect(screen.getAllByRole('button', { name: /cargar menú/i })).toHaveLength(2);
   });
 
-  it('shows weekend warning for today when today is a weekend', () => {
+  it('shows weekend status for today when today is a weekend', () => {
     (checkIsWeekend as jest.Mock).mockReturnValueOnce(true).mockReturnValue(false);
     render(<MenuImportPage />);
-    expect(screen.getByText('No hay entregas los fines de semana.')).toBeInTheDocument();
+    expect(screen.getByText('Fin de semana · sin entregas')).toBeInTheDocument();
+    expect(screen.getByText('No disponible')).toBeInTheDocument();
   });
 
   it('opens the form modal when Cargar menú is clicked', async () => {
@@ -94,8 +95,13 @@ describe('MenuImportPage', () => {
   it('calls save when save button is clicked inside modal', async () => {
     render(<MenuImportPage />);
     await userEvent.click(screen.getAllByRole('button', { name: /cargar menú/i })[0]);
-    await userEvent.click(screen.getByRole('button', { name: /guardar menú/i }));
+    await userEvent.click(screen.getByRole('button', { name: 'Guardar' }));
     expect(mockSave).toHaveBeenCalledWith(expect.objectContaining({ date: expect.any(String) }));
+  });
+
+  it('shows the date range next to Esta semana', () => {
+    render(<MenuImportPage />);
+    expect(screen.getByText(/\d{1,2}\s*–\s*\d{1,2}\s*\w+/)).toBeInTheDocument();
   });
 
   it('shows edit button when today menu exists', () => {

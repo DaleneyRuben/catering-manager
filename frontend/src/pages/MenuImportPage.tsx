@@ -1,14 +1,13 @@
 import { addDays, format, getDay, parseISO, startOfISOWeek } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useState } from 'react';
-import { Button } from '../components/ui/Button';
-import { Icon } from '../components/ui/Icon';
 import { PageHeader } from '../components/ui/PageHeader';
 import type { Menu, MenuDraft } from '../types/menu';
 import { useMenu } from '../hooks/useMenu';
 import { checkIsWeekend } from '../utils/devFlags';
 import { MEAL_FIELDS, MEAL_FIELD_LABELS } from './menu/menuFields';
 import { MenuFormModal } from './menu/MenuFormModal';
+import { DayCard } from './menu/DayCard';
 
 const toIso = (d: Date) => format(d, 'yyyy-MM-dd');
 
@@ -24,98 +23,14 @@ function getWeekDays(): string[] {
   return [0, 1, 2, 3, 4].map((i) => toIso(addDays(monday, i)));
 }
 
-// --- Editable day card (today / tomorrow) ---
-
-type CardVariant = 'today' | 'tomorrow' | 'default';
-
-const CARD_STYLES: Record<CardVariant, { border: string; headerBg: string; dateColor: string }> = {
-  today: {
-    border: 'border-l-[3px] border-l-olive-800',
-    headerBg: 'bg-olive-50',
-    dateColor: 'text-olive-800',
-  },
-  tomorrow: {
-    border: 'border-l-[3px] border-l-warn',
-    headerBg: 'bg-warn-bg',
-    dateColor: 'text-warn',
-  },
-  default: { border: '', headerBg: '', dateColor: 'text-ink' },
-};
-
-interface MenuCardProps {
-  menu: Menu;
-  onEdit: () => void;
-  variant?: CardVariant;
-}
-
-function MenuCard({ menu, onEdit, variant = 'default' }: MenuCardProps) {
-  const filled = MEAL_FIELDS.filter((f) => menu[f]);
-  const { border, headerBg, dateColor } = CARD_STYLES[variant];
-  return (
-    <div className={`bg-paper rounded-lg overflow-hidden border border-rule ${border}`}>
-      <div className={`flex items-center px-5 pt-4 pb-3 border-b border-rule ${headerBg}`}>
-        <p className={`font-serif text-[15px] ${dateColor}`}>{formatDateLabel(menu.date)}</p>
-        <button
-          type="button"
-          onClick={onEdit}
-          aria-label="Editar menú"
-          className="ml-auto w-8 h-8 flex items-center justify-center rounded-md text-muted hover:text-ink hover:bg-cream-2 transition-colors"
-        >
-          <Icon name="pencil" size={13} />
-        </button>
-      </div>
-      {filled.length === 0 ? (
-        <div className="px-5 py-4">
-          <p className="text-[13px] text-muted">Sin platos cargados.</p>
-        </div>
-      ) : (
-        <div className="px-5 py-5 grid grid-cols-2 gap-x-8 gap-y-4">
-          {filled.map((field) => (
-            <div key={field}>
-              <p className="text-[9.5px] font-mono uppercase tracking-[.14em] text-muted mb-0.5">
-                {MEAL_FIELD_LABELS[field]}
-              </p>
-              <p className="text-[14px] text-ink">{menu[field]}</p>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
-
-interface DaySectionProps {
-  date: string;
-  menu: Menu | null;
-  isWeekend: boolean;
-  variant?: CardVariant;
-  onOpen: () => void;
-}
-
-function DaySection({ date, menu, isWeekend, variant = 'default', onOpen }: DaySectionProps) {
-  if (isWeekend) {
-    return (
-      <div className="bg-paper border border-rule rounded-lg px-5 py-4">
-        <p className="text-[13px] text-alert">No hay entregas los fines de semana.</p>
-      </div>
-    );
-  }
-  if (menu) {
-    return <MenuCard menu={menu} onEdit={onOpen} variant={variant} />;
-  }
-  return (
-    <div className="bg-paper border border-rule rounded-lg px-5 py-4 flex items-center gap-4">
-      <p className="text-[11px] font-mono text-muted flex-1">{formatDateLabel(date)}</p>
-      <Button onClick={onOpen} leftIcon="plus" size="sm">
-        Cargar menú
-      </Button>
-    </div>
-  );
-}
-
 // --- Read-only 5-column weekly grid ---
 
 const DAY_LABELS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'];
+
+const CELL_BG = {
+  today: { filled: 'bg-[#eef4e2]', empty: 'bg-[#f4f7ee]' },
+  other: { filled: 'bg-[#fdfdfa]', empty: 'bg-paper' },
+};
 
 interface WeekGridProps {
   weekDays: string[];
@@ -123,37 +38,9 @@ interface WeekGridProps {
   today: string;
 }
 
-type ColKind = 'past' | 'today' | 'tomorrow' | 'future';
-
-const COL_STYLES: Record<ColKind, { header: string; body: string; label: string; date: string }> = {
-  past: { header: 'bg-cream-2', body: '', label: 'text-muted', date: 'text-ink-2' },
-  today: {
-    header: 'bg-olive-50',
-    body: 'bg-olive-50/40',
-    label: 'text-olive-800',
-    date: 'text-olive-700',
-  },
-  tomorrow: {
-    header: 'bg-warn-bg',
-    body: 'bg-warn-bg/30',
-    label: 'text-warn',
-    date: 'text-warn',
-  },
-  future: { header: 'bg-cream-2', body: '', label: 'text-muted', date: 'text-ink-2' },
-};
-
 function WeekGrid({ weekDays, menus, today }: WeekGridProps) {
-  const tomorrow = toIso(addDays(new Date(), 1));
-
-  const kinds: ColKind[] = weekDays.map((date) => {
-    if (date === today) return 'today';
-    if (date === tomorrow) return 'tomorrow';
-    if (date < today) return 'past';
-    return 'future';
-  });
-
   return (
-    <div data-testid="week-grid" className="border border-rule rounded-lg overflow-hidden">
+    <div data-testid="week-grid" className="border border-rule rounded-[14px] overflow-hidden">
       <div className="overflow-x-auto">
         <table className="w-full border-collapse">
           <thead>
@@ -161,21 +48,21 @@ function WeekGrid({ weekDays, menus, today }: WeekGridProps) {
               <th
                 scope="col"
                 aria-label="Tipo de comida"
-                className="bg-cream-2 border-b border-r border-rule px-4 py-3 min-w-[110px]"
+                className="bg-olive-50 border-b border-r border-rule px-4 py-3 min-w-[128px]"
               />
-              {weekDays.map((date, i) => {
-                const s = COL_STYLES[kinds[i]];
+              {weekDays.map((date) => {
+                const isToday = date === today;
                 return (
                   <th
                     key={date}
-                    className={`${s.header} border-b border-l border-rule px-3 py-3 text-left min-w-[130px]`}
+                    className={`${isToday ? 'bg-olive-100' : 'bg-olive-50'} border-b border-l border-cream-2 px-4 py-[13px] text-center min-w-[130px]`}
                   >
-                    <p
-                      className={`text-[9px] font-mono uppercase tracking-[.14em] font-semibold ${s.label}`}
-                    >
-                      {DAY_LABELS[i]}
+                    <p className={`text-[13px] font-bold ${isToday ? 'text-ok' : 'text-ink-2'}`}>
+                      {DAY_LABELS[weekDays.indexOf(date)]}
                     </p>
-                    <p className={`text-[11px] font-mono mt-0.5 ${s.date}`}>
+                    <p
+                      className={`font-mono text-[10.5px] mt-[3px] ${isToday ? 'text-olive-600' : 'text-faint'}`}
+                    >
                       {format(parseISO(date), 'd MMM', { locale: es })}
                     </p>
                   </th>
@@ -185,22 +72,24 @@ function WeekGrid({ weekDays, menus, today }: WeekGridProps) {
           </thead>
           <tbody>
             {MEAL_FIELDS.map((field) => (
-              <tr key={field} className="border-t border-rule">
-                <td className="bg-cream-2 sticky left-0 z-10 px-4 py-2.5 border-r border-rule">
-                  <p className="text-[9px] font-mono uppercase tracking-[.14em] text-muted whitespace-nowrap">
+              <tr key={field} className="border-t border-cream-2">
+                <td className="bg-[#f8f8f2] sticky left-0 z-10 px-4 py-3.5 border-r border-rule">
+                  <p className="font-mono text-[10.5px] tracking-[.08em] uppercase text-muted font-medium whitespace-nowrap">
                     {MEAL_FIELD_LABELS[field]}
                   </p>
                 </td>
-                {weekDays.map((date, di) => {
+                {weekDays.map((date) => {
                   const menu = menus.find((m) => m.date === date) ?? null;
-                  const s = COL_STYLES[kinds[di]];
+                  const isToday = date === today;
                   const value = menu?.[field];
+                  const filled = !!value;
+                  const bg = CELL_BG[isToday ? 'today' : 'other'][filled ? 'filled' : 'empty'];
                   return (
                     <td
                       key={date}
-                      className={`${s.body} border-l border-rule px-3 py-2.5 text-[13px] text-ink align-top`}
+                      className={`${bg} border-l border-cream-2 px-[11px] py-[9px] min-h-[54px] text-[12.5px] text-[#2a3122] align-top`}
                     >
-                      {value ?? <span className="text-muted text-[12px]">—</span>}
+                      {value ?? <span className="text-[#cdd0bf] text-[15px]">—</span>}
                     </td>
                   );
                 })}
@@ -230,36 +119,40 @@ export function MenuImportPage() {
   const isTodayWeekend = checkIsWeekend(parseISO(today));
   const isTomorrowWeekend = checkIsWeekend(parseISO(tomorrow));
 
+  const weekRangeLabel = `${format(parseISO(weekDays[0]), 'd')} – ${format(parseISO(weekDays[4]), 'd MMM', { locale: es })}`;
+
   const openModal = (date: string) => {
     setEditingDate(date);
     setModalOpen(true);
   };
 
   return (
-    <div className="px-4 py-5 lg:p-7 max-w-[900px] mx-auto">
+    <div className="px-4 py-5 lg:px-[44px] lg:py-[34px]">
       <PageHeader label="Operativa diaria" title="Menú del día" />
 
-      <p className="text-[12px] font-mono uppercase tracking-[.14em] text-olive-800 mb-3">Hoy</p>
-      <DaySection
-        date={today}
-        menu={todayMenu}
-        isWeekend={isTodayWeekend}
-        variant="today"
-        onOpen={() => openModal(today)}
-      />
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-[18px] mb-[30px]">
+        <DayCard
+          isToday
+          date={today}
+          menu={todayMenu}
+          isWeekend={isTodayWeekend}
+          onOpen={() => openModal(today)}
+        />
+        <DayCard
+          isToday={false}
+          date={tomorrow}
+          menu={tomorrowMenu}
+          isWeekend={isTomorrowWeekend}
+          onOpen={() => openModal(tomorrow)}
+        />
+      </div>
 
-      <p className="text-[12px] font-mono uppercase tracking-[.14em] text-warn mt-6 mb-3">Mañana</p>
-      <DaySection
-        date={tomorrow}
-        menu={tomorrowMenu}
-        isWeekend={isTomorrowWeekend}
-        variant="tomorrow"
-        onOpen={() => openModal(tomorrow)}
-      />
-
-      <p className="text-[12px] font-mono uppercase tracking-[.14em] text-warn mt-8 mb-3">
-        Esta semana
-      </p>
+      <div className="flex items-center justify-between gap-4 mb-4">
+        <h2 className="font-serif font-semibold text-[24px] text-ink">Esta semana</h2>
+        <span className="font-mono text-[11.5px] tracking-[.04em] text-muted">
+          {weekRangeLabel}
+        </span>
+      </div>
       <WeekGrid weekDays={weekDays} menus={menus} today={today} />
 
       <MenuFormModal
