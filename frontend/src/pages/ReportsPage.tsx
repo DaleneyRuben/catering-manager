@@ -9,7 +9,7 @@ export function ReportsPage() {
   const { user } = useAuth();
 
   return (
-    <div className="px-4 py-5 lg:p-7 max-w-[1320px] mx-auto">
+    <div className="px-4 py-5 lg:px-[44px] lg:py-[34px]">
       <PageHeader label="Analítica" title="Informes" />
 
       <div className="flex flex-wrap gap-5">
