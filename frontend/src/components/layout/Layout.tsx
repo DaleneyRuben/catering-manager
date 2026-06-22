@@ -3,8 +3,7 @@ import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { Toaster } from 'sonner';
 import { Icon } from '../ui/Icon';
 import { useAuth } from '../../contexts/AuthContext';
-import { ROLES, type UserRole } from '../../constants/roles';
-import smallLogo from '../../assets/small_logo.png';
+import { ROLES, ROLE_LABELS, type UserRole } from '../../constants/roles';
 
 interface NavItem {
   to: string;
@@ -43,6 +42,14 @@ interface LayoutProps {
   children: React.ReactNode;
 }
 
+const navLinkClass = ({ isActive }: { isActive: boolean }): string =>
+  [
+    'flex items-center gap-3 border-l-[3px] px-[22px] py-[9px] text-[13.5px] transition-colors',
+    isActive
+      ? 'border-olive-400 bg-white/10 text-olive-50 font-semibold'
+      : 'border-transparent text-olive-50/62 hover:text-olive-50 hover:bg-white/6',
+  ].join(' ');
+
 export function Layout({ children }: LayoutProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const { pathname } = useLocation();
@@ -71,67 +78,64 @@ export function Layout({ children }: LayoutProps) {
 
       <aside
         className={[
-          'fixed inset-y-0 left-0 z-40 w-56 flex flex-col bg-[#d8f5bd] border-r border-[#b8dba0]',
+          'fixed inset-y-0 left-0 z-40 w-[236px] flex flex-col',
+          'bg-gradient-to-b from-[#1e3c0a] to-[#152a06]',
           'transition-transform duration-200',
           'md:relative md:translate-x-0',
           menuOpen ? 'translate-x-0' : '-translate-x-full',
         ].join(' ')}
       >
-        <div className="px-4 py-4 flex items-center justify-center border-b border-[#b8dba0]">
-          <img src={smallLogo} alt="La Oliva" className="w-36 h-auto" />
+        <div className="px-[22px] pt-[26px] pb-[22px] border-b border-white/10">
+          <p className="font-serif font-semibold text-[27px] leading-none text-olive-50 tracking-[.01em]">
+            La Oliva
+          </p>
+          <p className="font-mono text-[8.5px] tracking-[.32em] text-olive-300 mt-[7px] uppercase">
+            Catering · con altura
+          </p>
         </div>
-        <nav className="flex-1 py-4 flex flex-col">
-          {user?.role === ROLES.SUPER_ADMIN && (
-            <>
-              {SUPER_ADMIN_NAV_ITEMS.map(({ to, label, icon }) => (
-                <NavLink
-                  key={to}
-                  to={to}
-                  className={({ isActive }) =>
-                    [
-                      'flex items-center gap-3 pl-[13px] pr-4 py-2 text-sm transition-colors border-l-[3px]',
-                      isActive
-                        ? 'border-olive-700 bg-white/60 text-olive-900 font-semibold'
-                        : 'border-transparent text-olive-900/60 hover:text-olive-900 hover:bg-white/40',
-                    ].join(' ')
-                  }
-                >
-                  <Icon name={icon} size={16} />
-                  {label}
-                </NavLink>
-              ))}
-              <div className="mx-4 my-2 border-t border-[#b8dba0]" />
-            </>
-          )}
+        <nav className="flex-1 py-[18px] flex flex-col gap-0.5">
+          <p className="font-mono text-[9px] tracking-[.2em] text-olive-300/60 uppercase px-[22px] pt-[6px] pb-2">
+            Gestión
+          </p>
           {NAV_ITEMS.filter(
             ({ allowedRoles }) => !allowedRoles || (user && allowedRoles.includes(user.role)),
           ).map(({ to, label, icon }) => (
-            <NavLink
-              key={to}
-              to={to}
-              end={to === '/'}
-              className={({ isActive }) =>
-                [
-                  'flex items-center gap-3 pl-[13px] pr-4 py-2 text-sm transition-colors border-l-[3px]',
-                  isActive
-                    ? 'border-olive-700 bg-white/60 text-olive-900 font-semibold'
-                    : 'border-transparent text-olive-900/60 hover:text-olive-900 hover:bg-white/40',
-                ].join(' ')
-              }
-            >
-              <Icon name={icon} size={16} />
+            <NavLink key={to} to={to} end={to === '/'} className={navLinkClass}>
+              <Icon name={icon} size={17} />
               {label}
             </NavLink>
           ))}
+          {user?.role === ROLES.SUPER_ADMIN && (
+            <>
+              <div className="h-px bg-white/12 mx-[22px] my-[14px]" />
+              <p className="font-mono text-[9px] tracking-[.2em] text-olive-300/60 uppercase px-[22px] pt-0.5 pb-2">
+                Administración
+              </p>
+              {SUPER_ADMIN_NAV_ITEMS.map(({ to, label, icon }) => (
+                <NavLink key={to} to={to} className={navLinkClass}>
+                  <Icon name={icon} size={17} />
+                  {label}
+                </NavLink>
+              ))}
+            </>
+          )}
         </nav>
-        <div className="border-t border-[#b8dba0] px-4 py-3 flex items-center justify-between gap-2">
-          <span className="text-[12px] text-olive-900/70 font-medium truncate">
-            {user?.username}
-          </span>
+        <div className="border-t border-white/10 px-[18px] py-[14px] flex items-center gap-[11px]">
+          <div className="w-[34px] h-[34px] rounded-full bg-olive-400 text-[#152a06] flex items-center justify-center font-bold text-[13px] shrink-0">
+            {user?.username?.[0]?.toUpperCase()}
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-[13px] font-semibold text-olive-50 leading-tight truncate">
+              {user?.username}
+            </p>
+            <p className="font-mono text-[9.5px] tracking-[.08em] text-olive-300/75 uppercase">
+              {user && ROLE_LABELS[user.role]}
+            </p>
+          </div>
           <button
             type="button"
             onClick={handleLogout}
-            className="text-olive-900/50 hover:text-olive-900 transition-colors shrink-0"
+            className="text-olive-50/50 hover:text-olive-50 transition-colors shrink-0"
             aria-label="Cerrar sesión"
             title="Cerrar sesión"
           >
@@ -141,16 +145,18 @@ export function Layout({ children }: LayoutProps) {
       </aside>
 
       <div className="flex flex-col flex-1 min-w-0">
-        <header className="flex items-center gap-3 px-4 h-12 bg-[#d8f5bd] border-b border-[#b8dba0] md:hidden shrink-0">
+        <header className="flex items-center gap-3 px-4 h-12 bg-gradient-to-b from-[#1e3c0a] to-[#152a06] md:hidden shrink-0">
           <button
             type="button"
             aria-label="Abrir menú"
-            className="text-olive-900/60 hover:text-olive-900"
+            className="text-olive-50/60 hover:text-olive-50"
             onClick={() => setMenuOpen(true)}
           >
             <Icon name="menu" size={20} />
           </button>
-          <img src={smallLogo} alt="La Oliva" className="h-7 w-auto" />
+          <p className="font-serif font-semibold text-[20px] leading-none text-olive-50">
+            La Oliva
+          </p>
         </header>
         <main className="flex-1 min-w-0 overflow-auto">
           <div key={pathname} className="page-enter">

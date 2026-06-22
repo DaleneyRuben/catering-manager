@@ -75,7 +75,7 @@ describe('Layout', () => {
     expect(aside.className).not.toContain('-translate-x-full');
   });
 
-  it('active nav link has the olive accent border', () => {
+  it('active nav link has the lime accent border', () => {
     render(
       <MemoryRouter initialEntries={['/clientes']}>
         <Layout>
@@ -84,7 +84,54 @@ describe('Layout', () => {
       </MemoryRouter>,
     );
     const clientesLink = screen.getByRole('link', { name: /clientes/i });
-    expect(clientesLink.className).toContain('border-olive-700');
+    expect(clientesLink.className).toContain('border-olive-400');
+  });
+
+  it('renders the brand wordmark and tagline', () => {
+    render(
+      <MemoryRouter>
+        <Layout>
+          <span />
+        </Layout>
+      </MemoryRouter>,
+    );
+    expect(screen.getAllByText('La Oliva').length).toBeGreaterThan(0);
+    expect(screen.getByText('Catering · con altura')).toBeInTheDocument();
+  });
+
+  it('renders the Gestión nav group label', () => {
+    render(
+      <MemoryRouter>
+        <Layout>
+          <span />
+        </Layout>
+      </MemoryRouter>,
+    );
+    expect(screen.getByText('Gestión')).toBeInTheDocument();
+  });
+
+  it('renders the Administración nav group label for super_admin', () => {
+    mockUserRole('super_admin');
+    render(
+      <MemoryRouter>
+        <Layout>
+          <span />
+        </Layout>
+      </MemoryRouter>,
+    );
+    expect(screen.getByText('Administración')).toBeInTheDocument();
+  });
+
+  it('shows the user initial and role label in the footer', () => {
+    render(
+      <MemoryRouter>
+        <Layout>
+          <span />
+        </Layout>
+      </MemoryRouter>,
+    );
+    expect(screen.getByText('D')).toBeInTheDocument();
+    expect(screen.getByText('Admin')).toBeInTheDocument();
   });
 
   it('closes the sidebar when the backdrop is clicked', async () => {
