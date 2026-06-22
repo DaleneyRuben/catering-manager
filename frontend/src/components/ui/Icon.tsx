@@ -184,6 +184,20 @@ export function Icon({ name, size = 16, stroke = 1.5, className }: IconProps) {
           <path d="M9 16l-2 4M15 16l2 4M12 16v6" />
         </svg>
       );
+    case 'server':
+      return (
+        <svg {...props}>
+          <path d="M5 12h14M5 12a7 7 0 0 1 14 0M5 12a7 7 0 0 0 14 0M12 5v14" />
+        </svg>
+      );
+    case 'database':
+      return (
+        <svg {...props}>
+          <path d="M4 6c0-1.7 3.6-3 8-3s8 1.3 8 3-3.6 3-8 3-8-1.3-8-3Z" />
+          <path d="M4 6v12c0 1.7 3.6 3 8 3s8-1.3 8-3V6" />
+          <path d="M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3" />
+        </svg>
+      );
     case 'shield-check':
       return (
         <svg {...props}>
