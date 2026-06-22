@@ -64,22 +64,24 @@ export function UserModal(props: Props) {
   };
 
   return (
-    <Modal onClose={onClose} className="rounded-[10px] w-[min(480px,92vw)]">
-      <div className="flex items-center gap-2.5 px-[22px] py-[18px] border-b border-rule">
-        <Icon name="users" size={16} />
-        <p className="flex-1 font-serif font-semibold text-[23px] leading-tight text-ink">
+    <Modal onClose={onClose} className="w-[min(480px,92vw)]">
+      <div className="flex items-center gap-3 px-[28px] py-[22px] border-b border-[#e4e1d3]">
+        <span className="w-[34px] h-[34px] rounded-[9px] bg-olive-100 text-olive-700 flex items-center justify-center shrink-0">
+          <Icon name="users" size={17} stroke={1.6} />
+        </span>
+        <p className="flex-1 font-serif font-semibold text-[23px] leading-none text-ink">
           {mode === 'create' ? 'Nuevo usuario' : 'Editar usuario'}
         </p>
         <button
           type="button"
           onClick={onClose}
-          className="w-[34px] h-[34px] flex items-center justify-center border border-rule rounded-md bg-paper text-faint hover:text-ink-2 hover:bg-cream-2 transition-colors"
+          className="p-1 flex items-center justify-center text-faint hover:text-ink-2 transition-colors"
         >
-          <Icon name="x" size={14} />
+          <Icon name="x" size={20} stroke={1.8} />
         </button>
       </div>
 
-      <div className="p-[22px] flex flex-col gap-4">
+      <div className="px-[28px] py-[22px] flex flex-col gap-[18px]">
         <Field label="Usuario" htmlFor="username" required>
           <input
             id="username"
@@ -125,7 +127,7 @@ export function UserModal(props: Props) {
                 type="button"
                 onClick={() => setRole(r.value)}
                 className={[
-                  'flex-1 py-2 text-[12.5px] rounded-md border transition-colors',
+                  'flex-1 py-[9px] px-[6px] text-[12.5px] rounded-[8px] border-[1.5px] transition-colors whitespace-nowrap',
                   role === r.value
                     ? 'bg-olive-800 text-olive-50 font-semibold border-olive-800'
                     : 'bg-white text-muted font-medium border-rule hover:bg-cream-2',
@@ -136,31 +138,31 @@ export function UserModal(props: Props) {
             ))}
           </div>
         </div>
+      </div>
 
-        <div className="flex gap-2.5 mt-1">
-          {mode === 'edit' && !isSelf && !confirmDelete && (
-            <Button variant="danger" onClick={() => setConfirmDelete(true)} disabled={isSaving}>
-              Eliminar
-            </Button>
-          )}
-          {mode === 'edit' && !isSelf && confirmDelete && (
-            <Button variant="alert" onClick={handleDelete} disabled={isSaving}>
-              ¿Confirmar?
-            </Button>
-          )}
-          <div className="flex-1" />
-          <Button variant="secondary" onClick={onClose}>
-            Cancelar
+      <div className="flex items-center gap-[10px] px-[28px] py-4 border-t border-[#e4e1d3]">
+        {mode === 'edit' && !isSelf && !confirmDelete && (
+          <Button variant="danger" onClick={() => setConfirmDelete(true)} disabled={isSaving}>
+            Eliminar
           </Button>
-          <Button
-            onClick={handleSave}
-            disabled={isSaving || !canSave}
-            loading={isSaving}
-            leftIcon="check"
-          >
-            {mode === 'create' ? 'Crear' : 'Guardar'}
+        )}
+        {mode === 'edit' && !isSelf && confirmDelete && (
+          <Button variant="alert" onClick={handleDelete} disabled={isSaving}>
+            ¿Confirmar?
           </Button>
-        </div>
+        )}
+        <div className="flex-1" />
+        <Button variant="secondary" onClick={onClose}>
+          Cancelar
+        </Button>
+        <Button
+          onClick={handleSave}
+          disabled={isSaving || !canSave}
+          loading={isSaving}
+          leftIcon="check"
+        >
+          {mode === 'create' ? 'Crear' : 'Guardar'}
+        </Button>
       </div>
     </Modal>
   );
