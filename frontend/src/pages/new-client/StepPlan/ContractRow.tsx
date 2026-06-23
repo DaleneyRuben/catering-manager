@@ -2,6 +2,7 @@ import { type UseFormRegister, type FieldErrors, type Control, Controller } from
 import { startOfToday, isWeekend, parseISO } from 'date-fns';
 import { Field, inputCls } from '../../../components/ui/Field';
 import { DatePickerInput } from '../../../components/ui/DatePickerInput';
+import { WizardSectionCard } from '../../../components/ui/WizardSectionCard';
 import { addBusinessDays } from '../../../utils/businessDays';
 import { formatDate } from '../../../utils/format';
 import type { NewClientFormValues } from '../types';
@@ -20,9 +21,8 @@ export function ContractRow({ register, control, errors, startDate, duration }: 
     startDate && duration > 0 ? formatDate(addBusinessDays(startDate, duration - 1)) : '—';
 
   return (
-    <div>
-      <p className="text-[10.5px] font-mono uppercase tracking-[.14em] text-muted mb-4">Contrato</p>
-      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+    <WizardSectionCard icon="calendar" iconBg="bg-cream-2" iconColor="text-muted" title="Contrato">
+      <div className="grid grid-cols-1 sm:grid-cols-4 gap-x-[22px] gap-y-[18px]">
         {/* TODO: restrict to today-only once backfilling of existing clients is complete */}
         <Controller
           name="contractDate"
@@ -30,9 +30,8 @@ export function ContractRow({ register, control, errors, startDate, duration }: 
           rules={{ required: 'Fecha de contrato es requerida' }}
           render={({ field }) => (
             <Field
-              label="Firma de contrato"
+              label="Fecha de firma"
               htmlFor="contractDate"
-              required
               error={errors.contractDate?.message}
             >
               <DatePickerInput
@@ -56,7 +55,7 @@ export function ContractRow({ register, control, errors, startDate, duration }: 
           }}
           render={({ field }) => (
             <Field
-              label="Inicio del servicio"
+              label="Fecha de inicio"
               htmlFor="startDate"
               required
               error={errors.startDate?.message}
@@ -71,7 +70,12 @@ export function ContractRow({ register, control, errors, startDate, duration }: 
             </Field>
           )}
         />
-        <Field label="Duración (días)" htmlFor="duration" required error={errors.duration?.message}>
+        <Field
+          label="Duración (días hábiles)"
+          htmlFor="duration"
+          required
+          error={errors.duration?.message}
+        >
           <input
             id="duration"
             type="number"
@@ -83,21 +87,16 @@ export function ContractRow({ register, control, errors, startDate, duration }: 
             })}
             className={inputCls(!!errors.duration)}
           />
-          <p className="text-[10.5px] font-mono text-muted mt-1">días hábiles (L–V)</p>
         </Field>
-        <div>
-          <p className="text-[11px] font-mono uppercase tracking-wider text-muted mb-1.5">
-            Fin de contrato
-          </p>
+        <Field label="Fin de contrato (auto)" htmlFor="contractEndDatePreview">
           <p
-            className="font-mono text-[13px] font-bold text-olive-800 py-2 px-3 rounded-md border"
-            style={{ background: 'var(--olive-50)', borderColor: 'var(--olive-200)' }}
+            id="contractEndDatePreview"
+            className="font-mono text-[14px] text-muted bg-empty-bg border border-hairline rounded-[9px] py-[11px] px-[14px]"
           >
             {contractEndDate}
           </p>
-          <p className="text-[10.5px] font-mono text-olive-700 mt-1">calculado automáticamente</p>
-        </div>
+        </Field>
       </div>
-    </div>
+    </WizardSectionCard>
   );
 }

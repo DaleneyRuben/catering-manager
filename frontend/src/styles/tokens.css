@@ -29,6 +29,7 @@
   --color-placeholder: #b0b3a1;
   --color-done-line: #9bc16a;
   --color-required: #c0492f;
+  --color-row-selected: #eef4e2;
 
   /* Status colors */
   --color-alert: #c4341a;

@@ -138,7 +138,7 @@ describe('NewClientPage', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Anemia' }));
     await userEvent.click(screen.getByRole('button', { name: /siguiente/i }));
     await userEvent.click(screen.getByRole('button', { name: /completo/i }));
-    fireEvent.change(screen.getByLabelText(/inicio del servicio/i), {
+    fireEvent.change(screen.getByLabelText(/fecha de inicio/i), {
       target: { value: '2026-06-01' },
     });
     await userEvent.click(screen.getByRole('button', { name: /siguiente/i }));
@@ -159,7 +159,7 @@ describe('NewClientPage', () => {
   it('shows precio and billing fields on step 3', async () => {
     await navigateToStep3();
     expect(screen.getByLabelText(/precio/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/inicio del servicio/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/fecha de inicio/i)).toBeInTheDocument();
   });
 
   it('shows calculated total when precio is entered', async () => {
@@ -173,7 +173,7 @@ describe('NewClientPage', () => {
   it('creates client and subscription on confirm', async () => {
     await navigateToStep3();
     await userEvent.click(screen.getByRole('button', { name: /completo/i }));
-    fireEvent.change(screen.getByLabelText(/inicio del servicio/i), {
+    fireEvent.change(screen.getByLabelText(/fecha de inicio/i), {
       target: { value: '2026-06-01' },
     });
     await userEvent.click(screen.getByRole('button', { name: /siguiente/i }));
@@ -194,7 +194,7 @@ describe('NewClientPage', () => {
   it('subscription POST defaults discount to 0', async () => {
     await navigateToStep3();
     await userEvent.click(screen.getByRole('button', { name: /completo/i }));
-    fireEvent.change(screen.getByLabelText(/inicio del servicio/i), {
+    fireEvent.change(screen.getByLabelText(/fecha de inicio/i), {
       target: { value: '2026-06-01' },
     });
     await userEvent.click(screen.getByRole('button', { name: /siguiente/i }));
@@ -210,7 +210,7 @@ describe('NewClientPage', () => {
   it('subscription POST sends calculated discount when precio is entered', async () => {
     await navigateToStep3();
     await userEvent.click(screen.getByRole('button', { name: /completo/i }));
-    fireEvent.change(screen.getByLabelText(/inicio del servicio/i), {
+    fireEvent.change(screen.getByLabelText(/fecha de inicio/i), {
       target: { value: '2026-06-01' },
     });
     // plan price 480, precio 380 → discount = 100
@@ -228,7 +228,7 @@ describe('NewClientPage', () => {
   it('subscription POST does not include contractEndDate', async () => {
     await navigateToStep3();
     await userEvent.click(screen.getByRole('button', { name: /completo/i }));
-    fireEvent.change(screen.getByLabelText(/inicio del servicio/i), {
+    fireEvent.change(screen.getByLabelText(/fecha de inicio/i), {
       target: { value: '2026-06-01' },
     });
     await userEvent.click(screen.getByRole('button', { name: /siguiente/i }));
@@ -248,7 +248,7 @@ describe('NewClientPage', () => {
     );
     await navigateToStep3();
     await userEvent.click(screen.getByRole('button', { name: /completo/i }));
-    fireEvent.change(screen.getByLabelText(/inicio del servicio/i), {
+    fireEvent.change(screen.getByLabelText(/fecha de inicio/i), {
       target: { value: '2026-06-01' },
     });
     await userEvent.click(screen.getByRole('button', { name: /siguiente/i }));
@@ -260,7 +260,7 @@ describe('NewClientPage', () => {
   it('navigates to /clientes after successful submit', async () => {
     await navigateToStep3();
     await userEvent.click(screen.getByRole('button', { name: /completo/i }));
-    fireEvent.change(screen.getByLabelText(/inicio del servicio/i), {
+    fireEvent.change(screen.getByLabelText(/fecha de inicio/i), {
       target: { value: '2026-06-01' },
     });
     await userEvent.click(screen.getByRole('button', { name: /siguiente/i }));
