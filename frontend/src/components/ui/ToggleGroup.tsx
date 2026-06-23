@@ -12,16 +12,16 @@ export function ToggleGroup({
   selectedClassName = 'bg-olive-700 text-white border-olive-700',
 }: Props) {
   return (
-    <div className="flex gap-1.5">
+    <div className="flex gap-[7px]">
       {options.map((opt) => (
         <button
           key={opt}
           type="button"
           onClick={() => onChange(opt)}
-          className={`flex-1 py-2 px-3 rounded-md border text-[13px] font-medium transition-colors ${
+          className={`flex-1 p-2 rounded-[8px] border text-[13px] transition-colors ${
             value === opt
-              ? selectedClassName
-              : 'bg-paper text-ink border-rule hover:border-olive-700'
+              ? `font-semibold ${selectedClassName}`
+              : 'font-normal bg-paper text-muted border-rule hover:border-olive-700'
           }`}
         >
           {opt}
