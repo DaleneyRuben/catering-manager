@@ -44,7 +44,7 @@ export function MenuFormModal({
 
   return (
     <Modal onClose={onClose} className="w-[min(640px,92vw)] max-h-[92vh] overflow-auto">
-      <div className="flex items-center justify-between gap-3 px-[28px] py-[22px] border-b border-[#e4e1d3]">
+      <div className="flex items-center justify-between gap-3 px-[28px] py-[22px] border-b border-hairline">
         <p className="font-serif font-semibold text-[24px] leading-none text-ink">{dateLabel}</p>
         <button
           type="button"
@@ -70,7 +70,7 @@ export function MenuFormModal({
         ))}
       </div>
 
-      <div className="flex justify-end gap-[10px] px-[28px] py-4 border-t border-[#e4e1d3]">
+      <div className="flex justify-end gap-[10px] px-[28px] py-4 border-t border-hairline">
         <Button variant="secondary" onClick={onClose} disabled={isSaving}>
           Cancelar
         </Button>

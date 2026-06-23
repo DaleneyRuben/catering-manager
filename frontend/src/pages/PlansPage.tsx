@@ -29,7 +29,7 @@ export function PlansPage() {
     if (plans.length === 0) {
       return (
         <div className="py-16 px-6 text-center bg-paper border border-rule rounded-[14px] flex flex-col items-center gap-3.5">
-          <span className="w-[52px] h-[52px] rounded-[14px] bg-cream-2 text-[#c8c4ad] flex items-center justify-center">
+          <span className="w-[52px] h-[52px] rounded-[14px] bg-cream-2 text-rule-2 flex items-center justify-center">
             <Icon name="plan" size={26} stroke={1.4} />
           </span>
           <p className="font-serif font-semibold text-[22px] text-ink-2">Sin planes</p>

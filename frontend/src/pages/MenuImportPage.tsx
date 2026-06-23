@@ -28,8 +28,8 @@ function getWeekDays(): string[] {
 const DAY_LABELS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'];
 
 const CELL_BG = {
-  today: { filled: 'bg-[#eef4e2]', empty: 'bg-[#f4f7ee]' },
-  other: { filled: 'bg-[#fdfdfa]', empty: 'bg-paper' },
+  today: { filled: 'bg-row-selected', empty: 'bg-menu-today-empty' },
+  other: { filled: 'bg-menu-other-filled', empty: 'bg-paper' },
 };
 
 interface WeekGridProps {
@@ -73,7 +73,7 @@ function WeekGrid({ weekDays, menus, today }: WeekGridProps) {
           <tbody>
             {MEAL_FIELDS.map((field) => (
               <tr key={field} className="border-t border-cream-2">
-                <td className="bg-[#f8f8f2] sticky left-0 z-10 px-4 py-3.5 border-r border-rule">
+                <td className="bg-menu-sticky-bg sticky left-0 z-10 px-4 py-3.5 border-r border-rule">
                   <p className="font-mono text-[10.5px] tracking-[.08em] uppercase text-muted font-medium whitespace-nowrap">
                     {MEAL_FIELD_LABELS[field]}
                   </p>
@@ -87,9 +87,9 @@ function WeekGrid({ weekDays, menus, today }: WeekGridProps) {
                   return (
                     <td
                       key={date}
-                      className={`${bg} border-l border-cream-2 px-[11px] py-[9px] min-h-[54px] text-[12.5px] text-[#2a3122] align-top`}
+                      className={`${bg} border-l border-cream-2 px-[11px] py-[9px] min-h-[54px] text-[12.5px] text-menu-dish-text align-top`}
                     >
-                      {value ?? <span className="text-[#cdd0bf] text-[15px]">—</span>}
+                      {value ?? <span className="text-empty-border text-[15px]">—</span>}
                     </td>
                   );
                 })}
