@@ -15,28 +15,28 @@ interface Props {
 export function ClientOverviewTab({ client, sub, remaining }: Props) {
   const { status } = client;
   return (
-    <div className="grid grid-cols-12 gap-5">
-      <div className="col-span-12 lg:col-span-7 flex flex-col gap-4">
+    <div className="grid grid-cols-12 gap-[20px]">
+      <div className="col-span-12 lg:col-span-7 flex flex-col gap-[20px]">
         <div className="bg-paper border border-rule rounded-lg p-5">
           {sub ? (
             <>
-              <div className="flex items-start justify-between gap-4 mb-3">
+              <div className="flex items-start justify-between gap-4 mb-[16px]">
                 <div>
-                  <Label variant="section" className="mb-1">
+                  <Label variant="section" className="mb-2">
                     {status === CLIENT_STATUS.ENDED ? 'Último plan' : 'Plan vigente'}
                   </Label>
-                  <p className="font-serif text-[25px] font-semibold leading-tight text-ink">
+                  <p className="font-serif text-[25px] font-semibold leading-none text-ink">
                     {sub.plan.name}
                   </p>
                 </div>
-                <div className="text-right shrink-0">
-                  <p className="font-mono font-semibold text-[21px] leading-tight text-ink">
+                <div className="text-right shrink-0 whitespace-nowrap">
+                  <span className="font-mono font-semibold text-[21px] text-ink">
                     {(Number(sub.plan.price) - sub.discount).toLocaleString('es-BO')}
-                  </p>
-                  <p className="font-mono text-[11px] text-faint">/mes</p>
+                  </span>
+                  <span className="font-mono text-[11px] text-faint"> /mes</span>
                 </div>
               </div>
-              <div className="flex flex-wrap gap-1.5 mb-4">
+              <div className="flex flex-wrap gap-[7px] mb-[18px]">
                 {sub.plan.meals.map((m) => (
                   <span
                     key={m}
@@ -46,8 +46,8 @@ export function ClientOverviewTab({ client, sub, remaining }: Props) {
                   </span>
                 ))}
               </div>
-              <div className="flex items-center justify-between">
-                <p className="font-mono text-[11.5px] text-muted">
+              <div className="flex items-center justify-between gap-3 border-t border-cream-2 pt-[14px]">
+                <p className="font-mono text-[11.5px] text-faint">
                   {formatDate(sub.startDate)} → {formatDate(sub.contractEndDate)}
                 </p>
                 {(() => {
@@ -55,7 +55,9 @@ export function ClientOverviewTab({ client, sub, remaining }: Props) {
                   if (remaining <= 0) cls = 'bg-rule text-muted';
                   else if (remaining <= EXPIRY_THRESHOLD_DAYS) cls = 'bg-warn-bg text-warn';
                   return (
-                    <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-mono ${cls}`}>
+                    <span
+                      className={`px-[11px] py-[4px] rounded-full text-[12px] font-semibold ${cls}`}
+                    >
                       {remaining} día{remaining === 1 ? '' : 's'}
                     </span>
                   );
@@ -68,28 +70,26 @@ export function ClientOverviewTab({ client, sub, remaining }: Props) {
         </div>
 
         <div className="bg-paper border border-rule rounded-lg p-5">
-          <Label variant="section" className="mb-3">
+          <Label variant="section" className="mb-4">
             Contacto
           </Label>
-          <div className="flex flex-col gap-2.5">
-            <div className="flex items-center gap-2.5">
-              <Icon name="phone" size={14} />
-              <span className="font-mono text-[13px]">{client.phoneNumber}</span>
+          <div className="flex flex-col gap-[14px]">
+            <div className="flex items-center gap-3">
+              <Icon name="phone" size={16} className="text-muted shrink-0" />
+              <span className="font-mono text-[13px] text-ink">{client.phoneNumber}</span>
             </div>
-            <div className="flex items-center gap-2.5">
-              <Icon name="pin" size={14} />
-              <span className="text-[13px]">{client.address}</span>
+            <div className="flex items-center gap-3">
+              <Icon name="pin" size={16} className="text-muted shrink-0" />
+              <span className="text-[13.5px] text-ink">{client.address}</span>
             </div>
-            <div className="flex items-center gap-2.5">
-              <Icon name="refresh" size={14} />
-              <span className="text-[13px] text-muted">
-                Entrega: <strong className="text-ink font-semibold">{client.delivery}</strong>
-              </span>
+            <div className="flex items-center gap-3">
+              <Icon name="refresh" size={16} className="text-muted shrink-0" />
+              <span className="text-[13.5px] text-ink">Entrega: {client.delivery}</span>
             </div>
           </div>
           {(client.nit || client.businessName) && (
             <>
-              <hr className="border-rule my-3" />
+              <hr className="border-cream-2 my-[2px]" />
               <Label variant="section" className="mb-2">
                 Facturación
               </Label>
@@ -110,7 +110,7 @@ export function ClientOverviewTab({ client, sub, remaining }: Props) {
 
       <div className="col-span-12 lg:col-span-5 flex flex-col gap-4">
         <div className="bg-paper border border-rule rounded-lg p-5">
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between mb-[18px]">
             <h2 className="font-serif text-[20px] font-semibold text-ink">Restricciones</h2>
             <span className="font-mono text-[12px] text-faint">{client.restrictions.length}</span>
           </div>
