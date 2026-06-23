@@ -215,6 +215,21 @@ describe('clientService.findAll with filters', () => {
     expect(subWhere?.finalizedAt).toEqual({ [Symbol.for('is')]: null });
   });
 
+  it('status=expiring excludes today-suspended clients via Op.and literal', async () => {
+    (Client.findAndCountAll as jest.Mock).mockResolvedValue({ rows: [], count: 0 });
+
+    await clientService.findAll({ status: 'expiring' });
+
+    const call = (Client.findAndCountAll as jest.Mock).mock.calls[0][0];
+    const andConditions = call.where?.[Symbol.for('and')];
+    expect(andConditions).toBeDefined();
+    const suspendedExclusion = andConditions.some(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (c: any) => c?.val?.includes?.('suspendedDates') && c?.val?.includes?.('NOT IN'),
+    );
+    expect(suspendedExclusion).toBe(true);
+  });
+
   it('status=expiring excludes finalized subscriptions', async () => {
     (Client.findAndCountAll as jest.Mock).mockResolvedValue({ rows: [], count: 0 });
 

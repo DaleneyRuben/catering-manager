@@ -86,6 +86,10 @@ const findAll = (filters: FindAllFilters = {}) => {
       subscriptionWhere.contractEndDate = { [Op.between]: [todayStr, thresholdStr] };
       subscriptionWhere.finalizedAt = { [Op.is]: null };
       andConditions.push(
+        // suspended-today clients belong under "paused", not "expiring"
+        literal(
+          `"Client"."id" NOT IN (SELECT s2."clientId" FROM subscriptions s2 WHERE '${todayStr}'::date = ANY(s2."suspendedDates") AND s2."contractEndDate" >= '${todayStr}')`,
+        ),
         literal(
           `"Client"."id" NOT IN (SELECT s2."clientId" FROM subscriptions s2 WHERE s2."startDate" > '${todayStr}' AND s2."contractEndDate" > '${todayStr}')`,
         ),
