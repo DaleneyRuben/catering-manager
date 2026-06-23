@@ -47,6 +47,49 @@
   --color-danger: #a8512f;
   --color-danger-bg: #f3ddd2;
   --color-danger-border: #e3c3b4;
+  --color-danger-hover: #8a3f22;
+  --color-warn-text: #7a5e0c;
+  --color-warn-text-strong: #5e480a;
+  --color-success-soft-bg: #e9f0dc;
+
+  /* Sidebar */
+  --color-sidebar-deep: #152a06;
+
+  /* Toast */
+  --color-toast-error-border: #f0b8a0;
+  --color-toast-success-border: #b8d099;
+
+  /* Suspend calendar */
+  --color-calendar-selectable: #a8c374;
+  --color-calendar-suspended-bg: #e3a899;
+  --color-calendar-suspended-text: #7a2418;
+  --color-calendar-suspended-border: #c5756a;
+
+  /* Meal chip (plans page) */
+  --color-chip-bg: #f3f1ea;
+  --color-chip-border: #e3e0d3;
+  --color-chip-text: #5c6150;
+  --color-chip-dot: #7ba049;
+
+  /* Plan card icon buttons */
+  --color-plan-delete: #c97b6a;
+  --color-plan-edit: #6b9a3a;
+
+  /* Plan tier bands (basic reuses olive-50/cream-2) */
+  --color-tier-basic-border: #e4e8d6;
+  --color-tier-mid-bg: #eaf0dd;
+  --color-tier-mid-border: #d7e1bd;
+  --color-tier-premium-bg: #e0e9cb;
+  --color-tier-premium-border: #c9d8a4;
+
+  /* Menu grid */
+  --color-today-gradient-start: #21420c;
+  --color-today-gradient-end: #163008;
+  --color-today-text: #bcd596;
+  --color-menu-today-empty: #f4f7ee;
+  --color-menu-other-filled: #fdfdfa;
+  --color-menu-sticky-bg: #f8f8f2;
+  --color-menu-dish-text: #2a3122;
 
   /* Fonts */
   --font-sans: 'Manrope', system-ui, sans-serif;
