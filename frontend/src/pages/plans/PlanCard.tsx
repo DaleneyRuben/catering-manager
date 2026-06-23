@@ -53,9 +53,9 @@ export function PlanCard({
           {includedMeals.map((m) => (
             <span
               key={m}
-              className="inline-flex items-center gap-1.5 bg-[#f3f1ea] border border-[#e3e0d3] rounded-full pl-[9px] pr-[11px] py-1 text-[12px] font-medium text-[#5c6150] whitespace-nowrap"
+              className="inline-flex items-center gap-1.5 bg-chip-bg border border-chip-border rounded-full pl-[9px] pr-[11px] py-1 text-[12px] font-medium text-chip-text whitespace-nowrap"
             >
-              <span className="w-[5px] h-[5px] rounded-full bg-[#7ba049] shrink-0" />
+              <span className="w-[5px] h-[5px] rounded-full bg-chip-dot shrink-0" />
               {MEAL_LABELS[m]}
             </span>
           ))}
@@ -72,7 +72,7 @@ export function PlanCard({
             type="button"
             onClick={onDelete}
             aria-label="Eliminar plan"
-            className="w-[34px] h-[34px] flex items-center justify-center rounded-lg text-[#c97b6a] hover:bg-danger-bg hover:text-danger transition-colors"
+            className="w-[34px] h-[34px] flex items-center justify-center rounded-lg text-plan-delete hover:bg-danger-bg hover:text-danger transition-colors"
           >
             <Icon name="trash" size={16} stroke={1.7} />
           </button>
@@ -80,7 +80,7 @@ export function PlanCard({
             type="button"
             onClick={onEdit}
             aria-label="Editar plan"
-            className="w-[34px] h-[34px] flex items-center justify-center rounded-lg text-[#6b9a3a] hover:bg-olive-100 hover:text-olive-700 transition-colors"
+            className="w-[34px] h-[34px] flex items-center justify-center rounded-lg text-plan-edit hover:bg-olive-100 hover:text-olive-700 transition-colors"
           >
             <Icon name="pencil" size={16} stroke={1.7} />
           </button>
