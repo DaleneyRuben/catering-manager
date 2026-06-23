@@ -18,7 +18,8 @@ const makeSub = (overrides = {}) => ({
   contractDate: '2026-05-01',
   startDate: '2026-05-01',
   contractEndDate: '2026-06-05',
-  plan: { id: 1, name: 'Completo', meals: [], price: 480, discount: 0 },
+  discount: 0,
+  plan: { id: 1, name: 'Completo', meals: [], price: 480 },
   ...overrides,
 });
 
@@ -108,6 +109,36 @@ describe('ClientsPage', () => {
     renderPage();
     await waitFor(() => expect(screen.getByText('Sin resultados')).toBeInTheDocument());
     expect(screen.queryByRole('button', { name: /siguiente/i })).not.toBeInTheDocument();
+  });
+
+  it('shows the price with a thousands separator', async () => {
+    mockGetPaginated.mockResolvedValue(
+      paginatedResponse([
+        makeClient({
+          subscriptions: [makeSub({ plan: { id: 1, name: 'Completo', meals: [], price: 1450 } })],
+        }),
+      ]),
+    );
+    renderPage();
+    expect(await screen.findByText('1.450')).toBeInTheDocument();
+  });
+
+  it('shows an em-dash for price when there is no subscription', async () => {
+    mockGetPaginated.mockResolvedValue(paginatedResponse([makeClient({ subscriptions: [] })]));
+    renderPage();
+    await screen.findByText('María García');
+    expect(screen.getAllByText('—').length).toBeGreaterThan(0);
+  });
+
+  it('shows the count next to each status filter pill', async () => {
+    mockGet.mockResolvedValue({ active: 7, expiring: 3, paused: 3, ended: 2, total: 16 });
+    mockGetPaginated.mockResolvedValue(paginatedResponse([], 16));
+    renderPage();
+    expect(await screen.findByRole('button', { name: /todos.*16/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /activos.*7/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /por vencer.*3/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /pausados.*3/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /finalizados.*2/i })).toBeInTheDocument();
   });
 
   it('filters clients by search query via backend', async () => {
