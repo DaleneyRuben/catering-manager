@@ -25,7 +25,7 @@ export function Tabs({ tabs, activeId, onChange, className = '' }: Props) {
   return (
     <div
       role="tablist"
-      className={`relative flex border-b border-rule overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] ${className}`}
+      className={`relative flex border-b border-hairline overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] ${className}`}
     >
       {tabs.map((tab) => (
         <button
@@ -48,7 +48,7 @@ export function Tabs({ tabs, activeId, onChange, className = '' }: Props) {
       {/* Sliding active indicator — positioned before paint so no initial slide */}
       <div
         aria-hidden="true"
-        className="absolute bottom-0 h-0.5 bg-olive-800 transition-all duration-200 ease-out"
+        className="absolute bottom-0 h-0.5 bg-olive-700 transition-all duration-200 ease-out"
         style={{ left: indicator.left, width: indicator.width }}
       />
     </div>

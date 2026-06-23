@@ -18,11 +18,13 @@ export function ClientHistorySummary({ eventCount, planName, clientSince }: Prop
       <p className="text-[10.5px] font-mono uppercase tracking-[.16em] text-olive-600 font-semibold mb-3">
         Registro
       </p>
-      <h2 className="font-serif text-[30px] leading-tight text-ink mb-3">Historial de actividad</h2>
-      <p className="text-[13.5px] leading-relaxed text-muted mb-6">
+      <h2 className="font-serif text-[30px] font-semibold leading-[1.05] text-ink mb-3">
+        Historial de actividad
+      </h2>
+      <p className="text-[13.5px] leading-[1.55] text-muted mb-6">
         Cada cambio de plan, renovación y suspensión queda registrado en orden cronológico.
       </p>
-      <div className="flex flex-col border-t border-rule">
+      <div className="flex flex-col border-t border-hairline">
         <div className="flex items-center justify-between py-3 border-b border-cream-2">
           <span className="text-[13px] text-muted">Eventos registrados</span>
           <span className="font-mono text-[14px] font-semibold text-ink">{eventCount}</span>
