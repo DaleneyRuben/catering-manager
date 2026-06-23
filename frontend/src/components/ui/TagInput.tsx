@@ -5,6 +5,7 @@ export function TagInput({
   label,
   labelClassName = 'text-[11px] font-mono uppercase tracking-wider text-muted mb-2',
   placeholder = 'Escribe y presiona Enter…',
+  emptyMessage = 'Sin restricciones agregadas todavía',
   tags,
   input,
   setInput,
@@ -12,9 +13,10 @@ export function TagInput({
   onRemove,
   tagClassName = 'bg-cream-2 border-rule text-ink',
 }: {
-  label: string;
+  label?: string;
   labelClassName?: string;
   placeholder?: string;
+  emptyMessage?: string;
   tags: string[];
   input: string;
   setInput: (v: string) => void;
@@ -24,7 +26,7 @@ export function TagInput({
 }) {
   return (
     <div>
-      <p className={labelClassName}>{label}</p>
+      {label && <p className={labelClassName}>{label}</p>}
       <div className="flex gap-[10px] mb-[13px]">
         <input
           value={input}
@@ -68,7 +70,7 @@ export function TagInput({
           ))
         ) : (
           <p className="flex-1 self-center text-center font-mono text-[12px] text-empty-text">
-            Sin restricciones agregadas todavía
+            {emptyMessage}
           </p>
         )}
       </div>
