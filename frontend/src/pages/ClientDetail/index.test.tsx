@@ -24,6 +24,7 @@ const mockClient = {
   businessName: null,
   underlyingDiseases: ['diabetes'],
   restrictions: ['gluten'],
+  groupMembers: [],
   pausedSince: null,
   status: 'active',
   subscriptions: [
@@ -193,13 +194,14 @@ describe('ClientDetailPage', () => {
     expect(await screen.findByText('Lista clientes')).toBeInTheDocument();
   });
 
-  it('renders 4 navigation tabs', async () => {
+  it('renders 3 navigation tabs', async () => {
     renderPage();
     await screen.findByText('John Doe');
     expect(screen.getByRole('tab', { name: /resumen/i })).toBeInTheDocument();
     expect(screen.getByRole('tab', { name: /plan/i })).toBeInTheDocument();
-    expect(screen.getByRole('tab', { name: /suspensiones/i })).toBeInTheDocument();
     expect(screen.getByRole('tab', { name: /historial/i })).toBeInTheDocument();
+    expect(screen.queryByRole('tab', { name: /suspensiones/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole('tab', { name: /^grupo$/i })).not.toBeInTheDocument();
   });
 
   it('shows plan vigente card in Resumen tab by default', async () => {
@@ -215,11 +217,18 @@ describe('ClientDetailPage', () => {
     expect(screen.getByText(/plan asignado/i)).toBeInTheDocument();
   });
 
-  it('switching to Suspensiones tab shows empty state', async () => {
+  it('switching to Plan tab shows suspensiones empty state', async () => {
     renderPage();
     await screen.findByText('John Doe');
-    fireEvent.click(screen.getByRole('tab', { name: /suspensiones/i }));
+    fireEvent.click(screen.getByRole('tab', { name: /plan/i }));
     expect(screen.getByText(/sin suspensiones/i)).toBeInTheDocument();
+  });
+
+  it('switching to Plan tab shows entrega conjunta empty state', async () => {
+    renderPage();
+    await screen.findByText('John Doe');
+    fireEvent.click(screen.getByRole('tab', { name: /plan/i }));
+    expect(screen.getByText(/sin miembros en el grupo/i)).toBeInTheDocument();
   });
 
   it('switching to Historial tab shows empty state', async () => {
@@ -277,20 +286,20 @@ describe('ClientDetailPage', () => {
     await waitFor(() => expect(mockPost).toHaveBeenCalledWith('/clients/1/finalize', {}));
   });
 
-  it('switching to Suspensiones tab shows suspended days count', async () => {
+  it('switching to Plan tab shows suspended days count', async () => {
     renderPage({
       ...mockClient,
       subscriptions: [{ ...mockClient.subscriptions[0], suspendedDates: ['2026-06-10'] }],
     });
     await screen.findByText('John Doe');
-    fireEvent.click(screen.getByRole('tab', { name: /suspensiones/i }));
+    fireEvent.click(screen.getByRole('tab', { name: /plan/i }));
     expect(await screen.findByText('1')).toBeInTheDocument();
   });
 
-  it('Suspender días button opens suspend modal', async () => {
+  it('Suspender button opens suspend modal', async () => {
     renderPage();
     await screen.findByText('John Doe');
-    fireEvent.click(screen.getByRole('tab', { name: /suspensiones/i }));
+    fireEvent.click(screen.getByRole('tab', { name: /plan/i }));
     fireEvent.click(screen.getByRole('button', { name: /^suspender$/i }));
     expect(await screen.findByRole('dialog')).toBeInTheDocument();
   });
@@ -299,10 +308,10 @@ describe('ClientDetailPage', () => {
     mockPatch.mockResolvedValue({});
     renderPage();
     await screen.findByText('John Doe');
-    fireEvent.click(screen.getByRole('tab', { name: /suspensiones/i }));
+    fireEvent.click(screen.getByRole('tab', { name: /plan/i }));
     fireEvent.click(screen.getByRole('button', { name: /^suspender$/i }));
     await screen.findByRole('dialog');
-    fireEvent.click(screen.getByRole('button', { name: /guardar/i }));
+    fireEvent.click(screen.getByRole('button', { name: /^guardar$/i }));
     await waitFor(() =>
       expect(mockPatch).toHaveBeenCalledWith(
         '/clients/1/subscriptions/1',
