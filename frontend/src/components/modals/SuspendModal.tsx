@@ -167,12 +167,12 @@ export function SuspendModal({
                   let border = '';
 
                   if (picked) {
-                    bg = '#e3a899';
-                    color = '#7a2418';
-                    border = '2px solid #c5756a';
+                    bg = 'var(--color-calendar-suspended-bg)';
+                    color = 'var(--color-calendar-suspended-text)';
+                    border = '2px solid var(--color-calendar-suspended-border)';
                   } else if (!outside && inContract && selectable) {
-                    bg = '#a8c374';
-                    color = '#1e3c0a';
+                    bg = 'var(--color-calendar-selectable)';
+                    color = 'var(--color-olive-800)';
                   }
 
                   let cursorClass = 'hover:bg-cream-2 cursor-pointer';
@@ -213,8 +213,7 @@ export function SuspendModal({
                 return (
                   <span
                     key={iso}
-                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-mono"
-                    style={{ background: '#f3eedc', color: '#6b4f08' }}
+                    className="inline-flex items-center gap-[7px] px-[10px] py-[5px] rounded-[8px] text-[11.5px] font-mono bg-warn-bg text-warn border border-warn-border"
                   >
                     {formatDate(iso)}
                     <button
