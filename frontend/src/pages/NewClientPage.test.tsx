@@ -158,7 +158,7 @@ describe('NewClientPage', () => {
 
   it('shows precio and billing fields on step 3', async () => {
     await navigateToStep3();
-    expect(screen.getByLabelText(/precio/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/precio final/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/fecha de inicio/i)).toBeInTheDocument();
   });
 
@@ -166,7 +166,7 @@ describe('NewClientPage', () => {
     await navigateToStep3();
     await userEvent.click(screen.getByRole('button', { name: /completo/i }));
     // plan price 480, precio 430 → descuento 50, total 430
-    fireEvent.change(screen.getByLabelText(/precio/i), { target: { value: '430' } });
+    fireEvent.change(screen.getByLabelText(/precio final/i), { target: { value: '430' } });
     expect(screen.getByText('430')).toBeInTheDocument();
   });
 
@@ -214,7 +214,7 @@ describe('NewClientPage', () => {
       target: { value: '2026-06-01' },
     });
     // plan price 480, precio 380 → discount = 100
-    fireEvent.change(screen.getByLabelText(/precio/i), { target: { value: '380' } });
+    fireEvent.change(screen.getByLabelText(/precio final/i), { target: { value: '380' } });
     await userEvent.click(screen.getByRole('button', { name: /siguiente/i }));
     await userEvent.click(screen.getByRole('button', { name: /crear/i }));
     await waitFor(() => expect(mockPost).toHaveBeenCalledTimes(2));

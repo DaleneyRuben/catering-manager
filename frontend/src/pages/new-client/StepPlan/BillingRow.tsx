@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { type UseFormSetValue } from 'react-hook-form';
 import { Field, inputCls } from '../../../components/ui/Field';
+import { WizardSectionCard } from '../../../components/ui/WizardSectionCard';
 import type { NewClientFormValues } from '../types';
 
 interface Props {
@@ -32,12 +33,22 @@ export function BillingRow({ setValue, price, discount }: Props) {
     price !== undefined && clientPriceNum !== undefined ? price - clientPriceNum : undefined;
 
   return (
-    <div>
-      <p className="text-[10.5px] font-mono uppercase tracking-[.14em] text-muted mb-4">
-        Facturación del plan
-      </p>
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
-        <Field label="Precio" htmlFor="client-price">
+    <WizardSectionCard
+      icon="report"
+      iconBg="bg-olive-100"
+      iconColor="text-olive-700"
+      title="Facturación"
+    >
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-x-[22px] gap-y-[18px] items-end">
+        <Field label="Precio base" htmlFor="base-price">
+          <p
+            id="base-price"
+            className="font-mono text-[14px] text-muted bg-empty-bg border border-hairline rounded-[9px] py-[11px] px-[14px]"
+          >
+            {price !== undefined ? price.toLocaleString('es-BO') : '—'}
+          </p>
+        </Field>
+        <Field label="Precio final" htmlFor="client-price">
           <input
             id="client-price"
             type="number"
@@ -50,27 +61,23 @@ export function BillingRow({ setValue, price, discount }: Props) {
             className={inputCls(false)}
           />
         </Field>
-        <div>
-          <p className="text-[11px] font-mono uppercase tracking-wider text-muted mb-1.5">
-            Descuento
-          </p>
-          <p className="font-mono text-[13px] text-ink py-2 px-3 bg-cream-2 rounded-md border border-rule">
-            {calculatedDiscount !== undefined ? calculatedDiscount : '—'}
-          </p>
-        </div>
-        <div>
-          <p className="text-[11px] font-mono uppercase tracking-wider text-muted mb-1.5">Total</p>
+        <Field label="Descuento" htmlFor="discount-preview">
           <p
-            className="font-mono text-[16px] font-bold text-olive-800 py-2 px-3 rounded-md border"
-            style={{
-              background: 'var(--olive-50, #f5f7f0)',
-              borderColor: 'var(--olive-200, #c8d4b0)',
-            }}
+            id="discount-preview"
+            className="font-mono text-[14px] text-warn bg-warn-bg border border-warn-border rounded-[9px] py-[11px] px-[14px]"
           >
-            {clientPriceNum !== undefined ? clientPriceNum : '—'}
+            {calculatedDiscount !== undefined ? calculatedDiscount.toLocaleString('es-BO') : '—'}
           </p>
-        </div>
+        </Field>
       </div>
-    </div>
+      <div className="flex items-center justify-between border-t border-cream-2 mt-[2px] pt-[18px]">
+        <span className="font-mono text-[11px] tracking-[.08em] uppercase text-muted">
+          Total mensual
+        </span>
+        <span className="font-serif text-[30px] font-semibold text-olive-700 tabular-nums">
+          {clientPriceNum !== undefined ? clientPriceNum.toLocaleString('es-BO') : '—'}
+        </span>
+      </div>
+    </WizardSectionCard>
   );
 }
