@@ -14,7 +14,12 @@ import type { Client, ClientStatus } from '../../types/client';
 
 const OUTLINE_BTN_CLS = 'bg-paper border border-rule hover:border-rule-2';
 const OUTLINE_OLIVE_BTN_CLS = 'bg-paper border border-olive-200 text-olive-700 hover:bg-olive-100';
-const PAUSAR_BTN_STYLE = { padding: '10px 16px', fontSize: '13px', gap: '8px', color: '#3d4234' };
+const PAUSAR_BTN_STYLE = {
+  padding: '10px 16px',
+  fontSize: '13px',
+  gap: '8px',
+  color: 'var(--color-ink-2)',
+};
 const REANUDAR_BTN_STYLE = { padding: '10px 18px', fontSize: '13px', gap: '8px' };
 const RENOVAR_BTN_STYLE = { padding: '10px 16px', fontSize: '13px', gap: '8px' };
 
@@ -132,8 +137,8 @@ export function ClientHeader({
         <div className="flex items-center gap-2.5 bg-warn-bg border border-warn-border rounded-md px-3.5 py-3 mb-5">
           <Icon name="calendar" size={14} className="text-warn shrink-0" />
           <div>
-            <p className="text-[13px] font-semibold text-warn">Plan en pausa</p>
-            <p className="font-mono text-[11px] text-warn">
+            <p className="text-[13px] font-semibold text-warn-text-strong">Plan en pausa</p>
+            <p className="font-mono text-[11px] text-warn-text">
               El cliente no recibe entregas. Reanudá el plan cuando esté listo.
             </p>
           </div>
@@ -143,8 +148,8 @@ export function ClientHeader({
         <div className="flex items-center gap-2.5 bg-warn-bg border border-warn-border rounded-md px-3.5 py-3 mb-5">
           <Icon name="calendar" size={14} className="text-warn shrink-0" />
           <div>
-            <p className="text-[13px] font-semibold text-warn">Plan programado</p>
-            <p className="font-mono text-[11px] text-warn">
+            <p className="text-[13px] font-semibold text-warn-text-strong">Plan programado</p>
+            <p className="font-mono text-[11px] text-warn-text">
               El plan inicia el {format(parseISO(sub.startDate), 'dd/MM/yyyy')}.
             </p>
           </div>

@@ -20,11 +20,11 @@ const BANNER_STYLES: Record<
     title: 'Todos los sistemas operativos',
     desc: 'La API y los servicios conectados responden con normalidad.',
     icon: 'check',
-    bg: 'bg-[#e9f0dc]',
+    bg: 'bg-success-soft-bg',
     border: 'border-olive-200',
     dotBg: 'bg-ok',
     halo: 'shadow-[0_0_0_6px_rgba(53,126,28,0.15)]',
-    sub: 'text-[#4e7d20]',
+    sub: 'text-success-text',
   },
   degraded: {
     title: 'Servicios degradados',
