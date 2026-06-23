@@ -26,6 +26,12 @@ beforeEach(() => {
 });
 
 describe('ClientGroupTab', () => {
+  it('shows the Entrega conjunta header label', () => {
+    mockUseClientGroup.mockReturnValue(mockHook());
+    render(<ClientGroupTab clientId="1" initialMembers={[]} />);
+    expect(screen.getByText('Entrega conjunta')).toBeInTheDocument();
+  });
+
   it('shows empty state in left column when no members', () => {
     mockUseClientGroup.mockReturnValue(mockHook());
     render(<ClientGroupTab clientId="1" initialMembers={[]} />);
@@ -84,7 +90,7 @@ describe('ClientGroupTab', () => {
       isLoading: false,
     });
     render(<ClientGroupTab clientId="1" initialMembers={[]} />);
-    fireEvent.change(screen.getByPlaceholderText(/buscar cliente/i), { target: { value: 'c' } });
+    fireEvent.change(screen.getByPlaceholderText(/agregar miembro/i), { target: { value: 'c' } });
     expect(screen.queryByText('Self')).not.toBeInTheDocument();
     expect(screen.getByText('Carlos')).toBeInTheDocument();
   });
@@ -97,7 +103,7 @@ describe('ClientGroupTab', () => {
       isLoading: false,
     });
     render(<ClientGroupTab clientId="1" initialMembers={[]} />);
-    fireEvent.change(screen.getByPlaceholderText(/buscar cliente/i), { target: { value: 'Car' } });
+    fireEvent.change(screen.getByPlaceholderText(/agregar miembro/i), { target: { value: 'Car' } });
     fireEvent.click(screen.getByRole('button', { name: /agregar carlos/i }));
     expect(add).toHaveBeenCalledWith({ id: '4', name: 'Carlos' });
   });
@@ -109,7 +115,7 @@ describe('ClientGroupTab', () => {
       isLoading: false,
     });
     render(<ClientGroupTab clientId="1" initialMembers={[]} />);
-    fireEvent.change(screen.getByPlaceholderText(/buscar cliente/i), { target: { value: 'Car' } });
+    fireEvent.change(screen.getByPlaceholderText(/agregar miembro/i), { target: { value: 'Car' } });
     expect(screen.queryByRole('button', { name: /agregar carlos/i })).not.toBeInTheDocument();
   });
 });
