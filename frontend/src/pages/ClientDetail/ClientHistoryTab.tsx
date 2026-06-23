@@ -66,7 +66,7 @@ export function ClientHistoryTab({ clientId, currentPlanName = null }: Props) {
             return (
               <div key={entry.id} className="relative">
                 <div
-                  className={`absolute -left-[18px] top-[5px] w-[11px] h-[11px] rounded-full border ${
+                  className={`absolute -left-[18px] top-[4px] w-[12px] h-[12px] rounded-full border-2 ${
                     i === 0 ? 'bg-olive-800 border-olive-800' : 'bg-paper border-rule'
                   }`}
                 />
