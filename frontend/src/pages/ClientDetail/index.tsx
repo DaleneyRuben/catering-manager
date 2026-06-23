@@ -74,7 +74,7 @@ export function ClientDetailPage() {
 
   if (!client) {
     return (
-      <div className="p-7 max-w-[1320px] mx-auto">
+      <div className="px-4 py-5 lg:px-[44px] lg:py-[34px]">
         <p className="text-muted text-[13px]">Cliente no encontrado.</p>
       </div>
     );
@@ -91,7 +91,7 @@ export function ClientDetailPage() {
       : 0;
 
   return (
-    <div className="p-7 max-w-[1320px] mx-auto">
+    <div className="px-4 py-5 lg:px-[44px] lg:py-[34px]">
       <ClientHeader
         client={client}
         status={status}
