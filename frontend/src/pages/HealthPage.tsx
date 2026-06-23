@@ -31,7 +31,7 @@ const BANNER_STYLES: Record<
     desc: 'Algunos servicios responden con latencia elevada.',
     icon: 'alert',
     bg: 'bg-warn-bg',
-    border: 'border-[#e3cf95]',
+    border: 'border-warn-border',
     dotBg: 'bg-warn',
     halo: 'shadow-[0_0_0_6px_rgba(168,127,16,0.15)]',
     sub: 'text-warn',
