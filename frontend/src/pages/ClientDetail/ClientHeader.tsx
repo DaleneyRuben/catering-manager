@@ -12,8 +12,11 @@ import { SEX_LABELS } from '../../constants/clientOptions';
 import { initials } from '../../utils/string';
 import type { Client, ClientStatus } from '../../types/client';
 
-const OUTLINE_BTN_CLS = 'bg-paper border border-rule text-ink hover:bg-cream-2';
+const OUTLINE_BTN_CLS = 'bg-paper border border-rule hover:border-rule-2';
 const OUTLINE_OLIVE_BTN_CLS = 'bg-paper border border-olive-200 text-olive-700 hover:bg-olive-100';
+const PAUSAR_BTN_STYLE = { padding: '10px 16px', fontSize: '13px', gap: '8px', color: '#3d4234' };
+const REANUDAR_BTN_STYLE = { padding: '10px 18px', fontSize: '13px', gap: '8px' };
+const RENOVAR_BTN_STYLE = { padding: '10px 16px', fontSize: '13px', gap: '8px' };
 
 interface Props {
   client: Client;
@@ -53,9 +56,9 @@ export function ClientHeader({
       <button
         type="button"
         onClick={onBack}
-        className="flex items-center gap-1.5 text-[13px] text-muted hover:text-ink mb-5 transition-colors"
+        className="inline-flex items-center gap-[7px] font-mono text-[11px] uppercase tracking-[.08em] text-olive-600 hover:underline mb-5"
       >
-        <Icon name="arrow-left" size={13} />
+        <Icon name="arrow-left" size={14} />
         Clientes
       </button>
 
@@ -92,6 +95,7 @@ export function ClientHeader({
               loading={isUpdating}
               leftIcon={toggleConfig.icon}
               className={toggleConfig.className}
+              style={status === CLIENT_STATUS.PAUSED ? REANUDAR_BTN_STYLE : PAUSAR_BTN_STYLE}
             >
               {toggleConfig.label}
             </Button>
@@ -101,6 +105,7 @@ export function ClientHeader({
             onClick={onRenew}
             leftIcon="refresh"
             className={OUTLINE_OLIVE_BTN_CLS}
+            style={RENOVAR_BTN_STYLE}
           >
             {status === CLIENT_STATUS.ENDED ? 'Reactivar' : 'Renovar'}
           </Button>

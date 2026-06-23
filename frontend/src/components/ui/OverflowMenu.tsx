@@ -30,7 +30,7 @@ export function OverflowMenu({ items }: Props) {
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="w-[38px] h-[38px] flex items-center justify-center rounded-[9px] border border-rule bg-paper hover:bg-cream-2 transition-colors text-muted hover:text-ink-2"
+        className="w-[38px] h-[38px] flex items-center justify-center rounded-[9px] border border-rule bg-paper hover:border-rule-2 transition-colors text-muted hover:text-ink-2"
         aria-label="Más acciones"
         aria-expanded={open}
       >
