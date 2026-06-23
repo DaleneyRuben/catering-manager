@@ -12,13 +12,13 @@ describe('Field', () => {
     expect(screen.getByRole('textbox')).toBeInTheDocument();
   });
 
-  it('shows the required marker', () => {
+  it('shows the required marker in the dedicated required color', () => {
     render(
       <Field label="Usuario" htmlFor="username" required>
         <input id="username" />
       </Field>,
     );
-    expect(screen.getByText('*')).toBeInTheDocument();
+    expect(screen.getByText('*')).toHaveClass('text-required');
   });
 
   it('shows the error message', () => {

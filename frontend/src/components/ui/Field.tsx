@@ -31,7 +31,7 @@ export function Field({
     <div>
       <label htmlFor={htmlFor} className={labelCls}>
         {label}
-        {required && <span className="ml-0.5 text-warn">*</span>}
+        {required && <span className="ml-0.5 text-required">*</span>}
       </label>
       {children}
       {error && <p className="mt-1 text-[11px] text-warn">{error}</p>}

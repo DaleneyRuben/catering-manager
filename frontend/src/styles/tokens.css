@@ -28,6 +28,7 @@
   --color-empty-text: #a7ab98;
   --color-placeholder: #b0b3a1;
   --color-done-line: #9bc16a;
+  --color-required: #c0492f;
 
   /* Status colors */
   --color-alert: #c4341a;
