@@ -62,9 +62,9 @@ export function ContractCard({ sub, remaining, onUpdateContract }: Props) {
             type="button"
             onClick={() => setEditing(true)}
             aria-label="Editar"
-            className="ml-auto text-muted hover:text-ink transition-colors"
+            className="ml-auto text-olive-700 hover:opacity-70 transition-opacity p-[3px]"
           >
-            <Icon name="pencil" size={13} />
+            <Icon name="pencil" size={15} stroke={1.7} />
           </button>
         )}
       </div>
