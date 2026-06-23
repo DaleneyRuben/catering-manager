@@ -34,7 +34,7 @@ export function OverflowMenu({ items }: Props) {
         aria-label="Más acciones"
         aria-expanded={open}
       >
-        <Icon name="more-horizontal" size={16} />
+        <Icon name="more-vertical" size={16} />
       </button>
 
       {open && (

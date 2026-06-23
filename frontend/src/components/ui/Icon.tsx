@@ -324,6 +324,14 @@ export function Icon({ name, size = 16, stroke = 1.5, className }: IconProps) {
           <circle cx="19" cy="12" r="1" fill="currentColor" stroke="none" />
         </svg>
       );
+    case 'more-vertical':
+      return (
+        <svg {...props}>
+          <circle cx="12" cy="5" r="1" fill="currentColor" stroke="none" />
+          <circle cx="12" cy="12" r="1" fill="currentColor" stroke="none" />
+          <circle cx="12" cy="19" r="1" fill="currentColor" stroke="none" />
+        </svg>
+      );
     default:
       return null;
   }

@@ -18,4 +18,9 @@ describe('Icon', () => {
     const { container } = render(<Icon name="nonexistent" />);
     expect(container.querySelector('svg')).not.toBeInTheDocument();
   });
+
+  it('renders three stacked circles for more-vertical', () => {
+    const { container } = render(<Icon name="more-vertical" />);
+    expect(container.querySelectorAll('circle')).toHaveLength(3);
+  });
 });
