@@ -21,14 +21,17 @@
   --color-faint: #9a9a86;
   --color-rule: #dcd9c8;
   --color-rule-2: #c8c4ad;
+  --color-row-hover: #f5f7f0;
 
   /* Status colors */
   --color-alert: #c4341a;
   --color-alert-bg: #fae6dd;
   --color-warn: #a87f10;
   --color-warn-bg: #f4ead0;
+  --color-warn-dot: #cda01a;
   --color-ok: #357e1c;
   --color-ok-bg: #dee9c8;
+  --color-muted-dot: #b3b39c;
   --color-taupe: #7b6a4e;
   --color-taupe-bg: #efe9dd;
   --color-danger: #a8512f;
