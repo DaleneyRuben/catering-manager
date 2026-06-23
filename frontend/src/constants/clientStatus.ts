@@ -21,9 +21,18 @@ export const STATUS_LABELS: Record<ClientStatus, string> = {
 
 export const STATUS_CLASSES: Record<ClientStatus, string> = {
   active: 'bg-ok-bg text-ok',
-  paused: 'bg-alert-bg text-alert',
+  paused: 'bg-cream-2 text-muted',
   expiring: 'bg-warn-bg text-warn',
-  suspended: 'bg-warn-bg text-warn',
-  ended: 'bg-alert-bg text-alert',
-  future: 'bg-warn-bg text-warn',
+  suspended: 'bg-cream-2 text-muted',
+  ended: 'bg-cream-2 text-faint',
+  future: 'bg-olive-100 text-olive-600',
+};
+
+export const STATUS_DOT_CLASSES: Record<ClientStatus, string> = {
+  active: 'bg-ok',
+  paused: 'bg-muted-dot',
+  expiring: 'bg-warn-dot',
+  suspended: 'bg-muted-dot',
+  ended: 'bg-rule-2',
+  future: 'bg-olive-400',
 };
