@@ -37,8 +37,8 @@ export function Tabs({ tabs, activeId, onChange, className = '' }: Props) {
           role="tab"
           aria-selected={activeId === tab.id}
           onClick={() => onChange(tab.id)}
-          className={`px-4 py-2.5 text-[13px] font-medium transition-colors shrink-0 whitespace-nowrap ${
-            activeId === tab.id ? 'text-ink' : 'text-muted hover:text-ink'
+          className={`px-4 py-2.5 text-[13px] transition-colors shrink-0 whitespace-nowrap ${
+            activeId === tab.id ? 'text-ink font-semibold' : 'text-muted hover:text-ink font-medium'
           }`}
         >
           {tab.label}

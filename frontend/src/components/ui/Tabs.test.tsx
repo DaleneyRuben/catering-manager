@@ -35,6 +35,13 @@ describe('Tabs', () => {
     expect(screen.getByRole('tab', { name: 'Plan' })).toHaveClass('text-muted');
   });
 
+  it('makes the active tab bold and the inactive tabs medium weight', () => {
+    render(<Tabs tabs={TABS} activeId="overview" onChange={() => {}} />);
+    expect(screen.getByRole('tab', { name: 'Resumen' })).toHaveClass('font-semibold');
+    expect(screen.getByRole('tab', { name: 'Plan' })).toHaveClass('font-medium');
+    expect(screen.getByRole('tab', { name: 'Plan' })).not.toHaveClass('font-semibold');
+  });
+
   it('applies custom className to the tablist', () => {
     render(<Tabs tabs={TABS} activeId="overview" onChange={() => {}} className="mb-5" />);
     expect(screen.getByRole('tablist')).toHaveClass('mb-5');
