@@ -6,9 +6,8 @@ import api from '../services/api';
 import { ClientsPage } from './ClientsPage';
 
 jest.mock('../services/api', () => ({
-  default: { get: jest.fn(), getPaginated: jest.fn() },
+  default: { getPaginated: jest.fn() },
 }));
-const mockGet = api.get as jest.Mock;
 const mockGetPaginated = api.getPaginated as jest.Mock;
 
 const makeSub = (overrides = {}) => ({
@@ -62,10 +61,6 @@ const paginatedResponse = (clients: ReturnType<typeof makeClient>[], total = cli
 });
 
 describe('ClientsPage', () => {
-  beforeEach(() => {
-    mockGet.mockResolvedValue({ active: 0, expiring: 0, paused: 0, ended: 0, total: 0 });
-  });
-
   it('renders the page heading', async () => {
     mockGetPaginated.mockResolvedValue(paginatedResponse([]));
     renderPage();
@@ -128,17 +123,6 @@ describe('ClientsPage', () => {
     renderPage();
     await screen.findByText('María García');
     expect(screen.getAllByText('—').length).toBeGreaterThan(0);
-  });
-
-  it('shows the count next to each status filter pill', async () => {
-    mockGet.mockResolvedValue({ active: 7, expiring: 3, paused: 3, ended: 2, total: 16 });
-    mockGetPaginated.mockResolvedValue(paginatedResponse([], 16));
-    renderPage();
-    expect(await screen.findByRole('button', { name: /todos.*16/i })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /activos.*7/i })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /por vencer.*3/i })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /pausados.*3/i })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /finalizados.*2/i })).toBeInTheDocument();
   });
 
   it('filters clients by search query via backend', async () => {

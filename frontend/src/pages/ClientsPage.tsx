@@ -5,7 +5,7 @@ import { Button } from '../components/ui/Button';
 import { PageHeader } from '../components/ui/PageHeader';
 import { Pagination } from '../components/ui/Pagination';
 import { ClientTableSkeleton } from './ClientTableSkeleton';
-import { useClientList, useClientCounts } from '../hooks/useClientList';
+import { useClientList } from '../hooks/useClientList';
 import { useDebounce } from '../hooks/useDebounce';
 import { formatDate } from '../utils/format';
 import {
@@ -87,14 +87,12 @@ export function ClientsPage() {
     page,
     limit,
   });
-  const { counts } = useClientCounts();
-
-  const STATUS_FILTERS: { v: FilterValue; l: string; count?: number }[] = [
-    { v: CLIENT_STATUS.ALL, l: 'Todos', count: counts?.total },
-    { v: CLIENT_STATUS.ACTIVE, l: 'Activos', count: counts?.active },
-    { v: CLIENT_STATUS.EXPIRING, l: 'Por vencer', count: counts?.expiring },
-    { v: CLIENT_STATUS.PAUSED, l: 'Pausados', count: counts?.paused },
-    { v: CLIENT_STATUS.ENDED, l: 'Finalizados', count: counts?.ended },
+  const STATUS_FILTERS: { v: FilterValue; l: string }[] = [
+    { v: CLIENT_STATUS.ALL, l: 'Todos' },
+    { v: CLIENT_STATUS.ACTIVE, l: 'Activos' },
+    { v: CLIENT_STATUS.EXPIRING, l: 'Por vencer' },
+    { v: CLIENT_STATUS.PAUSED, l: 'Pausados' },
+    { v: CLIENT_STATUS.ENDED, l: 'Finalizados' },
   ];
 
   useEffect(() => {
@@ -192,7 +190,7 @@ export function ClientsPage() {
         <div className={`${showSecondaryFilters ? 'flex' : 'hidden'} lg:flex`}>
           <div className="overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] min-w-0">
             <div className="inline-flex p-[3px] gap-px bg-paper border border-rule rounded-[11px] text-[12.5px]">
-              {STATUS_FILTERS.map(({ v, l, count }) => (
+              {STATUS_FILTERS.map(({ v, l }) => (
                 <button
                   type="button"
                   key={v}
@@ -204,7 +202,6 @@ export function ClientsPage() {
                   }`}
                 >
                   {l}
-                  {count !== undefined && <span className="opacity-50 ml-0.5">{count}</span>}
                 </button>
               ))}
             </div>

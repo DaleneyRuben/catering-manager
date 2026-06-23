@@ -48,14 +48,6 @@ export interface ClientFilters {
   limit?: number;
 }
 
-export interface ClientCounts {
-  active: number;
-  expiring: number;
-  paused: number;
-  ended: number;
-  total: number;
-}
-
 export function useClientList(filters: ClientFilters = {}) {
   const { data, isLoading, isFetching } = useQuery({
     queryKey: ['clients', filters],
@@ -83,12 +75,4 @@ export function useClientList(filters: ClientFilters = {}) {
     isLoading,
     isFetching,
   };
-}
-
-export function useClientCounts() {
-  const { data, isLoading } = useQuery({
-    queryKey: ['clients', 'counts'],
-    queryFn: () => api.get<ClientCounts>('/clients/counts'),
-  });
-  return { counts: data, isLoading };
 }
