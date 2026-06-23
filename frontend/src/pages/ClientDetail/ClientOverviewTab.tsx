@@ -1,4 +1,5 @@
 import { Icon } from '../../components/ui/Icon';
+import { Label } from '../../components/ui/Label';
 import { MEAL_LABELS } from '../../constants/meals';
 import type { Client, Subscription } from '../../types/client';
 import { CLIENT_STATUS } from '../../constants/clientStatus';
@@ -21,23 +22,25 @@ export function ClientOverviewTab({ client, sub, remaining }: Props) {
             <>
               <div className="flex items-start justify-between gap-4 mb-3">
                 <div>
-                  <p className="text-[12px] font-mono uppercase tracking-wider text-olive-800 mb-1">
+                  <Label variant="section" className="mb-1">
                     {status === CLIENT_STATUS.ENDED ? 'Último plan' : 'Plan vigente'}
+                  </Label>
+                  <p className="font-serif text-[25px] font-semibold leading-tight text-ink">
+                    {sub.plan.name}
                   </p>
-                  <p className="font-serif text-[24px] leading-tight text-ink">{sub.plan.name}</p>
                 </div>
                 <div className="text-right shrink-0">
-                  <p className="font-mono font-semibold text-[22px] leading-tight text-olive-800">
-                    {Number(sub.plan.price) - sub.discount}
+                  <p className="font-mono font-semibold text-[21px] leading-tight text-ink">
+                    {(Number(sub.plan.price) - sub.discount).toLocaleString('es-BO')}
                   </p>
-                  <p className="font-mono text-[10.5px] text-muted">/mes</p>
+                  <p className="font-mono text-[11px] text-faint">/mes</p>
                 </div>
               </div>
               <div className="flex flex-wrap gap-1.5 mb-4">
                 {sub.plan.meals.map((m) => (
                   <span
                     key={m}
-                    className="px-2 py-0.5 rounded-full text-[11px] font-mono bg-olive-100 border border-rule text-ink"
+                    className="px-2 py-0.5 rounded-full text-[11px] font-mono bg-olive-100 border border-olive-200 text-olive-700"
                   >
                     {MEAL_LABELS[m] ?? m}
                   </span>
@@ -65,9 +68,9 @@ export function ClientOverviewTab({ client, sub, remaining }: Props) {
         </div>
 
         <div className="bg-paper border border-rule rounded-lg p-5">
-          <p className="text-[12px] font-mono uppercase tracking-wider text-olive-800 mb-3">
+          <Label variant="section" className="mb-3">
             Contacto
-          </p>
+          </Label>
           <div className="flex flex-col gap-2.5">
             <div className="flex items-center gap-2.5">
               <Icon name="phone" size={14} />
@@ -87,21 +90,17 @@ export function ClientOverviewTab({ client, sub, remaining }: Props) {
           {(client.nit || client.businessName) && (
             <>
               <hr className="border-rule my-3" />
-              <p className="text-[12px] font-mono uppercase tracking-wider text-olive-800 mb-2">
+              <Label variant="section" className="mb-2">
                 Facturación
-              </p>
+              </Label>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <p className="text-[12px] font-mono uppercase tracking-wider text-olive-800">
-                    NIT
-                  </p>
+                  <Label variant="field">NIT</Label>
                   <p className="font-mono text-[13px]">{client.nit || '—'}</p>
                 </div>
                 <div>
-                  <p className="text-[12px] font-mono uppercase tracking-wider text-olive-800">
-                    Razón social
-                  </p>
-                  <p className="font-mono text-[13px]">{client.businessName || '—'}</p>
+                  <Label variant="field">Razón social</Label>
+                  <p className="text-[13.5px]">{client.businessName || '—'}</p>
                 </div>
               </div>
             </>
@@ -111,13 +110,9 @@ export function ClientOverviewTab({ client, sub, remaining }: Props) {
 
       <div className="col-span-12 lg:col-span-5 flex flex-col gap-4">
         <div className="bg-paper border border-rule rounded-lg p-5">
-          <div className="flex items-center mb-3">
-            <p className="text-[12px] font-mono uppercase tracking-wider text-olive-800">
-              Restricciones
-            </p>
-            <span className="ml-auto font-mono text-[10.5px] text-muted">
-              {client.restrictions.length}
-            </span>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="font-serif text-[20px] font-semibold text-ink">Restricciones</h2>
+            <span className="font-mono text-[12px] text-faint">{client.restrictions.length}</span>
           </div>
           {client.underlyingDiseases.length === 0 && client.restrictions.length === 0 ? (
             <p className="font-mono text-[12px] text-muted">Sin restricciones registradas.</p>
@@ -125,14 +120,14 @@ export function ClientOverviewTab({ client, sub, remaining }: Props) {
             <div className="space-y-3">
               {client.underlyingDiseases.length > 0 && (
                 <div>
-                  <p className="text-[12px] font-mono uppercase tracking-wider text-olive-800 mb-1.5">
+                  <Label variant="field" className="mb-2.5">
                     Enfermedades
-                  </p>
+                  </Label>
                   <div className="flex flex-wrap gap-1.5">
                     {client.underlyingDiseases.map((d) => (
                       <span
                         key={d}
-                        className="px-2.5 py-1 rounded-full text-[12px] font-mono bg-olive-100 border border-rule text-ink"
+                        className="px-3 py-1 rounded-full text-[12.5px] font-semibold bg-olive-100 border border-olive-200 text-olive-700"
                       >
                         {d}
                       </span>
@@ -142,14 +137,14 @@ export function ClientOverviewTab({ client, sub, remaining }: Props) {
               )}
               {client.restrictions.length > 0 && (
                 <div>
-                  <p className="text-[12px] font-mono uppercase tracking-wider text-olive-800 mb-1.5">
+                  <Label variant="field" className="mb-2.5">
                     Alergias y gustos
-                  </p>
+                  </Label>
                   <div className="flex flex-wrap gap-1.5">
                     {client.restrictions.map((r) => (
                       <span
                         key={r}
-                        className="inline-flex items-center gap-1 px-2.5 py-1 bg-warn-bg text-warn text-[12px] font-mono rounded-full"
+                        className="inline-flex items-center gap-1 px-3 py-1 bg-warn-bg text-warn border border-warn-border text-[12.5px] font-semibold rounded-full"
                       >
                         {r}
                       </span>

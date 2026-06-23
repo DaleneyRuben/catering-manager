@@ -14,5 +14,5 @@ const VARIANT_CLS: Record<LabelVariant, string> = {
 };
 
 export function Label({ variant = 'field', className = '', children }: Props) {
-  return <span className={`uppercase ${VARIANT_CLS[variant]} ${className}`}>{children}</span>;
+  return <p className={`uppercase ${VARIANT_CLS[variant]} ${className}`}>{children}</p>;
 }
