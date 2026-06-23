@@ -126,7 +126,7 @@ export function UsersPage() {
                   return (
                     <tr
                       key={u.id}
-                      className="border-b border-cream-2 last:border-0 hover:bg-[#f5f7f0] transition-colors"
+                      className="border-b border-cream-2 last:border-0 hover:bg-row-hover transition-colors"
                     >
                       <td className="px-[22px] py-[13px]">
                         <div className="flex items-center gap-3">

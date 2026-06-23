@@ -199,7 +199,7 @@ export function HealthPage() {
                   return (
                     <tr
                       key={service.name}
-                      className="border-b border-cream-2 last:border-0 hover:bg-[#f5f7f0] transition-colors"
+                      className="border-b border-cream-2 last:border-0 hover:bg-row-hover transition-colors"
                     >
                       <td className="px-[24px] py-[14px]">
                         <div className="flex items-center gap-[11px]">
