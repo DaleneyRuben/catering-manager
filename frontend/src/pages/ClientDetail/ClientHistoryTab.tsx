@@ -48,7 +48,7 @@ export function ClientHistoryTab({ clientId, currentPlanName = null }: Props) {
         />
       </div>
       <Card padding="26px 28px">
-        <div className="relative flex flex-col gap-3.5 pl-[18px]">
+        <div className="relative flex flex-col gap-[22px] pl-[18px]">
           <div className="absolute left-[5px] top-[6px] bottom-[6px] w-px bg-rule" />
           {history.map((entry, i) => {
             const meta = entry.metadata;
@@ -71,30 +71,30 @@ export function ClientHistoryTab({ clientId, currentPlanName = null }: Props) {
                     i === 0 ? 'bg-olive-800 border-olive-800' : 'bg-paper border-rule'
                   }`}
                 />
-                <p className="font-mono text-[10.5px] text-muted">
+                <p className="font-mono text-[11px] text-faint">
                   {formatEventDateTime(entry.occurredAt)}
                 </p>
-                <p className="text-[13px] font-semibold text-ink">
+                <p className="text-[14px] font-semibold text-ink mt-[3px]">
                   {EVENT_LABELS[entry.eventType]}
                 </p>
                 {showPlanDetails && (
-                  <div className="flex items-center gap-2 mt-0.5">
-                    <span className="px-1.5 py-0.5 rounded-full text-[10px] font-mono bg-olive-800 text-white">
+                  <div className="flex items-center gap-[9px] mt-[7px]">
+                    <span className="px-[9px] py-[3px] rounded-[6px] text-[11px] font-mono bg-olive-800 text-olive-50">
                       {planName}
                     </span>
                     {planPrice !== null && (
-                      <span className="font-mono text-[11px] text-muted">
+                      <span className="font-mono text-[11px] text-faint">
                         {(planPrice - discount).toLocaleString('es-BO')}/mes
                       </span>
                     )}
                   </div>
                 )}
                 {suspendedDates && suspendedDates.length > 0 && (
-                  <div className="flex flex-wrap gap-1.5 mt-1">
+                  <div className="flex flex-wrap gap-[6px] mt-[7px]">
                     {[...suspendedDates].sort().map((d) => (
                       <span
                         key={d}
-                        className="px-2 py-0.5 rounded-[6px] text-[10px] font-mono bg-warn-bg border border-warn-border text-warn"
+                        className="px-2 py-0.5 rounded-[6px] text-[10.5px] font-mono bg-warn-bg border border-warn-border text-warn"
                       >
                         {formatDate(d)}
                       </span>
