@@ -59,4 +59,30 @@ describe('TagInput', () => {
     renderTagInput([]);
     expect(screen.queryByRole('button', { name: /quitar/i })).not.toBeInTheDocument();
   });
+
+  it('shows an empty-state message when there are no tags', () => {
+    renderTagInput([]);
+    expect(screen.getByText(/sin restricciones agregadas todavía/i)).toBeInTheDocument();
+  });
+
+  it('hides the empty-state message once there is at least one tag', () => {
+    renderTagInput(['gluten']);
+    expect(screen.queryByText(/sin restricciones agregadas todavía/i)).not.toBeInTheDocument();
+  });
+
+  it('uses a custom placeholder when provided', () => {
+    const setInput = jest.fn();
+    render(
+      <TagInput
+        label="Restricciones"
+        placeholder="Ej. lácteos, maní, cebolla…"
+        tags={[]}
+        input=""
+        setInput={setInput}
+        onAdd={jest.fn()}
+        onRemove={jest.fn()}
+      />,
+    );
+    expect(screen.getByPlaceholderText('Ej. lácteos, maní, cebolla…')).toBeInTheDocument();
+  });
 });

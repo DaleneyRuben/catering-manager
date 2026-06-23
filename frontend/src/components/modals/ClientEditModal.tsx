@@ -3,6 +3,7 @@ import { parseISO, startOfToday } from 'date-fns';
 import { Field, inputCls, selectCls } from '../ui/Field';
 import { DatePickerInput } from '../ui/DatePickerInput';
 import { Icon } from '../ui/Icon';
+import { Label } from '../ui/Label';
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
 import { TagInput } from '../ui/TagInput';
@@ -78,32 +79,32 @@ export function ClientEditModal({
   };
 
   return (
-    <Modal onClose={onClose} className="rounded-xl w-[min(780px,94vw)] max-h-[92vh] overflow-auto">
+    <Modal onClose={onClose} className="max-w-[560px] w-full max-h-[90vh] overflow-auto">
       <div aria-labelledby="edit-modal-title">
-        <div className="sticky top-0 bg-cream z-10 flex items-center gap-2.5 px-6 py-[18px] border-b border-rule">
-          <Icon name="settings" size={16} />
+        <div className="sticky top-0 bg-cream z-10 flex items-center gap-[12px] px-[28px] py-[22px] border-b border-hairline">
+          <Icon name="settings" size={20} stroke={1.7} className="text-olive-700" />
           <div className="flex-1">
-            <h2 id="edit-modal-title" className="font-serif text-[22px]">
+            <h2 id="edit-modal-title" className="font-serif text-[23px] font-semibold leading-none">
               Editar cliente
             </h2>
-            <p className="font-mono text-[11px] text-muted">{client.name}</p>
+            <p className="font-mono text-[11px] text-faint mt-[3px]">{client.name}</p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 rounded hover:bg-cream-2 transition-colors"
+            className="p-1 text-faint hover:text-ink-2 transition-colors flex"
           >
-            <Icon name="x" size={14} />
+            <Icon name="x" size={20} stroke={1.8} />
           </button>
         </div>
 
-        <div className="p-[22px] space-y-6">
+        <div className="py-[22px] px-[28px] space-y-6">
           <div>
-            <p className="text-[11px] font-mono uppercase tracking-wider text-muted mb-3">
+            <Label variant="section" className="mb-[13px]">
               Identidad
-            </p>
+            </Label>
             <div className="space-y-4">
-              <Field label="Nombre completo" htmlFor="em-name" required>
+              <Field label="Nombre completo" htmlFor="em-name" required variant="plain">
                 <input
                   id="em-name"
                   type="text"
@@ -113,7 +114,7 @@ export function ClientEditModal({
                 />
               </Field>
               <div className="grid grid-cols-3 gap-4">
-                <Field label="Sexo" htmlFor="em-sex" required>
+                <Field label="Sexo" htmlFor="em-sex" required variant="plain">
                   <select
                     id="em-sex"
                     value={draft.sex}
@@ -127,7 +128,7 @@ export function ClientEditModal({
                     ))}
                   </select>
                 </Field>
-                <Field label="Fecha de nacimiento" htmlFor="em-dob" required>
+                <Field label="Fecha de nacimiento" htmlFor="em-dob" required variant="plain">
                   <DatePickerInput
                     value={draft.dateOfBirth}
                     onChange={(v) => set({ dateOfBirth: v })}
@@ -137,7 +138,7 @@ export function ClientEditModal({
                     disabled={{ after: startOfToday() }}
                   />
                 </Field>
-                <Field label="Celular" htmlFor="em-phone" required>
+                <Field label="Celular" htmlFor="em-phone" required variant="plain">
                   <input
                     id="em-phone"
                     type="tel"
@@ -150,14 +151,14 @@ export function ClientEditModal({
             </div>
           </div>
 
-          <hr className="border-rule" />
+          <hr className="border-hairline" />
 
           <div>
-            <p className="text-[11px] font-mono uppercase tracking-wider text-muted mb-3">
+            <Label variant="section" className="mb-[13px]">
               Dirección y entrega
-            </p>
+            </Label>
             <div className="space-y-4">
-              <Field label="Dirección" htmlFor="em-address" required>
+              <Field label="Dirección" htmlFor="em-address" required variant="plain">
                 <input
                   id="em-address"
                   type="text"
@@ -167,41 +168,45 @@ export function ClientEditModal({
                 />
               </Field>
               <div className="grid grid-cols-2 gap-4">
-                <Field label="Zona" htmlFor="em-deliveryZone" required>
+                <Field label="Zona" htmlFor="em-deliveryZone" required variant="plain">
                   <ToggleGroup
                     options={ZONES}
                     value={draft.deliveryZone}
                     onChange={(v) => set({ deliveryZone: v })}
-                    selectedClassName="bg-olive-100 text-ink border-olive-200"
+                    selectedClassName="bg-olive-100 text-olive-700 border-olive-200"
                   />
                 </Field>
-                <Field label="Delivery" htmlFor="em-delivery" required>
+                <Field label="Delivery" htmlFor="em-delivery" required variant="plain">
                   <ToggleGroup
                     options={DELIVERIES}
                     value={draft.delivery}
                     onChange={(v) => set({ delivery: v })}
-                    selectedClassName="bg-olive-100 text-ink border-olive-200"
+                    selectedClassName="bg-olive-100 text-olive-700 border-olive-200"
                   />
                 </Field>
               </div>
             </div>
           </div>
 
-          <hr className="border-rule" />
+          <hr className="border-hairline" />
 
           <TagInput
             label="Alergias, intolerancias y gustos"
+            labelClassName="text-[13.5px] font-bold text-ink mb-[13px]"
+            placeholder="Ej. lácteos, maní, cebolla…"
             tags={draft.restrictions}
             input={restrictionInput}
             setInput={setRestrictionInput}
             onAdd={addRestriction}
             onRemove={removeRestriction}
-            tagClassName="bg-olive-100 border-olive-200 text-ink"
+            tagClassName="bg-warn-bg border-warn-border text-warn"
           />
 
           <div>
-            <p className="text-[13px] font-semibold text-ink mb-1">Enfermedades de base</p>
-            <p className="text-[11.5px] font-mono text-muted mb-3">Selecciona las que apliquen.</p>
+            <p className="text-[13.5px] font-bold text-ink mb-[5px]">Enfermedades de base</p>
+            <p className="font-mono text-[11px] text-faint mb-[13px]">
+              Selecciona las que apliquen.
+            </p>
             <div className="flex flex-wrap gap-2">
               {DISEASES.map((d) => {
                 const selected = draft.underlyingDiseases.includes(d);
@@ -211,10 +216,10 @@ export function ClientEditModal({
                     type="button"
                     aria-pressed={selected}
                     onClick={() => toggleDisease(d)}
-                    className={`px-3 py-1.5 rounded-full text-[12px] font-mono border transition-colors ${
+                    className={`py-[6px] px-[13px] rounded-full text-[12.5px] border transition-colors ${
                       selected
-                        ? 'bg-olive-100 text-ink border-olive-200'
-                        : 'bg-paper text-ink border-rule hover:border-olive-200'
+                        ? 'font-semibold bg-olive-100 text-olive-700 border-olive-200'
+                        : 'font-medium bg-paper text-muted border-rule hover:border-olive-200'
                     }`}
                   >
                     {d}
@@ -224,14 +229,14 @@ export function ClientEditModal({
             </div>
           </div>
 
-          <hr className="border-rule" />
+          <hr className="border-hairline" />
 
           <div>
-            <p className="text-[11px] font-mono uppercase tracking-wider text-muted mb-3">
+            <Label variant="section" className="mb-[13px]">
               Facturación
-            </p>
+            </Label>
             <div className="grid grid-cols-2 gap-4">
-              <Field label="NIT" htmlFor="em-nit">
+              <Field label="NIT" htmlFor="em-nit" variant="plain">
                 <input
                   id="em-nit"
                   type="text"
@@ -241,7 +246,7 @@ export function ClientEditModal({
                   className={inputCls()}
                 />
               </Field>
-              <Field label="Razón social" htmlFor="em-business">
+              <Field label="Razón social" htmlFor="em-business" variant="plain">
                 <input
                   id="em-business"
                   type="text"
@@ -255,11 +260,10 @@ export function ClientEditModal({
           </div>
         </div>
 
-        <div className="sticky bottom-0 bg-cream border-t border-rule px-6 py-4 flex items-center gap-3">
+        <div className="sticky bottom-0 bg-cream border-t border-hairline px-[28px] py-[16px] flex items-center justify-end gap-[10px]">
           <Button variant="secondary" onClick={onClose}>
             Cancelar
           </Button>
-          <div className="flex-1" />
           <Button onClick={() => onSave(draft)} loading={isSaving} leftIcon="check">
             Guardar cambios
           </Button>
