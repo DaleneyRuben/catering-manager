@@ -33,11 +33,11 @@ it('calls onClick and closes the menu when an item is clicked', () => {
   expect(screen.queryByText('Editar datos')).not.toBeInTheDocument();
 });
 
-it('applies alert text color to items with variant alert', () => {
+it('applies danger text color to items with variant alert', () => {
   render(<OverflowMenu items={items} />);
   fireEvent.click(screen.getByRole('button', { name: /más acciones/i }));
   const deleteBtn = screen.getByText('Eliminar');
-  expect(deleteBtn).toHaveClass('text-alert');
+  expect(deleteBtn).toHaveClass('text-danger');
 });
 
 it('closes the menu when clicking outside', () => {

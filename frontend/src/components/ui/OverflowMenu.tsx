@@ -38,7 +38,7 @@ export function OverflowMenu({ items }: Props) {
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full mt-1.5 w-44 bg-paper border border-rule rounded-lg shadow-md z-20 py-1 overflow-hidden">
+        <div className="absolute right-0 top-full mt-1.5 w-[208px] bg-paper border border-rule rounded-[11px] shadow-[0_12px_32px_rgba(20,40,6,0.16)] z-20 p-[6px]">
           {items.map((item) => (
             <button
               key={item.label}
@@ -47,11 +47,13 @@ export function OverflowMenu({ items }: Props) {
                 setOpen(false);
                 item.onClick();
               }}
-              className={`w-full text-left px-3.5 py-2.5 text-[13px] transition-colors hover:bg-cream-2 flex items-center gap-2.5 ${
-                item.variant === 'alert' ? 'text-alert' : 'text-ink'
+              className={`w-full text-left px-[11px] py-[9px] rounded-[8px] text-[13px] transition-colors flex items-center gap-[10px] ${
+                item.variant === 'alert'
+                  ? 'text-danger hover:bg-danger-bg'
+                  : 'text-ink-2 hover:bg-cream-2'
               }`}
             >
-              {item.icon && <Icon name={item.icon} size={13} stroke={1.5} />}
+              {item.icon && <Icon name={item.icon} size={15} stroke={1.7} />}
               {item.label}
             </button>
           ))}
