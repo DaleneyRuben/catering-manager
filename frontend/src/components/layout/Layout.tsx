@@ -79,7 +79,7 @@ export function Layout({ children }: LayoutProps) {
       <aside
         className={[
           'fixed inset-y-0 left-0 z-40 w-[236px] flex flex-col',
-          'bg-gradient-to-b from-[#1e3c0a] to-[#152a06]',
+          'bg-gradient-to-b from-olive-800 to-sidebar-deep',
           'transition-transform duration-200',
           'md:relative md:translate-x-0',
           menuOpen ? 'translate-x-0' : '-translate-x-full',
@@ -121,7 +121,7 @@ export function Layout({ children }: LayoutProps) {
           )}
         </nav>
         <div className="border-t border-white/10 px-[18px] py-[14px] flex items-center gap-[11px]">
-          <div className="w-[34px] h-[34px] rounded-full bg-olive-400 text-[#152a06] flex items-center justify-center font-bold text-[13px] shrink-0">
+          <div className="w-[34px] h-[34px] rounded-full bg-olive-400 text-sidebar-deep flex items-center justify-center font-bold text-[13px] shrink-0">
             {user?.username?.[0]?.toUpperCase()}
           </div>
           <div className="flex-1 min-w-0">
@@ -169,8 +169,8 @@ export function Layout({ children }: LayoutProps) {
         toastOptions={{
           classNames: {
             toast: 'font-mono text-[13px]',
-            error: '!bg-[#fae6dd] !text-[#c4341a] !border-[#f0b8a0]',
-            success: '!bg-[#dee9c8] !text-[#357e1c] !border-[#b8d099]',
+            error: '!bg-alert-bg !text-alert !border-toast-error-border',
+            success: '!bg-ok-bg !text-ok !border-toast-success-border',
             icon: 'text-current',
           },
         }}

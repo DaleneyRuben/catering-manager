@@ -20,8 +20,8 @@ const VARIANT_CLS: Record<ButtonVariant, string> = {
   primary: 'bg-olive-700 text-olive-50 hover:bg-olive-800',
   secondary: 'text-muted hover:text-ink-2',
   danger: 'border border-danger-border text-danger hover:bg-danger-bg',
-  destructive: 'bg-danger text-white hover:bg-[#8a3f22]',
-  alert: 'border border-[#e9c4bb] text-alert hover:bg-cream-2',
+  destructive: 'bg-danger text-white hover:bg-danger-hover',
+  alert: 'border border-danger-border text-alert hover:bg-cream-2',
 };
 
 const SIZE_CLS: Record<ButtonSize, string> = {
