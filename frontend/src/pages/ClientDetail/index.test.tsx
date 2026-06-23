@@ -97,6 +97,18 @@ describe('ClientDetailPage', () => {
     expect(await screen.findByRole('button', { name: /pausar/i })).toBeInTheDocument();
   });
 
+  it('Pausar button has visible outline styling', async () => {
+    renderPage();
+    const btn = await screen.findByRole('button', { name: /pausar/i });
+    expect(btn).toHaveClass('border', 'border-rule', 'bg-paper');
+  });
+
+  it('shows a status dot inside the status badge', async () => {
+    renderPage();
+    await screen.findByText('John Doe');
+    expect(document.querySelector('.bg-ok')).toBeInTheDocument();
+  });
+
   it('shows Reanudar button when client is paused', async () => {
     renderPage({ ...mockClient, status: 'paused', pausedSince: '2026-06-10T00:00:00.000Z' });
     expect(await screen.findByRole('button', { name: /reanudar/i })).toBeInTheDocument();

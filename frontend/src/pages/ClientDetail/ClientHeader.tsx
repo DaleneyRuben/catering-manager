@@ -2,10 +2,18 @@ import { differenceInYears, format, parseISO, startOfToday } from 'date-fns';
 import { Icon } from '../../components/ui/Icon';
 import { Button } from '../../components/ui/Button';
 import { OverflowMenu } from '../../components/ui/OverflowMenu';
-import { STATUS_LABELS, STATUS_CLASSES, CLIENT_STATUS } from '../../constants/clientStatus';
+import {
+  STATUS_LABELS,
+  STATUS_CLASSES,
+  STATUS_DOT_CLASSES,
+  CLIENT_STATUS,
+} from '../../constants/clientStatus';
 import { SEX_LABELS } from '../../constants/clientOptions';
 import { initials } from '../../utils/string';
 import type { Client, ClientStatus } from '../../types/client';
+
+const OUTLINE_BTN_CLS = 'bg-paper border border-rule text-ink hover:bg-cream-2';
+const OUTLINE_OLIVE_BTN_CLS = 'bg-paper border border-olive-200 text-olive-700 hover:bg-olive-100';
 
 interface Props {
   client: Client;
@@ -33,19 +41,11 @@ export function ClientHeader({
   const age = differenceInYears(startOfToday(), parseISO(client.dateOfBirth));
   const sub = client.subscriptions[0];
 
-  let toggleConfig: { label: string; icon: 'calendar' | 'check'; className: string } | null = null;
+  let toggleConfig: { label: string; icon: 'calendar' | 'check'; className?: string } | null = null;
   if (status === CLIENT_STATUS.ACTIVE || status === CLIENT_STATUS.EXPIRING) {
-    toggleConfig = {
-      label: 'Pausar',
-      icon: 'calendar',
-      className: 'border border-rule text-ink hover:bg-cream-2',
-    };
+    toggleConfig = { label: 'Pausar', icon: 'calendar', className: OUTLINE_BTN_CLS };
   } else if (status === CLIENT_STATUS.PAUSED) {
-    toggleConfig = {
-      label: 'Reanudar',
-      icon: 'check',
-      className: 'bg-olive-800 text-white hover:bg-olive-700',
-    };
+    toggleConfig = { label: 'Reanudar', icon: 'check' };
   }
 
   return (
@@ -61,21 +61,22 @@ export function ClientHeader({
 
       <div className="flex flex-col gap-4 mb-6 lg:flex-row lg:items-center">
         <div className="flex items-center gap-3 flex-1 min-w-0">
-          <div className="w-12 h-12 lg:w-16 lg:h-16 rounded-full bg-olive-800 text-white flex items-center justify-center font-serif text-[20px] lg:text-[26px] font-semibold shrink-0">
+          <div className="w-12 h-12 lg:w-[62px] lg:h-[62px] rounded-full bg-olive-800 text-white flex items-center justify-center font-serif text-[20px] lg:text-[24px] font-semibold shrink-0">
             {initials(client.name)}
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
-              <h1 className="font-serif text-[24px] lg:text-[36px] leading-none text-ink">
+              <h1 className="font-serif text-[24px] lg:text-[35px] font-semibold leading-none tracking-[.005em] text-ink">
                 {client.name}
               </h1>
               <span
-                className={`px-2.5 py-0.5 rounded-full text-xs font-mono ${STATUS_CLASSES[status]}`}
+                className={`inline-flex items-center gap-[7px] pl-[10px] pr-3 py-[5px] rounded-full text-[12px] font-semibold ${STATUS_CLASSES[status]}`}
               >
+                <span className={`w-1.5 h-1.5 rounded-full ${STATUS_DOT_CLASSES[status]}`} />
                 {STATUS_LABELS[status]}
               </span>
             </div>
-            <p className="font-mono text-[12px] text-muted mt-1.5">
+            <p className="font-mono text-[11.5px] tracking-[.04em] text-faint mt-[9px]">
               {age} años · {SEX_LABELS[client.sex] ?? client.sex} · {client.deliveryZone} ·{' '}
               {client.phoneNumber}
             </p>
@@ -90,11 +91,17 @@ export function ClientHeader({
               disabled={isUpdating}
               loading={isUpdating}
               leftIcon={toggleConfig.icon}
+              className={toggleConfig.className}
             >
               {toggleConfig.label}
             </Button>
           )}
-          <Button variant="secondary" onClick={onRenew} leftIcon="refresh">
+          <Button
+            variant="secondary"
+            onClick={onRenew}
+            leftIcon="refresh"
+            className={OUTLINE_OLIVE_BTN_CLS}
+          >
             {status === CLIENT_STATUS.ENDED ? 'Reactivar' : 'Renovar'}
           </Button>
           <OverflowMenu
