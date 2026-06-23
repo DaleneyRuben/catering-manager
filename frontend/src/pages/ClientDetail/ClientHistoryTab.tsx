@@ -1,6 +1,11 @@
+import { format, parseISO } from 'date-fns';
 import { useClientHistory } from '../../hooks/useClientHistory';
-import { formatDate, formatDateTime } from '../../utils/format';
+import { formatDate } from '../../utils/format';
 import { EVENT_LABELS } from '../../constants/historyEvents';
+
+function formatEventDateTime(iso: string) {
+  return `${formatDate(iso)} · ${format(parseISO(iso), 'HH:mm')}`;
+}
 
 interface Props {
   clientId: string;
@@ -51,7 +56,7 @@ export function ClientHistoryTab({ clientId }: Props) {
                 }`}
               />
               <p className="font-mono text-[10.5px] text-muted">
-                {formatDateTime(entry.occurredAt)}
+                {formatEventDateTime(entry.occurredAt)}
               </p>
               <p className="text-[13px] font-semibold text-ink">{EVENT_LABELS[entry.eventType]}</p>
               {showPlanDetails && (
@@ -61,7 +66,7 @@ export function ClientHistoryTab({ clientId }: Props) {
                   </span>
                   {planPrice !== null && (
                     <span className="font-mono text-[11px] text-muted">
-                      ${(planPrice - discount).toLocaleString()}/mes
+                      {(planPrice - discount).toLocaleString('es-BO')}/mes
                     </span>
                   )}
                 </div>
@@ -71,8 +76,7 @@ export function ClientHistoryTab({ clientId }: Props) {
                   {[...suspendedDates].sort().map((d) => (
                     <span
                       key={d}
-                      className="px-2 py-0.5 rounded-full text-[10px] font-mono"
-                      style={{ background: '#f3eedc', color: '#6b4f08' }}
+                      className="px-2 py-0.5 rounded-[6px] text-[10px] font-mono bg-warn-bg border border-warn-border text-warn"
                     >
                       {formatDate(d)}
                     </span>
