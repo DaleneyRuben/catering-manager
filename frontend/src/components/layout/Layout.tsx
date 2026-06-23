@@ -158,7 +158,7 @@ export function Layout({ children }: LayoutProps) {
             La Oliva
           </p>
         </header>
-        <main className="flex-1 min-w-0 overflow-auto">
+        <main className="flex-1 min-w-0 overflow-y-auto overflow-x-hidden">
           <div key={pathname} className="page-enter">
             {children}
           </div>
