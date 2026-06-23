@@ -145,7 +145,7 @@ export function Layout({ children }: LayoutProps) {
       </aside>
 
       <div className="flex flex-col flex-1 min-w-0">
-        <header className="flex items-center gap-3 px-4 h-12 bg-gradient-to-b from-[#1e3c0a] to-[#152a06] md:hidden shrink-0">
+        <header className="flex items-center gap-3 px-4 h-12 bg-gradient-to-b from-olive-800 to-sidebar-deep md:hidden shrink-0">
           <button
             type="button"
             aria-label="Abrir menú"
