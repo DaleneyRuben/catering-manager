@@ -19,6 +19,17 @@ select {
   color: inherit;
 }
 
+/* iOS Safari auto-zooms the viewport when a focused input's font-size is under 16px,
+   and that zoom doesn't reset on client-side route changes (no full page reload).
+   Force 16px on small screens only — desktop keeps the design's 14px. */
+@media (max-width: 640px) {
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+  }
+}
+
 /* Brand mark — radial gradient not expressible in Tailwind */
 .brand-mark {
   background: radial-gradient(
