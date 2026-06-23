@@ -32,18 +32,21 @@ export function Pagination({ page, total, limit, onChange, onLimitChange }: Prop
         <p className="text-[11.5px] font-mono text-muted">
           {(page - 1) * limit + 1}–{Math.min(page * limit, total)} de {total}
         </p>
-        <select
-          value={limit}
-          onChange={(e) => onLimitChange(Number(e.target.value))}
-          className="text-[11.5px] font-mono text-muted border border-rule rounded-md px-1.5 py-0.5 bg-paper cursor-pointer"
-        >
+        <div className="flex items-center gap-1.5 font-mono text-[11px] text-muted">
           {LIMIT_OPTIONS.map((o) => (
-            <option key={o} value={o}>
+            <button
+              key={o}
+              type="button"
+              onClick={() => onLimitChange(o)}
+              className={`px-[10px] py-[5px] rounded-[7px] font-semibold transition-colors ${
+                o === limit ? 'bg-olive-100 text-olive-700' : 'hover:bg-cream-2'
+              }`}
+            >
               {o}
-            </option>
+            </button>
           ))}
-        </select>
-        <span className="text-[11px] font-mono text-muted">por página</span>
+          <span className="ml-1 uppercase tracking-[.08em] opacity-80">por página</span>
+        </div>
       </div>
       <div className="flex items-center gap-1">
         <button
@@ -73,7 +76,7 @@ export function Pagination({ page, total, limit, onChange, onLimitChange }: Prop
               aria-current={p === page ? 'page' : undefined}
               className={`w-8 h-8 flex items-center justify-center rounded-md text-[12px] font-mono transition-colors ${
                 p === page
-                  ? 'bg-olive-800 text-white'
+                  ? 'bg-olive-700 text-white'
                   : 'border border-rule text-ink-2 hover:bg-cream-2'
               }`}
             >

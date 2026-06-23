@@ -5,26 +5,24 @@ import { Pagination } from './Pagination';
 const noop = () => {};
 
 describe('Pagination', () => {
-  it('renders a limit selector with options 10, 25 and 50', () => {
+  it('renders a pill button for each limit option', () => {
     render(<Pagination page={1} total={30} limit={25} onChange={noop} onLimitChange={noop} />);
-    const select = screen.getByRole('combobox');
-    expect(select).toBeInTheDocument();
-    expect(screen.getByRole('option', { name: '10' })).toBeInTheDocument();
-    expect(screen.getByRole('option', { name: '25' })).toBeInTheDocument();
-    expect(screen.getByRole('option', { name: '50' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '10' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '25' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '50' })).toBeInTheDocument();
   });
 
-  it('calls onLimitChange with the selected value when limit changes', async () => {
+  it('calls onLimitChange with the selected value when a pill is clicked', async () => {
     const onLimitChange = jest.fn();
     render(
       <Pagination page={1} total={30} limit={25} onChange={noop} onLimitChange={onLimitChange} />,
     );
-    await userEvent.selectOptions(screen.getByRole('combobox'), '10');
+    await userEvent.click(screen.getByRole('button', { name: '10' }));
     expect(onLimitChange).toHaveBeenCalledWith(10);
   });
 
-  it('reflects the current limit as the selected option', () => {
+  it('highlights the current limit pill', () => {
     render(<Pagination page={1} total={30} limit={50} onChange={noop} onLimitChange={noop} />);
-    expect(screen.getByRole('combobox')).toHaveValue('50');
+    expect(screen.getByRole('button', { name: '50' }).className).toContain('bg-olive-100');
   });
 });
