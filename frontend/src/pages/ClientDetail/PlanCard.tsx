@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { Button } from '../../components/ui/Button';
+import { Card } from '../../components/ui/Card';
 import { Icon } from '../../components/ui/Icon';
 import { Label } from '../../components/ui/Label';
+import { inputCls } from '../../components/ui/Field';
 import { MEAL_LABELS } from '../../constants/meals';
 import type { Subscription } from '../../types/client';
 
@@ -36,23 +38,23 @@ export function PlanCard({ sub, onUpdateBilling }: Props) {
   };
 
   return (
-    <div className="bg-paper border border-rule rounded-lg p-5">
-      <div className="flex items-start flex-wrap gap-3 mb-4">
+    <Card padding="24px 26px">
+      <div className="flex items-start flex-wrap gap-3">
         <div>
-          <Label variant="section" className="mb-1">
+          <Label variant="section" className="mb-2">
             Plan asignado
           </Label>
-          <p className="font-serif text-[28px] font-semibold">{sub.plan.name}</p>
+          <p className="font-serif text-[28px] font-semibold leading-none">{sub.plan.name}</p>
         </div>
         <div className="ml-auto text-right">
           <Label variant="field">Total mensual</Label>
-          <p className="font-serif text-[40px] font-semibold text-olive-700 tabular-nums">
+          <p className="font-serif text-[40px] font-semibold leading-[1.05] text-olive-700 tabular-nums">
             {(planPrice - sub.discount).toLocaleString('es-BO')}
           </p>
         </div>
       </div>
-      <hr className="border-rule mb-4" />
-      <div className="flex flex-wrap gap-1.5 mb-4">
+      <hr className="border-cream-2 my-[18px]" />
+      <div className="flex flex-wrap gap-[7px]">
         {sub.plan.meals.map((m) => (
           <span
             key={m}
@@ -62,8 +64,8 @@ export function PlanCard({ sub, onUpdateBilling }: Props) {
           </span>
         ))}
       </div>
-      <hr className="border-rule mb-4" />
-      <div className="flex items-center mb-3">
+      <hr className="border-cream-2 my-[18px]" />
+      <div className="flex items-center mb-[14px]">
         <Label variant="section">Precio y descuento</Label>
         {!editing && (
           <button
@@ -80,7 +82,7 @@ export function PlanCard({ sub, onUpdateBilling }: Props) {
         <div className="flex flex-col gap-3">
           <div className="grid grid-cols-3 gap-3 items-end">
             <div>
-              <Label variant="field" className="mb-1">
+              <Label variant="field" className="mb-1.5">
                 Precio
               </Label>
               <input
@@ -89,28 +91,22 @@ export function PlanCard({ sub, onUpdateBilling }: Props) {
                 max={planPrice}
                 value={priceStr}
                 onChange={(e) => setPriceStr(e.target.value)}
-                className="w-full px-2.5 py-1.5 text-[13px] font-mono border border-rule rounded-md bg-cream focus:outline-none focus:border-olive-600"
+                className={`${inputCls()} font-mono`}
               />
             </div>
             <div>
-              <Label variant="field" className="mb-1">
+              <Label variant="field" className="mb-1.5">
                 Descuento
               </Label>
-              <p className="font-mono text-[13px] py-1.5 px-2.5 bg-cream-2 rounded-md border border-rule">
+              <p className="font-mono text-[15px] font-semibold text-warn py-2">
                 {!Number.isNaN(enteredPrice) ? derivedDiscount.toLocaleString('es-BO') : '—'}
               </p>
             </div>
             <div>
-              <Label variant="field" className="mb-1">
+              <Label variant="field" className="mb-1.5">
                 Total
               </Label>
-              <p
-                className="font-mono text-[14px] font-bold text-olive-700 py-1.5 px-2.5 rounded-md border"
-                style={{
-                  background: 'var(--olive-50,#f5f7f0)',
-                  borderColor: 'var(--olive-200,#c8d4b0)',
-                }}
-              >
+              <p className="font-mono text-[15px] font-semibold text-olive-700 bg-olive-100 rounded-[7px] py-[9px] px-[10px] text-center">
                 {!Number.isNaN(enteredPrice) ? enteredPrice.toLocaleString('es-BO') : '—'}
               </p>
             </div>
@@ -127,23 +123,31 @@ export function PlanCard({ sub, onUpdateBilling }: Props) {
       ) : (
         <div className="grid grid-cols-3 gap-3">
           <div>
-            <Label variant="field">Precio</Label>
-            <p className="font-mono text-[14px]">{planPrice.toLocaleString('es-BO')}</p>
+            <Label variant="field" className="mb-1">
+              Precio
+            </Label>
+            <p className="font-mono text-[16px] font-semibold text-ink">
+              {planPrice.toLocaleString('es-BO')}
+            </p>
           </div>
           <div>
-            <Label variant="field">Descuento</Label>
-            <p className="font-mono text-[14px] text-muted">
+            <Label variant="field" className="mb-1">
+              Descuento
+            </Label>
+            <p className="font-mono text-[16px] font-semibold text-warn">
               {sub.discount > 0 ? sub.discount.toLocaleString('es-BO') : '—'}
             </p>
           </div>
           <div>
-            <Label variant="field">Total</Label>
-            <p className="font-mono text-[14px] font-bold text-olive-700">
+            <Label variant="field" className="mb-1">
+              Total
+            </Label>
+            <p className="font-mono text-[16px] font-semibold text-olive-700">
               {(planPrice - sub.discount).toLocaleString('es-BO')}
             </p>
           </div>
         </div>
       )}
-    </div>
+    </Card>
   );
 }
