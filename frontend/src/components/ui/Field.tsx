@@ -13,20 +13,23 @@ export function Field({
   htmlFor,
   required,
   error,
+  variant = 'mono',
   children,
 }: {
   label: string;
   htmlFor: string;
   required?: boolean;
   error?: string;
+  variant?: 'mono' | 'plain';
   children: React.ReactNode;
 }) {
+  const labelCls =
+    variant === 'plain'
+      ? 'block text-[11px] text-faint mb-1.5'
+      : 'block text-[11px] font-mono uppercase tracking-wider text-muted mb-1.5';
   return (
     <div>
-      <label
-        htmlFor={htmlFor}
-        className="block text-[11px] font-mono uppercase tracking-wider text-muted mb-1.5"
-      >
+      <label htmlFor={htmlFor} className={labelCls}>
         {label}
         {required && <span className="ml-0.5 text-warn">*</span>}
       </label>

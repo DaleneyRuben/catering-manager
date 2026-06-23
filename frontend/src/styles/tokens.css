@@ -23,6 +23,9 @@
   --color-rule-2: #c8c4ad;
   --color-hairline: #e4e1d3;
   --color-row-hover: #f5f7f0;
+  --color-empty-bg: #f3f2ec;
+  --color-empty-border: #cdd0bf;
+  --color-empty-text: #a7ab98;
 
   /* Status colors */
   --color-alert: #c4341a;

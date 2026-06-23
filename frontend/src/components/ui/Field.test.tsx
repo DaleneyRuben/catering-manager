@@ -29,6 +29,26 @@ describe('Field', () => {
     );
     expect(screen.getByText('Campo requerido')).toBeInTheDocument();
   });
+
+  it('defaults to the mono/uppercase label style', () => {
+    render(
+      <Field label="Usuario" htmlFor="username">
+        <input id="username" />
+      </Field>,
+    );
+    expect(screen.getByText('Usuario')).toHaveClass('font-mono', 'uppercase', 'text-muted');
+  });
+
+  it('renders a plain sentence-case label when variant is plain', () => {
+    render(
+      <Field label="Nombre completo" htmlFor="name" variant="plain">
+        <input id="name" />
+      </Field>,
+    );
+    const label = screen.getByText('Nombre completo');
+    expect(label).toHaveClass('text-faint');
+    expect(label).not.toHaveClass('font-mono', 'uppercase');
+  });
 });
 
 describe('inputCls', () => {
