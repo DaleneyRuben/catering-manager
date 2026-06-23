@@ -51,36 +51,36 @@ export function RenewalModal({ client, sub, isReactivation, onClose, onRenew }: 
       <div className="p-[22px] flex flex-col gap-6">
         {/* Before / After summary cards */}
         <div className="grid grid-cols-2 gap-3.5">
-          <div className="p-3.5 bg-cream-2 border border-rule rounded-md">
-            <p className="text-[10px] font-mono uppercase tracking-wider text-muted mb-1.5">
+          <div className="py-[14px] px-[16px] bg-empty-bg border border-hairline rounded-[11px]">
+            <p className="text-[9.5px] font-mono uppercase tracking-[.1em] text-faint mb-2">
               Contrato anterior
             </p>
-            <p className="font-mono text-[12px] text-ink-2">
+            <p className="font-mono text-[11.5px] text-muted">
               {formatDate(sub?.startDate)} → {formatDate(sub?.contractEndDate)}
             </p>
             {sub?.plan && (
-              <div className="mt-2.5 flex items-center gap-2">
-                <span className="px-2 py-0.5 rounded-full text-[11px] font-mono bg-olive-800 text-white">
+              <div className="mt-2 flex items-center gap-[7px]">
+                <span className="px-2 py-0.5 rounded-[5px] text-[10.5px] font-mono bg-muted text-olive-50">
                   {sub.plan.name}
                 </span>
-                <span className="font-mono text-[12px] text-muted">
-                  ${(sub.plan.price - (sub.discount ?? 0)).toLocaleString()}/mes
+                <span className="font-mono text-[11px] text-faint">
+                  {(sub.plan.price - (sub.discount ?? 0)).toLocaleString('es-BO')}/mes
                 </span>
               </div>
             )}
           </div>
-          <div className="p-3.5 bg-[#f0f4e8] border border-[#c8d9a0] rounded-md">
-            <p className="text-[10px] font-mono uppercase tracking-wider text-olive-700 mb-1.5">
+          <div className="py-[14px] px-[16px] bg-success-soft-bg border border-olive-200 rounded-[11px]">
+            <p className="text-[9.5px] font-mono uppercase tracking-[.1em] text-success-text mb-2">
               Nuevo contrato
             </p>
-            <p className="font-mono text-[12px] text-ink-2">{form.newContractPreview}</p>
+            <p className="font-mono text-[11.5px] text-olive-700">{form.newContractPreview}</p>
             {form.newPlan && (
-              <div className="mt-2.5 flex items-center gap-2">
-                <span className="px-2 py-0.5 rounded-full text-[11px] font-mono bg-olive-800 text-white">
+              <div className="mt-2 flex items-center gap-[7px]">
+                <span className="px-2 py-0.5 rounded-[5px] text-[10.5px] font-mono bg-olive-800 text-olive-50">
                   {form.newPlan.name}
                 </span>
-                <span className="font-mono text-[12px] font-semibold text-olive-700">
-                  {form.precioNum !== undefined ? `$${form.total.toLocaleString()}/mes` : '—'}
+                <span className="font-mono text-[11px] text-success-text">
+                  {form.precioNum !== undefined ? `${form.total.toLocaleString('es-BO')}/mes` : '—'}
                 </span>
               </div>
             )}
@@ -108,7 +108,7 @@ export function RenewalModal({ client, sub, isReactivation, onClose, onRenew }: 
                 >
                   <div className="font-serif text-[18px] leading-tight">{p.name}</div>
                   <div className="font-mono text-[20px] mt-1">
-                    {p.price.toLocaleString()}
+                    {p.price.toLocaleString('es-BO')}
                     <span className={`text-[11px] ${isSel ? 'opacity-60' : 'text-muted'}`}>
                       /mes
                     </span>
@@ -202,9 +202,9 @@ export function RenewalModal({ client, sub, isReactivation, onClose, onRenew }: 
             )}
 
             {form.willBePaused && (
-              <div className="flex items-start gap-2 px-3 py-2.5 bg-[#f3eedc] border border-[#d8c075] rounded-md">
-                <Icon name="calendar" size={13} className="text-[#6b4f08] shrink-0 mt-0.5" />
-                <p className="font-mono text-[11px] text-[#6b4f08]">
+              <div className="flex items-start gap-2 px-3 py-2.5 bg-warn-bg border border-warn-border rounded-md">
+                <Icon name="calendar" size={13} className="text-warn-text shrink-0 mt-0.5" />
+                <p className="font-mono text-[11px] text-warn-text">
                   El cliente queda pausado hasta que se active manualmente.
                 </p>
               </div>
@@ -256,7 +256,7 @@ export function RenewalModal({ client, sub, isReactivation, onClose, onRenew }: 
               </p>
               <p className={readonlyCls}>
                 {form.newPlan && form.precioNum !== undefined
-                  ? form.discount.toLocaleString()
+                  ? form.discount.toLocaleString('es-BO')
                   : '—'}
               </p>
             </div>
@@ -264,8 +264,8 @@ export function RenewalModal({ client, sub, isReactivation, onClose, onRenew }: 
               <p className="text-[10.5px] font-mono uppercase tracking-wider text-muted mb-1.5">
                 Total
               </p>
-              <p className="w-full px-3 py-2 font-mono text-[15px] font-bold text-olive-800 border border-[#c8d4b0] rounded-md bg-[#f5f7f0]">
-                {form.precioNum !== undefined ? `$${form.total.toLocaleString()}` : '—'}
+              <p className="w-full py-[9px] px-[10px] font-mono text-[14px] font-semibold text-olive-700 rounded-[7px] bg-olive-100 text-center">
+                {form.precioNum !== undefined ? form.total.toLocaleString('es-BO') : '—'}
               </p>
             </div>
           </div>
@@ -288,11 +288,12 @@ export function RenewalModal({ client, sub, isReactivation, onClose, onRenew }: 
             <li>
               Facturación:{' '}
               <span className="font-mono">
-                {form.precioNum !== undefined ? `$${form.total.toLocaleString()}/mes` : '—'}
+                {form.precioNum !== undefined ? `${form.total.toLocaleString('es-BO')}/mes` : '—'}
                 {form.discount > 0 && form.newPlan && form.precioNum !== undefined && (
                   <span className="text-muted">
                     {' '}
-                    (${form.newPlan.price.toLocaleString()} − ${form.discount.toLocaleString()})
+                    ({form.newPlan.price.toLocaleString('es-BO')} −{' '}
+                    {form.discount.toLocaleString('es-BO')})
                   </span>
                 )}
               </span>
