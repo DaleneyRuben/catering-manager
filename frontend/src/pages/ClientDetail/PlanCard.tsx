@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Button } from '../../components/ui/Button';
 import { Icon } from '../../components/ui/Icon';
+import { Label } from '../../components/ui/Label';
 import { MEAL_LABELS } from '../../constants/meals';
 import type { Subscription } from '../../types/client';
 
@@ -38,15 +39,15 @@ export function PlanCard({ sub, onUpdateBilling }: Props) {
     <div className="bg-paper border border-rule rounded-lg p-5">
       <div className="flex items-start flex-wrap gap-3 mb-4">
         <div>
-          <p className="text-[12px] font-mono uppercase tracking-wider text-olive-800 mb-1">
+          <Label variant="section" className="mb-1">
             Plan asignado
-          </p>
-          <p className="font-serif text-[28px]">{sub.plan.name}</p>
+          </Label>
+          <p className="font-serif text-[28px] font-semibold">{sub.plan.name}</p>
         </div>
         <div className="ml-auto text-right">
-          <p className="font-mono text-[10.5px] text-muted">Total mensual</p>
-          <p className="font-serif text-[40px] text-olive-800 tabular-nums">
-            {planPrice - sub.discount}
+          <Label variant="field">Total mensual</Label>
+          <p className="font-serif text-[40px] font-semibold text-olive-700 tabular-nums">
+            {(planPrice - sub.discount).toLocaleString('es-BO')}
           </p>
         </div>
       </div>
@@ -63,9 +64,7 @@ export function PlanCard({ sub, onUpdateBilling }: Props) {
       </div>
       <hr className="border-rule mb-4" />
       <div className="flex items-center mb-3">
-        <p className="text-[12px] font-mono uppercase tracking-wider text-olive-800">
-          Precio y descuento
-        </p>
+        <Label variant="section">Precio y descuento</Label>
         {!editing && (
           <button
             type="button"
@@ -81,9 +80,9 @@ export function PlanCard({ sub, onUpdateBilling }: Props) {
         <div className="flex flex-col gap-3">
           <div className="grid grid-cols-3 gap-3 items-end">
             <div>
-              <p className="text-[12px] font-mono uppercase tracking-wider text-olive-800 mb-1">
+              <Label variant="field" className="mb-1">
                 Precio
-              </p>
+              </Label>
               <input
                 type="number"
                 min={0}
@@ -94,25 +93,25 @@ export function PlanCard({ sub, onUpdateBilling }: Props) {
               />
             </div>
             <div>
-              <p className="text-[12px] font-mono uppercase tracking-wider text-olive-800 mb-1">
+              <Label variant="field" className="mb-1">
                 Descuento
-              </p>
+              </Label>
               <p className="font-mono text-[13px] py-1.5 px-2.5 bg-cream-2 rounded-md border border-rule">
-                {!Number.isNaN(enteredPrice) ? derivedDiscount : '—'}
+                {!Number.isNaN(enteredPrice) ? derivedDiscount.toLocaleString('es-BO') : '—'}
               </p>
             </div>
             <div>
-              <p className="text-[12px] font-mono uppercase tracking-wider text-olive-800 mb-1">
+              <Label variant="field" className="mb-1">
                 Total
-              </p>
+              </Label>
               <p
-                className="font-mono text-[14px] font-bold text-olive-800 py-1.5 px-2.5 rounded-md border"
+                className="font-mono text-[14px] font-bold text-olive-700 py-1.5 px-2.5 rounded-md border"
                 style={{
                   background: 'var(--olive-50,#f5f7f0)',
                   borderColor: 'var(--olive-200,#c8d4b0)',
                 }}
               >
-                {!Number.isNaN(enteredPrice) ? enteredPrice : '—'}
+                {!Number.isNaN(enteredPrice) ? enteredPrice.toLocaleString('es-BO') : '—'}
               </p>
             </div>
           </div>
@@ -128,21 +127,19 @@ export function PlanCard({ sub, onUpdateBilling }: Props) {
       ) : (
         <div className="grid grid-cols-3 gap-3">
           <div>
-            <p className="text-[12px] font-mono uppercase tracking-wider text-olive-800">Precio</p>
-            <p className="font-mono text-[14px]">{sub.plan.price}</p>
+            <Label variant="field">Precio</Label>
+            <p className="font-mono text-[14px]">{planPrice.toLocaleString('es-BO')}</p>
           </div>
           <div>
-            <p className="text-[12px] font-mono uppercase tracking-wider text-olive-800">
-              Descuento
-            </p>
+            <Label variant="field">Descuento</Label>
             <p className="font-mono text-[14px] text-muted">
-              {sub.discount > 0 ? sub.discount : '—'}
+              {sub.discount > 0 ? sub.discount.toLocaleString('es-BO') : '—'}
             </p>
           </div>
           <div>
-            <p className="text-[12px] font-mono uppercase tracking-wider text-olive-800">Total</p>
-            <p className="font-mono text-[14px] font-bold text-olive-800">
-              {planPrice - sub.discount}
+            <Label variant="field">Total</Label>
+            <p className="font-mono text-[14px] font-bold text-olive-700">
+              {(planPrice - sub.discount).toLocaleString('es-BO')}
             </p>
           </div>
         </div>

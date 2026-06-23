@@ -31,6 +31,16 @@ it('renders plan name and total', () => {
   expect(screen.getAllByText('140')).toHaveLength(2); // header + grid row (150 - 10)
 });
 
+it('formats prices over 1000 with a dot thousands separator', () => {
+  const bigSub: Subscription = {
+    ...sub,
+    discount: 0,
+    plan: { ...sub.plan, price: 1390 },
+  };
+  render(<PlanCard sub={bigSub} onUpdateBilling={onUpdateBilling} />);
+  expect(screen.getAllByText('1.390')).toHaveLength(3);
+});
+
 it('renders meal pills', () => {
   render(<PlanCard sub={sub} onUpdateBilling={onUpdateBilling} />);
   expect(screen.getByText('Desayuno')).toBeInTheDocument();
