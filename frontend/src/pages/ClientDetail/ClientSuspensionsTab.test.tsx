@@ -39,8 +39,13 @@ describe('ClientSuspensionsTab', () => {
   it('calls onSuspend when button is clicked', () => {
     const onSuspend = jest.fn();
     render(<ClientSuspensionsTab sub={baseSub} onSuspend={onSuspend} />);
-    fireEvent.click(screen.getByRole('button', { name: /suspender días/i }));
+    fireEvent.click(screen.getByRole('button', { name: /^suspender$/i }));
     expect(onSuspend).toHaveBeenCalledTimes(1);
+  });
+
+  it('shows the Suspensiones header label', () => {
+    render(<ClientSuspensionsTab sub={baseSub} onSuspend={jest.fn()} />);
+    expect(screen.getByText('Suspensiones')).toBeInTheDocument();
   });
 
   it('shows zero count and empty state when sub is undefined', () => {

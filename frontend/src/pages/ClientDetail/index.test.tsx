@@ -291,7 +291,7 @@ describe('ClientDetailPage', () => {
     renderPage();
     await screen.findByText('John Doe');
     fireEvent.click(screen.getByRole('tab', { name: /suspensiones/i }));
-    fireEvent.click(screen.getByRole('button', { name: /suspender días/i }));
+    fireEvent.click(screen.getByRole('button', { name: /^suspender$/i }));
     expect(await screen.findByRole('dialog')).toBeInTheDocument();
   });
 
@@ -300,7 +300,7 @@ describe('ClientDetailPage', () => {
     renderPage();
     await screen.findByText('John Doe');
     fireEvent.click(screen.getByRole('tab', { name: /suspensiones/i }));
-    fireEvent.click(screen.getByRole('button', { name: /suspender días/i }));
+    fireEvent.click(screen.getByRole('button', { name: /^suspender$/i }));
     await screen.findByRole('dialog');
     fireEvent.click(screen.getByRole('button', { name: /guardar/i }));
     await waitFor(() =>
