@@ -1,4 +1,5 @@
 import { Button } from '../../components/ui/Button';
+import { Card } from '../../components/ui/Card';
 import { Label } from '../../components/ui/Label';
 import type { Subscription } from '../../types/client';
 import { formatDate } from '../../utils/format';
@@ -10,7 +11,7 @@ interface Props {
 
 export function ClientSuspensionsTab({ sub, onSuspend }: Props) {
   return (
-    <div className="bg-paper border border-rule rounded-lg p-5">
+    <Card>
       <div className="flex items-center justify-between mb-4">
         <Label variant="section">Suspensiones</Label>
         <Button onClick={onSuspend} size="sm" leftIcon="calendar">
@@ -37,6 +38,6 @@ export function ClientSuspensionsTab({ sub, onSuspend }: Props) {
       ) : (
         <p className="font-mono text-[12px] text-muted">Sin suspensiones registradas.</p>
       )}
-    </div>
+    </Card>
   );
 }

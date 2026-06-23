@@ -1,3 +1,4 @@
+import { Card } from '../../components/ui/Card';
 import { Icon } from '../../components/ui/Icon';
 import { Label } from '../../components/ui/Label';
 import { MEAL_LABELS } from '../../constants/meals';
@@ -17,7 +18,7 @@ export function ClientOverviewTab({ client, sub, remaining }: Props) {
   return (
     <div className="grid grid-cols-12 gap-[20px]">
       <div className="col-span-12 lg:col-span-7 flex flex-col gap-[20px]">
-        <div className="bg-paper border border-rule rounded-lg p-5">
+        <Card>
           {sub ? (
             <>
               <div className="flex items-start justify-between gap-4 mb-[16px]">
@@ -67,9 +68,9 @@ export function ClientOverviewTab({ client, sub, remaining }: Props) {
           ) : (
             <p className="text-[13px] text-muted">Sin suscripción activa.</p>
           )}
-        </div>
+        </Card>
 
-        <div className="bg-paper border border-rule rounded-lg p-5">
+        <Card>
           <Label variant="section" className="mb-4">
             Contacto
           </Label>
@@ -105,11 +106,11 @@ export function ClientOverviewTab({ client, sub, remaining }: Props) {
               </div>
             </>
           )}
-        </div>
+        </Card>
       </div>
 
       <div className="col-span-12 lg:col-span-5 flex flex-col gap-4">
-        <div className="bg-paper border border-rule rounded-lg p-5">
+        <Card>
           <div className="flex items-center justify-between mb-[18px]">
             <h2 className="font-serif text-[20px] font-semibold text-ink">Restricciones</h2>
             <span className="font-mono text-[12px] text-faint">{client.restrictions.length}</span>
@@ -154,7 +155,7 @@ export function ClientOverviewTab({ client, sub, remaining }: Props) {
               )}
             </div>
           )}
-        </div>
+        </Card>
       </div>
     </div>
   );

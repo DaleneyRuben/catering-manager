@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { startOfToday } from 'date-fns';
 import { Button } from '../../components/ui/Button';
+import { Card } from '../../components/ui/Card';
 import { DatePickerInput } from '../../components/ui/DatePickerInput';
 import { Icon } from '../../components/ui/Icon';
 import { Label } from '../../components/ui/Label';
@@ -53,7 +54,7 @@ export function ContractCard({ sub, remaining, onUpdateContract }: Props) {
   };
 
   return (
-    <div className="bg-paper border border-rule rounded-lg p-5">
+    <Card>
       <div className="flex items-center mb-3">
         <Label variant="section">Contrato</Label>
         {!editing && (
@@ -137,6 +138,6 @@ export function ContractCard({ sub, remaining, onUpdateContract }: Props) {
           </div>
         </div>
       )}
-    </div>
+    </Card>
   );
 }

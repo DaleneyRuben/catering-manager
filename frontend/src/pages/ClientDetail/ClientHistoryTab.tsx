@@ -2,6 +2,7 @@ import { format, parseISO } from 'date-fns';
 import { useClientHistory } from '../../hooks/useClientHistory';
 import { formatDate } from '../../utils/format';
 import { EVENT_LABELS } from '../../constants/historyEvents';
+import { Card } from '../../components/ui/Card';
 import { ClientHistorySummary } from './ClientHistorySummary';
 
 function formatEventDateTime(iso: string) {
@@ -38,15 +39,15 @@ export function ClientHistoryTab({ clientId, currentPlanName = null }: Props) {
   );
 
   return (
-    <div className="grid grid-cols-12 gap-7">
-      <div className="col-span-12 lg:col-span-4">
+    <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.7fr] gap-[28px]">
+      <div>
         <ClientHistorySummary
           eventCount={history.length}
           planName={currentPlanName}
           clientSince={clientSince}
         />
       </div>
-      <div className="col-span-12 lg:col-span-8 bg-paper border border-rule rounded-lg p-5">
+      <Card padding="26px 28px">
         <div className="relative flex flex-col gap-3.5 pl-[18px]">
           <div className="absolute left-[5px] top-[6px] bottom-[6px] w-px bg-rule" />
           {history.map((entry, i) => {
@@ -104,7 +105,7 @@ export function ClientHistoryTab({ clientId, currentPlanName = null }: Props) {
             );
           })}
         </div>
-      </div>
+      </Card>
     </div>
   );
 }

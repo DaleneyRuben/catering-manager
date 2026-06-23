@@ -1,3 +1,4 @@
+import { Card } from '../../components/ui/Card';
 import { Label } from '../../components/ui/Label';
 
 interface Props {
@@ -7,7 +8,7 @@ interface Props {
 
 export function BillingCard({ nit, businessName }: Props) {
   return (
-    <div className="bg-paper border border-rule rounded-lg p-5">
+    <Card>
       <Label variant="section" className="mb-3">
         Facturación
       </Label>
@@ -21,6 +22,6 @@ export function BillingCard({ nit, businessName }: Props) {
           <p className="text-[13.5px] break-words">{businessName || '—'}</p>
         </div>
       </div>
-    </div>
+    </Card>
   );
 }

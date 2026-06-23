@@ -3,6 +3,7 @@ import { useClientGroup } from '../../hooks/useClientGroup';
 import { useClientList } from '../../hooks/useClientList';
 import { useDebounce } from '../../hooks/useDebounce';
 import { Button } from '../../components/ui/Button';
+import { Card } from '../../components/ui/Card';
 import { Icon } from '../../components/ui/Icon';
 import { Label } from '../../components/ui/Label';
 import { inputCls } from '../../components/ui/Field';
@@ -27,7 +28,7 @@ export function ClientGroupTab({ clientId, initialMembers }: Props) {
   const searchResults = clients.filter((c) => c.id !== clientId && !memberIds.has(c.id));
 
   return (
-    <div className="bg-paper border border-rule rounded-lg p-5">
+    <Card>
       <Label variant="section" className="mb-4">
         Entrega conjunta
       </Label>
@@ -101,6 +102,6 @@ export function ClientGroupTab({ clientId, initialMembers }: Props) {
       <Button onClick={save} disabled={!isDirty || isSaving} leftIcon="check" className="w-full">
         Guardar grupo
       </Button>
-    </div>
+    </Card>
   );
 }

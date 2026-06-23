@@ -29,13 +29,13 @@ export function ClientPlanTab({
   }
 
   return (
-    <div className="grid grid-cols-12 gap-5">
-      <div className="col-span-12 lg:col-span-7 flex flex-col gap-4">
+    <div className="grid grid-cols-12 gap-[20px]">
+      <div className="col-span-12 lg:col-span-7 flex flex-col gap-[20px]">
         <PlanCard sub={sub} onUpdateBilling={onUpdateBilling} />
         <ContractCard sub={sub} remaining={remaining} onUpdateContract={onUpdateContract} />
         <BillingCard nit={client.nit} businessName={client.businessName} />
       </div>
-      <div className="col-span-12 lg:col-span-5 flex flex-col gap-4">
+      <div className="col-span-12 lg:col-span-5 flex flex-col gap-[20px]">
         <ClientSuspensionsTab sub={sub} onSuspend={onSuspend} />
         <ClientGroupTab clientId={client.id} initialMembers={client.groupMembers} />
       </div>
