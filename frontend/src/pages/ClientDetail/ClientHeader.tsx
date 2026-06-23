@@ -117,22 +117,22 @@ export function ClientHeader({
       </div>
 
       {status === CLIENT_STATUS.PAUSED && (
-        <div className="flex items-center gap-2.5 bg-[#f3eedc] border border-[#d8c075] rounded-md px-3.5 py-3 mb-5">
-          <Icon name="calendar" size={14} className="text-[#6b4f08] shrink-0" />
+        <div className="flex items-center gap-2.5 bg-warn-bg border border-warn-border rounded-md px-3.5 py-3 mb-5">
+          <Icon name="calendar" size={14} className="text-warn shrink-0" />
           <div>
-            <p className="text-[13px] font-semibold text-[#6b4f08]">Plan en pausa</p>
-            <p className="font-mono text-[11px] text-[#6b4f08]">
+            <p className="text-[13px] font-semibold text-warn">Plan en pausa</p>
+            <p className="font-mono text-[11px] text-warn">
               El cliente no recibe entregas. Reanudá el plan cuando esté listo.
             </p>
           </div>
         </div>
       )}
       {status === CLIENT_STATUS.FUTURE && sub?.startDate && (
-        <div className="flex items-center gap-2.5 bg-[#f3eedc] border border-[#d8c075] rounded-md px-3.5 py-3 mb-5">
-          <Icon name="calendar" size={14} className="text-[#6b4f08] shrink-0" />
+        <div className="flex items-center gap-2.5 bg-warn-bg border border-warn-border rounded-md px-3.5 py-3 mb-5">
+          <Icon name="calendar" size={14} className="text-warn shrink-0" />
           <div>
-            <p className="text-[13px] font-semibold text-[#6b4f08]">Plan programado</p>
-            <p className="font-mono text-[11px] text-[#6b4f08]">
+            <p className="text-[13px] font-semibold text-warn">Plan programado</p>
+            <p className="font-mono text-[11px] text-warn">
               El plan inicia el {format(parseISO(sub.startDate), 'dd/MM/yyyy')}.
             </p>
           </div>
