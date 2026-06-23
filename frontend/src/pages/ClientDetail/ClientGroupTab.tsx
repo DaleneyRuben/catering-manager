@@ -4,6 +4,7 @@ import { useClientList } from '../../hooks/useClientList';
 import { useDebounce } from '../../hooks/useDebounce';
 import { Button } from '../../components/ui/Button';
 import { Icon } from '../../components/ui/Icon';
+import { Label } from '../../components/ui/Label';
 import { inputCls } from '../../components/ui/Field';
 import type { GroupMember } from '../../types/client';
 
@@ -27,9 +28,9 @@ export function ClientGroupTab({ clientId, initialMembers }: Props) {
 
   return (
     <div className="bg-paper border border-rule rounded-lg p-5">
-      <p className="text-[10.5px] font-mono uppercase tracking-wider text-muted font-semibold mb-4">
+      <Label variant="section" className="mb-4">
         Entrega conjunta
-      </p>
+      </Label>
 
       {members.length === 0 ? (
         <p className="font-mono text-[12px] text-muted mb-4">Sin miembros en el grupo.</p>

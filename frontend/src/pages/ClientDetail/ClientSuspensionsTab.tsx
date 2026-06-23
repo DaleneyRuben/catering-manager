@@ -1,4 +1,5 @@
 import { Button } from '../../components/ui/Button';
+import { Label } from '../../components/ui/Label';
 import type { Subscription } from '../../types/client';
 import { formatDate } from '../../utils/format';
 
@@ -11,15 +12,13 @@ export function ClientSuspensionsTab({ sub, onSuspend }: Props) {
   return (
     <div className="bg-paper border border-rule rounded-lg p-5">
       <div className="flex items-center justify-between mb-4">
-        <p className="text-[10.5px] font-mono uppercase tracking-wider text-muted font-semibold">
-          Suspensiones
-        </p>
+        <Label variant="section">Suspensiones</Label>
         <Button onClick={onSuspend} size="sm" leftIcon="calendar">
           Suspender
         </Button>
       </div>
       <div className="flex items-baseline gap-2 mb-4">
-        <span className="font-serif text-[32px] leading-none text-ink">
+        <span className="font-serif text-[34px] font-semibold leading-none text-ink">
           {sub?.suspendedDates?.length ?? 0}
         </span>
         <span className="text-[12.5px] text-muted">días suspendidos</span>
