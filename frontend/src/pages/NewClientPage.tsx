@@ -2,9 +2,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { format, startOfToday } from 'date-fns';
-import { Icon } from '../components/ui/Icon';
 import { Button } from '../components/ui/Button';
-import { PageHeader } from '../components/ui/PageHeader';
 import { StepIndicator } from '../components/ui/StepIndicator';
 import { useCreateClient } from '../hooks/useCreateClient';
 import { usePlans } from '../hooks/usePlans';
@@ -102,63 +100,85 @@ export function NewClientPage() {
   });
 
   return (
-    <div className="px-4 py-5 lg:p-7 max-w-[1320px] mx-auto">
-      <button
-        type="button"
-        onClick={() => navigate('/clientes')}
-        className="flex items-center gap-1.5 text-[13px] text-muted hover:text-ink mb-4 lg:mb-5 transition-colors"
-      >
-        <Icon name="arrow-left" size={13} />
-        Clientes
-      </button>
-      <PageHeader label="Directorio" title="Agregar cliente" />
-
-      <StepIndicator steps={STEPS} current={step} />
-
-      <div className="bg-paper border border-rule rounded-lg p-6 sm:p-8 mt-7">
-        {step === 1 && <StepIdentity register={register} control={control} errors={errors} />}
-        {step === 2 && (
-          <StepRestrictions
-            value={restrictions}
-            onChange={(u) => setRestrictions((prev) => ({ ...prev, ...u }))}
-          />
-        )}
-        {step === 3 && (
-          <StepPlan
-            register={register}
-            control={control}
-            errors={errors}
-            plans={plans}
-            setValue={setValue}
-          />
-        )}
-        {step === 4 && (
-          <StepConfirm
-            formValues={getValues()}
-            restrictions={restrictions}
-            plans={plans}
-            submitError={submitError}
-          />
-        )}
+    <div>
+      <div className="px-4 py-5 lg:px-[44px] lg:pt-[30px] lg:pb-[20px] border-b border-hairline">
+        <div className="flex items-center gap-2 font-mono text-[11px] tracking-[.1em] text-faint uppercase mb-3">
+          <button
+            type="button"
+            onClick={() => navigate('/clientes')}
+            className="text-olive-600 hover:underline"
+          >
+            Clientes
+          </button>
+          <span className="opacity-50">/</span>
+          <span>Directorio</span>
+        </div>
+        <h1 className="font-serif font-semibold text-[28px] lg:text-[38px] leading-none tracking-[.005em] text-ink">
+          Agregar cliente
+        </h1>
       </div>
 
-      <div className="flex justify-between mt-6">
-        {step > 1 ? (
-          <Button variant="secondary" onClick={handleBack} leftIcon="arrow-left">
-            Atrás
-          </Button>
-        ) : (
-          <div />
-        )}
-        {step < 4 ? (
-          <Button onClick={handleNext} rightIcon="arrow-right">
-            Siguiente
-          </Button>
-        ) : (
-          <Button onClick={submit} loading={isCreating} leftIcon="check">
-            Guardar cliente
-          </Button>
-        )}
+      <div className="px-4 py-5 lg:px-[44px] lg:pt-[26px]">
+        <div className="max-w-[680px] mx-auto">
+          <StepIndicator steps={STEPS} current={step} />
+        </div>
+      </div>
+
+      <div className="px-4 lg:px-[44px]">
+        <div className="max-w-[860px] w-full mx-auto lg:pt-[30px]">
+          {step === 1 && <StepIdentity register={register} control={control} errors={errors} />}
+          {step === 2 && (
+            <StepRestrictions
+              value={restrictions}
+              onChange={(u) => setRestrictions((prev) => ({ ...prev, ...u }))}
+            />
+          )}
+          {step === 3 && (
+            <StepPlan
+              register={register}
+              control={control}
+              errors={errors}
+              plans={plans}
+              setValue={setValue}
+            />
+          )}
+          {step === 4 && (
+            <StepConfirm
+              formValues={getValues()}
+              restrictions={restrictions}
+              plans={plans}
+              submitError={submitError}
+            />
+          )}
+        </div>
+      </div>
+
+      <div className="px-4 lg:px-[44px]">
+        <div className="max-w-[860px] w-full mx-auto flex items-center justify-between gap-4 py-6 lg:py-[24px]">
+          {step > 1 ? (
+            <Button variant="secondary" onClick={handleBack} leftIcon="arrow-left">
+              Atrás
+            </Button>
+          ) : (
+            <Button variant="secondary" onClick={() => navigate('/clientes')} leftIcon="arrow-left">
+              Cancelar
+            </Button>
+          )}
+          <div className="flex items-center gap-[14px]">
+            <span className="font-mono text-[11px] tracking-[.06em] text-faint uppercase">
+              Paso {step} de 4
+            </span>
+            {step < 4 ? (
+              <Button onClick={handleNext} rightIcon="arrow-right">
+                Siguiente
+              </Button>
+            ) : (
+              <Button onClick={submit} loading={isCreating} rightIcon="check">
+                Crear cliente
+              </Button>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );

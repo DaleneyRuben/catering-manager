@@ -91,6 +91,17 @@ describe('NewClientPage', () => {
     expect(screen.getByText(/nombre es requerido/i)).toBeInTheDocument();
   });
 
+  it('shows a Cancelar link back to /clientes on step 1', async () => {
+    renderPage();
+    await userEvent.click(screen.getByRole('button', { name: /cancelar/i }));
+    expect(await screen.findByText('Clientes list')).toBeInTheDocument();
+  });
+
+  it('shows the current step indicator', () => {
+    renderPage();
+    expect(screen.getByText('Paso 1 de 4')).toBeInTheDocument();
+  });
+
   it('advances to Restricciones after completing step 1', async () => {
     renderPage();
     await fillStep1();
@@ -131,7 +142,7 @@ describe('NewClientPage', () => {
       target: { value: '2026-06-01' },
     });
     await userEvent.click(screen.getByRole('button', { name: /siguiente/i }));
-    await userEvent.click(screen.getByRole('button', { name: /guardar/i }));
+    await userEvent.click(screen.getByRole('button', { name: /crear/i }));
     await waitFor(() => expect(mockPost).toHaveBeenCalledTimes(2));
     expect(mockPost).toHaveBeenNthCalledWith(
       1,
@@ -166,7 +177,7 @@ describe('NewClientPage', () => {
       target: { value: '2026-06-01' },
     });
     await userEvent.click(screen.getByRole('button', { name: /siguiente/i }));
-    await userEvent.click(screen.getByRole('button', { name: /guardar/i }));
+    await userEvent.click(screen.getByRole('button', { name: /crear/i }));
     await waitFor(() => expect(mockPost).toHaveBeenCalledTimes(2));
     expect(mockPost).toHaveBeenNthCalledWith(
       1,
@@ -187,7 +198,7 @@ describe('NewClientPage', () => {
       target: { value: '2026-06-01' },
     });
     await userEvent.click(screen.getByRole('button', { name: /siguiente/i }));
-    await userEvent.click(screen.getByRole('button', { name: /guardar/i }));
+    await userEvent.click(screen.getByRole('button', { name: /crear/i }));
     await waitFor(() => expect(mockPost).toHaveBeenCalledTimes(2));
     expect(mockPost).toHaveBeenNthCalledWith(
       2,
@@ -205,7 +216,7 @@ describe('NewClientPage', () => {
     // plan price 480, precio 380 → discount = 100
     fireEvent.change(screen.getByLabelText(/precio/i), { target: { value: '380' } });
     await userEvent.click(screen.getByRole('button', { name: /siguiente/i }));
-    await userEvent.click(screen.getByRole('button', { name: /guardar/i }));
+    await userEvent.click(screen.getByRole('button', { name: /crear/i }));
     await waitFor(() => expect(mockPost).toHaveBeenCalledTimes(2));
     expect(mockPost).toHaveBeenNthCalledWith(
       2,
@@ -221,7 +232,7 @@ describe('NewClientPage', () => {
       target: { value: '2026-06-01' },
     });
     await userEvent.click(screen.getByRole('button', { name: /siguiente/i }));
-    await userEvent.click(screen.getByRole('button', { name: /guardar/i }));
+    await userEvent.click(screen.getByRole('button', { name: /crear/i }));
     await waitFor(() => expect(mockPost).toHaveBeenCalledTimes(2));
     expect(mockPost.mock.calls[1][1]).not.toHaveProperty('contractEndDate');
   });
@@ -241,8 +252,8 @@ describe('NewClientPage', () => {
       target: { value: '2026-06-01' },
     });
     await userEvent.click(screen.getByRole('button', { name: /siguiente/i }));
-    await userEvent.click(screen.getByRole('button', { name: /guardar/i }));
-    await waitFor(() => expect(screen.getByRole('button', { name: /guardar/i })).toBeDisabled());
+    await userEvent.click(screen.getByRole('button', { name: /crear/i }));
+    await waitFor(() => expect(screen.getByRole('button', { name: /crear/i })).toBeDisabled());
     resolve();
   });
 
@@ -253,7 +264,7 @@ describe('NewClientPage', () => {
       target: { value: '2026-06-01' },
     });
     await userEvent.click(screen.getByRole('button', { name: /siguiente/i }));
-    await userEvent.click(screen.getByRole('button', { name: /guardar/i }));
+    await userEvent.click(screen.getByRole('button', { name: /crear/i }));
     await waitFor(() => expect(screen.getByText('Clientes list')).toBeInTheDocument());
   });
 });
