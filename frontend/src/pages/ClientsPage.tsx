@@ -6,6 +6,7 @@ import { PageHeader } from '../components/ui/PageHeader';
 import { Pagination } from '../components/ui/Pagination';
 import { ClientTableSkeleton } from './ClientTableSkeleton';
 import { ClientFilterBar, type FilterValue } from './ClientFilterBar';
+import { ClientRestrictionPills } from './ClientRestrictionPills';
 import { useClientList } from '../hooks/useClientList';
 import { useDebounce } from '../hooks/useDebounce';
 import { formatDate } from '../utils/format';
@@ -141,6 +142,7 @@ export function ClientsPage() {
                 <tr className="bg-olive-50 border-b border-rule text-[10px] font-mono uppercase tracking-[.13em] text-muted">
                   <th className="text-left px-5 py-[13px] font-semibold">Cliente</th>
                   <th className="text-left px-5 py-[13px] font-semibold">Plan</th>
+                  <th className="text-left px-5 py-[13px] font-semibold">Restricciones</th>
                   <th className="text-left px-5 py-[13px] font-semibold">Zona</th>
                   <th className="text-left px-5 py-[13px] font-semibold">Nacimiento</th>
                   <th className="text-left px-5 py-[13px] font-semibold">Contrato</th>
@@ -176,6 +178,12 @@ export function ClientsPage() {
                       </td>
                       <td className="px-5 py-[13px] text-[13.5px] text-ink-2">
                         {sub ? sub.plan.name : <span className="text-faint">—</span>}
+                      </td>
+                      <td className="px-5 py-[13px]">
+                        <ClientRestrictionPills
+                          restrictions={c.restrictions}
+                          highlightQuery={debouncedRestriction}
+                        />
                       </td>
                       <td className="px-5 py-[13px]">
                         <span className="font-mono text-[11px] tracking-[.04em] text-muted bg-cream-2 rounded-[5px] px-[9px] py-[3px]">

@@ -152,6 +152,22 @@ describe('ClientsPage', () => {
     });
   });
 
+  it('shows client restrictions as pills in the table', async () => {
+    mockGetPaginated.mockResolvedValue(
+      paginatedResponse([makeClient({ restrictions: ['Gluten', 'Maní'] })]),
+    );
+    renderPage();
+    await waitFor(() => expect(screen.getByText('Gluten')).toBeInTheDocument());
+    expect(screen.getByText('Maní')).toBeInTheDocument();
+  });
+
+  it('shows a dash in the restrictions column when a client has none', async () => {
+    mockGetPaginated.mockResolvedValue(paginatedResponse([makeClient({ restrictions: [] })]));
+    renderPage();
+    await screen.findByText('María García');
+    expect(screen.getAllByText('—').length).toBeGreaterThan(0);
+  });
+
   it('filters clients by allergy/restriction search via backend', async () => {
     mockGetPaginated.mockImplementation((url: string) => {
       if (url.includes(`restriction=${encodeURIComponent('maní')}`))
@@ -170,5 +186,6 @@ describe('ClientsPage', () => {
       expect(screen.getByText('Juan Pérez')).toBeInTheDocument();
       expect(screen.queryByText('María García')).not.toBeInTheDocument();
     });
+    expect(screen.getByText('maní')).toHaveClass('bg-olive-100');
   });
 });
