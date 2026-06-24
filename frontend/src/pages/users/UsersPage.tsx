@@ -18,6 +18,12 @@ const ROLE_CLASSES: Record<UserRole, string> = {
   delivery: 'bg-taupe-bg text-taupe',
 };
 
+// Super admin's avatar/icon uses a darker olive than its badge text — every other role reuses ROLE_CLASSES as-is.
+const ROLE_ICON_CLASSES: Record<UserRole, string> = {
+  ...ROLE_CLASSES,
+  super_admin: 'bg-ok-bg text-olive-800',
+};
+
 const ROLE_ICONS: Record<UserRole, string> = {
   super_admin: 'shield-check',
   admin: 'shield',
@@ -57,7 +63,7 @@ export function UsersPage() {
             className="bg-paper border border-rule rounded-[13px] px-5 py-[18px] flex items-center gap-3.5"
           >
             <span
-              className={`w-[38px] h-[38px] rounded-[10px] flex items-center justify-center shrink-0 ${ROLE_CLASSES[role]}`}
+              className={`w-[38px] h-[38px] rounded-[10px] flex items-center justify-center shrink-0 ${ROLE_ICON_CLASSES[role]}`}
             >
               <Icon name={ROLE_ICONS[role]} size={19} stroke={1.6} />
             </span>
@@ -77,7 +83,7 @@ export function UsersPage() {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Buscar usuario…"
-            className="w-full pl-[38px] pr-3 py-2.5 text-[13.5px] border border-rule rounded-[9px] bg-paper placeholder:text-faint focus:outline-none focus:border-olive-600"
+            className="w-full pl-[38px] pr-[14px] py-2.5 text-[13.5px] border border-rule rounded-[9px] bg-paper placeholder:text-faint focus:outline-none focus:border-olive-600"
           />
           <Icon
             name="search"
@@ -131,7 +137,7 @@ export function UsersPage() {
                       <td className="px-[22px] py-[13px]">
                         <div className="flex items-center gap-3">
                           <div
-                            className={`w-9 h-9 rounded-full flex items-center justify-center font-mono text-[12px] font-semibold shrink-0 ${ROLE_CLASSES[u.role]}`}
+                            className={`w-9 h-9 rounded-full flex items-center justify-center font-mono text-[12px] font-semibold shrink-0 ${ROLE_ICON_CLASSES[u.role]}`}
                           >
                             {initials(u.username)}
                           </div>
