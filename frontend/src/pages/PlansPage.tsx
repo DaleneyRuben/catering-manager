@@ -103,6 +103,7 @@ export function PlansPage() {
       {deletePlan && (
         <ConfirmModal
           title="Eliminar plan"
+          icon="trash"
           message={
             <>
               ¿Seguro que querés eliminar el plan{' '}
