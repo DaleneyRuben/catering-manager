@@ -1,10 +1,10 @@
 import { Icon } from '../ui/Icon';
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
+import { PlanRadioList } from '../ui/PlanRadioList';
 import { usePlans } from '../../hooks/usePlans';
 import { formatDate } from '../../utils/format';
 import { initials } from '../../utils/string';
-import { MEAL_LABELS } from '../../constants/meals';
 import { useRenewalForm } from '../../hooks/useRenewalForm';
 import type { StartMode } from '../../hooks/useRenewalForm';
 import type { Client, Subscription, RenewalPayload } from '../../types/client';
@@ -18,39 +18,56 @@ interface Props {
 }
 
 const inputCls =
-  'w-full px-3 py-2 text-[13px] font-mono border border-rule rounded-md bg-cream focus:outline-none focus:border-olive-600';
-const readonlyCls =
-  'w-full px-3 py-2 text-[13px] font-mono border border-rule rounded-md bg-cream-2 text-ink-2';
+  'w-full py-[9px] px-[12px] text-[13.5px] font-mono border border-rule rounded-[9px] bg-white focus:outline-none focus:border-olive-600';
+const plainLabelCls = 'block text-[11px] text-faint mb-[6px]';
+const CANCEL_BTN_STYLE = { padding: '10px 16px', fontSize: '13.5px' };
+const CONFIRM_BTN_STYLE = { padding: '11px 18px', fontSize: '13.5px' };
 
 export function RenewalModal({ client, sub, isReactivation, onClose, onRenew }: Props) {
   const { plans } = usePlans();
   const form = useRenewalForm({ plans, sub, isReactivation, onRenew, onClose });
 
+  let vigenciaSummary = '— completar los campos —';
+  if (form.willBePaused) vigenciaSummary = 'pausado (sin fecha)';
+  else if (form.newStart && form.newEnd)
+    vigenciaSummary = `${formatDate(form.newStart)} → ${formatDate(form.newEnd)}`;
+
   return (
-    <Modal onClose={onClose} className="w-[min(760px,96vw)] max-h-[92vh] overflow-auto">
+    <Modal onClose={onClose} className="w-[min(560px,92vw)] max-h-[92vh] overflow-auto">
       {/* Header */}
-      <div className="sticky top-0 z-10 flex items-center gap-3 px-[22px] py-[18px] border-b border-rule bg-cream">
-        <div className="w-11 h-11 rounded-full bg-olive-800 text-white flex items-center justify-center font-serif text-[18px] font-semibold shrink-0">
+      <div className="flex items-center gap-[13px] px-[28px] py-[22px] border-b border-hairline">
+        <div className="w-10 h-10 rounded-full bg-olive-800 text-olive-50 flex items-center justify-center font-serif text-[16px] font-semibold shrink-0">
           {initials(client.name)}
         </div>
         <div className="flex-1 min-w-0">
-          <p className="font-serif text-[20px] leading-tight text-ink">
+          <p className="font-serif text-[23px] leading-none text-ink">
             {isReactivation ? 'Reactivar' : 'Renovar'} · {client.name}
           </p>
-          <p className="font-mono text-[11px] text-muted mt-0.5">{client.deliveryZone}</p>
+          <p className="font-mono text-[11px] text-faint mt-[3px]">{client.deliveryZone}</p>
         </div>
         <button
           type="button"
           onClick={onClose}
-          className="w-[34px] h-[34px] flex items-center justify-center border border-rule rounded-md bg-paper hover:bg-cream-2 transition-colors"
+          className="text-faint hover:text-ink-2 transition-colors p-1"
         >
-          <Icon name="x" size={14} />
+          <Icon name="x" size={20} stroke={1.8} />
         </button>
       </div>
 
-      <div className="p-[22px] flex flex-col gap-6">
+      <div className="py-[22px] px-[28px]">
+        {/* Plan */}
+        <div className="mb-[20px]">
+          <p className={plainLabelCls}>Plan</p>
+          <PlanRadioList
+            plans={plans}
+            selectedId={form.newPlanId}
+            onSelect={form.setNewPlanId}
+            size="sm"
+          />
+        </div>
+
         {/* Before / After summary cards */}
-        <div className="grid grid-cols-2 gap-3.5">
+        <div className="grid grid-cols-2 gap-[14px] mb-[20px]">
           <div className="py-[14px] px-[16px] bg-empty-bg border border-hairline rounded-[11px]">
             <p className="text-[9.5px] font-mono uppercase tracking-[.1em] text-faint mb-2">
               Contrato anterior
@@ -87,131 +104,73 @@ export function RenewalModal({ client, sub, isReactivation, onClose, onRenew }: 
           </div>
         </div>
 
-        {/* Plan de comidas — card grid matching StepPlan */}
-        <div>
-          <p className="text-[10.5px] font-mono uppercase tracking-[.14em] text-muted mb-4">
-            Plan de comidas
-          </p>
-          <div className="grid grid-cols-3 gap-3">
-            {plans.map((p) => {
-              const isSel = p.id === form.newPlanId;
-              return (
-                <button
-                  key={p.id}
-                  type="button"
-                  onClick={() => form.setNewPlanId(p.id)}
-                  className={`text-left p-4 rounded-md border transition-colors ${
-                    isSel
-                      ? 'bg-olive-800 text-white border-olive-800'
-                      : 'bg-paper text-ink border-rule hover:border-olive-700'
-                  }`}
-                >
-                  <div className="font-serif text-[18px] leading-tight">{p.name}</div>
-                  <div className="font-mono text-[20px] mt-1">
-                    {p.price.toLocaleString('es-BO')}
-                    <span className={`text-[11px] ${isSel ? 'opacity-60' : 'text-muted'}`}>
-                      /mes
-                    </span>
-                  </div>
-                  {p.meals.length > 0 && (
-                    <div className="flex flex-wrap gap-1 mt-2.5">
-                      {p.meals.map((m) => (
-                        <span
-                          key={m}
-                          className={`text-[10px] font-mono px-1.5 py-0.5 rounded-full ${
-                            isSel ? 'bg-white/15' : 'bg-cream-2 text-muted'
-                          }`}
-                        >
-                          {MEAL_LABELS[m] ?? m}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                </button>
-              );
-            })}
+        {/* Duración + Fin */}
+        <div className="grid grid-cols-2 gap-[14px] mb-[18px]">
+          <div>
+            {/* eslint-disable-next-line jsx-a11y/label-has-associated-control -- false positive: htmlFor/id are correctly matched below, rule misfires on literal text children */}
+            <label className={plainLabelCls} htmlFor="renewal-duration">
+              Duración (días)
+            </label>
+            <input
+              id="renewal-duration"
+              type="text"
+              inputMode="numeric"
+              value={form.durationStr}
+              onChange={(e) => form.setDurationStr(e.target.value.replace(/\D/g, ''))}
+              className={inputCls}
+            />
+            <p className="text-[10.5px] text-faint mt-[5px]">días hábiles (L–V)</p>
+          </div>
+          <div>
+            <p className={plainLabelCls}>Fin</p>
+            <p className="font-mono text-[13.5px] text-muted py-[9px]">
+              {form.newEnd ? formatDate(form.newEnd) : '—'}
+            </p>
+            <p className="text-[10.5px] text-faint">calculado automáticamente</p>
           </div>
         </div>
 
-        {/* Contrato */}
-        <div className="border-t border-rule pt-5">
-          <p className="text-[10.5px] font-mono uppercase tracking-[.14em] text-muted mb-4">
-            Contrato
-          </p>
-
-          {/* Duración + Fin de contrato */}
-          <div className="grid grid-cols-2 gap-4 mb-5">
-            <div>
-              <p className="text-[10.5px] font-mono uppercase tracking-wider text-muted mb-1.5">
-                Duración (días)
-              </p>
-              <input
-                type="text"
-                inputMode="numeric"
-                value={form.durationStr}
-                onChange={(e) => form.setDurationStr(e.target.value.replace(/\D/g, ''))}
-                className={inputCls}
-              />
-              <p className="font-mono text-[10px] text-muted mt-1">días hábiles (L–V)</p>
+        {/* Inicio del servicio */}
+        {!isReactivation && (
+          <div className="mb-[18px]">
+            <p className={plainLabelCls}>Inicio del servicio</p>
+            <div className="flex gap-[7px]">
+              {(
+                [
+                  { v: 'atEnd', l: 'Al vencer' },
+                  { v: 'pick', l: 'Elegir fecha' },
+                  { v: 'undefined', l: 'Sin fecha' },
+                ] as { v: StartMode; l: string }[]
+              ).map((o) => (
+                <button
+                  key={o.v}
+                  type="button"
+                  onClick={() => form.setStartMode(o.v)}
+                  className={`flex-1 text-center py-2 rounded-[8px] text-[12px] border-[1.5px] transition-colors ${
+                    form.startMode === o.v
+                      ? 'font-semibold bg-olive-100 text-olive-700 border-olive-200'
+                      : 'bg-white text-muted border-rule'
+                  }`}
+                >
+                  {o.l}
+                </button>
+              ))}
             </div>
-            <div>
-              <p className="text-[10.5px] font-mono uppercase tracking-wider text-muted mb-1.5">
-                Fin de contrato
-              </p>
-              <p className={readonlyCls}>{form.newEnd ? formatDate(form.newEnd) : '—'}</p>
-              <p className="font-mono text-[10px] text-olive-700 mt-1">calculado automáticamente</p>
-            </div>
-          </div>
 
-          {/* Inicio del servicio — full width section */}
-          <div>
-            <p className="text-[10.5px] font-mono uppercase tracking-wider text-muted mb-2">
-              Inicio del servicio
-            </p>
-
-            {!isReactivation && (
-              <div className="flex gap-2 mb-3 flex-wrap">
-                {(
-                  [
-                    { v: 'atEnd', l: 'Al vencer' },
-                    { v: 'pick', l: 'Elegir fecha' },
-                    { v: 'undefined', l: 'Sin fecha' },
-                  ] as { v: StartMode; l: string }[]
-                ).map((o) => (
-                  <button
-                    key={o.v}
-                    type="button"
-                    onClick={() => form.setStartMode(o.v)}
-                    className={`px-3 py-1.5 rounded-md border text-[12px] font-semibold transition-colors ${
-                      form.startMode === o.v
-                        ? 'bg-olive-800 text-white border-olive-800'
-                        : 'bg-paper text-ink border-rule hover:bg-cream-2'
-                    }`}
-                  >
-                    {o.l}
-                  </button>
-                ))}
-              </div>
-            )}
-
-            {!isReactivation && form.startMode === 'atEnd' && form.newStart && (
-              <p className="font-mono text-[12px] text-ink-2 px-3 py-2.5 bg-cream-2 rounded-md border border-rule">
-                Inicia el primer día de reparto tras el vencimiento:{' '}
-                <strong>{formatDate(form.newStart)}</strong>
+            {form.startMode === 'atEnd' && form.newStart && (
+              <p className="mt-[11px] font-mono text-[12px] text-muted bg-empty-bg border border-hairline rounded-[8px] py-[10px] px-[13px]">
+                Inicia automáticamente el {formatDate(form.newStart)}.
               </p>
             )}
 
             {form.willBePaused && (
-              <div className="flex items-start gap-2 px-3 py-2.5 bg-warn-bg border border-warn-border rounded-md">
-                <Icon name="calendar" size={13} className="text-warn-text shrink-0 mt-0.5" />
-                <p className="font-mono text-[11px] text-warn-text">
-                  El cliente queda pausado hasta que se active manualmente.
-                </p>
+              <div className="mt-[11px] text-[12.5px] text-warn-text bg-warn-bg border border-warn-border rounded-[8px] py-[10px] px-[13px]">
+                El cliente queda pausado hasta que se active manualmente.
               </div>
             )}
 
-            {(isReactivation || form.startMode === 'pick') && (
-              <div className="max-w-xs">
+            {form.startMode === 'pick' && (
+              <div className="mt-[11px]">
                 <input
                   type="date"
                   value={form.pickedDate}
@@ -227,103 +186,84 @@ export function RenewalModal({ client, sub, isReactivation, onClose, onRenew }: 
               </div>
             )}
           </div>
-        </div>
+        )}
 
-        {/* Facturación del plan */}
-        <div className="border-t border-rule pt-5">
-          <p className="text-[10.5px] font-mono uppercase tracking-[.14em] text-muted mb-4">
-            Facturación del plan
-          </p>
-          <div className="grid grid-cols-3 gap-4 items-end">
-            <div>
-              <p className="text-[10.5px] font-mono uppercase tracking-wider text-muted mb-1.5">
-                Precio
+        {isReactivation && (
+          <div className="mb-[18px] max-w-xs">
+            <p className={plainLabelCls}>Inicio del servicio</p>
+            <input
+              type="date"
+              value={form.pickedDate}
+              min={form.tomorrow}
+              onChange={(e) => form.setPickedDate(e.target.value)}
+              className={inputCls}
+            />
+            {form.pickedDateIsWeekend && (
+              <p className="font-mono text-[11px] text-alert mt-1">
+                El inicio debe ser un día hábil (lunes a viernes).
               </p>
-              <input
-                type="number"
-                min={0}
-                max={form.newPlan?.price}
-                value={form.precioStr}
-                onChange={(e) => form.setPrecioStr(e.target.value)}
-                disabled={!form.newPlan}
-                placeholder="—"
-                className={inputCls}
-              />
-            </div>
-            <div>
-              <p className="text-[10.5px] font-mono uppercase tracking-wider text-muted mb-1.5">
-                Descuento
-              </p>
-              <p className={readonlyCls}>
-                {form.newPlan && form.precioNum !== undefined
-                  ? form.discount.toLocaleString('es-BO')
-                  : '—'}
-              </p>
-            </div>
-            <div>
-              <p className="text-[10.5px] font-mono uppercase tracking-wider text-muted mb-1.5">
-                Total
-              </p>
-              <p className="w-full py-[9px] px-[10px] font-mono text-[14px] font-semibold text-olive-700 rounded-[7px] bg-olive-100 text-center">
-                {form.precioNum !== undefined ? form.total.toLocaleString('es-BO') : '—'}
-              </p>
-            </div>
+            )}
+          </div>
+        )}
+
+        {/* Facturación */}
+        <div className="grid grid-cols-3 gap-[12px] mb-[18px]">
+          <div>
+            {/* eslint-disable-next-line jsx-a11y/label-has-associated-control -- false positive: htmlFor/id are correctly matched below, rule misfires on literal text children */}
+            <label htmlFor="renewal-precio" className={plainLabelCls}>
+              Precio
+            </label>
+            <input
+              id="renewal-precio"
+              type="number"
+              min={0}
+              max={form.newPlan?.price}
+              value={form.precioStr}
+              onChange={(e) => form.setPrecioStr(e.target.value)}
+              disabled={!form.newPlan}
+              placeholder="—"
+              className={inputCls}
+            />
+          </div>
+          <div>
+            <p className={plainLabelCls}>Descuento</p>
+            <p className="font-mono text-[14px] text-warn py-[9px]">
+              {form.newPlan && form.precioNum !== undefined
+                ? form.discount.toLocaleString('es-BO')
+                : '—'}
+            </p>
+          </div>
+          <div>
+            <p className={plainLabelCls}>Total</p>
+            <p className="font-mono text-[14px] font-semibold text-olive-700 bg-olive-100 rounded-[7px] py-[9px] px-[10px] text-center">
+              {form.precioNum !== undefined ? form.total.toLocaleString('es-BO') : '—'}
+            </p>
           </div>
         </div>
 
-        {/* Summary */}
-        <div className="p-3.5 bg-paper border border-dashed border-rule-2 rounded-md">
-          <p className="text-[10px] font-mono uppercase tracking-wider text-muted mb-2">Resumen</p>
-          <ul className="text-[13px] leading-[1.7]">
-            {sub?.plan && sub.planId !== form.newPlanId && (
-              <li>
-                Cambio de plan:{' '}
-                <strong>{plans.find((p) => p.id === sub.planId)?.name ?? sub.plan.name}</strong> →{' '}
-                <strong className="text-olive-700">{form.newPlan?.name}</strong>
-              </li>
-            )}
-            <li>
-              Vigencia: <span className="font-mono">{form.vigenciaText}</span>
-            </li>
-            <li>
-              Facturación:{' '}
-              <span className="font-mono">
-                {form.precioNum !== undefined ? `${form.total.toLocaleString('es-BO')}/mes` : '—'}
-                {form.discount > 0 && form.newPlan && form.precioNum !== undefined && (
-                  <span className="text-muted">
-                    {' '}
-                    ({form.newPlan.price.toLocaleString('es-BO')} −{' '}
-                    {form.discount.toLocaleString('es-BO')})
-                  </span>
-                )}
-              </span>
-              {isReactivation && (
-                <span className="ml-2 px-1.5 py-0.5 rounded-full text-[11px] font-mono bg-ok-bg text-ok">
-                  Reactivación
-                </span>
-              )}
-            </li>
-            <li>
-              Cliente: <strong>{client.name}</strong>
-            </li>
-          </ul>
+        {/* Resumen */}
+        <div className="border border-dashed border-empty-border rounded-[11px] py-[14px] px-[16px] text-[12.5px] text-ink-2 leading-[1.7]">
+          · Plan: <strong>{form.newPlan?.name}</strong>
+          <br />· Vigencia: <span className="font-mono">{vigenciaSummary}</span>
+          <br />· Total: <strong>{form.total.toLocaleString('es-BO')}</strong> /mes · Cliente:{' '}
+          {client.name}
         </div>
+      </div>
 
-        {/* Footer */}
-        <div className="flex gap-2.5">
-          <Button variant="secondary" onClick={onClose}>
-            Cancelar
-          </Button>
-          <div className="flex-1" />
-          <Button
-            onClick={form.handleConfirm}
-            disabled={!form.canConfirm}
-            loading={form.isSaving}
-            leftIcon="refresh"
-          >
-            {form.confirmLabel}
-          </Button>
-        </div>
+      {/* Footer */}
+      <div className="flex justify-end gap-[10px] py-[16px] px-[28px] border-t border-hairline">
+        <Button variant="secondary" onClick={onClose} style={CANCEL_BTN_STYLE}>
+          Cancelar
+        </Button>
+        <Button
+          onClick={form.handleConfirm}
+          disabled={!form.canConfirm}
+          loading={form.isSaving}
+          leftIcon="refresh"
+          style={CONFIRM_BTN_STYLE}
+        >
+          {form.confirmLabel}
+        </Button>
       </div>
     </Modal>
   );
