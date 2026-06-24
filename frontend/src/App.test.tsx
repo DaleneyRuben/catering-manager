@@ -40,7 +40,7 @@ function renderAt(path: string, role: string = 'admin') {
 describe('App', () => {
   it('renders the dashboard at root', () => {
     renderAt('/');
-    expect(screen.getByRole('heading', { name: 'Dashboard' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Panel' })).toBeInTheDocument();
   });
 
   it('renders the clients page at /clientes', async () => {
