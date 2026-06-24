@@ -5,6 +5,7 @@ import type { AppUser, UserDraft, UserUpdateDraft } from '../../hooks/useUsers';
 import { ROLES, type UserRole } from '../../constants/roles';
 import { Modal } from '../../components/ui/Modal';
 import { Button } from '../../components/ui/Button';
+import { ConfirmModal } from '../../components/ui/ConfirmModal';
 import { MODAL_CANCEL_STYLE, MODAL_CONFIRM_STYLE } from '../../components/ui/modalButtonStyles';
 
 const ROLE_OPTIONS: { value: UserRole; label: string }[] = [
@@ -42,7 +43,7 @@ export function UserModal(props: Props) {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [role, setRole] = useState<UserRole>(initial?.role ?? ROLES.ADMIN);
-  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const canSave = mode === 'create' ? !!username && !!password : !!username;
 
@@ -63,6 +64,24 @@ export function UserModal(props: Props) {
       onClose();
     }
   };
+
+  if (showDeleteConfirm && mode === 'edit') {
+    return (
+      <ConfirmModal
+        title="Eliminar usuario"
+        message={
+          <>
+            ¿Seguro que querés eliminar a{' '}
+            <span className="font-semibold">{(props as EditProps).user.username}</span>? Esta acción
+            no se puede deshacer.
+          </>
+        }
+        confirmLabel="Eliminar"
+        onClose={() => setShowDeleteConfirm(false)}
+        onConfirm={handleDelete}
+      />
+    );
+  }
 
   return (
     <Modal onClose={onClose} className="w-[min(480px,92vw)]">
@@ -142,14 +161,9 @@ export function UserModal(props: Props) {
       </div>
 
       <div className="flex items-center gap-[10px] px-[28px] py-4 border-t border-hairline">
-        {mode === 'edit' && !isSelf && !confirmDelete && (
-          <Button variant="danger" onClick={() => setConfirmDelete(true)} disabled={isSaving}>
+        {mode === 'edit' && !isSelf && (
+          <Button variant="danger" onClick={() => setShowDeleteConfirm(true)} disabled={isSaving}>
             Eliminar
-          </Button>
-        )}
-        {mode === 'edit' && !isSelf && confirmDelete && (
-          <Button variant="alert" onClick={handleDelete} disabled={isSaving}>
-            ¿Confirmar?
           </Button>
         )}
         <div className="flex-1" />

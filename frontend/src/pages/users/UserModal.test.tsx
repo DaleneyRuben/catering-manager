@@ -71,11 +71,18 @@ describe('UserModal — edit mode', () => {
     expect(screen.queryByRole('button', { name: 'Eliminar' })).not.toBeInTheDocument();
   });
 
-  it('replaces Eliminar with ¿Confirmar? after clicking Eliminar', async () => {
+  it('shows a confirmation dialog after clicking Eliminar', async () => {
     render(<UserModal {...editProps} />);
     await userEvent.click(screen.getByRole('button', { name: 'Eliminar' }));
-    expect(screen.getByRole('button', { name: '¿Confirmar?' })).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: 'Eliminar' })).not.toBeInTheDocument();
+    expect(screen.getByText('Eliminar usuario')).toBeInTheDocument();
+    expect(screen.getByText(/no se puede deshacer/i)).toBeInTheDocument();
+  });
+
+  it('returns to the edit form when the confirmation dialog is cancelled', async () => {
+    render(<UserModal {...editProps} />);
+    await userEvent.click(screen.getByRole('button', { name: 'Eliminar' }));
+    await userEvent.click(screen.getByRole('button', { name: /cancelar/i }));
+    expect(screen.getByText('Editar usuario')).toBeInTheDocument();
   });
 
   it('calls onSave with updated draft when Guardar is clicked', async () => {
@@ -113,7 +120,7 @@ describe('UserModal — edit mode', () => {
     expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ password: 'newpass' }));
   });
 
-  it('calls onDelete and onClose when ¿Confirmar? is clicked', async () => {
+  it('calls onDelete and onClose when the deletion is confirmed', async () => {
     const onDelete = jest.fn().mockResolvedValue(undefined);
     const onClose = jest.fn();
     render(
@@ -127,7 +134,7 @@ describe('UserModal — edit mode', () => {
       />,
     );
     await userEvent.click(screen.getByRole('button', { name: 'Eliminar' }));
-    await userEvent.click(screen.getByRole('button', { name: '¿Confirmar?' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Eliminar' }));
     expect(onDelete).toHaveBeenCalled();
     await waitFor(() => expect(onClose).toHaveBeenCalled());
   });
