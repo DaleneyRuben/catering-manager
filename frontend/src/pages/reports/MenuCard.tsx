@@ -8,6 +8,7 @@ import { downloadReport } from '../../utils/downloadReport';
 import { checkIsWeekend } from '../../utils/devFlags';
 import { DaySelector, type DayOption } from './DaySelector';
 import { ReportNotice } from './ReportNotice';
+import { DISABLED_DOWNLOAD_STYLE } from './downloadButtonStyle';
 
 const BASE = API_BASE;
 
@@ -77,6 +78,7 @@ export function MenuCard() {
         loading={loading}
         leftIcon="download"
         className="mt-auto"
+        style={isSelectedWeekend || !menuExists ? DISABLED_DOWNLOAD_STYLE : undefined}
       >
         Descargar .docx
       </Button>

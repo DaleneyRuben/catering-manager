@@ -7,6 +7,7 @@ import { downloadReport } from '../../utils/downloadReport';
 import { checkIsWeekend } from '../../utils/devFlags';
 import { DaySelector, type DayOption } from './DaySelector';
 import { ReportNotice } from './ReportNotice';
+import { DISABLED_DOWNLOAD_STYLE } from './downloadButtonStyle';
 
 const BASE = API_BASE;
 
@@ -67,6 +68,7 @@ export function DeliveryListCard() {
         loading={loading}
         leftIcon="download"
         className="mt-auto"
+        style={isSelectedWeekend ? DISABLED_DOWNLOAD_STYLE : undefined}
       >
         Descargar .xlsx
       </Button>
