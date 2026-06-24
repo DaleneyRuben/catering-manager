@@ -57,7 +57,7 @@ export function ClientFilterBar({
               onChange={(e) => onQChange(e.target.value)}
               onKeyDown={blurOnEnter}
               placeholder="Buscar cliente…"
-              className="w-full pl-[38px] pr-9 py-2.5 text-[13.5px] border border-rule rounded-[9px] bg-paper placeholder:text-faint focus:outline-none focus:border-olive-600"
+              className="w-full pl-[38px] pr-9 py-[6px] lg:py-2.5 text-[13.5px] border border-rule rounded-[9px] bg-paper placeholder:text-faint focus:outline-none focus:border-olive-600"
             />
             <Icon
               name="search"
@@ -103,7 +103,7 @@ export function ClientFilterBar({
             onChange={(e) => onRestrictionChange(e.target.value)}
             onKeyDown={blurOnEnter}
             placeholder="Buscar por alergia o restricción…"
-            className="w-full pl-[38px] pr-9 py-2.5 text-[13.5px] border border-rule rounded-[9px] bg-paper placeholder:text-faint focus:outline-none focus:border-warn-dot"
+            className="w-full pl-[38px] pr-9 py-[6px] lg:py-2.5 text-[13.5px] border border-rule rounded-[9px] bg-paper placeholder:text-faint focus:outline-none focus:border-warn-dot"
           />
           <Icon
             name="alert"
@@ -154,12 +154,12 @@ export function ClientFilterBar({
         </div>
 
         {/* Month — right-aligned */}
-        <div className="lg:ml-auto lg:shrink-0 lg:self-stretch">
+        <div className="lg:ml-auto lg:shrink-0 self-stretch">
           <div className="relative h-full text-[12.5px] tracking-[.02em] text-muted">
             <select
               value={birthMonth}
               onChange={(e) => onBirthMonthChange(e.target.value)}
-              className="appearance-none h-full w-full py-[9px] px-[14px] pr-8 border border-rule rounded-[11px] bg-paper cursor-pointer hover:border-rule-2"
+              className="appearance-none h-full w-full py-[9px] px-[14px] pr-8 border border-rule rounded-[11px] bg-paper cursor-pointer hover:border-rule-2 !text-[12.5px]"
             >
               <option value="all">Mes · todos</option>
               {MONTHS.map((m, i) => (
