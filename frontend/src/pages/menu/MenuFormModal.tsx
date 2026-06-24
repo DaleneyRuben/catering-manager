@@ -43,7 +43,7 @@ export function MenuFormModal({
   if (!open) return null;
 
   return (
-    <Modal onClose={onClose} className="w-[min(640px,92vw)] max-h-[92vh] overflow-auto">
+    <Modal onClose={onClose} className="w-[min(600px,92vw)] max-h-[92vh] overflow-auto">
       <div className="flex items-center justify-between gap-3 px-[28px] py-[22px] border-b border-hairline">
         <p className="font-serif font-semibold text-[24px] leading-none text-ink">{dateLabel}</p>
         <button

@@ -71,7 +71,7 @@ export function DayCard({ isToday, date, menu, isWeekend, onOpen }: Props) {
           className={
             isToday
               ? 'inline-flex items-center gap-2 bg-white/10 text-white/40 border border-white/15 rounded-[9px] px-[18px] py-3 text-[13px] font-semibold whitespace-nowrap shrink-0 cursor-not-allowed'
-              : 'inline-flex items-center gap-2 bg-empty-bg text-faint border border-hairline rounded-[9px] px-[18px] py-3 text-[13px] font-semibold whitespace-nowrap shrink-0 cursor-not-allowed'
+              : 'inline-flex items-center gap-2 bg-empty-bg text-empty-text border border-hairline rounded-[9px] px-[18px] py-3 text-[13px] font-semibold whitespace-nowrap shrink-0 cursor-not-allowed'
           }
         >
           <Icon name="no-entry" size={16} stroke={1.8} />
