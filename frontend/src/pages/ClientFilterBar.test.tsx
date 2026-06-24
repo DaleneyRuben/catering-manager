@@ -31,6 +31,19 @@ describe('ClientFilterBar', () => {
     expect(onQChange).toHaveBeenCalledWith('a');
   });
 
+  it('does not show a clear button when the name search is empty', () => {
+    render(<ClientFilterBar {...baseProps} q="" />);
+    expect(screen.queryByLabelText('Limpiar búsqueda de cliente')).not.toBeInTheDocument();
+  });
+
+  it('shows a clear button when the name search has a value, and clears it on click', async () => {
+    const onQChange = jest.fn();
+    render(<ClientFilterBar {...baseProps} q="Juan" onQChange={onQChange} />);
+    const clearButton = screen.getByLabelText('Limpiar búsqueda de cliente');
+    await userEvent.click(clearButton);
+    expect(onQChange).toHaveBeenCalledWith('');
+  });
+
   it('renders the allergy/restriction search input', () => {
     render(<ClientFilterBar {...baseProps} />);
     expect(screen.getByPlaceholderText('Buscar por alergia o restricción…')).toBeInTheDocument();

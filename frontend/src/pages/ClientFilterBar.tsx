@@ -52,13 +52,23 @@ export function ClientFilterBar({
               value={q}
               onChange={(e) => onQChange(e.target.value)}
               placeholder="Buscar cliente…"
-              className="w-full pl-[38px] pr-3 py-2.5 text-[13.5px] border border-rule rounded-[9px] bg-paper placeholder:text-faint focus:outline-none focus:border-olive-600"
+              className="w-full pl-[38px] pr-9 py-2.5 text-[13.5px] border border-rule rounded-[9px] bg-paper placeholder:text-faint focus:outline-none focus:border-olive-600"
             />
             <Icon
               name="search"
               size={16}
               className="absolute left-[13px] top-1/2 -translate-y-1/2 text-faint"
             />
+            {q && (
+              <button
+                type="button"
+                aria-label="Limpiar búsqueda de cliente"
+                onClick={() => onQChange('')}
+                className="absolute right-[9px] top-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-cream-2 text-muted flex items-center justify-center hover:bg-olive-100 hover:text-olive-700 transition-colors"
+              >
+                <Icon name="x" size={12} stroke={2.2} />
+              </button>
+            )}
           </div>
 
           <button
