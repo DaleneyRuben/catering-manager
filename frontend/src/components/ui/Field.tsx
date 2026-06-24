@@ -26,7 +26,7 @@ export function Field({
   const labelCls =
     variant === 'plain'
       ? 'block text-[11px] text-faint mb-1.5'
-      : 'block text-[11px] font-mono uppercase tracking-wider text-muted mb-1.5';
+      : 'block text-[10px] font-mono uppercase tracking-[.1em] text-muted mb-2';
   return (
     <div>
       <label htmlFor={htmlFor} className={labelCls}>
