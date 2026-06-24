@@ -26,6 +26,10 @@ interface Props {
   isFetching: boolean;
 }
 
+const blurOnEnter = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  if (e.key === 'Enter') e.currentTarget.blur();
+};
+
 export function ClientFilterBar({
   q,
   onQChange,
@@ -51,6 +55,7 @@ export function ClientFilterBar({
             <input
               value={q}
               onChange={(e) => onQChange(e.target.value)}
+              onKeyDown={blurOnEnter}
               placeholder="Buscar cliente…"
               className="w-full pl-[38px] pr-9 py-2.5 text-[13.5px] border border-rule rounded-[9px] bg-paper placeholder:text-faint focus:outline-none focus:border-olive-600"
             />
@@ -96,6 +101,7 @@ export function ClientFilterBar({
           <input
             value={restriction}
             onChange={(e) => onRestrictionChange(e.target.value)}
+            onKeyDown={blurOnEnter}
             placeholder="Buscar por alergia o restricción…"
             className="w-full pl-[38px] pr-9 py-2.5 text-[13.5px] border border-rule rounded-[9px] bg-paper placeholder:text-faint focus:outline-none focus:border-warn-dot"
           />

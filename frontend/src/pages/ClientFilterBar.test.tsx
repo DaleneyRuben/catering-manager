@@ -44,6 +44,15 @@ describe('ClientFilterBar', () => {
     expect(onQChange).toHaveBeenCalledWith('');
   });
 
+  it('blurs the name search input on Enter so mobile keyboards dismiss', async () => {
+    render(<ClientFilterBar {...baseProps} q="Juan" />);
+    const input = screen.getByPlaceholderText('Buscar cliente…');
+    input.focus();
+    expect(input).toHaveFocus();
+    await userEvent.keyboard('{Enter}');
+    expect(input).not.toHaveFocus();
+  });
+
   it('renders the allergy/restriction search input', () => {
     render(<ClientFilterBar {...baseProps} />);
     expect(screen.getByPlaceholderText('Buscar por alergia o restricción…')).toBeInTheDocument();
@@ -54,6 +63,15 @@ describe('ClientFilterBar', () => {
     render(<ClientFilterBar {...baseProps} onRestrictionChange={onRestrictionChange} />);
     await userEvent.type(screen.getByPlaceholderText('Buscar por alergia o restricción…'), 'l');
     expect(onRestrictionChange).toHaveBeenCalledWith('l');
+  });
+
+  it('blurs the allergy search input on Enter so mobile keyboards dismiss', async () => {
+    render(<ClientFilterBar {...baseProps} restriction="maní" />);
+    const input = screen.getByPlaceholderText('Buscar por alergia o restricción…');
+    input.focus();
+    expect(input).toHaveFocus();
+    await userEvent.keyboard('{Enter}');
+    expect(input).not.toHaveFocus();
   });
 
   it('does not show a clear button when the allergy search is empty', () => {
