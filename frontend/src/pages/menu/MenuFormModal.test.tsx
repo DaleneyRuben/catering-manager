@@ -28,6 +28,11 @@ describe('MenuFormModal', () => {
     expect(screen.getByLabelText(/cena/i)).toBeInTheDocument();
   });
 
+  it('shows the fruta hint on the merienda pm field', () => {
+    render(<MenuFormModal {...baseProps} />);
+    expect(screen.getByLabelText(/merienda pm \(fruta\)/i)).toBeInTheDocument();
+  });
+
   it('pre-fills fields when initial data is provided', () => {
     render(
       <MenuFormModal

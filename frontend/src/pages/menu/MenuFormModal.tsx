@@ -59,7 +59,15 @@ export function MenuFormModal({
 
       <div className="px-[28px] py-[22px] grid grid-cols-2 grid-rows-4 grid-flow-col gap-4">
         {MEAL_FIELDS.map((field) => (
-          <Field key={field} label={MEAL_FIELD_LABELS[field]} htmlFor={`menu-field-${field}`}>
+          <Field
+            key={field}
+            label={
+              field === 'afternoonSnack'
+                ? `${MEAL_FIELD_LABELS[field]} (fruta)`
+                : MEAL_FIELD_LABELS[field]
+            }
+            htmlFor={`menu-field-${field}`}
+          >
             <input
               id={`menu-field-${field}`}
               type="text"
