@@ -5,6 +5,7 @@ import type { AppUser, UserDraft, UserUpdateDraft } from '../../hooks/useUsers';
 import { ROLES, type UserRole } from '../../constants/roles';
 import { Modal } from '../../components/ui/Modal';
 import { Button } from '../../components/ui/Button';
+import { MODAL_CANCEL_STYLE, MODAL_CONFIRM_STYLE } from '../../components/ui/modalButtonStyles';
 
 const ROLE_OPTIONS: { value: UserRole; label: string }[] = [
   { value: ROLES.SUPER_ADMIN, label: 'Super admin' },
@@ -152,7 +153,7 @@ export function UserModal(props: Props) {
           </Button>
         )}
         <div className="flex-1" />
-        <Button variant="secondary" onClick={onClose}>
+        <Button variant="secondary" onClick={onClose} style={MODAL_CANCEL_STYLE}>
           Cancelar
         </Button>
         <Button
@@ -160,6 +161,7 @@ export function UserModal(props: Props) {
           disabled={isSaving || !canSave}
           loading={isSaving}
           leftIcon="check"
+          style={MODAL_CONFIRM_STYLE}
         >
           {mode === 'create' ? 'Crear' : 'Guardar'}
         </Button>

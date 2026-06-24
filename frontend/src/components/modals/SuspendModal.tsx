@@ -20,6 +20,7 @@ import { es } from 'date-fns/locale';
 import { Icon } from '../ui/Icon';
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
+import { MODAL_CANCEL_STYLE, MODAL_CONFIRM_STYLE } from '../ui/modalButtonStyles';
 import { addBusinessDays, subtractBusinessDays } from '../../utils/businessDays';
 import { formatDate } from '../../utils/format';
 import type { Subscription } from '../../types/client';
@@ -238,11 +239,21 @@ export function SuspendModal({
         )}
 
         <div className="flex gap-2.5 mt-5">
-          <Button variant="secondary" onClick={onClose} disabled={isSaving}>
+          <Button
+            variant="secondary"
+            onClick={onClose}
+            disabled={isSaving}
+            style={MODAL_CANCEL_STYLE}
+          >
             Cancelar
           </Button>
           <div className="flex-1" />
-          <Button onClick={handleSave} loading={isSaving} leftIcon="check">
+          <Button
+            onClick={handleSave}
+            loading={isSaving}
+            leftIcon="check"
+            style={MODAL_CONFIRM_STYLE}
+          >
             Guardar
           </Button>
         </div>

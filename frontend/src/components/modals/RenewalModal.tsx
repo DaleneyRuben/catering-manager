@@ -1,6 +1,7 @@
 import { Icon } from '../ui/Icon';
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
+import { MODAL_CANCEL_STYLE, MODAL_CONFIRM_STYLE } from '../ui/modalButtonStyles';
 import { PlanRadioList } from '../ui/PlanRadioList';
 import { usePlans } from '../../hooks/usePlans';
 import { formatDate } from '../../utils/format';
@@ -20,8 +21,6 @@ interface Props {
 const inputCls =
   'w-full py-[9px] px-[12px] text-[13.5px] font-mono border border-rule rounded-[9px] bg-white focus:outline-none focus:border-olive-600';
 const plainLabelCls = 'block text-[11px] text-faint mb-[6px]';
-const CANCEL_BTN_STYLE = { padding: '10px 16px', fontSize: '13.5px' };
-const CONFIRM_BTN_STYLE = { padding: '11px 18px', fontSize: '13.5px' };
 
 export function RenewalModal({ client, sub, isReactivation, onClose, onRenew }: Props) {
   const { plans } = usePlans();
@@ -252,7 +251,7 @@ export function RenewalModal({ client, sub, isReactivation, onClose, onRenew }: 
 
       {/* Footer */}
       <div className="flex justify-end gap-[10px] py-[16px] px-[28px] border-t border-hairline">
-        <Button variant="secondary" onClick={onClose} style={CANCEL_BTN_STYLE}>
+        <Button variant="secondary" onClick={onClose} style={MODAL_CANCEL_STYLE}>
           Cancelar
         </Button>
         <Button
@@ -260,7 +259,7 @@ export function RenewalModal({ client, sub, isReactivation, onClose, onRenew }: 
           disabled={!form.canConfirm}
           loading={form.isSaving}
           leftIcon="refresh"
-          style={CONFIRM_BTN_STYLE}
+          style={MODAL_CONFIRM_STYLE}
         >
           {form.confirmLabel}
         </Button>

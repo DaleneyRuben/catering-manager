@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Icon } from '../../components/ui/Icon';
 import { Modal } from '../../components/ui/Modal';
 import { Button } from '../../components/ui/Button';
+import { MODAL_CANCEL_STYLE, MODAL_CONFIRM_STYLE } from '../../components/ui/modalButtonStyles';
 import type { Plan } from '../../types/client';
 import { PlanEditorForm } from './PlanEditorForm';
 import type { MealKey, PlanDraft } from './types';
@@ -73,10 +74,20 @@ export function PlanModal(props: Props) {
       <div className="px-[28px] py-[22px]">
         <PlanEditorForm draft={draft} setDraft={setDraft} />
         <div className="flex justify-end gap-2.5 mt-[18px]">
-          <Button variant="secondary" onClick={onClose} disabled={isSaving}>
+          <Button
+            variant="secondary"
+            onClick={onClose}
+            disabled={isSaving}
+            style={MODAL_CANCEL_STYLE}
+          >
             Cancelar
           </Button>
-          <Button onClick={handleSubmit} loading={isSaving} leftIcon="check">
+          <Button
+            onClick={handleSubmit}
+            loading={isSaving}
+            leftIcon="check"
+            style={MODAL_CONFIRM_STYLE}
+          >
             {mode === 'create' ? 'Crear plan' : 'Guardar cambios'}
           </Button>
         </div>

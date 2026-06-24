@@ -3,6 +3,7 @@ import { Modal } from '../../components/ui/Modal';
 import { Button } from '../../components/ui/Button';
 import { Icon } from '../../components/ui/Icon';
 import { Field, inputCls } from '../../components/ui/Field';
+import { MODAL_CANCEL_STYLE, MODAL_CONFIRM_STYLE } from '../../components/ui/modalButtonStyles';
 import type { MenuDraft } from '../../types/menu';
 import { MEAL_FIELDS, MEAL_FIELD_LABELS, emptyDraft, type MealField } from './menuFields';
 
@@ -71,10 +72,20 @@ export function MenuFormModal({
       </div>
 
       <div className="flex justify-end gap-[10px] px-[28px] py-4 border-t border-hairline">
-        <Button variant="secondary" onClick={onClose} disabled={isSaving}>
+        <Button
+          variant="secondary"
+          onClick={onClose}
+          disabled={isSaving}
+          style={MODAL_CANCEL_STYLE}
+        >
           Cancelar
         </Button>
-        <Button onClick={handleSave} loading={isSaving} leftIcon="check">
+        <Button
+          onClick={handleSave}
+          loading={isSaving}
+          leftIcon="check"
+          style={MODAL_CONFIRM_STYLE}
+        >
           Guardar
         </Button>
       </div>

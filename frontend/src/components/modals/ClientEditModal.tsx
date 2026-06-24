@@ -6,6 +6,7 @@ import { Icon } from '../ui/Icon';
 import { Label } from '../ui/Label';
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
+import { MODAL_CANCEL_STYLE, MODAL_CONFIRM_STYLE } from '../ui/modalButtonStyles';
 import { TagInput } from '../ui/TagInput';
 import { ToggleGroup } from '../ui/ToggleGroup';
 import { DISEASES } from '../../constants/diseases';
@@ -261,10 +262,15 @@ export function ClientEditModal({
         </div>
 
         <div className="sticky bottom-0 bg-cream border-t border-hairline px-[28px] py-[16px] flex items-center justify-end gap-[10px]">
-          <Button variant="secondary" onClick={onClose}>
+          <Button variant="secondary" onClick={onClose} style={MODAL_CANCEL_STYLE}>
             Cancelar
           </Button>
-          <Button onClick={() => onSave(draft)} loading={isSaving} leftIcon="check">
+          <Button
+            onClick={() => onSave(draft)}
+            loading={isSaving}
+            leftIcon="check"
+            style={MODAL_CONFIRM_STYLE}
+          >
             Guardar cambios
           </Button>
         </div>
