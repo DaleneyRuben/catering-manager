@@ -106,8 +106,39 @@ export function ClientFilterBar({
           )}
         </div>
 
-        {/* Month — collapsed on mobile behind toggle */}
-        <div className={`${showSecondaryFilters ? 'block' : 'hidden'} lg:block lg:shrink-0`}>
+        {/* Results count — always visible */}
+        <span
+          className={`font-mono text-[11.5px] uppercase tracking-[.04em] lg:ml-auto transition-opacity ${isFetching ? 'opacity-40' : 'text-muted'}`}
+        >
+          {resultsLabel}
+        </span>
+      </div>
+
+      {/* Row 2: categorical filters — collapsed on mobile behind toggle */}
+      <div
+        className={`${showSecondaryFilters ? 'flex' : 'hidden'} lg:flex items-center gap-3 flex-wrap`}
+      >
+        <div className="overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] min-w-0">
+          <div className="inline-flex p-[3px] gap-px bg-paper border border-rule rounded-[11px] text-[12.5px]">
+            {STATUS_FILTERS.map(({ v, l }) => (
+              <button
+                type="button"
+                key={v}
+                onClick={() => onFilterChange(v)}
+                className={`px-3.5 py-[6px] rounded-[8px] font-semibold whitespace-nowrap transition-all ${
+                  filter === v
+                    ? 'bg-olive-100 text-olive-700'
+                    : 'text-muted font-normal hover:bg-cream-2 hover:text-ink-2'
+                }`}
+              >
+                {l}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Month — right-aligned */}
+        <div className="lg:ml-auto lg:shrink-0">
           <div className="relative">
             <select
               value={birthMonth}
@@ -126,35 +157,6 @@ export function ClientFilterBar({
               size={14}
               className="absolute right-3 top-1/2 -translate-y-1/2 text-muted pointer-events-none"
             />
-          </div>
-        </div>
-
-        {/* Results count — always visible */}
-        <span
-          className={`font-mono text-[11.5px] uppercase tracking-[.04em] lg:ml-auto transition-opacity ${isFetching ? 'opacity-40' : 'text-muted'}`}
-        >
-          {resultsLabel}
-        </span>
-      </div>
-
-      {/* Status segmented control — collapsed on mobile behind toggle */}
-      <div className={`${showSecondaryFilters ? 'flex' : 'hidden'} lg:flex`}>
-        <div className="overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] min-w-0">
-          <div className="inline-flex p-[3px] gap-px bg-paper border border-rule rounded-[11px] text-[12.5px]">
-            {STATUS_FILTERS.map(({ v, l }) => (
-              <button
-                type="button"
-                key={v}
-                onClick={() => onFilterChange(v)}
-                className={`px-3.5 py-[6px] rounded-[8px] font-semibold whitespace-nowrap transition-all ${
-                  filter === v
-                    ? 'bg-olive-100 text-olive-700'
-                    : 'text-muted font-normal hover:bg-cream-2 hover:text-ink-2'
-                }`}
-              >
-                {l}
-              </button>
-            ))}
           </div>
         </div>
       </div>
