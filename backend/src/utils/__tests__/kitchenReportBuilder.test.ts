@@ -11,11 +11,7 @@ const mockMenu = {
   juice: 'Limonada',
 };
 
-const makeClient = (
-  name: string,
-  planMeals: string[],
-  restrictions: string[] = [],
-): ActiveClientRow => ({ name, planMeals, restrictions });
+const makeClient = (name: string, planMeals: string[]): ActiveClientRow => ({ name, planMeals });
 
 const allMeals = ['breakfast', 'morning_snack', 'salad', 'lunch', 'afternoon_snack', 'dinner'];
 
@@ -103,25 +99,9 @@ describe('computeKitchenReportData', () => {
     expect(data.hiperproteico).toEqual([]);
   });
 
-  it('detects restriction conflicts against menu dishes', () => {
-    const clients = [makeClient('Carmen Tapia', allMeals, ['yuca', 'platano'])];
-    const data = computeKitchenReportData(mockMenu, clients, '2026-06-04');
-
-    expect(data.restrictionConflicts).toEqual([
-      { name: 'Carmen Tapia', conflicts: ['yuca', 'platano'] },
-    ]);
-  });
-
-  it('excludes clients with no restriction conflicts', () => {
-    const clients = [makeClient('Ana López', allMeals, ['kiwi'])];
-    const data = computeKitchenReportData(mockMenu, clients, '2026-06-04');
-
-    expect(data.restrictionConflicts).toEqual([]);
-  });
-
   it('matches snapshot', () => {
     const clients = [
-      makeClient('Carmen Tapia', ['lunch', 'salad', 'dinner'], ['yuca']),
+      makeClient('Carmen Tapia', ['lunch', 'salad', 'dinner']),
       makeClient('Ana López', allMeals),
       makeClient('Jorge Rengel', [...allMeals, 'extra']),
     ];

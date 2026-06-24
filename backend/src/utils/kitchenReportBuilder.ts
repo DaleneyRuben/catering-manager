@@ -41,8 +41,6 @@ const W = {
   sectionLabel: COL_WIDTHS.slice(1).reduce((a: number, b) => a + b, 0),
   dateMain: COL_WIDTHS.slice(0, 5).reduce((a: number, b) => a + b, 0),
   full: COL_WIDTHS.reduce((a: number, b) => a + b, 0),
-  restrictionName: COL_WIDTHS[1] + COL_WIDTHS[2],
-  restrictionConflicts: COL_WIDTHS[2] * 2 + COL_WIDTHS[5],
 } as const;
 
 const MEAL_LABEL_SHADING = { type: ShadingType.CLEAR, color: 'auto', fill: 'D9D9D9' };
@@ -252,21 +250,6 @@ const buildMealTableRows = (
   ];
 };
 
-const restrictionTableRows = (conflicts: { name: string; conflicts: string[] }[]): TableRow[] =>
-  conflicts.map(
-    (c) =>
-      new TableRow({
-        children: [
-          emptyCell(W.count),
-          cell(para(c.name, { bold: true }), { colspan: 2, width: W.restrictionName }),
-          cell(para(c.conflicts.join(' - ').toUpperCase(), { color: GRAY }), {
-            colspan: 3,
-            width: W.restrictionConflicts,
-          }),
-        ],
-      }),
-  );
-
 const buildDocxTable = (rows: TableRow[]): Table =>
   new Table({
     width: { size: W.full, type: WidthType.DXA },
@@ -295,7 +278,6 @@ export const buildKitchenReport = async (
     specHeaderRow(),
     sectionLabelRow('PRODUCCION'),
     ...PRODUCCION_MEALS.flatMap((m) => buildMealTableRows(m, menu, clients)),
-    ...restrictionTableRows(data.restrictionConflicts),
   ];
 
   const doc = new Document({

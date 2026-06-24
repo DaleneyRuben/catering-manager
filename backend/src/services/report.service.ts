@@ -22,7 +22,6 @@ const findDeliveryClientsForDate = async (date: string): Promise<string[]> => {
 export type ActiveClientRow = {
   name: string;
   planMeals: string[];
-  restrictions: string[];
 };
 
 const findActiveClientsWithPlansForDate = async (date: string): Promise<ActiveClientRow[]> => {
@@ -40,7 +39,6 @@ const findActiveClientsWithPlansForDate = async (date: string): Promise<ActiveCl
     .map((s) => ({
       name: (s.client as Client).name,
       planMeals: (s.plan as Plan).meals,
-      restrictions: (s.client as Client).restrictions,
     }));
 };
 

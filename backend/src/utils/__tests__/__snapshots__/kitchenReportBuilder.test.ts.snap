@@ -52,14 +52,6 @@ exports[`computeKitchenReportData matches snapshot 1`] = `
       "noDar": [],
     },
   ],
-  "restrictionConflicts": [
-    {
-      "conflicts": [
-        "yuca",
-      ],
-      "name": "Carmen Tapia",
-    },
-  ],
   "totalClients": 3,
 }
 `;

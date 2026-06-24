@@ -7,7 +7,7 @@ jest.mock('../../models/Client');
 jest.mock('../../models/Plan');
 jest.mock('../../models/Subscription');
 
-const makeClient = (name: string, restrictions: string[] = []) => ({ name, restrictions });
+const makeClient = (name: string) => ({ name });
 
 const makePlan = (meals: string[] = ['breakfast', 'lunch', 'dinner']) => ({ meals });
 
@@ -16,7 +16,7 @@ const makeSubscription = (
     startDate: string;
     contractEndDate: string;
     suspendedDates: string[];
-    client: { name: string; restrictions: string[] };
+    client: { name: string };
     plan: { meals: string[] };
   }> = {},
 ) => ({
@@ -97,19 +97,17 @@ describe('reportService.findDeliveryClientsForDate', () => {
 describe('reportService.findActiveClientsWithPlansForDate', () => {
   beforeEach(() => jest.clearAllMocks());
 
-  it('returns name, planMeals, and restrictions for active non-suspended clients', async () => {
+  it('returns name and planMeals for active non-suspended clients', async () => {
     (Subscription.findAll as jest.Mock).mockResolvedValue([
       makeSubscription({
-        client: makeClient('Ana López', ['platano']),
+        client: makeClient('Ana López'),
         plan: makePlan(['breakfast', 'lunch']),
       }),
     ]);
 
     const result = await reportService.findActiveClientsWithPlansForDate('2026-06-15');
 
-    expect(result).toEqual([
-      { name: 'Ana López', planMeals: ['breakfast', 'lunch'], restrictions: ['platano'] },
-    ]);
+    expect(result).toEqual([{ name: 'Ana López', planMeals: ['breakfast', 'lunch'] }]);
   });
 
   it('excludes clients whose date is in suspendedDates', async () => {

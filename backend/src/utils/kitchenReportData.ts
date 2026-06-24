@@ -39,7 +39,6 @@ export type KitchenReportData = {
   pasteleria: MealSection[];
   hiperproteico: string[];
   produccion: MealSection[];
-  restrictionConflicts: { name: string; conflicts: string[] }[];
 };
 
 export const PASTELERIA_MEALS: MealConfig[] = [
@@ -78,34 +77,13 @@ export const computeKitchenReportData = (
   menu: MenuData,
   clients: ActiveClientRow[],
   date: string,
-): KitchenReportData => {
-  const allDishes = [
-    menu.breakfast,
-    menu.morningSnack,
-    menu.salad,
-    menu.lunch,
-    menu.afternoonSnack,
-    menu.dinner,
-    menu.juice,
-  ]
-    .filter(Boolean)
-    .join(' ')
-    .toLowerCase();
-
-  return {
-    dateText: formatDateText(date),
-    totalClients: clients.length,
-    pasteleria: toSection(PASTELERIA_MEALS, menu, clients),
-    hiperproteico: clients.filter((c) => c.planMeals.includes('extra')).map((c) => c.name),
-    produccion: toSection(PRODUCCION_MEALS, menu, clients),
-    restrictionConflicts: clients
-      .map((c) => ({
-        name: c.name,
-        conflicts: c.restrictions.filter((r) => allDishes.includes(r.toLowerCase())),
-      }))
-      .filter((c) => c.conflicts.length > 0),
-  };
-};
+): KitchenReportData => ({
+  dateText: formatDateText(date),
+  totalClients: clients.length,
+  pasteleria: toSection(PASTELERIA_MEALS, menu, clients),
+  hiperproteico: clients.filter((c) => c.planMeals.includes('extra')).map((c) => c.name),
+  produccion: toSection(PRODUCCION_MEALS, menu, clients),
+});
 
 export const kitchenReportFileName = (date: string): string => {
   const parsed = parseISO(date);
