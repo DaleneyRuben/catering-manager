@@ -43,6 +43,7 @@ export interface ClientUpdateDraft {
 export interface ClientFilters {
   status?: string;
   q?: string;
+  restriction?: string;
   birthMonth?: string;
   page?: number;
   limit?: number;
@@ -56,6 +57,7 @@ export function useClientList(filters: ClientFilters = {}) {
       if (filters.status && filters.status !== CLIENT_STATUS.ALL)
         params.set('status', filters.status);
       if (filters.q) params.set('q', filters.q);
+      if (filters.restriction) params.set('restriction', filters.restriction);
       if (filters.birthMonth && filters.birthMonth !== CLIENT_STATUS.ALL)
         params.set('birthMonth', filters.birthMonth);
       if (filters.page) params.set('page', String(filters.page));

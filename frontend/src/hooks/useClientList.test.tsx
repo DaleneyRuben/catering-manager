@@ -63,4 +63,20 @@ describe('useClientList', () => {
     await waitFor(() => expect(mockGetPaginated).toHaveBeenCalled());
     expect(mockGetPaginated).toHaveBeenCalledWith(expect.stringContaining('limit=10'));
   });
+
+  it('passes restriction param in the query string', async () => {
+    mockGetPaginated.mockResolvedValue({ data: [], total: 0, page: 1, limit: 25 });
+    renderHook(() => useClientList({ restriction: 'maní' }), { wrapper: makeWrapper() });
+    await waitFor(() => expect(mockGetPaginated).toHaveBeenCalled());
+    expect(mockGetPaginated).toHaveBeenCalledWith(
+      expect.stringContaining(`restriction=${encodeURIComponent('maní')}`),
+    );
+  });
+
+  it('omits restriction param when not provided', async () => {
+    mockGetPaginated.mockResolvedValue({ data: [], total: 0, page: 1, limit: 25 });
+    renderHook(() => useClientList(), { wrapper: makeWrapper() });
+    await waitFor(() => expect(mockGetPaginated).toHaveBeenCalled());
+    expect(mockGetPaginated).toHaveBeenCalledWith(expect.not.stringContaining('restriction='));
+  });
 });
