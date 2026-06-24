@@ -4,17 +4,11 @@ import type { CreateUserDto, UpdateUserDto } from '../schemas/user.schema';
 
 const SALT_ROUNDS = 10;
 
-const USER_ATTRIBUTES = ['id', 'username', 'role', 'lastLoginAt', 'deletedAt'];
+const USER_ATTRIBUTES = ['id', 'username', 'role', 'lastLoginAt'];
 
-const findAll = () =>
-  User.findAll({
-    attributes: USER_ATTRIBUTES,
-    order: [['username', 'ASC']],
-    paranoid: false,
-  });
+const findAll = () => User.findAll({ attributes: USER_ATTRIBUTES, order: [['username', 'ASC']] });
 
-const findById = (id: number) =>
-  User.findByPk(id, { attributes: USER_ATTRIBUTES, paranoid: false });
+const findById = (id: number) => User.findByPk(id, { attributes: USER_ATTRIBUTES });
 
 const create = async (dto: CreateUserDto): Promise<User> => {
   const hashed = await bcrypt.hash(dto.password, SALT_ROUNDS);

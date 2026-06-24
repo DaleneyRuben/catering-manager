@@ -26,9 +26,8 @@ describe('userService.findAll', () => {
     const result = await userService.findAll();
 
     expect(User.findAll).toHaveBeenCalledWith({
-      attributes: ['id', 'username', 'role', 'lastLoginAt', 'deletedAt'],
+      attributes: ['id', 'username', 'role', 'lastLoginAt'],
       order: [['username', 'ASC']],
-      paranoid: false,
     });
     expect(result).toEqual([mockUser]);
   });
@@ -41,8 +40,7 @@ describe('userService.findById', () => {
     const result = await userService.findById(1);
 
     expect(User.findByPk).toHaveBeenCalledWith(1, {
-      attributes: ['id', 'username', 'role', 'lastLoginAt', 'deletedAt'],
-      paranoid: false,
+      attributes: ['id', 'username', 'role', 'lastLoginAt'],
     });
     expect(result).toEqual(mockUser);
   });

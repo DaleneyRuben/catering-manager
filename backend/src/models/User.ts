@@ -3,7 +3,7 @@ import { ROLE_VALUES, type UserRole } from '../constants/roles';
 
 export type { UserRole };
 
-@Table({ tableName: 'users', timestamps: true, paranoid: true })
+@Table({ tableName: 'users', timestamps: true })
 class User extends Model {
   @Column({ type: DataType.STRING, allowNull: false, unique: true })
   declare username: string;
