@@ -152,19 +152,40 @@ describe('ClientsPage', () => {
     });
   });
 
-  it('shows client restrictions as pills in the table', async () => {
+  it('does not show the restricciones column when the allergy search is empty', async () => {
     mockGetPaginated.mockResolvedValue(
       paginatedResponse([makeClient({ restrictions: ['Gluten', 'Maní'] })]),
     );
     renderPage();
-    await waitFor(() => expect(screen.getByText('Gluten')).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText('María García')).toBeInTheDocument());
+    expect(screen.queryByText('Restricciones')).not.toBeInTheDocument();
+    expect(screen.queryByText('Gluten')).not.toBeInTheDocument();
+  });
+
+  it('shows client restrictions as pills in the table once filtering by allergy', async () => {
+    mockGetPaginated.mockResolvedValue(
+      paginatedResponse([makeClient({ restrictions: ['Gluten', 'Maní'] })]),
+    );
+    renderPage();
+    await waitFor(() => expect(screen.getByText('María García')).toBeInTheDocument());
+
+    const allergySearch = screen.getByPlaceholderText('Buscar por alergia o restricción…');
+    await userEvent.type(allergySearch, 'gluten');
+
+    await waitFor(() => expect(screen.getByText('Restricciones')).toBeInTheDocument());
+    expect(screen.getByText('Gluten')).toBeInTheDocument();
     expect(screen.getByText('Maní')).toBeInTheDocument();
   });
 
-  it('shows a dash in the restrictions column when a client has none', async () => {
+  it('shows a dash in the restrictions column when a client has none and an allergy search is active', async () => {
     mockGetPaginated.mockResolvedValue(paginatedResponse([makeClient({ restrictions: [] })]));
     renderPage();
     await screen.findByText('María García');
+
+    const allergySearch = screen.getByPlaceholderText('Buscar por alergia o restricción…');
+    await userEvent.type(allergySearch, 'gluten');
+
+    await waitFor(() => expect(screen.getByText('Restricciones')).toBeInTheDocument());
     expect(screen.getAllByText('—').length).toBeGreaterThan(0);
   });
 
