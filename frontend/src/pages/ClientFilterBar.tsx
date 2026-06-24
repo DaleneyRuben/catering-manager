@@ -138,12 +138,12 @@ export function ClientFilterBar({
         </div>
 
         {/* Month — right-aligned */}
-        <div className="lg:ml-auto lg:shrink-0">
-          <div className="relative">
+        <div className="lg:ml-auto lg:shrink-0 lg:self-stretch">
+          <div className="relative h-full text-[12.5px] tracking-[.02em] text-muted">
             <select
               value={birthMonth}
               onChange={(e) => onBirthMonthChange(e.target.value)}
-              className="appearance-none font-mono text-[13px] text-ink-2 w-full py-[10px] pl-[14px] pr-8 border border-rule rounded-[9px] bg-paper cursor-pointer"
+              className="appearance-none h-full w-full py-[9px] px-[14px] pr-8 border border-rule rounded-[11px] bg-paper cursor-pointer hover:border-rule-2"
             >
               <option value="all">Mes · todos</option>
               {MONTHS.map((m, i) => (
