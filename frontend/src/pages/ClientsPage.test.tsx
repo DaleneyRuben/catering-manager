@@ -143,8 +143,28 @@ describe('ClientsPage', () => {
     renderPage();
     await waitFor(() => expect(screen.getByText('María García')).toBeInTheDocument());
 
-    const search = screen.getByPlaceholderText(/buscar/i);
+    const search = screen.getByPlaceholderText('Buscar cliente…');
     await userEvent.type(search, 'Juan');
+
+    await waitFor(() => {
+      expect(screen.getByText('Juan Pérez')).toBeInTheDocument();
+      expect(screen.queryByText('María García')).not.toBeInTheDocument();
+    });
+  });
+
+  it('filters clients by allergy/restriction search via backend', async () => {
+    mockGetPaginated.mockImplementation((url: string) => {
+      if (url.includes(`restriction=${encodeURIComponent('maní')}`))
+        return Promise.resolve(
+          paginatedResponse([makeClient({ id: 2, name: 'Juan Pérez', restrictions: ['maní'] })]),
+        );
+      return Promise.resolve(paginatedResponse([makeClient({ id: 1, name: 'María García' })]));
+    });
+    renderPage();
+    await waitFor(() => expect(screen.getByText('María García')).toBeInTheDocument());
+
+    const allergySearch = screen.getByPlaceholderText('Buscar por alergia o restricción…');
+    await userEvent.type(allergySearch, 'maní');
 
     await waitFor(() => {
       expect(screen.getByText('Juan Pérez')).toBeInTheDocument();

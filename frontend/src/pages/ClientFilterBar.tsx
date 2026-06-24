@@ -16,6 +16,8 @@ const STATUS_FILTERS: { v: FilterValue; l: string }[] = [
 interface Props {
   q: string;
   onQChange: (value: string) => void;
+  restriction: string;
+  onRestrictionChange: (value: string) => void;
   birthMonth: string;
   onBirthMonthChange: (value: string) => void;
   filter: FilterValue;
@@ -27,6 +29,8 @@ interface Props {
 export function ClientFilterBar({
   q,
   onQChange,
+  restriction,
+  onRestrictionChange,
   birthMonth,
   onBirthMonthChange,
   filter,
@@ -75,6 +79,31 @@ export function ClientFilterBar({
               </span>
             )}
           </button>
+        </div>
+
+        {/* Allergy / restriction search */}
+        <div className="relative flex-1 min-w-[230px]">
+          <input
+            value={restriction}
+            onChange={(e) => onRestrictionChange(e.target.value)}
+            placeholder="Buscar por alergia o restricción…"
+            className="w-full pl-[38px] pr-9 py-2.5 text-[13.5px] border border-rule rounded-[9px] bg-paper placeholder:text-faint focus:outline-none focus:border-warn-dot"
+          />
+          <Icon
+            name="alert"
+            size={16}
+            className="absolute left-[13px] top-1/2 -translate-y-1/2 text-warn-dot"
+          />
+          {restriction && (
+            <button
+              type="button"
+              aria-label="Limpiar búsqueda de alergia"
+              onClick={() => onRestrictionChange('')}
+              className="absolute right-[9px] top-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-cream-2 text-muted flex items-center justify-center hover:bg-warn-border hover:text-ink-2 transition-colors"
+            >
+              <Icon name="x" size={12} stroke={2.2} />
+            </button>
+          )}
         </div>
 
         {/* Month — collapsed on mobile behind toggle */}

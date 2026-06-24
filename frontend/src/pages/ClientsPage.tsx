@@ -29,6 +29,8 @@ export function ClientsPage() {
 
   const [q, setQ] = useState(() => searchParams.get('q') ?? '');
   const debouncedQ = useDebounce(q);
+  const [restriction, setRestriction] = useState(() => searchParams.get('restriction') ?? '');
+  const debouncedRestriction = useDebounce(restriction);
   const [tableLoading, setTableLoading] = useState(false);
 
   const updateParams = (updates: Record<string, string | null>, resetPage = false) => {
@@ -77,9 +79,15 @@ export function ClientsPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedQ]);
 
+  useEffect(() => {
+    updateParams({ restriction: debouncedRestriction || null }, true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [debouncedRestriction]);
+
   const { clients, total, isLoading, isFetching } = useClientList({
     status: filter,
     q: debouncedQ,
+    restriction: debouncedRestriction,
     birthMonth,
     page,
     limit,
@@ -104,6 +112,8 @@ export function ClientsPage() {
       <ClientFilterBar
         q={q}
         onQChange={setQ}
+        restriction={restriction}
+        onRestrictionChange={setRestriction}
         birthMonth={birthMonth}
         onBirthMonthChange={changeBirthMonth}
         filter={filter}

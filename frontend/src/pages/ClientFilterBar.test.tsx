@@ -6,6 +6,8 @@ import { CLIENT_STATUS } from '../constants/clientStatus';
 const baseProps = {
   q: '',
   onQChange: jest.fn(),
+  restriction: '',
+  onRestrictionChange: jest.fn(),
   birthMonth: 'all',
   onBirthMonthChange: jest.fn(),
   filter: CLIENT_STATUS.ALL,
@@ -27,6 +29,37 @@ describe('ClientFilterBar', () => {
     render(<ClientFilterBar {...baseProps} onQChange={onQChange} />);
     await userEvent.type(screen.getByPlaceholderText('Buscar cliente…'), 'a');
     expect(onQChange).toHaveBeenCalledWith('a');
+  });
+
+  it('renders the allergy/restriction search input', () => {
+    render(<ClientFilterBar {...baseProps} />);
+    expect(screen.getByPlaceholderText('Buscar por alergia o restricción…')).toBeInTheDocument();
+  });
+
+  it('calls onRestrictionChange when typing in the allergy search input', async () => {
+    const onRestrictionChange = jest.fn();
+    render(<ClientFilterBar {...baseProps} onRestrictionChange={onRestrictionChange} />);
+    await userEvent.type(screen.getByPlaceholderText('Buscar por alergia o restricción…'), 'l');
+    expect(onRestrictionChange).toHaveBeenCalledWith('l');
+  });
+
+  it('does not show a clear button when the allergy search is empty', () => {
+    render(<ClientFilterBar {...baseProps} restriction="" />);
+    expect(screen.queryByLabelText('Limpiar búsqueda de alergia')).not.toBeInTheDocument();
+  });
+
+  it('shows a clear button when the allergy search has a value, and clears it on click', async () => {
+    const onRestrictionChange = jest.fn();
+    render(
+      <ClientFilterBar
+        {...baseProps}
+        restriction="maní"
+        onRestrictionChange={onRestrictionChange}
+      />,
+    );
+    const clearButton = screen.getByLabelText('Limpiar búsqueda de alergia');
+    await userEvent.click(clearButton);
+    expect(onRestrictionChange).toHaveBeenCalledWith('');
   });
 
   it('renders all status filter buttons', () => {
