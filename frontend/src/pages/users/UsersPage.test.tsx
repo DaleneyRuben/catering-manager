@@ -1,6 +1,8 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { subDays } from 'date-fns';
 import { useUsers } from '../../hooks/useUsers';
+import { formatDateTime } from '../../utils/format';
 import { useAuth } from '../../contexts/AuthContext';
 import { UsersPage } from './UsersPage';
 
@@ -29,16 +31,14 @@ const defaultUsers = [
     id: '1',
     username: 'admin',
     role: 'admin' as const,
-    lastLoginAt: '2026-06-20T14:30:00',
-    deletedAt: null,
+    lastLoginAt: subDays(new Date(), 3).toISOString(),
   },
-  { id: '2', username: 'chef', role: 'kitchen' as const, lastLoginAt: null, deletedAt: null },
+  { id: '2', username: 'chef', role: 'kitchen' as const, lastLoginAt: null },
   {
     id: '3',
     username: 'rocio',
     role: 'kitchen' as const,
-    lastLoginAt: null,
-    deletedAt: '2026-06-10T00:00:00.000Z',
+    lastLoginAt: subDays(new Date(), 10).toISOString(),
   },
 ];
 
@@ -131,21 +131,21 @@ describe('UsersPage', () => {
 
   it('shows the formatted last login date', () => {
     render(<UsersPage />);
-    expect(screen.getByText('20/06/2026 14:30')).toBeInTheDocument();
+    expect(screen.getByText(formatDateTime(defaultUsers[0].lastLoginAt!))).toBeInTheDocument();
   });
 
   it('shows Nunca when the user has never logged in', () => {
     render(<UsersPage />);
-    expect(screen.getAllByText('Nunca')).toHaveLength(2);
+    expect(screen.getAllByText('Nunca')).toHaveLength(1);
   });
 
-  it('shows Activo for users without a deletedAt', () => {
+  it('shows Activo for users who logged in within the last 7 days', () => {
     render(<UsersPage />);
-    expect(screen.getAllByText('Activo')).toHaveLength(2);
+    expect(screen.getAllByText('Activo')).toHaveLength(1);
   });
 
-  it('shows Inactivo for soft-deleted users', () => {
+  it('shows Inactivo for users who have not logged in within the last 7 days, including those who never logged in', () => {
     render(<UsersPage />);
-    expect(screen.getByText('Inactivo')).toBeInTheDocument();
+    expect(screen.getAllByText('Inactivo')).toHaveLength(2);
   });
 });

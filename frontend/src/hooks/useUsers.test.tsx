@@ -17,14 +17,12 @@ const user1 = {
   username: 'ada',
   role: 'admin' as const,
   lastLoginAt: null,
-  deletedAt: null,
 };
 const user2 = {
   id: '2',
   username: 'grace',
   role: 'kitchen' as const,
   lastLoginAt: null,
-  deletedAt: null,
 };
 
 function makeWrapper() {

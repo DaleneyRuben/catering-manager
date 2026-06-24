@@ -9,7 +9,6 @@ export type AppUser = {
   username: string;
   role: UserRole;
   lastLoginAt: string | null;
-  deletedAt: string | null;
 };
 
 export type UserDraft = {

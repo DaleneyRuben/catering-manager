@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { isAfter, parseISO, subDays } from 'date-fns';
 import { Button } from '../../components/ui/Button';
 import { Icon } from '../../components/ui/Icon';
 import { PageHeader } from '../../components/ui/PageHeader';
@@ -32,6 +33,10 @@ const ROLE_ICONS: Record<UserRole, string> = {
 };
 
 const ROLE_ORDER: UserRole[] = [ROLES.SUPER_ADMIN, ROLES.ADMIN, ROLES.KITCHEN, ROLES.DELIVERY];
+
+// Active means the user has logged in within the last 7 days — not a soft-delete flag.
+const isActiveUser = (lastLoginAt: string | null): boolean =>
+  !!lastLoginAt && isAfter(parseISO(lastLoginAt), subDays(new Date(), 7));
 
 export function UsersPage() {
   const { user: currentUser } = useAuth();
@@ -128,7 +133,7 @@ export function UsersPage() {
               </thead>
               <tbody>
                 {filteredUsers.map((u) => {
-                  const isActive = !u.deletedAt;
+                  const isActive = isActiveUser(u.lastLoginAt);
                   return (
                     <tr
                       key={u.id}
