@@ -1,5 +1,11 @@
 export type PlanTier = 'basic' | 'mid' | 'premium';
 
+export const TIER_LABELS: Record<PlanTier, string> = {
+  basic: 'Esencial',
+  mid: 'Completo',
+  premium: 'Premium',
+};
+
 export const TIER_STYLES: Record<PlanTier, { band: string; bandBorder: string }> = {
   basic: { band: 'var(--color-olive-50)', bandBorder: 'var(--color-tier-basic-border)' },
   mid: { band: 'var(--color-tier-mid-bg)', bandBorder: 'var(--color-tier-mid-border)' },
