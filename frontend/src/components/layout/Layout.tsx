@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { Toaster } from 'sonner';
 import { Icon } from '../ui/Icon';
@@ -55,6 +55,7 @@ export function Layout({ children }: LayoutProps) {
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const { user, clearAuth } = useAuth();
+  const mainRef = useRef<HTMLElement>(null);
 
   const handleLogout = () => {
     clearAuth();
@@ -63,10 +64,11 @@ export function Layout({ children }: LayoutProps) {
 
   useEffect(() => {
     setMenuOpen(false);
+    mainRef.current?.scrollTo?.(0, 0);
   }, [pathname]);
 
   return (
-    <div className="flex min-h-screen bg-cream">
+    <div className="flex h-dvh bg-cream">
       {menuOpen && (
         <div
           data-testid="sidebar-backdrop"
@@ -158,7 +160,7 @@ export function Layout({ children }: LayoutProps) {
             La Oliva
           </p>
         </header>
-        <main className="flex-1 min-w-0 overflow-y-auto overflow-x-hidden">
+        <main ref={mainRef} className="flex-1 min-w-0 overflow-y-auto overflow-x-hidden">
           <div key={pathname} className="page-enter">
             {children}
           </div>
