@@ -250,6 +250,36 @@ describe('clientService.findAll with filters', () => {
     expect(subWhere?.finalizedAt).toEqual({ [Symbol.for('is')]: null });
   });
 
+  it('restriction filter adds a parameterized EXISTS/unnest condition', async () => {
+    (Client.findAndCountAll as jest.Mock).mockResolvedValue({ rows: [], count: 0 });
+
+    await clientService.findAll({ restriction: 'maní' });
+
+    const call = (Client.findAndCountAll as jest.Mock).mock.calls[0][0];
+    const andConditions = call.where?.[Symbol.for('and')];
+    expect(andConditions).toBeDefined();
+    const restrictionCondition = andConditions.find(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (c: any) => c?.val?.includes?.('unnest') && c?.val?.includes?.('restrictions'),
+    );
+    expect(restrictionCondition).toBeDefined();
+    expect(restrictionCondition.val).toContain('ILIKE');
+    expect(restrictionCondition.val).toContain(':restrictionTerm');
+    expect(call.replacements).toEqual({ restrictionTerm: '%maní%' });
+  });
+
+  it('omits the restriction condition when no restriction filter is given', async () => {
+    (Client.findAndCountAll as jest.Mock).mockResolvedValue({ rows: [], count: 0 });
+
+    await clientService.findAll({ q: 'ana' });
+
+    const call = (Client.findAndCountAll as jest.Mock).mock.calls[0][0];
+    const andConditions = call.where?.[Symbol.for('and')];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const restrictionCondition = andConditions.find((c: any) => c?.val?.includes?.('unnest'));
+    expect(restrictionCondition).toBeUndefined();
+  });
+
   it('no filters calls findAndCountAll without where', async () => {
     (Client.findAndCountAll as jest.Mock).mockResolvedValue({ rows: [], count: 0 });
 

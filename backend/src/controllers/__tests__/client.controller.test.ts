@@ -98,6 +98,16 @@ describe('GET /api/clients', () => {
     expect(clientService.findAll).toHaveBeenCalledWith(expect.objectContaining({ q: 'maria' }));
   });
 
+  it('forwards restriction query param to service', async () => {
+    (clientService.findAll as jest.Mock).mockResolvedValue({ rows: [], total: 0 });
+
+    await request(app).get(`/api/clients?restriction=${encodeURIComponent('maní')}`);
+
+    expect(clientService.findAll).toHaveBeenCalledWith(
+      expect.objectContaining({ restriction: 'maní' }),
+    );
+  });
+
   it('forwards birthMonth query param to service as number', async () => {
     (clientService.findAll as jest.Mock).mockResolvedValue({ rows: [], total: 0 });
 

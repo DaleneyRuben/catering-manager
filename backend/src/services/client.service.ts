@@ -20,6 +20,7 @@ const INCLUDE_SUBSCRIPTION_ORDERED = [
 export interface FindAllFilters {
   status?: string;
   q?: string;
+  restriction?: string;
   birthMonth?: number;
   page?: number;
   limit?: number;
@@ -141,6 +142,17 @@ const findAll = (filters: FindAllFilters = {}) => {
     );
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const replacements: Record<string, any> = {};
+  if (filters.restriction) {
+    replacements.restrictionTerm = `%${filters.restriction}%`;
+    andConditions.push(
+      literal(
+        `EXISTS (SELECT 1 FROM unnest("Client"."restrictions") r WHERE r ILIKE :restrictionTerm)`,
+      ),
+    );
+  }
+
   if (andConditions.length) clientWhere[Op.and] = andConditions;
 
   const page = filters.page ?? 1;
@@ -163,6 +175,7 @@ const findAll = (filters: FindAllFilters = {}) => {
     limit,
     offset,
     distinct: true,
+    ...(Object.keys(replacements).length ? { replacements } : {}),
   }).then(({ rows, count }) => {
     const processed = rows.map(withStatus);
     return { rows: processed, total: count };
