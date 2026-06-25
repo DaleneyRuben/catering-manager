@@ -5,7 +5,7 @@ import Plan from '../models/Plan';
 import Subscription from '../models/Subscription';
 import User from '../models/User';
 import type Menu from '../models/Menu';
-import { ROLES, type UserRole } from '../constants/roles';
+import { ROLES } from '../constants/roles';
 import { appToday, addCalendarDays } from '../utils/date';
 import menuService from './menu.service';
 
@@ -134,31 +134,24 @@ export type Connection = {
   online: boolean;
 };
 
-const findConnectionForRole = async (role: UserRole): Promise<Connection | null> => {
-  const user = await User.findOne({
-    where: { role, lastLoginAt: { [Op.not]: null } },
+const findConnections = async (): Promise<Connection[]> => {
+  const users = await User.findAll({
+    where: {
+      role: { [Op.in]: [ROLES.KITCHEN, ROLES.DELIVERY] },
+      lastLoginAt: { [Op.not]: null },
+    },
     order: [['lastLoginAt', 'DESC']],
   });
-  if (!user) return null;
 
-  const lastLoginAt = user.lastLoginAt as Date;
-  return {
-    username: user.username,
-    lastLoginAt: lastLoginAt.toISOString(),
-    online: Date.now() - lastLoginAt.getTime() <= ONLINE_WINDOW_MS,
-  };
-};
-
-const findConnections = async (): Promise<{
-  kitchen: Connection | null;
-  delivery: Connection | null;
-}> => {
-  const [kitchen, delivery] = await Promise.all([
-    findConnectionForRole(ROLES.KITCHEN),
-    findConnectionForRole(ROLES.DELIVERY),
-  ]);
-
-  return { kitchen, delivery };
+  const now = Date.now();
+  return users.map((user) => {
+    const lastLoginAt = user.lastLoginAt as Date;
+    return {
+      username: user.username,
+      lastLoginAt: lastLoginAt.toISOString(),
+      online: now - lastLoginAt.getTime() <= ONLINE_WINDOW_MS,
+    };
+  });
 };
 
 export type MenuStatus = {
@@ -187,7 +180,7 @@ const findMenus = async (): Promise<{ today: MenuStatus; tomorrow: MenuStatus }>
 export type DashboardSummary = DashboardCounts & {
   contractEnding: { today: ContractEndingPerson[]; tomorrow: ContractEndingPerson[] };
   birthdays: BirthdayPerson[];
-  connections: { kitchen: Connection | null; delivery: Connection | null };
+  connections: Connection[];
   menus: { today: MenuStatus; tomorrow: MenuStatus };
 };
 

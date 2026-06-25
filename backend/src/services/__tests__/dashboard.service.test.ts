@@ -130,53 +130,45 @@ describe('dashboardService.findConnections', () => {
     jest.useRealTimers();
   });
 
-  it('returns the username and lastLoginAt for the most recently active user per role', async () => {
-    (User.findOne as jest.Mock).mockImplementation(({ where }) =>
-      where.role === 'kitchen'
-        ? Promise.resolve({ username: 'Susy', lastLoginAt: new Date('2026-06-25T11:30:00Z') })
-        : Promise.resolve(null),
-    );
+  it('returns all kitchen and delivery users sorted by lastLoginAt desc', async () => {
+    (User.findAll as jest.Mock).mockResolvedValue([
+      { username: 'Caro', lastLoginAt: new Date('2026-06-25T11:59:00Z') },
+      { username: 'Randy', lastLoginAt: new Date('2026-06-25T11:56:00Z') },
+    ]);
 
     const result = await dashboardService.findConnections();
 
-    expect(result.kitchen).toEqual({
-      username: 'Susy',
-      lastLoginAt: '2026-06-25T11:30:00.000Z',
-      online: true,
-    });
+    expect(result).toEqual([
+      { username: 'Caro', lastLoginAt: '2026-06-25T11:59:00.000Z', online: true },
+      { username: 'Randy', lastLoginAt: '2026-06-25T11:56:00.000Z', online: true },
+    ]);
   });
 
   it('marks online false when the last login was over an hour ago', async () => {
-    (User.findOne as jest.Mock).mockImplementation(({ where }) =>
-      where.role === 'delivery'
-        ? Promise.resolve({ username: 'Randy', lastLoginAt: new Date('2026-06-25T08:14:00Z') })
-        : Promise.resolve(null),
-    );
+    (User.findAll as jest.Mock).mockResolvedValue([
+      { username: 'Randy', lastLoginAt: new Date('2026-06-25T08:14:00Z') },
+    ]);
 
     const result = await dashboardService.findConnections();
 
-    expect(result.delivery).toEqual({
-      username: 'Randy',
-      lastLoginAt: '2026-06-25T08:14:00.000Z',
-      online: false,
-    });
+    expect(result[0].online).toBe(false);
   });
 
-  it('returns null for a role with no user that has ever logged in', async () => {
-    (User.findOne as jest.Mock).mockResolvedValue(null);
+  it('returns an empty array when no kitchen or delivery user has logged in', async () => {
+    (User.findAll as jest.Mock).mockResolvedValue([]);
 
     const result = await dashboardService.findConnections();
 
-    expect(result.kitchen).toBeNull();
-    expect(result.delivery).toBeNull();
+    expect(result).toEqual([]);
   });
 
-  it('excludes users who have never logged in from the query', async () => {
-    (User.findOne as jest.Mock).mockResolvedValue(null);
+  it('queries only kitchen and delivery roles with a non-null lastLoginAt', async () => {
+    (User.findAll as jest.Mock).mockResolvedValue([]);
 
     await dashboardService.findConnections();
 
-    const call = (User.findOne as jest.Mock).mock.calls[0][0];
+    const call = (User.findAll as jest.Mock).mock.calls[0][0];
+    expect(call.where.role).toEqual({ [Symbol.for('in')]: ['kitchen', 'delivery'] });
     expect(call.where.lastLoginAt).toEqual({ [Symbol.for('not')]: null });
   });
 });
@@ -288,7 +280,7 @@ describe('dashboardService.findSummary', () => {
     ]);
     (Subscription.findAll as jest.Mock).mockResolvedValue([]);
     (Client.findAll as jest.Mock).mockResolvedValue([]);
-    (User.findOne as jest.Mock).mockResolvedValue(null);
+    (User.findAll as jest.Mock).mockResolvedValue([]);
     (menuService.findByDate as jest.Mock).mockResolvedValue(null);
 
     const result = await dashboardService.findSummary();
@@ -299,7 +291,7 @@ describe('dashboardService.findSummary', () => {
       deliveriesToday: 9,
       contractEnding: { today: [], tomorrow: [] },
       birthdays: [],
-      connections: { kitchen: null, delivery: null },
+      connections: [],
       menus: {
         today: { date: '2026-06-25', loaded: false },
         tomorrow: { date: '2026-06-26', loaded: false },
