@@ -1,11 +1,26 @@
-import { format, parseISO } from 'date-fns';
-import { es } from 'date-fns/locale';
+import { parseISO } from 'date-fns';
 import Client from '../models/Client';
 import { appToday, addCalendarDays } from '../utils/date';
 import { checkIsWeekend } from '../utils/devFlags';
 import { findActiveSubscriptionsForDate } from './subscriptionQueries';
 
-export type DeliveryClientRow = {
+export type DeliveryPerson = {
+  id: number;
+  name: string;
+  phone: string;
+  deliveryZone: string;
+};
+
+export type DeliveryGroup = {
+  groupToken: string | null;
+  members: DeliveryPerson[];
+};
+
+export type DeliveryDayRoute = {
+  groups: DeliveryGroup[];
+};
+
+type DeliveryClientRow = {
   id: number;
   name: string;
   phoneNumber: string;
@@ -13,21 +28,43 @@ export type DeliveryClientRow = {
   groupToken: string | null;
 };
 
-export type DeliveryDayRoute = {
-  date: string;
-  dateLabel: string;
-  clients: DeliveryClientRow[];
-};
+const byName = (a: DeliveryPerson, b: DeliveryPerson) => a.name.localeCompare(b.name, 'es');
 
-const formatDateLabel = (date: string): string => {
-  const label = format(parseISO(date), "EEEE d 'de' MMMM, yyyy", { locale: es });
-  return label.charAt(0).toUpperCase() + label.slice(1);
+const toPerson = (c: DeliveryClientRow): DeliveryPerson => ({
+  id: c.id,
+  name: c.name,
+  phone: c.phoneNumber,
+  deliveryZone: c.deliveryZone,
+});
+
+// A client without a groupToken is represented as a group of one, so the
+// frontend can render every entry the same way. Groups are listed before singles.
+const buildGroups = (clients: DeliveryClientRow[]): DeliveryGroup[] => {
+  const groupTokens: string[] = [];
+  clients.forEach((c) => {
+    if (c.groupToken && !groupTokens.includes(c.groupToken)) groupTokens.push(c.groupToken);
+  });
+
+  const groups: DeliveryGroup[] = groupTokens.map((groupToken) => ({
+    groupToken,
+    members: clients
+      .filter((c) => c.groupToken === groupToken)
+      .map(toPerson)
+      .sort(byName),
+  }));
+
+  const singles: DeliveryGroup[] = clients
+    .filter((c) => !c.groupToken)
+    .map(toPerson)
+    .sort(byName)
+    .map((person) => ({ groupToken: null, members: [person] }));
+
+  return [...groups, ...singles];
 };
 
 // Weekends are never delivery days — return an empty route without hitting the DB.
 const buildDayRoute = async (date: string): Promise<DeliveryDayRoute> => {
-  const dateLabel = formatDateLabel(date);
-  if (checkIsWeekend(parseISO(date))) return { date, dateLabel, clients: [] };
+  if (checkIsWeekend(parseISO(date))) return { groups: [] };
 
   const subscriptions = await findActiveSubscriptionsForDate(date);
   const clients = subscriptions.map((s) => {
@@ -41,16 +78,16 @@ const buildDayRoute = async (date: string): Promise<DeliveryDayRoute> => {
     };
   });
 
-  return { date, dateLabel, clients };
+  return { groups: buildGroups(clients) };
 };
 
-const findRoute = async (): Promise<{ hoy: DeliveryDayRoute; manana: DeliveryDayRoute }> => {
+const findRoute = async (): Promise<Record<string, DeliveryDayRoute>> => {
   const today = appToday();
   const tomorrow = addCalendarDays(today, 1);
 
   const [hoy, manana] = await Promise.all([buildDayRoute(today), buildDayRoute(tomorrow)]);
 
-  return { hoy, manana };
+  return { [today]: hoy, [tomorrow]: manana };
 };
 
 export default { findRoute };
