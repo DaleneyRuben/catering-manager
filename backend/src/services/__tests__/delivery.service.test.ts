@@ -35,47 +35,47 @@ describe('deliveryService.findRoute', () => {
     expect(Object.keys(result)).toEqual(['2026-06-23', '2026-06-24']);
   });
 
-  it('returns no groups for today when today is a Saturday, without querying', async () => {
+  it('returns no zones for today when today is a Saturday, without querying', async () => {
     (appToday as jest.Mock).mockReturnValue('2026-06-27'); // Saturday
     (findActiveSubscriptionsForDate as jest.Mock).mockResolvedValue([makeSubscription()]);
 
     const result = await deliveryService.findRoute();
 
-    expect(result['2026-06-27'].groups).toEqual([]);
+    expect(result['2026-06-27'].zones).toEqual([]);
     expect(findActiveSubscriptionsForDate).not.toHaveBeenCalledWith('2026-06-27');
   });
 
-  it('returns no groups for today when today is a Sunday', async () => {
+  it('returns no zones for today when today is a Sunday', async () => {
     (appToday as jest.Mock).mockReturnValue('2026-06-28'); // Sunday
     (findActiveSubscriptionsForDate as jest.Mock).mockResolvedValue([makeSubscription()]);
 
     const result = await deliveryService.findRoute();
 
-    expect(result['2026-06-28'].groups).toEqual([]);
+    expect(result['2026-06-28'].zones).toEqual([]);
   });
 
-  it('returns no groups for tomorrow when tomorrow is a Saturday, while today still has data', async () => {
+  it('returns no zones for tomorrow when tomorrow is a Saturday, while today still has data', async () => {
     (appToday as jest.Mock).mockReturnValue('2026-06-26'); // Friday
     (findActiveSubscriptionsForDate as jest.Mock).mockResolvedValue([makeSubscription()]);
 
     const result = await deliveryService.findRoute();
 
-    expect(result['2026-06-26'].groups).toHaveLength(1);
-    expect(result['2026-06-27'].groups).toEqual([]); // Saturday
+    expect(result['2026-06-26'].zones).toHaveLength(1);
+    expect(result['2026-06-27'].zones).toEqual([]); // Saturday
   });
 
-  it('returns an empty groups array when nothing matches on a weekday', async () => {
+  it('returns an empty zones array when nothing matches on a weekday', async () => {
     (appToday as jest.Mock).mockReturnValue('2026-06-23');
     (findActiveSubscriptionsForDate as jest.Mock).mockResolvedValue([]);
 
     const result = await deliveryService.findRoute();
 
-    expect(result['2026-06-23'].groups).toEqual([]);
-    expect(result['2026-06-24'].groups).toEqual([]);
+    expect(result['2026-06-23'].zones).toEqual([]);
+    expect(result['2026-06-24'].zones).toEqual([]);
   });
 
-  describe('grouping', () => {
-    it('groups clients sharing a groupToken together', async () => {
+  describe('zone/group clustering', () => {
+    it('groups clients sharing a groupToken together within their zone', async () => {
       (appToday as jest.Mock).mockReturnValue('2026-06-23');
       (findActiveSubscriptionsForDate as jest.Mock).mockResolvedValue([
         makeSubscription(
@@ -88,7 +88,8 @@ describe('deliveryService.findRoute', () => {
 
       const result = await deliveryService.findRoute();
 
-      expect(result['2026-06-23'].groups).toEqual([
+      const centro = result['2026-06-23'].zones.find((z) => z.zone === 'Centro');
+      expect(centro?.groups).toEqual([
         {
           groupToken: 'tok-1',
           members: [
@@ -97,36 +98,45 @@ describe('deliveryService.findRoute', () => {
           ],
         },
       ]);
+      expect(centro?.singles).toEqual([]);
     });
 
-    it('represents a client without a groupToken as a group of one with groupToken null', async () => {
+    it('puts clients without a groupToken into singles', async () => {
       (appToday as jest.Mock).mockReturnValue('2026-06-23');
       (findActiveSubscriptionsForDate as jest.Mock).mockResolvedValue([
-        makeSubscription(
-          makeClient({ id: 1, name: 'Ana López', deliveryZone: 'Sur', groupToken: null }),
-        ),
+        makeSubscription(makeClient({ id: 1, name: 'Ana López', groupToken: null })),
       ]);
 
       const result = await deliveryService.findRoute();
 
-      expect(result['2026-06-23'].groups).toEqual([
-        {
-          groupToken: null,
-          members: [{ id: 1, name: 'Ana López', phone: '+591 7000 0000', deliveryZone: 'Sur' }],
-        },
+      const centro = result['2026-06-23'].zones.find((z) => z.zone === 'Centro');
+      expect(centro?.groups).toEqual([]);
+      expect(centro?.singles).toEqual([
+        { id: 1, name: 'Ana López', phone: '+591 7000 0000', deliveryZone: 'Centro' },
       ]);
     });
 
-    it('lists groups before singles', async () => {
+    it('omits zones with no clients', async () => {
       (appToday as jest.Mock).mockReturnValue('2026-06-23');
       (findActiveSubscriptionsForDate as jest.Mock).mockResolvedValue([
-        makeSubscription(makeClient({ id: 1, name: 'Single Client', groupToken: null })),
-        makeSubscription(makeClient({ id: 2, name: 'Group Member', groupToken: 'tok-1' })),
+        makeSubscription(makeClient({ deliveryZone: 'Centro' })),
       ]);
 
       const result = await deliveryService.findRoute();
 
-      expect(result['2026-06-23'].groups.map((g) => g.groupToken)).toEqual(['tok-1', null]);
+      expect(result['2026-06-23'].zones.map((z) => z.zone)).toEqual(['Centro']);
+    });
+
+    it('orders zones as Sur then Centro', async () => {
+      (appToday as jest.Mock).mockReturnValue('2026-06-23');
+      (findActiveSubscriptionsForDate as jest.Mock).mockResolvedValue([
+        makeSubscription(makeClient({ id: 1, name: 'Centro Client', deliveryZone: 'Centro' })),
+        makeSubscription(makeClient({ id: 2, name: 'Sur Client', deliveryZone: 'Sur' })),
+      ]);
+
+      const result = await deliveryService.findRoute();
+
+      expect(result['2026-06-23'].zones.map((z) => z.zone)).toEqual(['Sur', 'Centro']);
     });
 
     it('sorts singles alphabetically by name', async () => {
@@ -138,21 +148,23 @@ describe('deliveryService.findRoute', () => {
 
       const result = await deliveryService.findRoute();
 
-      const names = result['2026-06-23'].groups.map((g) => g.members[0].name);
-      expect(names).toEqual(['Ana López', 'Zara Gomez']);
+      const centro = result['2026-06-23'].zones.find((z) => z.zone === 'Centro');
+      expect(centro?.singles.map((s) => s.name)).toEqual(['Ana López', 'Zara Gomez']);
     });
 
-    it('keeps each member tagged with its own deliveryZone', async () => {
+    it('counts entregas as groups.length + singles.length', async () => {
       (appToday as jest.Mock).mockReturnValue('2026-06-23');
       (findActiveSubscriptionsForDate as jest.Mock).mockResolvedValue([
-        makeSubscription(
-          makeClient({ id: 1, name: 'Sur Client', deliveryZone: 'Sur', groupToken: null }),
-        ),
+        makeSubscription(makeClient({ id: 1, name: 'A', groupToken: 'tok-1' })),
+        makeSubscription(makeClient({ id: 2, name: 'B', groupToken: 'tok-1' })),
+        makeSubscription(makeClient({ id: 3, name: 'C', groupToken: null })),
+        makeSubscription(makeClient({ id: 4, name: 'D', groupToken: null })),
       ]);
 
       const result = await deliveryService.findRoute();
 
-      expect(result['2026-06-23'].groups[0].members[0].deliveryZone).toBe('Sur');
+      const centro = result['2026-06-23'].zones.find((z) => z.zone === 'Centro');
+      expect(centro?.entregas).toBe(3); // 1 group + 2 singles
     });
   });
 });

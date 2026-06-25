@@ -10,8 +10,8 @@ jest.mock('../../middleware/auth', () => ({
 }));
 
 const mockRoute = {
-  '2026-06-23': { groups: [] },
-  '2026-06-24': { groups: [] },
+  '2026-06-23': { zones: [] },
+  '2026-06-24': { zones: [] },
 };
 
 describe('GET /api/delivery', () => {

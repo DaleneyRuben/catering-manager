@@ -4,6 +4,10 @@ import { appToday, addCalendarDays } from '../utils/date';
 import { checkIsWeekend } from '../utils/devFlags';
 import { findActiveSubscriptionsForDate } from './subscriptionQueries';
 
+// Display order for the Entregas page — Sur first, matching the route layout, not the
+// alphabetical order used for client-facing zone dropdowns elsewhere in the app.
+const ZONE_ORDER = ['Sur', 'Centro'];
+
 export type DeliveryPerson = {
   id: number;
   name: string;
@@ -12,12 +16,19 @@ export type DeliveryPerson = {
 };
 
 export type DeliveryGroup = {
-  groupToken: string | null;
+  groupToken: string;
   members: DeliveryPerson[];
 };
 
-export type DeliveryDayRoute = {
+export type DeliveryZoneRoute = {
+  zone: string;
+  entregas: number;
   groups: DeliveryGroup[];
+  singles: DeliveryPerson[];
+};
+
+export type DeliveryDayRoute = {
+  zones: DeliveryZoneRoute[];
 };
 
 type DeliveryClientRow = {
@@ -37,34 +48,35 @@ const toPerson = (c: DeliveryClientRow): DeliveryPerson => ({
   deliveryZone: c.deliveryZone,
 });
 
-// A client without a groupToken is represented as a group of one, so the
-// frontend can render every entry the same way. Groups are listed before singles.
-const buildGroups = (clients: DeliveryClientRow[]): DeliveryGroup[] => {
-  const groupTokens: string[] = [];
-  clients.forEach((c) => {
-    if (c.groupToken && !groupTokens.includes(c.groupToken)) groupTokens.push(c.groupToken);
-  });
+// Groups always belong to a single zone, so clustering per-zone first is safe.
+const buildZones = (clients: DeliveryClientRow[]): DeliveryZoneRoute[] =>
+  ZONE_ORDER.map((zone) => {
+    const inZone = clients.filter((c) => c.deliveryZone === zone);
 
-  const groups: DeliveryGroup[] = groupTokens.map((groupToken) => ({
-    groupToken,
-    members: clients
-      .filter((c) => c.groupToken === groupToken)
+    const groupTokens: string[] = [];
+    inZone.forEach((c) => {
+      if (c.groupToken && !groupTokens.includes(c.groupToken)) groupTokens.push(c.groupToken);
+    });
+
+    const groups: DeliveryGroup[] = groupTokens.map((groupToken) => ({
+      groupToken,
+      members: inZone
+        .filter((c) => c.groupToken === groupToken)
+        .map(toPerson)
+        .sort(byName),
+    }));
+
+    const singles = inZone
+      .filter((c) => !c.groupToken)
       .map(toPerson)
-      .sort(byName),
-  }));
+      .sort(byName);
 
-  const singles: DeliveryGroup[] = clients
-    .filter((c) => !c.groupToken)
-    .map(toPerson)
-    .sort(byName)
-    .map((person) => ({ groupToken: null, members: [person] }));
-
-  return [...groups, ...singles];
-};
+    return { zone, entregas: groups.length + singles.length, groups, singles };
+  }).filter((z) => z.entregas > 0);
 
 // Weekends are never delivery days — return an empty route without hitting the DB.
 const buildDayRoute = async (date: string): Promise<DeliveryDayRoute> => {
-  if (checkIsWeekend(parseISO(date))) return { groups: [] };
+  if (checkIsWeekend(parseISO(date))) return { zones: [] };
 
   const subscriptions = await findActiveSubscriptionsForDate(date);
   const clients = subscriptions.map((s) => {
@@ -78,7 +90,7 @@ const buildDayRoute = async (date: string): Promise<DeliveryDayRoute> => {
     };
   });
 
-  return { groups: buildGroups(clients) };
+  return { zones: buildZones(clients) };
 };
 
 const findRoute = async (): Promise<Record<string, DeliveryDayRoute>> => {
