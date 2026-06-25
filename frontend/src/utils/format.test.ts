@@ -1,4 +1,4 @@
-import { formatDate, formatDateTime } from './format';
+import { formatDate, formatDateTime, formatLongDate } from './format';
 
 describe('formatDate', () => {
   it('returns — for null input', () => {
@@ -29,5 +29,15 @@ describe('formatDateTime', () => {
 
   it('zero-pads hours and minutes', () => {
     expect(formatDateTime('2026-06-03T09:05:00')).toBe('03/06/2026 09:05');
+  });
+});
+
+describe('formatLongDate', () => {
+  it('formats as capitalized weekday + day + month in Spanish', () => {
+    expect(formatLongDate('2026-06-24')).toBe('Miércoles 24 de junio');
+  });
+
+  it('includes the year when withYear is true', () => {
+    expect(formatLongDate('2026-06-24', { withYear: true })).toBe('Miércoles 24 de junio, 2026');
   });
 });

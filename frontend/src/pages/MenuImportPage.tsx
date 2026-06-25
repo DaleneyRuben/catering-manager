@@ -5,16 +5,12 @@ import { PageHeader } from '../components/ui/PageHeader';
 import type { Menu, MenuDraft } from '../types/menu';
 import { useMenu } from '../hooks/useMenu';
 import { checkIsWeekend } from '../utils/devFlags';
+import { formatLongDate } from '../utils/format';
 import { MEAL_FIELDS, MEAL_FIELD_LABELS } from './menu/menuFields';
 import { MenuFormModal } from './menu/MenuFormModal';
 import { DayCard } from './menu/DayCard';
 
 const toIso = (d: Date) => format(d, 'yyyy-MM-dd');
-
-const formatDateLabel = (iso: string) => {
-  const s = format(parseISO(iso), "EEEE d 'de' MMMM", { locale: es });
-  return s.charAt(0).toUpperCase() + s.slice(1);
-};
 
 function getWeekDays(): string[] {
   const today = new Date();
@@ -159,7 +155,7 @@ export function MenuImportPage() {
         open={modalOpen}
         onClose={() => setModalOpen(false)}
         date={editingDate}
-        dateLabel={formatDateLabel(editingDate)}
+        dateLabel={formatLongDate(editingDate)}
         initial={menus.find((m) => m.date === editingDate) ?? null}
         onSave={async (draft: MenuDraft) => {
           await save(draft);
