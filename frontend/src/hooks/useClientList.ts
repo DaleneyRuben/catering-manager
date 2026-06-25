@@ -23,6 +23,7 @@ export interface SubscriptionCreateDraft {
   contractDate: string;
   duration: number;
   discount: number;
+  specialInstructions?: Record<string, string>;
 }
 
 export interface ClientUpdateDraft {

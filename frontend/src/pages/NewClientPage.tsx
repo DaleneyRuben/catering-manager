@@ -54,6 +54,7 @@ export function NewClientPage() {
       startDate: '',
       duration: 20,
       discount: 0,
+      specialInstructions: {},
     },
   });
 
@@ -91,6 +92,9 @@ export function NewClientPage() {
           startDate: data.startDate,
           duration: data.duration,
           discount: data.discount,
+          ...(Object.keys(data.specialInstructions).length > 0
+            ? { specialInstructions: data.specialInstructions }
+            : {}),
         },
       );
       navigate('/clientes');

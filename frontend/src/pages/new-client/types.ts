@@ -13,6 +13,7 @@ export interface NewClientFormValues {
   startDate: string;
   duration: number;
   discount: number;
+  specialInstructions: Record<string, string>;
 }
 
 export interface RestrictionsState {
