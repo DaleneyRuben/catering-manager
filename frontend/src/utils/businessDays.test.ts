@@ -10,8 +10,16 @@ describe('addBusinessDays', () => {
     expect(addBusinessDays('2026-05-25', 0)).toBe('2026-05-25');
   });
 
+  it('returns the same date for 0 days when starting on a Saturday', () => {
+    expect(addBusinessDays('2026-05-23', 0)).toBe('2026-05-23');
+  });
+
   it('skips the weekend: Friday + 1 = Monday', () => {
     expect(addBusinessDays('2026-05-29', 1)).toBe('2026-06-01');
+  });
+
+  it('Saturday + 1 business day = Monday', () => {
+    expect(addBusinessDays('2026-05-23', 1)).toBe('2026-05-25');
   });
 
   it('adds 5 business days: Monday + 5 = next Monday', () => {
@@ -60,11 +68,26 @@ describe('remainingDeliveryDays', () => {
     // so this returns the same as Mon Jun8 → Fri Jun12 = 4 (Tue–Fri)
     expect(remainingDeliveryDays(start, end, today)).toBe(4);
   });
+
+  it('returns 1 for a 1-day plan that has not yet started (startDate == endDate)', () => {
+    const today = new Date(2026, 5, 1); // Mon Jun 1
+    const start = new Date(2026, 5, 3); // Wed Jun 3 — in the future
+    const end = new Date(2026, 5, 3); // same day (1-day plan)
+    expect(remainingDeliveryDays(start, end, today)).toBe(1);
+  });
 });
 
 describe('subtractBusinessDays', () => {
+  it('returns the same date for 0 days', () => {
+    expect(subtractBusinessDays('2026-06-01', 0)).toBe('2026-06-01');
+  });
+
   it('subtracts 1 business day: Monday − 1 = Friday', () => {
     expect(subtractBusinessDays('2026-06-01', 1)).toBe('2026-05-29');
+  });
+
+  it('Sunday − 1 business day = Friday', () => {
+    expect(subtractBusinessDays('2026-05-24', 1)).toBe('2026-05-22');
   });
 
   it('subtracts 5 business days across a weekend', () => {
@@ -84,5 +107,15 @@ describe('businessDaysUntil', () => {
   it('skips Saturday and Sunday in the count', () => {
     // Mon Jun 1 to Mon Jun 8 = 6 business days (Mon Tue Wed Thu Fri [skip Sat Sun] Mon)
     expect(businessDaysUntil(new Date(2026, 5, 1), new Date(2026, 5, 8))).toBe(6);
+  });
+
+  it('returns 0 when from is after to', () => {
+    // critical: the refactored implementation must not throw (eachDayOfInterval throws for start > end)
+    expect(businessDaysUntil(new Date(2026, 5, 3), new Date(2026, 5, 1))).toBe(0);
+  });
+
+  it('does not count weekend days when from starts on a Saturday', () => {
+    // Sat May 23 to Mon May 25: only Monday is a business day
+    expect(businessDaysUntil(new Date(2026, 4, 23), new Date(2026, 4, 25))).toBe(1);
   });
 });
