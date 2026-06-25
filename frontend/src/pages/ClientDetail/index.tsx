@@ -14,8 +14,8 @@ import { ClientPlanTab } from './ClientPlanTab';
 import { ClientHeader } from './ClientHeader';
 import { RenewalModal } from '../../components/modals/RenewalModal';
 import { ConfirmModal } from '../../components/ui/ConfirmModal';
-import { PageLoader } from '../../components/ui/PageLoader';
 import { Tabs } from '../../components/ui/Tabs';
+import { ClientDetailSkeleton } from './ClientDetailSkeleton';
 
 type TabId = 'overview' | 'plan' | 'history';
 
@@ -71,7 +71,7 @@ export function ClientDetailPage() {
     setEditOpen(false);
   };
 
-  if (isLoading) return <PageLoader />;
+  if (isLoading) return <ClientDetailSkeleton />;
 
   if (!client) {
     return (
