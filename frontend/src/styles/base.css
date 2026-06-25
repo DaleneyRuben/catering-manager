@@ -30,6 +30,11 @@ select {
   }
 }
 
+/* Login panel glow — radial gradient not expressible in Tailwind */
+.login-panel-glow {
+  background: radial-gradient(ellipse at 32% 44%, rgba(109, 193, 24, 0.11) 0%, transparent 62%);
+}
+
 /* Brand mark — radial gradient not expressible in Tailwind */
 .brand-mark {
   background: radial-gradient(
