@@ -9,6 +9,7 @@ import { formatLongDate } from '../utils/format';
 import { MEAL_FIELDS, MEAL_FIELD_LABELS } from './menu/menuFields';
 import { MenuFormModal } from './menu/MenuFormModal';
 import { DayCard } from './menu/DayCard';
+import { MenuImportSkeleton } from './menu/MenuImportSkeleton';
 
 const toIso = (d: Date) => format(d, 'yyyy-MM-dd');
 
@@ -108,7 +109,7 @@ export function MenuImportPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editingDate, setEditingDate] = useState<string>(today);
 
-  const { menus, isSaving, save } = useMenu();
+  const { menus, isLoading, isSaving, save } = useMenu();
 
   const todayMenu = menus.find((m) => m.date === today) ?? null;
   const tomorrowMenu = menus.find((m) => m.date === tomorrow) ?? null;
@@ -126,30 +127,36 @@ export function MenuImportPage() {
     <div className="px-4 py-5 lg:px-[44px] lg:py-[34px]">
       <PageHeader label="Operativa diaria" title="Menú del día" />
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-[18px] mb-[30px]">
-        <DayCard
-          isToday
-          date={today}
-          menu={todayMenu}
-          isWeekend={isTodayWeekend}
-          onOpen={() => openModal(today)}
-        />
-        <DayCard
-          isToday={false}
-          date={tomorrow}
-          menu={tomorrowMenu}
-          isWeekend={isTomorrowWeekend}
-          onOpen={() => openModal(tomorrow)}
-        />
-      </div>
+      {isLoading ? (
+        <MenuImportSkeleton />
+      ) : (
+        <>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-[18px] mb-[30px]">
+            <DayCard
+              isToday
+              date={today}
+              menu={todayMenu}
+              isWeekend={isTodayWeekend}
+              onOpen={() => openModal(today)}
+            />
+            <DayCard
+              isToday={false}
+              date={tomorrow}
+              menu={tomorrowMenu}
+              isWeekend={isTomorrowWeekend}
+              onOpen={() => openModal(tomorrow)}
+            />
+          </div>
 
-      <div className="flex items-center justify-between gap-4 mb-4">
-        <h2 className="font-serif font-semibold text-[24px] text-ink">Esta semana</h2>
-        <span className="font-mono text-[11.5px] tracking-[.04em] text-muted">
-          {weekRangeLabel}
-        </span>
-      </div>
-      <WeekGrid weekDays={weekDays} menus={menus} today={today} />
+          <div className="flex items-center justify-between gap-4 mb-4">
+            <h2 className="font-serif font-semibold text-[24px] text-ink">Esta semana</h2>
+            <span className="font-mono text-[11.5px] tracking-[.04em] text-muted">
+              {weekRangeLabel}
+            </span>
+          </div>
+          <WeekGrid weekDays={weekDays} menus={menus} today={today} />
+        </>
+      )}
 
       <MenuFormModal
         open={modalOpen}
