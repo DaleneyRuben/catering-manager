@@ -109,6 +109,20 @@ export function useClient(id: string | number) {
     },
   });
 
+  const updateInstructionsMutation = useMutation({
+    mutationFn: ({
+      subscriptionId,
+      specialInstructions,
+    }: {
+      subscriptionId: string;
+      specialInstructions: Record<string, string>;
+    }) => api.patch(`/clients/${id}/subscriptions/${subscriptionId}`, { specialInstructions }),
+    onSuccess: () => {
+      invalidateClient();
+      toast.success('Instrucciones actualizadas');
+    },
+  });
+
   return {
     client: client ?? null,
     isLoading,
@@ -127,6 +141,11 @@ export function useClient(id: string | number) {
       toVoid(updateSuspensionsMutation.mutateAsync({ suspendedDates, subscriptionId })),
     updateBilling: (subscriptionId: string, discount: number): Promise<void> =>
       toVoid(updateBillingMutation.mutateAsync({ subscriptionId, discount })),
+    updateInstructions: (
+      subscriptionId: string,
+      specialInstructions: Record<string, string>,
+    ): Promise<void> =>
+      toVoid(updateInstructionsMutation.mutateAsync({ subscriptionId, specialInstructions })),
     renew: (data: RenewalPayload): Promise<void> => toVoid(renewMutation.mutateAsync(data)),
     isRenewing: renewMutation.isPending,
   };

@@ -10,9 +10,10 @@ import type { Subscription } from '../../types/client';
 interface Props {
   sub: Subscription;
   onUpdateBilling: (discount: number) => Promise<void>;
+  onUpdateInstructions: (specialInstructions: Record<string, string>) => Promise<void>;
 }
 
-export function PlanCard({ sub, onUpdateBilling }: Props) {
+export function PlanCard({ sub, onUpdateBilling, onUpdateInstructions }: Props) {
   const planPrice = Number(sub.plan.price);
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -64,6 +65,34 @@ export function PlanCard({ sub, onUpdateBilling }: Props) {
           </span>
         ))}
       </div>
+
+      {sub.plan.meals.includes('salad') && (
+        <>
+          <hr className="border-cream-2 my-[18px]" />
+          <Label variant="section" className="mb-[14px]">
+            Instrucciones especiales
+          </Label>
+          <label htmlFor="salad-grande" className="flex items-center gap-3 cursor-pointer w-fit">
+            <input
+              id="salad-grande"
+              type="checkbox"
+              checked={!!sub.specialInstructions?.salad}
+              onChange={(e) => {
+                const updated = { ...sub.specialInstructions };
+                if (e.target.checked) {
+                  updated.salad = 'DAR GRANDES';
+                } else {
+                  delete updated.salad;
+                }
+                onUpdateInstructions(updated);
+              }}
+              className="w-4 h-4 accent-olive-700 cursor-pointer"
+            />
+            <span className="text-[13.5px] text-ink">Ensalada grande</span>
+          </label>
+        </>
+      )}
+
       <hr className="border-cream-2 my-[18px]" />
       <div className="flex items-center mb-[14px]">
         <Label variant="section">Precio y descuento</Label>

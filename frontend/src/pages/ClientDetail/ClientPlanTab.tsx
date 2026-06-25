@@ -13,6 +13,7 @@ interface Props {
   remaining: number;
   onUpdateContract: (draft: import('./ContractCard').ContractDraft) => Promise<void>;
   onUpdateBilling: (discount: number) => Promise<void>;
+  onUpdateInstructions: (specialInstructions: Record<string, string>) => Promise<void>;
   onSuspend: () => void;
 }
 
@@ -22,6 +23,7 @@ export function ClientPlanTab({
   remaining,
   onUpdateContract,
   onUpdateBilling,
+  onUpdateInstructions,
   onSuspend,
 }: Props) {
   if (!sub) {
@@ -31,7 +33,11 @@ export function ClientPlanTab({
   return (
     <div className="grid grid-cols-12 gap-[20px]">
       <div className="col-span-12 lg:col-span-7 flex flex-col gap-[20px]">
-        <PlanCard sub={sub} onUpdateBilling={onUpdateBilling} />
+        <PlanCard
+          sub={sub}
+          onUpdateBilling={onUpdateBilling}
+          onUpdateInstructions={onUpdateInstructions}
+        />
         <ContractCard sub={sub} remaining={remaining} onUpdateContract={onUpdateContract} />
         <BillingCard nit={client.nit} businessName={client.businessName} />
       </div>
