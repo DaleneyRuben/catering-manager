@@ -28,4 +28,19 @@ describe('Icon', () => {
     const { container } = render(<Icon name="pause" />);
     expect(container.querySelectorAll('rect')).toHaveLength(2);
   });
+
+  it('renders an svg for flag', () => {
+    const { container } = render(<Icon name="flag" />);
+    expect(container.querySelector('svg')).toBeInTheDocument();
+  });
+
+  it('renders an svg for gift', () => {
+    const { container } = render(<Icon name="gift" />);
+    expect(container.querySelector('svg')).toBeInTheDocument();
+  });
+
+  it('renders an svg for wifi', () => {
+    const { container } = render(<Icon name="wifi" />);
+    expect(container.querySelector('svg')).toBeInTheDocument();
+  });
 });
