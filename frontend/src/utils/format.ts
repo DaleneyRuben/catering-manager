@@ -15,3 +15,7 @@ export function formatLongDate(iso: string, { withYear = false }: { withYear?: b
   const label = format(parseISO(iso), pattern, { locale: es });
   return label.charAt(0).toUpperCase() + label.slice(1);
 }
+
+export function formatShortDate(iso: string) {
+  return format(parseISO(iso), 'dd/MM');
+}

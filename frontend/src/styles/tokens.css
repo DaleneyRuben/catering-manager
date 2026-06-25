@@ -120,6 +120,12 @@
   --color-delivery-5-chip-text: #2f6e4f;
   --color-delivery-5-avatar-border: #bdd9cb;
 
+  /* Dashboard menu status rows */
+  --color-menu-loaded-bg: #f4f7ec;
+  --color-menu-loaded-border: #e0e8cc;
+  --color-menu-empty-bg: #faf4e6;
+  --color-menu-empty-border: #ecdcb6;
+
   /* Menu grid */
   --color-today-gradient-start: #21420c;
   --color-today-gradient-end: #163008;

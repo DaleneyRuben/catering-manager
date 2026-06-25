@@ -1,4 +1,4 @@
-import { formatDate, formatDateTime, formatLongDate } from './format';
+import { formatDate, formatDateTime, formatLongDate, formatShortDate } from './format';
 
 describe('formatDate', () => {
   it('returns — for null input', () => {
@@ -39,5 +39,15 @@ describe('formatLongDate', () => {
 
   it('includes the year when withYear is true', () => {
     expect(formatLongDate('2026-06-24', { withYear: true })).toBe('Miércoles 24 de junio, 2026');
+  });
+});
+
+describe('formatShortDate', () => {
+  it('formats an ISO date as dd/MM', () => {
+    expect(formatShortDate('2026-06-24')).toBe('24/06');
+  });
+
+  it('zero-pads single-digit day and month', () => {
+    expect(formatShortDate('2026-01-05')).toBe('05/01');
   });
 });
