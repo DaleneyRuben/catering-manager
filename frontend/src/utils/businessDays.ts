@@ -1,23 +1,21 @@
-import { addDays, isWeekend, format, parseISO, differenceInBusinessDays } from 'date-fns';
+import {
+  addBusinessDays as dfnsAddBusinessDays,
+  subBusinessDays as dfnsSubBusinessDays,
+  differenceInBusinessDays,
+  eachDayOfInterval,
+  isWeekend,
+  format,
+  parseISO,
+} from 'date-fns';
 
 export function addBusinessDays(dateString: string, days: number): string {
-  let date = parseISO(dateString);
-  let added = 0;
-  while (added < days) {
-    date = addDays(date, 1);
-    if (!isWeekend(date)) added += 1;
-  }
-  return format(date, 'yyyy-MM-dd');
+  const result = dfnsAddBusinessDays(parseISO(`${dateString}T12:00:00`), days);
+  return format(result, 'yyyy-MM-dd');
 }
 
 export function subtractBusinessDays(dateString: string, days: number): string {
-  let date = parseISO(dateString);
-  let subtracted = 0;
-  while (subtracted < days) {
-    date = addDays(date, -1);
-    if (!isWeekend(date)) subtracted += 1;
-  }
-  return format(date, 'yyyy-MM-dd');
+  const result = dfnsSubBusinessDays(parseISO(`${dateString}T12:00:00`), days);
+  return format(result, 'yyyy-MM-dd');
 }
 
 export function remainingDeliveryDays(startDate: Date, endDate: Date, today = new Date()): number {
@@ -30,11 +28,6 @@ export function remainingDeliveryDays(startDate: Date, endDate: Date, today = ne
 }
 
 export function businessDaysUntil(from: Date, to: Date): number {
-  let count = 0;
-  let cur = from;
-  while (cur <= to) {
-    if (!isWeekend(cur)) count += 1;
-    cur = addDays(cur, 1);
-  }
-  return count;
+  if (from > to) return 0;
+  return eachDayOfInterval({ start: from, end: to }).filter((d) => !isWeekend(d)).length;
 }
