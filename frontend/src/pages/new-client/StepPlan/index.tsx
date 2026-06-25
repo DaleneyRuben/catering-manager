@@ -64,7 +64,7 @@ export function StepPlan({ register, control, errors, plans, setValue }: Props) 
 
       {selectedPlan?.meals.includes('salad') && (
         <WizardSectionCard
-          icon="salad"
+          icon="utensils"
           iconBg="bg-olive-100"
           iconColor="text-olive-700"
           title="Instrucciones especiales"
