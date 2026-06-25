@@ -97,9 +97,12 @@ const findRoute = async (): Promise<Record<string, DeliveryDayRoute>> => {
   const today = appToday();
   const tomorrow = addCalendarDays(today, 1);
 
-  const [hoy, manana] = await Promise.all([buildDayRoute(today), buildDayRoute(tomorrow)]);
+  const [todayRoute, tomorrowRoute] = await Promise.all([
+    buildDayRoute(today),
+    buildDayRoute(tomorrow),
+  ]);
 
-  return { [today]: hoy, [tomorrow]: manana };
+  return { [today]: todayRoute, [tomorrow]: tomorrowRoute };
 };
 
 export default { findRoute };
