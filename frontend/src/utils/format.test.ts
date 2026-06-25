@@ -1,4 +1,12 @@
-import { formatDate, formatDateTime, formatLongDate, formatShortDate } from './format';
+import {
+  formatDate,
+  formatDateTime,
+  formatLongDate,
+  formatShortDate,
+  formatWeekdayDate,
+  formatConnectionStamp,
+  formatRelativeTime,
+} from './format';
 
 describe('formatDate', () => {
   it('returns — for null input', () => {
@@ -49,5 +57,46 @@ describe('formatShortDate', () => {
 
   it('zero-pads single-digit day and month', () => {
     expect(formatShortDate('2026-01-05')).toBe('05/01');
+  });
+});
+
+describe('formatWeekdayDate', () => {
+  it('returns capitalized weekday + dd/MM', () => {
+    expect(formatWeekdayDate('2026-06-23')).toBe('Martes 23/06');
+  });
+
+  it('handles a different weekday', () => {
+    expect(formatWeekdayDate('2026-06-24')).toBe('Miércoles 24/06');
+  });
+});
+
+describe('formatConnectionStamp', () => {
+  const sameDay = new Date('2026-06-23T00:00:00');
+
+  it('returns "Hoy · HH:mm" when iso is today', () => {
+    expect(formatConnectionStamp('2026-06-23T10:29:00', sameDay)).toBe('Hoy · 10:29');
+  });
+
+  it('returns "dd/MM · HH:mm" when iso is a different day', () => {
+    expect(formatConnectionStamp('2026-06-20T08:14:00', sameDay)).toBe('20/06 · 08:14');
+  });
+});
+
+describe('formatRelativeTime', () => {
+  const base = new Date('2026-06-23T11:00:00').getTime();
+
+  it('returns "hace X min" for under an hour', () => {
+    const iso = new Date(base - 8 * 60_000).toISOString();
+    expect(formatRelativeTime(iso, base)).toBe('hace 8 min');
+  });
+
+  it('returns "hace X h" for 1–23 hours', () => {
+    const iso = new Date(base - 2 * 60 * 60_000).toISOString();
+    expect(formatRelativeTime(iso, base)).toBe('hace 2 h');
+  });
+
+  it('returns "hace X días" for 24+ hours', () => {
+    const iso = new Date(base - 3 * 24 * 60 * 60_000).toISOString();
+    expect(formatRelativeTime(iso, base)).toBe('hace 3 días');
   });
 });

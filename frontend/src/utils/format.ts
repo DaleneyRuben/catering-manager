@@ -19,3 +19,25 @@ export function formatLongDate(iso: string, { withYear = false }: { withYear?: b
 export function formatShortDate(iso: string) {
   return format(parseISO(iso), 'dd/MM');
 }
+
+export function formatWeekdayDate(iso: string) {
+  const label = format(parseISO(iso), 'EEEE dd/MM', { locale: es });
+  return label.charAt(0).toUpperCase() + label.slice(1);
+}
+
+// Returns "Hoy · 14:32" if iso is today, otherwise "12/06 · 14:32"
+export function formatConnectionStamp(iso: string, now = new Date()) {
+  const date = parseISO(iso);
+  const isToday = format(date, 'yyyy-MM-dd') === format(now, 'yyyy-MM-dd');
+  const time = format(date, 'HH:mm');
+  return isToday ? `Hoy · ${time}` : `${format(date, 'dd/MM')} · ${time}`;
+}
+
+// Returns "hace X min", "hace X h", or "hace X días"
+export function formatRelativeTime(iso: string, now = Date.now()) {
+  const mins = Math.floor((now - parseISO(iso).getTime()) / 60_000);
+  if (mins < 60) return `hace ${mins} min`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `hace ${hours} h`;
+  return `hace ${Math.floor(hours / 24)} días`;
+}
