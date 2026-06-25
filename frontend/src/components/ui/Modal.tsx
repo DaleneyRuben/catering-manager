@@ -14,7 +14,7 @@ export function Modal({ onClose, children, className = '' }: Props) {
     <>
       <div
         data-testid="modal-backdrop"
-        className="fixed inset-0 z-50 bg-[rgba(21,42,6,0.42)] backdrop-blur-[3px] modal-backdrop-enter"
+        className="fixed inset-0 z-50 bg-modal-backdrop backdrop-blur-[3px] modal-backdrop-enter"
         onClick={onClose}
         aria-hidden="true"
       />

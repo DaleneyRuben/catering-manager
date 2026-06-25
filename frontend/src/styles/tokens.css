@@ -56,6 +56,9 @@
   /* Sidebar */
   --color-sidebar-deep: #152a06;
 
+  /* Modal */
+  --color-modal-backdrop: rgba(21, 42, 6, 0.42);
+
   /* Toast */
   --color-toast-error-border: #f0b8a0;
   --color-toast-success-border: #b8d099;

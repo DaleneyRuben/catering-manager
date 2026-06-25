@@ -19,7 +19,7 @@ describe('Modal', () => {
       </Modal>,
     );
     const backdrop = screen.getByTestId('modal-backdrop');
-    expect(backdrop.className).toContain('bg-[rgba(21,42,6,0.42)]');
+    expect(backdrop.className).toContain('bg-modal-backdrop');
     expect(backdrop.className).toContain('backdrop-blur-[3px]');
 
     const dialog = screen.getByRole('dialog');
