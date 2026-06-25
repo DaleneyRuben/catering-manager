@@ -1,0 +1,213 @@
+import { Op, QueryTypes, fn, literal, where } from 'sequelize';
+import sequelize from '../database/sequelize';
+import Client from '../models/Client';
+import Plan from '../models/Plan';
+import Subscription from '../models/Subscription';
+import User from '../models/User';
+import type Menu from '../models/Menu';
+import { ROLES, type UserRole } from '../constants/roles';
+import { appToday, addCalendarDays } from '../utils/date';
+import menuService from './menu.service';
+
+const ONLINE_WINDOW_MS = 60 * 60 * 1000;
+const MEAL_FIELDS: (keyof Menu)[] = [
+  'breakfast',
+  'morningSnack',
+  'salad',
+  'lunch',
+  'afternoonSnack',
+  'dinner',
+  'juice',
+];
+
+export type DashboardCounts = {
+  active: { today: number; tomorrow: number };
+  suspended: { today: number; tomorrow: number };
+  deliveriesToday: number;
+};
+
+type CountsRow = {
+  active_today: string;
+  active_tomorrow: string;
+  suspended_today: string;
+  suspended_tomorrow: string;
+  deliveries_today: string;
+};
+
+// Pure aggregate counts — no model hydration, mirrors client.service.ts's getCounts().
+// A delivery group counts as one stop regardless of member count.
+const findCounts = async (): Promise<DashboardCounts> => {
+  const today = appToday();
+  const tomorrow = addCalendarDays(today, 1);
+
+  const [row] = await sequelize.query<CountsRow>(
+    `SELECT
+      COUNT(CASE WHEN c."pausedSince" IS NULL AND (s."startDate" IS NULL OR s."startDate" <= :today) AND s."contractEndDate" >= :today AND s."finalizedAt" IS NULL AND NOT (:today::date = ANY(s."suspendedDates")) THEN 1 END) AS active_today,
+      COUNT(CASE WHEN c."pausedSince" IS NULL AND (s."startDate" IS NULL OR s."startDate" <= :tomorrow) AND s."contractEndDate" >= :tomorrow AND s."finalizedAt" IS NULL AND NOT (:tomorrow::date = ANY(s."suspendedDates")) THEN 1 END) AS active_tomorrow,
+      COUNT(CASE WHEN c."pausedSince" IS NULL AND (s."startDate" IS NULL OR s."startDate" <= :today) AND s."contractEndDate" >= :today AND s."finalizedAt" IS NULL AND :today::date = ANY(s."suspendedDates") THEN 1 END) AS suspended_today,
+      COUNT(CASE WHEN c."pausedSince" IS NULL AND (s."startDate" IS NULL OR s."startDate" <= :tomorrow) AND s."contractEndDate" >= :tomorrow AND s."finalizedAt" IS NULL AND :tomorrow::date = ANY(s."suspendedDates") THEN 1 END) AS suspended_tomorrow,
+      COUNT(DISTINCT CASE WHEN c."pausedSince" IS NULL AND (s."startDate" IS NULL OR s."startDate" <= :today) AND s."contractEndDate" >= :today AND s."finalizedAt" IS NULL AND NOT (:today::date = ANY(s."suspendedDates")) AND c."groupToken" IS NOT NULL THEN c."groupToken" END)
+        + COUNT(CASE WHEN c."pausedSince" IS NULL AND (s."startDate" IS NULL OR s."startDate" <= :today) AND s."contractEndDate" >= :today AND s."finalizedAt" IS NULL AND NOT (:today::date = ANY(s."suspendedDates")) AND c."groupToken" IS NULL THEN 1 END) AS deliveries_today
+    FROM clients c
+    LEFT JOIN subscriptions s ON s."id" = (SELECT MAX(s2."id") FROM subscriptions s2 WHERE s2."clientId" = c.id)`,
+    { replacements: { today, tomorrow }, type: QueryTypes.SELECT },
+  );
+
+  const r = row as unknown as CountsRow;
+  return {
+    active: { today: Number(r.active_today), tomorrow: Number(r.active_tomorrow) },
+    suspended: { today: Number(r.suspended_today), tomorrow: Number(r.suspended_tomorrow) },
+    deliveriesToday: Number(r.deliveries_today),
+  };
+};
+
+export type ContractEndingPerson = {
+  id: number;
+  name: string;
+  plan: string;
+  date: string;
+};
+
+const byName = (a: ContractEndingPerson, b: ContractEndingPerson) =>
+  a.name.localeCompare(b.name, 'es');
+
+const findContractEndingForDate = async (date: string): Promise<ContractEndingPerson[]> => {
+  const subscriptions = await Subscription.findAll({
+    where: { contractEndDate: date, finalizedAt: { [Op.is]: null } },
+    include: [Client, Plan],
+  });
+
+  return subscriptions
+    .map((s) => ({
+      id: (s.client as Client).id,
+      name: (s.client as Client).name,
+      plan: (s.plan as Plan).name,
+      date: s.contractEndDate as string,
+    }))
+    .sort(byName);
+};
+
+const findContractEnding = async (): Promise<{
+  today: ContractEndingPerson[];
+  tomorrow: ContractEndingPerson[];
+}> => {
+  const today = appToday();
+  const tomorrow = addCalendarDays(today, 1);
+
+  const [todayRows, tomorrowRows] = await Promise.all([
+    findContractEndingForDate(today),
+    findContractEndingForDate(tomorrow),
+  ]);
+
+  return { today: todayRows, tomorrow: tomorrowRows };
+};
+
+export type BirthdayPerson = {
+  id: number;
+  name: string;
+  dateOfBirth: string;
+  isToday: boolean;
+};
+
+const findBirthdays = async (): Promise<BirthdayPerson[]> => {
+  const today = appToday();
+  const currentMonth = Number(today.slice(5, 7));
+  const todayMonthDay = today.slice(5);
+
+  const clients = await Client.findAll({
+    attributes: ['id', 'name', 'dateOfBirth'],
+    where: where(fn('EXTRACT', literal('MONTH FROM "dateOfBirth"')), Op.eq, currentMonth),
+    order: [[literal('EXTRACT(DAY FROM "dateOfBirth")'), 'ASC']],
+  });
+
+  return clients.map((c) => ({
+    id: c.id,
+    name: c.name,
+    dateOfBirth: c.dateOfBirth,
+    isToday: c.dateOfBirth.slice(5) === todayMonthDay,
+  }));
+};
+
+export type Connection = {
+  username: string;
+  lastLoginAt: string;
+  online: boolean;
+};
+
+const findConnectionForRole = async (role: UserRole): Promise<Connection | null> => {
+  const user = await User.findOne({
+    where: { role, lastLoginAt: { [Op.not]: null } },
+    order: [['lastLoginAt', 'DESC']],
+  });
+  if (!user) return null;
+
+  const lastLoginAt = user.lastLoginAt as Date;
+  return {
+    username: user.username,
+    lastLoginAt: lastLoginAt.toISOString(),
+    online: Date.now() - lastLoginAt.getTime() <= ONLINE_WINDOW_MS,
+  };
+};
+
+const findConnections = async (): Promise<{
+  kitchen: Connection | null;
+  delivery: Connection | null;
+}> => {
+  const [kitchen, delivery] = await Promise.all([
+    findConnectionForRole(ROLES.KITCHEN),
+    findConnectionForRole(ROLES.DELIVERY),
+  ]);
+
+  return { kitchen, delivery };
+};
+
+export type MenuStatus = {
+  date: string;
+  loaded: boolean;
+};
+
+const isMenuLoaded = (menu: Menu | null): boolean =>
+  !!menu && MEAL_FIELDS.every((field) => !!menu[field]);
+
+const findMenus = async (): Promise<{ today: MenuStatus; tomorrow: MenuStatus }> => {
+  const today = appToday();
+  const tomorrow = addCalendarDays(today, 1);
+
+  const [todayMenu, tomorrowMenu] = await Promise.all([
+    menuService.findByDate(today),
+    menuService.findByDate(tomorrow),
+  ]);
+
+  return {
+    today: { date: today, loaded: isMenuLoaded(todayMenu) },
+    tomorrow: { date: tomorrow, loaded: isMenuLoaded(tomorrowMenu) },
+  };
+};
+
+export type DashboardSummary = DashboardCounts & {
+  contractEnding: { today: ContractEndingPerson[]; tomorrow: ContractEndingPerson[] };
+  birthdays: BirthdayPerson[];
+  connections: { kitchen: Connection | null; delivery: Connection | null };
+  menus: { today: MenuStatus; tomorrow: MenuStatus };
+};
+
+const findSummary = async (): Promise<DashboardSummary> => {
+  const [counts, contractEnding, birthdays, connections, menus] = await Promise.all([
+    findCounts(),
+    findContractEnding(),
+    findBirthdays(),
+    findConnections(),
+    findMenus(),
+  ]);
+
+  return { ...counts, contractEnding, birthdays, connections, menus };
+};
+
+export default {
+  findCounts,
+  findContractEnding,
+  findBirthdays,
+  findConnections,
+  findMenus,
+  findSummary,
+};
