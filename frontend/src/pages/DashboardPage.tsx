@@ -26,7 +26,7 @@ export function DashboardPage() {
 
   if (isLoading || !summary) {
     return (
-      <div className="px-[44px] pt-[34px] pb-[48px]">
+      <div className="px-4 py-5 lg:px-[44px] lg:pt-[34px] lg:pb-[48px]">
         <PageHeader label="Resumen operativo" title="Panel" action={todayBadge} />
         <div className="py-16 text-center text-muted font-mono text-[12px]">Cargando…</div>
       </div>
@@ -34,11 +34,11 @@ export function DashboardPage() {
   }
 
   return (
-    <div className="px-[44px] pt-[34px] pb-[48px]">
+    <div className="px-4 py-5 lg:px-[44px] lg:pt-[34px] lg:pb-[48px]">
       <PageHeader label="Resumen operativo" title="Panel" action={todayBadge} />
 
       <div className="flex flex-col gap-5">
-        <div className="grid grid-cols-3 gap-[18px]">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-[18px]">
           <KpiCard
             icon="clipboard-check"
             iconBg="bg-olive-100"
@@ -69,10 +69,7 @@ export function DashboardPage() {
           />
         </div>
 
-        <div
-          className="grid gap-[18px] items-start"
-          style={{ gridTemplateColumns: '1.15fr 1fr 1fr' }}
-        >
+        <div className="grid grid-cols-1 lg:grid-cols-[1.15fr_1fr_1fr] gap-[18px] items-start">
           <ContractEndingCard
             today={summary.contractEnding.today}
             tomorrow={summary.contractEnding.tomorrow}
