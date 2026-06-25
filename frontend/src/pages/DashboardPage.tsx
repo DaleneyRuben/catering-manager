@@ -2,6 +2,7 @@ import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Icon } from '../components/ui/Icon';
 import { PageHeader } from '../components/ui/PageHeader';
+import { Skeleton } from '../components/ui/Skeleton';
 import { useDashboard } from '../hooks/useDashboard';
 import { formatLongDate } from '../utils/format';
 import { KpiCard } from './dashboard/KpiCard';
@@ -28,7 +29,25 @@ export function DashboardPage() {
     return (
       <div className="px-4 py-5 lg:px-[44px] lg:pt-[34px] lg:pb-[48px]">
         <PageHeader label="Resumen operativo" title="Panel" action={todayBadge} />
-        <div className="py-16 text-center text-muted font-mono text-[12px]">Cargando…</div>
+        <div className="flex flex-col gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-[18px]">
+            {['a', 'b', 'c'].map((k) => (
+              <div
+                key={k}
+                className="bg-paper border border-rule rounded-[14px] p-[22px] flex flex-col gap-3"
+              >
+                <Skeleton className="w-9 h-9 rounded-[10px]" />
+                <Skeleton className="w-20 h-2.5 mt-1" />
+                <Skeleton className="w-12 h-8 rounded-[5px]" />
+              </div>
+            ))}
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-[1.15fr_1fr_1fr] gap-[18px]">
+            {['a', 'b', 'c'].map((k) => (
+              <Skeleton key={k} className="h-[160px] rounded-[14px]" />
+            ))}
+          </div>
+        </div>
       </div>
     );
   }
