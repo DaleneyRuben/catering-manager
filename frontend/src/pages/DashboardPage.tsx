@@ -1,3 +1,5 @@
+import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
 import { Icon } from '../components/ui/Icon';
 import { PageHeader } from '../components/ui/PageHeader';
 import { useDashboard } from '../hooks/useDashboard';
@@ -9,7 +11,7 @@ import { ConnectionsCard } from './dashboard/ConnectionsCard';
 import { MenuStatusCard } from './dashboard/MenuStatusCard';
 
 function todayIso() {
-  return new Date().toISOString().slice(0, 10);
+  return format(new Date(), 'yyyy-MM-dd');
 }
 
 const todayBadge = (
@@ -77,9 +79,9 @@ export function DashboardPage() {
           />
           <BirthdaysCard
             birthdays={summary.birthdays}
-            monthLabel={new Date()
-              .toLocaleString('es', { month: 'long' })
-              .replace(/^\w/, (c) => c.toUpperCase())}
+            monthLabel={format(new Date(), 'LLLL', { locale: es }).replace(/^\w/, (c) =>
+              c.toUpperCase(),
+            )}
           />
           <div className="flex flex-col gap-[18px]">
             <ConnectionsCard connections={summary.connections} />
