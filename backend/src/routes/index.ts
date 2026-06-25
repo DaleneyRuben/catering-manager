@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import authRoutes from './auth.routes';
 import clientRoutes from './client.routes';
+import dashboardRoutes from './dashboard.routes';
 import deliveryRoutes from './delivery.routes';
 import menuRoutes from './menu.routes';
 import planRoutes from './plan.routes';
@@ -18,6 +19,7 @@ router.get('/health', requireAuth, requireRole(ROLES.SUPER_ADMIN), healthControl
 router.use('/auth', authRoutes);
 
 router.use('/clients', requireAuth, requireRole(ROLES.SUPER_ADMIN, ROLES.ADMIN), clientRoutes);
+router.use('/dashboard', requireAuth, requireRole(ROLES.SUPER_ADMIN, ROLES.ADMIN), dashboardRoutes);
 router.use(
   '/delivery',
   requireAuth,
