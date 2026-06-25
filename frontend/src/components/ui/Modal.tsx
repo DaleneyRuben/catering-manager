@@ -22,7 +22,7 @@ export function Modal({ onClose, children, className = '' }: Props) {
         <div
           role="dialog"
           aria-modal="true"
-          className={`pointer-events-auto bg-cream rounded-[16px] shadow-[0_24px_60px_rgba(20,40,6,0.32)] modal-dialog-enter ${className}`}
+          className={`pointer-events-auto bg-cream rounded-[16px] shadow-[var(--shadow-dialog)] modal-dialog-enter ${className}`}
         >
           {children}
         </div>

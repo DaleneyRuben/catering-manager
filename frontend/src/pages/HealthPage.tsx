@@ -23,7 +23,7 @@ const BANNER_STYLES: Record<
     bg: 'bg-success-soft-bg',
     border: 'border-olive-200',
     dotBg: 'bg-ok',
-    halo: 'shadow-[0_0_0_6px_rgba(53,126,28,0.15)]',
+    halo: 'shadow-[var(--shadow-halo-ok)]',
     sub: 'text-success-text',
   },
   degraded: {
@@ -33,7 +33,7 @@ const BANNER_STYLES: Record<
     bg: 'bg-warn-bg',
     border: 'border-warn-border',
     dotBg: 'bg-warn',
-    halo: 'shadow-[0_0_0_6px_rgba(168,127,16,0.15)]',
+    halo: 'shadow-[var(--shadow-halo-warn)]',
     sub: 'text-warn',
   },
   down: {
@@ -43,7 +43,7 @@ const BANNER_STYLES: Record<
     bg: 'bg-danger-bg',
     border: 'border-danger-border',
     dotBg: 'bg-danger',
-    halo: 'shadow-[0_0_0_6px_rgba(168,81,47,0.15)]',
+    halo: 'shadow-[var(--shadow-halo-danger)]',
     sub: 'text-danger',
   },
 };

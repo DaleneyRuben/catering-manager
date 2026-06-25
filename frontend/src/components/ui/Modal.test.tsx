@@ -24,7 +24,7 @@ describe('Modal', () => {
 
     const dialog = screen.getByRole('dialog');
     expect(dialog.className).toContain('rounded-[16px]');
-    expect(dialog.className).toContain('shadow-[0_24px_60px_rgba(20,40,6,0.32)]');
+    expect(dialog.className).toContain('shadow-[var(--shadow-dialog)]');
     expect(dialog.className).not.toContain('border');
   });
 

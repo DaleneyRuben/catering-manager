@@ -65,13 +65,7 @@ export function LoginPage() {
     <div className="min-h-screen flex">
       {/* Left decorative panel — hidden on mobile */}
       <div className="hidden md:flex md:w-[44%] flex-col items-center justify-center bg-olive-900 relative overflow-hidden login-panel-left">
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            background:
-              'radial-gradient(ellipse at 32% 44%, rgba(109,193,24,0.11) 0%, transparent 62%)',
-          }}
-        />
+        <div className="absolute inset-0 pointer-events-none login-panel-glow" />
         <div className="relative z-10 flex flex-col items-center gap-6 px-14 text-center">
           <div className="w-36 h-36 rounded-full bg-paper/90 flex items-center justify-center p-2 shadow-xl ring-1 ring-white/10">
             <img src={logo} alt="La Oliva" className="w-full h-auto" />

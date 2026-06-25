@@ -25,7 +25,7 @@ export function PlanCard({
   return (
     <div
       data-testid={`plan-card-${plan.id}`}
-      className="bg-paper border border-rule rounded-[14px] overflow-hidden flex flex-col hover:shadow-[0_8px_24px_rgba(20,40,6,0.09)] hover:border-olive-200 transition-all"
+      className="bg-paper border border-rule rounded-[14px] overflow-hidden flex flex-col hover:shadow-[var(--shadow-card-hover)] hover:border-olive-200 transition-all"
     >
       <div
         className="px-5 pt-[15px] pb-[14px] border-b"

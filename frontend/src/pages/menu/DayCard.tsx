@@ -33,7 +33,7 @@ export function DayCard({ isToday, date, menu, isWeekend, onOpen }: Props) {
     <div
       className={
         isToday
-          ? 'bg-gradient-to-br from-today-gradient-start to-today-gradient-end rounded-[14px] px-[26px] py-6 flex items-center justify-between gap-5 shadow-[0_8px_24px_rgba(20,40,6,0.14)]'
+          ? 'bg-gradient-to-br from-today-gradient-start to-today-gradient-end rounded-[14px] px-[26px] py-6 flex items-center justify-between gap-5 shadow-[var(--shadow-card-elevated)]'
           : 'bg-paper border border-rule rounded-[14px] px-[26px] py-6 flex items-center justify-between gap-5'
       }
     >
@@ -42,7 +42,7 @@ export function DayCard({ isToday, date, menu, isWeekend, onOpen }: Props) {
           <span
             className={
               isToday
-                ? 'w-[7px] h-[7px] rounded-full bg-olive-400 shrink-0 shadow-[0_0_0_4px_rgba(108,193,24,0.22)]'
+                ? 'w-[7px] h-[7px] rounded-full bg-olive-400 shrink-0 shadow-[var(--shadow-dot-today)]'
                 : 'w-[7px] h-[7px] rounded-full bg-empty-border shrink-0'
             }
           />

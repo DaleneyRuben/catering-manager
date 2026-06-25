@@ -38,7 +38,7 @@ export function OverflowMenu({ items }: Props) {
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full mt-1.5 w-[208px] bg-paper border border-rule rounded-[11px] shadow-[0_12px_32px_rgba(20,40,6,0.16)] z-20 p-[6px]">
+        <div className="absolute right-0 top-full mt-1.5 w-[208px] bg-paper border border-rule rounded-[11px] shadow-[var(--shadow-dropdown)] z-20 p-[6px]">
           {items.map((item) => (
             <button
               key={item.label}

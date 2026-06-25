@@ -11,8 +11,7 @@ type Day = 'today' | 'tomorrow';
 const entregasTotal = (route: DeliveryDayRoute | undefined): number =>
   (route?.zones ?? []).reduce((sum, z) => sum + z.entregas, 0);
 
-const TAB_ON =
-  'bg-paper border border-rule text-ink shadow-[0_1px_2px_rgba(0,0,0,.04)] font-semibold';
+const TAB_ON = 'bg-paper border border-rule text-ink shadow-[var(--shadow-tab)] font-semibold';
 const TAB_OFF = 'border border-transparent text-muted font-semibold';
 const BADGE_ON =
   'font-mono text-[10.5px] font-semibold text-olive-700 bg-olive-100 rounded-full px-[7px] py-px';

@@ -12,8 +12,8 @@ function ConnectionRow({ connection }: RowProps) {
       <span
         className={`w-2 h-2 rounded-full shrink-0 ${
           connection.online
-            ? 'bg-olive-400 shadow-[0_0_0_3px_rgba(108,193,24,0.18)]'
-            : 'bg-warn-dot shadow-[0_0_0_3px_rgba(205,160,26,0.16)]'
+            ? 'bg-olive-400 shadow-[var(--shadow-glow-online)]'
+            : 'bg-warn-dot shadow-[var(--shadow-glow-offline)]'
         }`}
       />
       <div className="flex-1 min-w-0">
