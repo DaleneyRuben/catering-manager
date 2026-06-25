@@ -1,5 +1,5 @@
 import { differenceInBusinessDays, parseISO } from 'date-fns';
-import { Op, fn, literal, where, QueryTypes } from 'sequelize';
+import { Op, literal, QueryTypes } from 'sequelize';
 import { appToday, addDeliveryDays, toAppDate } from '../utils/date';
 import { EXPIRY_THRESHOLD_DAYS } from '../constants/subscription.constants';
 import { CLIENT_STATUS } from '../constants/client.constants';
@@ -21,7 +21,6 @@ export interface FindAllFilters {
   status?: string;
   q?: string;
   restriction?: string;
-  birthMonth?: number;
   page?: number;
   limit?: number;
 }
@@ -134,12 +133,6 @@ const findAll = (filters: FindAllFilters = {}) => {
         { nit: { [Op.iLike]: q } },
       ],
     });
-  }
-
-  if (filters.birthMonth) {
-    andConditions.push(
-      where(fn('EXTRACT', literal('MONTH FROM "Client"."dateOfBirth"')), Op.eq, filters.birthMonth),
-    );
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

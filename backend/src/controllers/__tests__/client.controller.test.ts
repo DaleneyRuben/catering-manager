@@ -108,12 +108,14 @@ describe('GET /api/clients', () => {
     );
   });
 
-  it('forwards birthMonth query param to service as number', async () => {
+  it('ignores birthMonth query param (filter has been removed)', async () => {
     (clientService.findAll as jest.Mock).mockResolvedValue({ rows: [], total: 0 });
 
     await request(app).get('/api/clients?birthMonth=3');
 
-    expect(clientService.findAll).toHaveBeenCalledWith(expect.objectContaining({ birthMonth: 3 }));
+    expect(clientService.findAll).toHaveBeenCalledWith(
+      expect.not.objectContaining({ birthMonth: expect.anything() }),
+    );
   });
 
   it('returns 500 when service throws', async () => {
