@@ -1,4 +1,26 @@
-import { addDeliveryDays, subtractDeliveryDays, toAppDate, calcContractEndDate } from '../date';
+import {
+  addDeliveryDays,
+  subtractDeliveryDays,
+  addCalendarDays,
+  toAppDate,
+  calcContractEndDate,
+} from '../date';
+
+describe('addCalendarDays', () => {
+  it('adds calendar days without skipping weekends', () => {
+    // Fri May 8 + 1 = Sat May 9 (unlike addDeliveryDays, weekends are not skipped)
+    expect(addCalendarDays('2026-05-08', 1)).toBe('2026-05-09');
+  });
+
+  it('crosses a weekend into the following week', () => {
+    // Sat May 9 + 2 = Mon May 11
+    expect(addCalendarDays('2026-05-09', 2)).toBe('2026-05-11');
+  });
+
+  it('returns the same date when adding 0 days', () => {
+    expect(addCalendarDays('2026-05-06', 0)).toBe('2026-05-06');
+  });
+});
 
 describe('addDeliveryDays', () => {
   it('adds business days skipping weekends', () => {

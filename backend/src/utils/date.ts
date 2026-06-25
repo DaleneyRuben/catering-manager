@@ -27,6 +27,12 @@ export const subtractDeliveryDays = (startDate: string, days: number): string =>
   return format(result, 'yyyy-MM-dd');
 };
 
+// Plain calendar days — unlike addDeliveryDays, weekends are not skipped.
+export const addCalendarDays = (startDate: string, days: number): string => {
+  const result = addDays(parseISO(`${startDate}T12:00:00`), days);
+  return format(result, 'yyyy-MM-dd');
+};
+
 // startDate counts as day 1, so end = startDate + (duration - 1) delivery days
 export const calcContractEndDate = (startDate: string | null, duration: number): string | null => {
   if (!startDate) return null;
