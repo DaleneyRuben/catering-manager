@@ -73,7 +73,6 @@ export function StepPlan({ register, control, errors, plans, setValue }: Props) 
           <CheckboxRow
             id="new-salad-grande"
             label="Ensalada grande"
-            description="DAR GRANDES en el reporte de cocina"
             checked={!!specialInstructions?.salad}
             onChange={(checked) => {
               const updated = { ...(specialInstructions ?? {}) };

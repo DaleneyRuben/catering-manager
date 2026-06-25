@@ -1,5 +1,3 @@
-import { Icon } from './Icon';
-
 interface Props {
   id: string;
   label: string;
@@ -10,19 +8,15 @@ interface Props {
 
 export function CheckboxRow({ id, label, description, checked, onChange }: Props) {
   return (
-    <label
-      htmlFor={id}
-      className={`flex items-center gap-3 py-[10px] px-[14px] rounded-[9px] cursor-pointer transition-all border-[1.5px] ${
-        checked ? 'border-olive-700 bg-row-selected' : 'border-rule bg-white'
-      }`}
-    >
-      <span
-        className={`w-[18px] h-[18px] rounded-[4px] flex items-center justify-center shrink-0 border-2 transition-all ${
-          checked ? 'bg-olive-700 border-olive-700' : 'bg-white border-empty-border'
-        }`}
-      >
-        {checked && <Icon name="check" size={10} stroke={2.8} className="text-white" />}
-      </span>
+    <label htmlFor={id} className="flex items-center gap-3 cursor-pointer py-[6px]">
+      <div>
+        <p className="font-mono text-[13px] text-ink">{label}</p>
+        {description && (
+          <p className="font-mono text-[10px] tracking-[.04em] text-faint mt-[1px]">
+            {description}
+          </p>
+        )}
+      </div>
       <input
         id={id}
         type="checkbox"
@@ -30,14 +24,18 @@ export function CheckboxRow({ id, label, description, checked, onChange }: Props
         onChange={(e) => onChange(e.target.checked)}
         className="sr-only"
       />
-      <div>
-        <p className="text-[13.5px] font-semibold text-ink">{label}</p>
-        {description && (
-          <p className="font-mono text-[10px] tracking-[.04em] text-faint mt-[1px]">
-            {description}
-          </p>
-        )}
-      </div>
+      <span
+        aria-hidden="true"
+        className={`relative inline-flex shrink-0 w-[38px] h-[22px] rounded-full transition-colors duration-200 ${
+          checked ? 'bg-olive-700' : 'bg-rule'
+        }`}
+      >
+        <span
+          className={`absolute top-[2px] w-[18px] h-[18px] rounded-full bg-white shadow-sm transition-transform duration-200 ${
+            checked ? 'translate-x-[18px]' : 'translate-x-[2px]'
+          }`}
+        />
+      </span>
     </label>
   );
 }

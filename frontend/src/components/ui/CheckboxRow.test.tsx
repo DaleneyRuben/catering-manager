@@ -21,34 +21,45 @@ describe('CheckboxRow', () => {
   });
 
   it('does not render description when omitted', () => {
-    const { container } = render(<CheckboxRow {...baseProps} />);
-    expect(container.querySelector('p + p')).toBeNull();
+    render(<CheckboxRow {...baseProps} />);
+    expect(screen.queryByRole('paragraph')).toBeNull();
   });
 
-  it('calls onChange with true when unchecked row is clicked', async () => {
+  it('calls onChange with true when unchecked toggle is clicked', async () => {
     const onChange = jest.fn();
     render(<CheckboxRow {...baseProps} onChange={onChange} />);
     await userEvent.click(screen.getByLabelText('Ensalada grande'));
     expect(onChange).toHaveBeenCalledWith(true);
   });
 
-  it('calls onChange with false when checked row is clicked', async () => {
+  it('calls onChange with false when checked toggle is clicked', async () => {
     const onChange = jest.fn();
     render(<CheckboxRow {...baseProps} checked onChange={onChange} />);
     await userEvent.click(screen.getByLabelText('Ensalada grande'));
     expect(onChange).toHaveBeenCalledWith(false);
   });
 
-  it('applies selected border and background when checked', () => {
-    render(<CheckboxRow {...baseProps} checked />);
-    const label = screen.getByLabelText('Ensalada grande').closest('label')!;
-    expect(label.className).toContain('border-olive-700');
-    expect(label.className).toContain('bg-row-selected');
+  it('applies olive background to track when checked', () => {
+    const { container } = render(<CheckboxRow {...baseProps} checked />);
+    const track = container.querySelector('span[aria-hidden]')!;
+    expect(track.className).toContain('bg-olive-700');
   });
 
-  it('applies default border when unchecked', () => {
-    render(<CheckboxRow {...baseProps} />);
-    const label = screen.getByLabelText('Ensalada grande').closest('label')!;
-    expect(label.className).toContain('border-rule');
+  it('applies rule background to track when unchecked', () => {
+    const { container } = render(<CheckboxRow {...baseProps} />);
+    const track = container.querySelector('span[aria-hidden]')!;
+    expect(track.className).toContain('bg-rule');
+  });
+
+  it('translates thumb to the right when checked', () => {
+    const { container } = render(<CheckboxRow {...baseProps} checked />);
+    const thumb = container.querySelector('span[aria-hidden] span')!;
+    expect(thumb.className).toContain('translate-x-[18px]');
+  });
+
+  it('translates thumb to the left when unchecked', () => {
+    const { container } = render(<CheckboxRow {...baseProps} />);
+    const thumb = container.querySelector('span[aria-hidden] span')!;
+    expect(thumb.className).toContain('translate-x-[2px]');
   });
 });

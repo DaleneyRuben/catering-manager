@@ -76,7 +76,6 @@ export function PlanCard({ sub, onUpdateBilling, onUpdateInstructions }: Props) 
           <CheckboxRow
             id="salad-grande"
             label="Ensalada grande"
-            description="DAR GRANDES en el reporte de cocina"
             checked={!!sub.specialInstructions?.salad}
             onChange={(checked) => {
               const updated = { ...sub.specialInstructions };
