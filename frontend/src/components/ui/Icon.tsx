@@ -248,6 +248,13 @@ export function Icon({ name, size = 16, stroke = 1.5, className }: IconProps) {
           <path d="M8 17.5h8M14 17.5l-2-5h-4l-1.5-3H4M14 12.5h3l3 2.5v2.5" />
         </svg>
       );
+    case 'pause':
+      return (
+        <svg {...props}>
+          <rect x="6" y="5" width="4" height="14" rx="1" />
+          <rect x="14" y="5" width="4" height="14" rx="1" />
+        </svg>
+      );
     case 'stethoscope':
       return (
         <svg {...props}>

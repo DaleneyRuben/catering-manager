@@ -23,4 +23,9 @@ describe('Icon', () => {
     const { container } = render(<Icon name="more-vertical" />);
     expect(container.querySelectorAll('circle')).toHaveLength(3);
   });
+
+  it('renders two bars for pause', () => {
+    const { container } = render(<Icon name="pause" />);
+    expect(container.querySelectorAll('rect')).toHaveLength(2);
+  });
 });
