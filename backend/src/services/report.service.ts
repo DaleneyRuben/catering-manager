@@ -1,20 +1,11 @@
-import { Op } from 'sequelize';
 import Client from '../models/Client';
 import Plan from '../models/Plan';
-import Subscription from '../models/Subscription';
+import { findActiveSubscriptionsForDate } from './subscriptionQueries';
 
 const findDeliveryClientsForDate = async (date: string): Promise<string[]> => {
-  const subscriptions = await Subscription.findAll({
-    where: {
-      startDate: { [Op.lte]: date },
-      contractEndDate: { [Op.gte]: date },
-      finalizedAt: { [Op.is]: null },
-    },
-    include: [{ model: Client, where: { pausedSince: null } }],
-  });
+  const subscriptions = await findActiveSubscriptionsForDate(date);
 
   return subscriptions
-    .filter((s) => !s.suspendedDates.includes(date))
     .map((s) => (s.client as Client).name)
     .sort((a, b) => a.localeCompare(b, 'es'));
 };
@@ -25,21 +16,12 @@ export type ActiveClientRow = {
 };
 
 const findActiveClientsWithPlansForDate = async (date: string): Promise<ActiveClientRow[]> => {
-  const subscriptions = await Subscription.findAll({
-    where: {
-      startDate: { [Op.lte]: date },
-      contractEndDate: { [Op.gte]: date },
-      finalizedAt: { [Op.is]: null },
-    },
-    include: [{ model: Client, where: { pausedSince: null } }, { model: Plan }],
-  });
+  const subscriptions = await findActiveSubscriptionsForDate(date);
 
-  return subscriptions
-    .filter((s) => !s.suspendedDates.includes(date))
-    .map((s) => ({
-      name: (s.client as Client).name,
-      planMeals: (s.plan as Plan).meals,
-    }));
+  return subscriptions.map((s) => ({
+    name: (s.client as Client).name,
+    planMeals: (s.plan as Plan).meals,
+  }));
 };
 
 export default { findDeliveryClientsForDate, findActiveClientsWithPlansForDate };
