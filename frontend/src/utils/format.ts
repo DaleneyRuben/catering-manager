@@ -1,4 +1,10 @@
-import { format, parseISO } from 'date-fns';
+import {
+  differenceInDays,
+  differenceInHours,
+  differenceInMinutes,
+  format,
+  parseISO,
+} from 'date-fns';
 import { es } from 'date-fns/locale';
 
 export function formatDate(iso: string | null | undefined) {
@@ -35,9 +41,10 @@ export function formatConnectionStamp(iso: string, now = new Date()) {
 
 // Returns "hace X min", "hace X h", or "hace X días"
 export function formatRelativeTime(iso: string, now = Date.now()) {
-  const mins = Math.floor((now - parseISO(iso).getTime()) / 60_000);
+  const date = parseISO(iso);
+  const mins = differenceInMinutes(now, date);
   if (mins < 60) return `hace ${mins} min`;
-  const hours = Math.floor(mins / 60);
+  const hours = differenceInHours(now, date);
   if (hours < 24) return `hace ${hours} h`;
-  return `hace ${Math.floor(hours / 24)} días`;
+  return `hace ${differenceInDays(now, date)} días`;
 }
