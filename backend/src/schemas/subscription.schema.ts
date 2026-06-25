@@ -29,6 +29,7 @@ export const updateSubscriptionSchema = z.object({
   contractEndDate: dateField.optional(),
   suspendedDates: z.array(dateField).optional(),
   discount: z.number().int().min(0).optional(),
+  specialInstructions: z.record(z.string(), z.string()).optional(),
 });
 
 export type CreateSubscriptionDto = z.infer<typeof createSubscriptionSchema>;

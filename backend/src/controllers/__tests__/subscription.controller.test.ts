@@ -184,3 +184,45 @@ describe('PATCH /api/clients/:clientId/subscriptions/:id with suspendedDates', (
     expect(res.status).toBe(400);
   });
 });
+
+describe('PATCH /api/clients/:clientId/subscriptions/:id with specialInstructions', () => {
+  it('passes specialInstructions to the service', async () => {
+    const updated = { ...mockSubscription, specialInstructions: { salad: 'DAR GRANDES' } };
+    (subscriptionService.update as jest.Mock).mockResolvedValue(updated);
+
+    const res = await request(app)
+      .patch(`/api/clients/${id1}/subscriptions/${id1}`)
+      .send({ specialInstructions: { salad: 'DAR GRANDES' } });
+
+    expect(res.status).toBe(200);
+    expect(subscriptionService.update).toHaveBeenCalledWith(
+      1,
+      1,
+      expect.objectContaining({ specialInstructions: { salad: 'DAR GRANDES' } }),
+    );
+  });
+
+  it('passes empty object to clear all instructions', async () => {
+    const updated = { ...mockSubscription, specialInstructions: {} };
+    (subscriptionService.update as jest.Mock).mockResolvedValue(updated);
+
+    const res = await request(app)
+      .patch(`/api/clients/${id1}/subscriptions/${id1}`)
+      .send({ specialInstructions: {} });
+
+    expect(res.status).toBe(200);
+    expect(subscriptionService.update).toHaveBeenCalledWith(
+      1,
+      1,
+      expect.objectContaining({ specialInstructions: {} }),
+    );
+  });
+
+  it('returns 400 when specialInstructions value is not a string', async () => {
+    const res = await request(app)
+      .patch(`/api/clients/${id1}/subscriptions/${id1}`)
+      .send({ specialInstructions: { salad: 123 } });
+
+    expect(res.status).toBe(400);
+  });
+});
