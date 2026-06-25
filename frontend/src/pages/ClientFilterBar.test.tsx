@@ -8,8 +8,6 @@ const baseProps = {
   onQChange: jest.fn(),
   restriction: '',
   onRestrictionChange: jest.fn(),
-  birthMonth: 'all',
-  onBirthMonthChange: jest.fn(),
   filter: CLIENT_STATUS.ALL,
   onFilterChange: jest.fn(),
   resultsLabel: '3 resultados',
@@ -109,23 +107,8 @@ describe('ClientFilterBar', () => {
     expect(onFilterChange).toHaveBeenCalledWith(CLIENT_STATUS.ACTIVE);
   });
 
-  it('calls onBirthMonthChange when a month is selected', async () => {
-    const onBirthMonthChange = jest.fn();
-    render(<ClientFilterBar {...baseProps} onBirthMonthChange={onBirthMonthChange} />);
-    const select = screen.getAllByRole('combobox')[0];
-    await userEvent.selectOptions(select, '3');
-    expect(onBirthMonthChange).toHaveBeenCalledWith('3');
-  });
-
   it('shows the results label', () => {
     render(<ClientFilterBar {...baseProps} resultsLabel="7 resultados" />);
     expect(screen.getByText('7 resultados')).toBeInTheDocument();
-  });
-
-  it('toggles secondary filters visibility on mobile filter button click', async () => {
-    render(<ClientFilterBar {...baseProps} />);
-    const toggle = screen.getByLabelText('Filtros');
-    await userEvent.click(toggle);
-    expect(screen.getByRole('button', { name: 'Activos' })).toBeInTheDocument();
   });
 });

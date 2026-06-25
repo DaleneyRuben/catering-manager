@@ -24,7 +24,6 @@ export function ClientsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
 
   const filter = (searchParams.get('status') as FilterValue) ?? CLIENT_STATUS.ALL;
-  const birthMonth = searchParams.get('birthMonth') ?? CLIENT_STATUS.ALL;
   const page = Number(searchParams.get('page') ?? '1');
   const limit = Number(searchParams.get('limit') ?? '25');
 
@@ -45,7 +44,6 @@ export function ClientsPage() {
         });
         // remove defaults to keep URLs clean
         if (next.get('status') === CLIENT_STATUS.ALL) next.delete('status');
-        if (next.get('birthMonth') === CLIENT_STATUS.ALL) next.delete('birthMonth');
         if (next.get('page') === '1') next.delete('page');
         if (next.get('limit') === '25') next.delete('limit');
         return next;
@@ -58,11 +56,6 @@ export function ClientsPage() {
     if (v === filter) return;
     setTableLoading(true);
     updateParams({ status: v }, true);
-  };
-  const changeBirthMonth = (v: string) => {
-    if (v === birthMonth) return;
-    setTableLoading(true);
-    updateParams({ birthMonth: v }, true);
   };
   const changeLimit = (v: number) => {
     if (v === limit) return;
@@ -89,7 +82,6 @@ export function ClientsPage() {
     status: filter,
     q: debouncedQ,
     restriction: debouncedRestriction,
-    birthMonth,
     page,
     limit,
   });
@@ -117,8 +109,6 @@ export function ClientsPage() {
         onQChange={setQ}
         restriction={restriction}
         onRestrictionChange={setRestriction}
-        birthMonth={birthMonth}
-        onBirthMonthChange={changeBirthMonth}
         filter={filter}
         onFilterChange={changeFilter}
         resultsLabel={`${clients.length} resultados`}

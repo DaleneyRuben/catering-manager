@@ -1,7 +1,5 @@
-import { useState } from 'react';
 import { Icon } from '../components/ui/Icon';
 import { CLIENT_STATUS } from '../constants/clientStatus';
-import { MONTHS } from '../constants/months';
 
 export type FilterValue = (typeof CLIENT_STATUS)[keyof typeof CLIENT_STATUS];
 
@@ -18,8 +16,6 @@ interface Props {
   onQChange: (value: string) => void;
   restriction: string;
   onRestrictionChange: (value: string) => void;
-  birthMonth: string;
-  onBirthMonthChange: (value: string) => void;
   filter: FilterValue;
   onFilterChange: (value: FilterValue) => void;
   resultsLabel: string;
@@ -35,147 +31,91 @@ export function ClientFilterBar({
   onQChange,
   restriction,
   onRestrictionChange,
-  birthMonth,
-  onBirthMonthChange,
   filter,
   onFilterChange,
   resultsLabel,
   isFetching,
 }: Props) {
-  const [showSecondaryFilters, setShowSecondaryFilters] = useState(false);
-
-  const activeCount = (filter !== CLIENT_STATUS.ALL ? 1 : 0) + (birthMonth !== 'all' ? 1 : 0);
-
   return (
-    <div className="flex flex-col gap-3 mb-3.5">
-      {/* Row 1: type-to-search */}
-      <div className="flex items-center gap-3 flex-wrap">
-        <div className="flex items-center gap-2 flex-1 min-w-[200px]">
-          <div className="relative flex-1">
-            <input
-              value={q}
-              onChange={(e) => onQChange(e.target.value)}
-              onKeyDown={blurOnEnter}
-              placeholder="Buscar cliente…"
-              className="w-full pl-[38px] pr-9 py-[6px] lg:py-2.5 text-[13.5px] border border-rule rounded-[9px] bg-paper placeholder:text-faint focus:outline-none focus:border-olive-600"
-            />
-            <Icon
-              name="search"
-              size={16}
-              className="absolute left-[13px] top-1/2 -translate-y-1/2 text-faint"
-            />
-            {q && (
-              <button
-                type="button"
-                aria-label="Limpiar búsqueda de cliente"
-                onClick={() => onQChange('')}
-                className="absolute right-[9px] top-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-cream-2 text-muted flex items-center justify-center hover:bg-olive-100 hover:text-olive-700 transition-colors"
-              >
-                <Icon name="x" size={12} stroke={2.2} />
-              </button>
-            )}
-          </div>
-
+    <div className="flex items-center gap-3 flex-wrap mb-3.5">
+      {/* Name search */}
+      <div className="relative flex-1 min-w-[200px]">
+        <input
+          value={q}
+          onChange={(e) => onQChange(e.target.value)}
+          onKeyDown={blurOnEnter}
+          placeholder="Buscar cliente…"
+          className="w-full pl-[38px] pr-9 py-2.5 text-[13.5px] border border-rule rounded-[9px] bg-paper placeholder:text-faint focus:outline-none focus:border-olive-600"
+        />
+        <Icon
+          name="search"
+          size={16}
+          className="absolute left-[13px] top-1/2 -translate-y-1/2 text-faint"
+        />
+        {q && (
           <button
             type="button"
-            onClick={() => setShowSecondaryFilters((v) => !v)}
-            aria-label="Filtros"
-            className={`lg:hidden relative shrink-0 flex items-center gap-1.5 px-3 h-[38px] border rounded-[9px] text-[12px] font-medium transition-colors ${
-              activeCount > 0
-                ? 'border-olive-600 bg-olive-50 text-olive-800'
-                : 'border-rule bg-paper text-muted'
-            }`}
+            aria-label="Limpiar búsqueda de cliente"
+            onClick={() => onQChange('')}
+            className="absolute right-[9px] top-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-cream-2 text-muted flex items-center justify-center hover:bg-olive-100 hover:text-olive-700 transition-colors"
           >
-            <Icon name="filter" size={12} />
-            Filtros
-            {activeCount > 0 && (
-              <span className="w-4 h-4 rounded-full bg-olive-800 text-white text-[10px] flex items-center justify-center">
-                {activeCount}
-              </span>
-            )}
+            <Icon name="x" size={12} stroke={2.2} />
           </button>
-        </div>
+        )}
+      </div>
 
-        {/* Allergy / restriction search */}
-        <div className="relative flex-1 min-w-[230px]">
-          <input
-            value={restriction}
-            onChange={(e) => onRestrictionChange(e.target.value)}
-            onKeyDown={blurOnEnter}
-            placeholder="Buscar por alergia o restricción…"
-            className="w-full pl-[38px] pr-9 py-[6px] lg:py-2.5 text-[13.5px] border border-rule rounded-[9px] bg-paper placeholder:text-faint focus:outline-none focus:border-warn-dot"
-          />
-          <Icon
-            name="alert"
-            size={16}
-            className="absolute left-[13px] top-1/2 -translate-y-1/2 text-warn-dot"
-          />
-          {restriction && (
+      {/* Allergy / restriction search */}
+      <div className="relative flex-1 min-w-[230px]">
+        <input
+          value={restriction}
+          onChange={(e) => onRestrictionChange(e.target.value)}
+          onKeyDown={blurOnEnter}
+          placeholder="Buscar por alergia o restricción…"
+          className="w-full pl-[38px] pr-9 py-2.5 text-[13.5px] border border-rule rounded-[9px] bg-paper placeholder:text-faint focus:outline-none focus:border-warn-dot"
+        />
+        <Icon
+          name="alert"
+          size={16}
+          className="absolute left-[13px] top-1/2 -translate-y-1/2 text-warn-dot"
+        />
+        {restriction && (
+          <button
+            type="button"
+            aria-label="Limpiar búsqueda de alergia"
+            onClick={() => onRestrictionChange('')}
+            className="absolute right-[9px] top-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-cream-2 text-muted flex items-center justify-center hover:bg-warn-border hover:text-ink-2 transition-colors"
+          >
+            <Icon name="x" size={12} stroke={2.2} />
+          </button>
+        )}
+      </div>
+
+      {/* Status segmented control */}
+      <div className="overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] min-w-0">
+        <div className="inline-flex p-[3px] gap-px bg-paper border border-rule rounded-[11px] text-[12.5px]">
+          {STATUS_FILTERS.map(({ v, l }) => (
             <button
               type="button"
-              aria-label="Limpiar búsqueda de alergia"
-              onClick={() => onRestrictionChange('')}
-              className="absolute right-[9px] top-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-cream-2 text-muted flex items-center justify-center hover:bg-warn-border hover:text-ink-2 transition-colors"
+              key={v}
+              onClick={() => onFilterChange(v)}
+              className={`px-3.5 py-[6px] rounded-[8px] font-semibold whitespace-nowrap transition-all ${
+                filter === v
+                  ? 'bg-olive-100 text-olive-700'
+                  : 'text-muted font-normal hover:bg-cream-2 hover:text-ink-2'
+              }`}
             >
-              <Icon name="x" size={12} stroke={2.2} />
+              {l}
             </button>
-          )}
+          ))}
         </div>
-
-        {/* Results count — always visible */}
-        <span
-          className={`font-mono text-[11.5px] uppercase tracking-[.04em] lg:ml-auto transition-opacity ${isFetching ? 'opacity-40' : 'text-muted'}`}
-        >
-          {resultsLabel}
-        </span>
       </div>
 
-      {/* Row 2: categorical filters — collapsed on mobile behind toggle */}
-      <div
-        className={`${showSecondaryFilters ? 'flex' : 'hidden'} lg:flex items-center gap-3 flex-wrap`}
+      {/* Results count */}
+      <span
+        className={`font-mono text-[11.5px] uppercase tracking-[.04em] ml-auto transition-opacity ${isFetching ? 'opacity-40' : 'text-muted'}`}
       >
-        <div className="overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] min-w-0">
-          <div className="inline-flex p-[3px] gap-px bg-paper border border-rule rounded-[11px] text-[12.5px]">
-            {STATUS_FILTERS.map(({ v, l }) => (
-              <button
-                type="button"
-                key={v}
-                onClick={() => onFilterChange(v)}
-                className={`px-3.5 py-[6px] rounded-[8px] font-semibold whitespace-nowrap transition-all ${
-                  filter === v
-                    ? 'bg-olive-100 text-olive-700'
-                    : 'text-muted font-normal hover:bg-cream-2 hover:text-ink-2'
-                }`}
-              >
-                {l}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Month — right-aligned */}
-        <div className="lg:ml-auto lg:shrink-0 self-stretch">
-          <div className="relative h-full text-[12.5px] tracking-[.02em] text-muted">
-            <select
-              value={birthMonth}
-              onChange={(e) => onBirthMonthChange(e.target.value)}
-              className="appearance-none h-full w-full py-[9px] px-[14px] pr-8 border border-rule rounded-[11px] bg-paper cursor-pointer hover:border-rule-2 !text-[12.5px]"
-            >
-              <option value="all">Mes · todos</option>
-              {MONTHS.map((m, i) => (
-                <option key={m} value={i + 1}>
-                  {m}
-                </option>
-              ))}
-            </select>
-            <Icon
-              name="chevron-down"
-              size={14}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted pointer-events-none"
-            />
-          </div>
-        </div>
-      </div>
+        {resultsLabel}
+      </span>
     </div>
   );
 }
