@@ -16,6 +16,7 @@ const makeSubscription = (
     startDate: string;
     contractEndDate: string;
     suspendedDates: string[];
+    specialInstructions: Record<string, string>;
     client: { name: string };
     plan: { meals: string[] };
   }> = {},
@@ -23,6 +24,7 @@ const makeSubscription = (
   startDate: '2026-06-01',
   contractEndDate: '2026-06-30',
   suspendedDates: [],
+  specialInstructions: {},
   client: makeClient('Ana López'),
   plan: makePlan(),
   ...overrides,
@@ -97,17 +99,34 @@ describe('reportService.findDeliveryClientsForDate', () => {
 describe('reportService.findActiveClientsWithPlansForDate', () => {
   beforeEach(() => jest.clearAllMocks());
 
-  it('returns name and planMeals for active non-suspended clients', async () => {
+  it('returns name, planMeals and specialInstructions for active non-suspended clients', async () => {
     (Subscription.findAll as jest.Mock).mockResolvedValue([
       makeSubscription({
         client: makeClient('Ana López'),
         plan: makePlan(['breakfast', 'lunch']),
+        specialInstructions: { salad: 'DAR GRANDES' },
       }),
     ]);
 
     const result = await reportService.findActiveClientsWithPlansForDate('2026-06-15');
 
-    expect(result).toEqual([{ name: 'Ana López', planMeals: ['breakfast', 'lunch'] }]);
+    expect(result).toEqual([
+      {
+        name: 'Ana López',
+        planMeals: ['breakfast', 'lunch'],
+        specialInstructions: { salad: 'DAR GRANDES' },
+      },
+    ]);
+  });
+
+  it('defaults specialInstructions to empty object when null', async () => {
+    (Subscription.findAll as jest.Mock).mockResolvedValue([
+      makeSubscription({ specialInstructions: undefined as unknown as Record<string, string> }),
+    ]);
+
+    const result = await reportService.findActiveClientsWithPlansForDate('2026-06-15');
+
+    expect(result[0].specialInstructions).toEqual({});
   });
 
   it('excludes clients whose date is in suspendedDates', async () => {

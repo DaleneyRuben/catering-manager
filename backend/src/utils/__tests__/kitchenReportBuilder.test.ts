@@ -11,7 +11,11 @@ const mockMenu = {
   juice: 'Limonada',
 };
 
-const makeClient = (name: string, planMeals: string[]): ActiveClientRow => ({ name, planMeals });
+const makeClient = (
+  name: string,
+  planMeals: string[],
+  specialInstructions: Record<string, string> = {},
+): ActiveClientRow => ({ name, planMeals, specialInstructions });
 
 const allMeals = ['breakfast', 'morning_snack', 'salad', 'lunch', 'afternoon_snack', 'dinner'];
 
