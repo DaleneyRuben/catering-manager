@@ -228,6 +228,43 @@ describe('subscriptionService.create', () => {
     expect(mockClient.update).toHaveBeenCalledWith({ pausedSince: today });
   });
 
+  it('persists specialInstructions when provided', async () => {
+    (Client.findByPk as jest.Mock).mockResolvedValue({ id: 1 });
+    (Subscription.create as jest.Mock).mockResolvedValue(mockSubscription);
+    (ClientHistory.create as jest.Mock).mockResolvedValue({});
+    (Plan.findByPk as jest.Mock).mockResolvedValue({ id: 2, name: 'Completo', price: 5000 });
+
+    await subscriptionService.create(1, {
+      planId: 2,
+      startDate,
+      contractDate: today,
+      duration: 20,
+      specialInstructions: { salad: 'DAR GRANDES' },
+    });
+
+    expect(Subscription.create).toHaveBeenCalledWith(
+      expect.objectContaining({ specialInstructions: { salad: 'DAR GRANDES' } }),
+    );
+  });
+
+  it('omits specialInstructions from create when not provided', async () => {
+    (Client.findByPk as jest.Mock).mockResolvedValue({ id: 1 });
+    (Subscription.create as jest.Mock).mockResolvedValue(mockSubscription);
+    (ClientHistory.create as jest.Mock).mockResolvedValue({});
+    (Plan.findByPk as jest.Mock).mockResolvedValue({ id: 2, name: 'Completo', price: 5000 });
+
+    await subscriptionService.create(1, {
+      planId: 2,
+      startDate,
+      contractDate: today,
+      duration: 20,
+    });
+
+    expect(Subscription.create).toHaveBeenCalledWith(
+      expect.not.objectContaining({ specialInstructions: expect.anything() }),
+    );
+  });
+
   it('logs plan_assigned history event when renewalType is not provided', async () => {
     (Client.findByPk as jest.Mock).mockResolvedValue({ id: 1 });
     (Subscription.create as jest.Mock).mockResolvedValue(mockSubscription);

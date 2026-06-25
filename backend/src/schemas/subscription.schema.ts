@@ -16,6 +16,7 @@ export const createSubscriptionSchema = z.object({
   duration: z.number().int().min(1),
   discount: z.number().int().min(0).optional(),
   renewalType: z.enum(['renewal', 'reactivation']).optional(),
+  specialInstructions: z.record(z.string(), z.string()).optional(),
 });
 
 export const updateSubscriptionSchema = z.object({

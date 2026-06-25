@@ -27,6 +27,7 @@ const create = async (clientId: number, data: CreateSubscriptionDto) => {
     duration: data.duration,
     contractEndDate,
     clientId,
+    ...(data.specialInstructions ? { specialInstructions: data.specialInstructions } : {}),
   } as never);
 
   const eventTypeByRenewal = {
