@@ -1,4 +1,5 @@
 import { Op, QueryTypes, fn, literal, where } from 'sequelize';
+import { format, getMonth, parseISO } from 'date-fns';
 import sequelize from '../database/sequelize';
 import Client from '../models/Client';
 import Plan from '../models/Plan';
@@ -111,8 +112,10 @@ export type BirthdayPerson = {
 
 const findBirthdays = async (): Promise<BirthdayPerson[]> => {
   const today = appToday();
-  const currentMonth = Number(today.slice(5, 7));
-  const todayMonthDay = today.slice(5);
+  const todayDate = parseISO(today);
+  // getMonth returns 0-based index; SQL EXTRACT(MONTH) is 1-based
+  const currentMonth = getMonth(todayDate) + 1;
+  const todayMonthDay = format(todayDate, 'MM-dd');
 
   const clients = await Client.findAll({
     attributes: ['id', 'name', 'dateOfBirth'],
@@ -124,7 +127,7 @@ const findBirthdays = async (): Promise<BirthdayPerson[]> => {
     id: c.id,
     name: c.name,
     dateOfBirth: c.dateOfBirth,
-    isToday: c.dateOfBirth.slice(5) === todayMonthDay,
+    isToday: format(parseISO(c.dateOfBirth), 'MM-dd') === todayMonthDay,
   }));
 };
 

@@ -1,4 +1,4 @@
-import { addBusinessDays, parseISO } from 'date-fns';
+import { addBusinessDays, format, parseISO } from 'date-fns';
 import { EXPIRY_THRESHOLD_DAYS } from '../constants/subscription.constants';
 
 export type ClientStatusValue = 'active' | 'expiring' | 'paused' | 'suspended' | 'ended' | 'future';
@@ -40,7 +40,7 @@ export function deriveClientStatus(input: StatusInput, today: string): ClientSta
 
   // expiring: contractEndDate falls within EXPIRY_THRESHOLD_DAYS kitchen business days
   const threshold = addBusinessDays(parseISO(`${today}T12:00:00`), EXPIRY_THRESHOLD_DAYS);
-  const thresholdStr = threshold.toISOString().slice(0, 10);
+  const thresholdStr = format(threshold, 'yyyy-MM-dd');
   if (sub.contractEndDate <= thresholdStr) return 'expiring';
 
   return 'active';
