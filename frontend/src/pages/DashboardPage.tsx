@@ -24,7 +24,7 @@ export function DashboardPage() {
 
   if (isLoading || !summary) {
     return (
-      <div className="px-[44px] py-[34px]">
+      <div className="px-[44px] pt-[34px] pb-[48px]">
         <PageHeader label="Resumen operativo" title="Panel" action={todayBadge} />
         <div className="py-16 text-center text-muted font-mono text-[12px]">Cargando…</div>
       </div>
@@ -32,7 +32,7 @@ export function DashboardPage() {
   }
 
   return (
-    <div className="px-[44px] py-[34px]">
+    <div className="px-[44px] pt-[34px] pb-[48px]">
       <PageHeader label="Resumen operativo" title="Panel" action={todayBadge} />
 
       <div className="flex flex-col gap-5">
@@ -67,7 +67,10 @@ export function DashboardPage() {
           />
         </div>
 
-        <div className="grid gap-[18px]" style={{ gridTemplateColumns: '1.15fr 1fr 1fr' }}>
+        <div
+          className="grid gap-[18px] items-start"
+          style={{ gridTemplateColumns: '1.15fr 1fr 1fr' }}
+        >
           <ContractEndingCard
             today={summary.contractEnding.today}
             tomorrow={summary.contractEnding.tomorrow}
