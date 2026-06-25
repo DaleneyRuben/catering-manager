@@ -3,7 +3,7 @@ import { isAfter, parseISO, subDays } from 'date-fns';
 import { Button } from '../../components/ui/Button';
 import { Icon } from '../../components/ui/Icon';
 import { PageHeader } from '../../components/ui/PageHeader';
-import { PageLoader } from '../../components/ui/PageLoader';
+import { UsersPageSkeleton } from './UsersPageSkeleton';
 import { useUsers, type AppUser } from '../../hooks/useUsers';
 import { useAuth } from '../../contexts/AuthContext';
 import { UserModal } from './UserModal';
@@ -45,7 +45,7 @@ export function UsersPage() {
   const [editUser, setEditUser] = useState<AppUser | null>(null);
   const [query, setQuery] = useState('');
 
-  if (isLoading) return <PageLoader />;
+  if (isLoading) return <UsersPageSkeleton />;
 
   const filteredUsers = users.filter((u) => u.username.toLowerCase().includes(query.toLowerCase()));
 

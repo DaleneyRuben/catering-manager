@@ -22,10 +22,6 @@ jest.mock('./UserModal', () => ({
   },
 }));
 
-jest.mock('../../components/ui/PageLoader', () => ({
-  PageLoader: () => <div>cargando</div>,
-}));
-
 const defaultUsers = [
   {
     id: '1',
@@ -73,10 +69,10 @@ describe('UsersPage', () => {
     expect(screen.getByText('chef')).toBeInTheDocument();
   });
 
-  it('renders the PageLoader while loading', () => {
+  it('shows skeleton while loading', () => {
     setupUsers({ isLoading: true, users: [] });
-    render(<UsersPage />);
-    expect(screen.getByText('cargando')).toBeInTheDocument();
+    const { container } = render(<UsersPage />);
+    expect(container.querySelector('.animate-pulse')).toBeInTheDocument();
     expect(screen.queryByRole('heading', { name: 'Usuarios' })).not.toBeInTheDocument();
   });
 
