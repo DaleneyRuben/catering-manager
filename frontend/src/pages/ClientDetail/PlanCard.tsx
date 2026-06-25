@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
+import { CheckboxRow } from '../../components/ui/CheckboxRow';
 import { Icon } from '../../components/ui/Icon';
 import { Label } from '../../components/ui/Label';
 import { inputCls } from '../../components/ui/Field';
@@ -72,24 +73,21 @@ export function PlanCard({ sub, onUpdateBilling, onUpdateInstructions }: Props) 
           <Label variant="section" className="mb-[14px]">
             Instrucciones especiales
           </Label>
-          <label htmlFor="salad-grande" className="flex items-center gap-3 cursor-pointer w-fit">
-            <input
-              id="salad-grande"
-              type="checkbox"
-              checked={!!sub.specialInstructions?.salad}
-              onChange={(e) => {
-                const updated = { ...sub.specialInstructions };
-                if (e.target.checked) {
-                  updated.salad = 'DAR GRANDES';
-                } else {
-                  delete updated.salad;
-                }
-                onUpdateInstructions(updated);
-              }}
-              className="w-4 h-4 accent-olive-700 cursor-pointer"
-            />
-            <span className="text-[13.5px] text-ink">Ensalada grande</span>
-          </label>
+          <CheckboxRow
+            id="salad-grande"
+            label="Ensalada grande"
+            description="DAR GRANDES en el reporte de cocina"
+            checked={!!sub.specialInstructions?.salad}
+            onChange={(checked) => {
+              const updated = { ...sub.specialInstructions };
+              if (checked) {
+                updated.salad = 'DAR GRANDES';
+              } else {
+                delete updated.salad;
+              }
+              onUpdateInstructions(updated);
+            }}
+          />
         </>
       )}
 

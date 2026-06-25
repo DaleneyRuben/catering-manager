@@ -7,6 +7,7 @@ import {
   useWatch,
 } from 'react-hook-form';
 import type { Plan } from '../../../types/client';
+import { CheckboxRow } from '../../../components/ui/CheckboxRow';
 import { WizardSectionCard } from '../../../components/ui/WizardSectionCard';
 import { PlanRadioList } from '../../../components/ui/PlanRadioList';
 import type { NewClientFormValues } from '../types';
@@ -69,27 +70,21 @@ export function StepPlan({ register, control, errors, plans, setValue }: Props) 
           iconColor="text-olive-700"
           title="Instrucciones especiales"
         >
-          <label
-            htmlFor="new-salad-grande"
-            className="flex items-center gap-3 cursor-pointer w-fit"
-          >
-            <input
-              id="new-salad-grande"
-              type="checkbox"
-              checked={!!specialInstructions?.salad}
-              onChange={(e) => {
-                const updated = { ...(specialInstructions ?? {}) };
-                if (e.target.checked) {
-                  updated.salad = 'DAR GRANDES';
-                } else {
-                  delete updated.salad;
-                }
-                setValue('specialInstructions', updated);
-              }}
-              className="w-4 h-4 accent-olive-700 cursor-pointer"
-            />
-            <span className="text-[13.5px] text-ink">Ensalada grande</span>
-          </label>
+          <CheckboxRow
+            id="new-salad-grande"
+            label="Ensalada grande"
+            description="DAR GRANDES en el reporte de cocina"
+            checked={!!specialInstructions?.salad}
+            onChange={(checked) => {
+              const updated = { ...(specialInstructions ?? {}) };
+              if (checked) {
+                updated.salad = 'DAR GRANDES';
+              } else {
+                delete updated.salad;
+              }
+              setValue('specialInstructions', updated);
+            }}
+          />
         </WizardSectionCard>
       )}
     </div>
