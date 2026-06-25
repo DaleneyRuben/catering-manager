@@ -10,6 +10,7 @@ exports[`computeKitchenReportData matches snapshot 1`] = `
     {
       "count": 2,
       "dish": "Queque de platano",
+      "instructions": {},
       "label": "DESAYUNO",
       "noDar": [
         "Carmen Tapia",
@@ -18,6 +19,7 @@ exports[`computeKitchenReportData matches snapshot 1`] = `
     {
       "count": 2,
       "dish": "Flan de chocolate",
+      "instructions": {},
       "label": "MEDIA MAÑANA",
       "noDar": [
         "Carmen Tapia",
@@ -26,6 +28,7 @@ exports[`computeKitchenReportData matches snapshot 1`] = `
     {
       "count": 2,
       "dish": "Manzana asada con canela",
+      "instructions": {},
       "label": "MERIENDA TARDE",
       "noDar": [
         "Carmen Tapia",
@@ -36,18 +39,21 @@ exports[`computeKitchenReportData matches snapshot 1`] = `
     {
       "count": 3,
       "dish": "Boloñesa con caracolitos",
+      "instructions": {},
       "label": "ALMUERZO",
       "noDar": [],
     },
     {
       "count": 3,
       "dish": "Vainitas con zuccini",
+      "instructions": {},
       "label": "ENSALADA",
       "noDar": [],
     },
     {
       "count": 3,
       "dish": "Tortilla de coliflor con yuca",
+      "instructions": {},
       "label": "CENA",
       "noDar": [],
     },

@@ -68,6 +68,34 @@ describe('computeKitchenReportData', () => {
     expect(desayuno.noDar).toEqual(['Carlos Ríos']);
   });
 
+  it('groups instructions by label within a meal section', () => {
+    const clients = [
+      makeClient('Ana López', allMeals, { salad: 'DAR GRANDES' }),
+      makeClient('Jorge Rengel', allMeals, { salad: 'DAR GRANDES' }),
+      makeClient('Carlos Ríos', allMeals),
+    ];
+    const data = computeKitchenReportData(mockMenu, clients, '2026-06-04');
+
+    const ensalada = data.produccion.find((m) => m.label === 'ENSALADA')!;
+    expect(ensalada.instructions).toEqual({ 'DAR GRANDES': ['Ana López', 'Jorge Rengel'] });
+  });
+
+  it('returns empty instructions when no client has a special instruction for the meal', () => {
+    const clients = [makeClient('Ana López', allMeals)];
+    const data = computeKitchenReportData(mockMenu, clients, '2026-06-04');
+
+    const ensalada = data.produccion.find((m) => m.label === 'ENSALADA')!;
+    expect(ensalada.instructions).toEqual({});
+  });
+
+  it('only applies an instruction to the relevant meal section', () => {
+    const clients = [makeClient('Ana López', allMeals, { salad: 'DAR GRANDES' })];
+    const data = computeKitchenReportData(mockMenu, clients, '2026-06-04');
+
+    const almuerzo = data.produccion.find((m) => m.label === 'ALMUERZO')!;
+    expect(almuerzo.instructions).toEqual({});
+  });
+
   it('includes all PASTELERIA meals in order', () => {
     const clients = [makeClient('Ana López', allMeals)];
     const data = computeKitchenReportData(mockMenu, clients, '2026-06-04');

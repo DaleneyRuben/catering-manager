@@ -235,6 +235,26 @@ const hiperproteicoTableRows = (clients: string[]): TableRow[] => {
   ]);
 };
 
+const instructionTableRows = (label: string, clients: string[]): TableRow[] => {
+  if (clients.length === 0) return [];
+  return clientChunkRows(
+    clients,
+    [
+      cell(
+        para(String(clients.length), {
+          bold: true,
+          color: RED,
+          size: NO_DAR_SIZE,
+          align: AlignmentType.CENTER,
+        }),
+        { width: W.count },
+      ),
+      cell(para(label, { size: NO_DAR_SIZE }), { width: W.label }),
+    ],
+    NO_DAR_SIZE,
+  );
+};
+
 const buildMealTableRows = (
   config: MealConfig,
   menu: MenuData,
@@ -243,9 +263,16 @@ const buildMealTableRows = (
   const dish = menu[config.menuField] ?? '';
   const receiving = clients.filter((c) => c.planMeals.includes(config.key));
   const noDar = clients.filter((c) => !c.planMeals.includes(config.key)).map((c) => c.name);
+  const instructions = receiving.reduce<Record<string, string[]>>((acc, c) => {
+    const label = c.specialInstructions[config.key];
+    if (label) (acc[label] ??= []).push(c.name);
+    return acc;
+  }, {});
+
   return [
     mealTableRow(config.label, dish, receiving.length),
     ...noDarTableRows(config.label, noDar),
+    ...Object.entries(instructions).flatMap(([label, names]) => instructionTableRows(label, names)),
     spacerRow(),
   ];
 };

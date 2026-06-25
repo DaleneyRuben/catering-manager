@@ -31,6 +31,8 @@ export type MealSection = {
   dish: string;
   count: number;
   noDar: string[];
+  // instruction label → client names (e.g. "DAR GRANDES" → ["Ana López", "Carlos Ríos"])
+  instructions: Record<string, string[]>;
 };
 
 export type KitchenReportData = {
@@ -61,17 +63,33 @@ const formatDateText = (date: string): string => {
   return `FECHA: ${day} – ${month} – ${year}`;
 };
 
+const groupByInstruction = (
+  mealKey: string,
+  receiving: ActiveClientRow[],
+): Record<string, string[]> =>
+  receiving.reduce<Record<string, string[]>>((acc, c) => {
+    const label = c.specialInstructions[mealKey];
+    if (label) {
+      acc[label] = [...(acc[label] ?? []), c.name];
+    }
+    return acc;
+  }, {});
+
 const toSection = (
   configs: MealConfig[],
   menu: MenuData,
   clients: ActiveClientRow[],
 ): MealSection[] =>
-  configs.map((m) => ({
-    label: m.label,
-    dish: menu[m.menuField] ?? '',
-    count: clients.filter((c) => c.planMeals.includes(m.key)).length,
-    noDar: clients.filter((c) => !c.planMeals.includes(m.key)).map((c) => c.name),
-  }));
+  configs.map((m) => {
+    const receiving = clients.filter((c) => c.planMeals.includes(m.key));
+    return {
+      label: m.label,
+      dish: menu[m.menuField] ?? '',
+      count: receiving.length,
+      noDar: clients.filter((c) => !c.planMeals.includes(m.key)).map((c) => c.name),
+      instructions: groupByInstruction(m.key, receiving),
+    };
+  });
 
 export const computeKitchenReportData = (
   menu: MenuData,
