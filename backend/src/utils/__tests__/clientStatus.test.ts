@@ -125,11 +125,31 @@ describe('deriveClientStatus', () => {
     ).toBe('expiring');
   });
 
+  it('returns expiring when contractEndDate is exactly on the threshold day (Wed Jun 10 + 5 bd = Wed Jun 17)', () => {
+    // EXPIRY_THRESHOLD_DAYS=5; addBusinessDays('2026-06-10', 5) = '2026-06-17'
+    expect(
+      deriveClientStatus(
+        { pausedSince: null, sub: makeSub({ contractEndDate: '2026-06-17' }) },
+        TODAY,
+      ),
+    ).toBe('expiring');
+  });
+
   // --- active ---
   it('returns expiring (not ended) when contractEndDate is today — last delivery day is still within threshold', () => {
     expect(
       deriveClientStatus({ pausedSince: null, sub: makeSub({ contractEndDate: TODAY }) }, TODAY),
     ).toBe('expiring');
+  });
+
+  it('returns active when contractEndDate is 1 business day past the threshold (Thu Jun 18)', () => {
+    // '2026-06-18' > '2026-06-17' (threshold) → active
+    expect(
+      deriveClientStatus(
+        { pausedSince: null, sub: makeSub({ contractEndDate: '2026-06-18' }) },
+        TODAY,
+      ),
+    ).toBe('active');
   });
 
   it('returns active for a normal in-progress subscription', () => {
