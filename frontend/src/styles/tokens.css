@@ -40,7 +40,7 @@
   --color-warn-bg: #f4ead0;
   --color-warn-border: #e3cf95;
   --color-warn-dot: #cda01a;
-  --color-ok: #357e1c;
+  --color-ok: var(--color-olive-700);
   --color-ok-bg: #dee9c8;
   --color-muted-dot: #b3b39c;
   --color-taupe: #7b6a4e;
@@ -61,7 +61,7 @@
   --color-toast-success-border: #b8d099;
 
   /* Suspend calendar */
-  --color-calendar-selectable: #a8c374;
+  --color-calendar-selectable: var(--color-olive-300);
   --color-calendar-suspended-bg: #e3a899;
   --color-calendar-suspended-text: #7a2418;
   --color-calendar-suspended-border: #c5756a;
@@ -82,6 +82,43 @@
   --color-tier-mid-border: #d7e1bd;
   --color-tier-premium-bg: #e0e9cb;
   --color-tier-premium-border: #c9d8a4;
+
+  /* Delivery group palette — cycles per group on the Entregas route.
+     avatar bg/text reuse chip-bg/chip-text, so only 6 tokens per color. */
+  --color-delivery-1-accent: var(--color-olive-700);
+  --color-delivery-1-card-bg: #f4f7ec;
+  --color-delivery-1-card-border: #dde8c8;
+  --color-delivery-1-chip-bg: var(--color-olive-100);
+  --color-delivery-1-chip-text: var(--color-olive-700);
+  --color-delivery-1-avatar-border: var(--color-olive-200);
+
+  --color-delivery-2-accent: #b7891b;
+  --color-delivery-2-card-bg: #faf5e8;
+  --color-delivery-2-card-border: #ece0c4;
+  --color-delivery-2-chip-bg: var(--color-warn-bg);
+  --color-delivery-2-chip-text: #8f6b10;
+  --color-delivery-2-avatar-border: var(--color-warn-border);
+
+  --color-delivery-3-accent: #6f9d2f;
+  --color-delivery-3-card-bg: #f6f8ea;
+  --color-delivery-3-card-border: #e2e9c5;
+  --color-delivery-3-chip-bg: #ebf0d3;
+  --color-delivery-3-chip-text: #5a8520;
+  --color-delivery-3-avatar-border: #d6e0ab;
+
+  --color-delivery-4-accent: #c2792a;
+  --color-delivery-4-card-bg: #fbf3e7;
+  --color-delivery-4-card-border: #efddc3;
+  --color-delivery-4-chip-bg: #f6e6cd;
+  --color-delivery-4-chip-text: #a4631d;
+  --color-delivery-4-avatar-border: #e6cda0;
+
+  --color-delivery-5-accent: #2f6e4f;
+  --color-delivery-5-card-bg: #ecf4ef;
+  --color-delivery-5-card-border: #cfe3d8;
+  --color-delivery-5-chip-bg: #dbece2;
+  --color-delivery-5-chip-text: #2f6e4f;
+  --color-delivery-5-avatar-border: #bdd9cb;
 
   /* Menu grid */
   --color-today-gradient-start: #21420c;
