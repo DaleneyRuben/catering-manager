@@ -38,6 +38,9 @@ class Subscription extends Model {
 
   @Column({ type: DataType.DATEONLY, allowNull: true, defaultValue: null })
   declare finalizedAt: string | null;
+
+  @Column({ type: DataType.JSONB, allowNull: false, defaultValue: {} })
+  declare specialInstructions: Record<string, string>;
 }
 
 export default Subscription;
