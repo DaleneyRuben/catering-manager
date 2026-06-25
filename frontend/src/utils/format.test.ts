@@ -85,14 +85,38 @@ describe('formatConnectionStamp', () => {
 describe('formatRelativeTime', () => {
   const base = new Date('2026-06-23T11:00:00').getTime();
 
+  it('returns "hace 0 min" for 0 minutes', () => {
+    expect(formatRelativeTime(new Date(base).toISOString(), base)).toBe('hace 0 min');
+  });
+
   it('returns "hace X min" for under an hour', () => {
     const iso = new Date(base - 8 * 60_000).toISOString();
     expect(formatRelativeTime(iso, base)).toBe('hace 8 min');
   });
 
+  it('returns "hace 59 min" for 59 minutes (just before the hour boundary)', () => {
+    const iso = new Date(base - 59 * 60_000).toISOString();
+    expect(formatRelativeTime(iso, base)).toBe('hace 59 min');
+  });
+
+  it('returns "hace 1 h" for exactly 60 minutes (at the hour boundary)', () => {
+    const iso = new Date(base - 60 * 60_000).toISOString();
+    expect(formatRelativeTime(iso, base)).toBe('hace 1 h');
+  });
+
   it('returns "hace X h" for 1–23 hours', () => {
     const iso = new Date(base - 2 * 60 * 60_000).toISOString();
     expect(formatRelativeTime(iso, base)).toBe('hace 2 h');
+  });
+
+  it('returns "hace 23 h" for 23 hours (just before the day boundary)', () => {
+    const iso = new Date(base - 23 * 60 * 60_000).toISOString();
+    expect(formatRelativeTime(iso, base)).toBe('hace 23 h');
+  });
+
+  it('returns "hace 1 días" for exactly 24 hours (at the day boundary)', () => {
+    const iso = new Date(base - 24 * 60 * 60_000).toISOString();
+    expect(formatRelativeTime(iso, base)).toBe('hace 1 días');
   });
 
   it('returns "hace X días" for 24+ hours', () => {
