@@ -30,7 +30,7 @@ function ConnectionRow({ roleLabel, connection }: RowProps) {
         }`}
       />
       <div className="flex-1 min-w-0">
-        <p className="text-[13.5px] font-semibold text-ink leading-tight">{roleLabel}</p>
+        <p className="text-[13.5px] font-semibold text-ink leading-tight">{connection.username}</p>
         <p className="font-mono text-[10.5px] text-faint mt-0.5">
           {formatConnectionStamp(connection.lastLoginAt)}
         </p>

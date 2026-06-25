@@ -31,6 +31,11 @@ describe('ConnectionsCard', () => {
     expect(screen.getAllByText('Sin registro')).toHaveLength(2);
   });
 
+  it('shows the username when a connection is present', () => {
+    render(<ConnectionsCard kitchen={onlineConnection} delivery={null} />);
+    expect(screen.getByText('cocina1')).toBeInTheDocument();
+  });
+
   it('shows relative time when a connection is present', () => {
     render(<ConnectionsCard kitchen={onlineConnection} delivery={null} />);
     expect(screen.getByText(/hace \d+ min/)).toBeInTheDocument();
