@@ -82,10 +82,7 @@ export function DashboardPage() {
               .replace(/^\w/, (c) => c.toUpperCase())}
           />
           <div className="flex flex-col gap-[18px]">
-            <ConnectionsCard
-              kitchen={summary.connections.kitchen}
-              delivery={summary.connections.delivery}
-            />
+            <ConnectionsCard connections={summary.connections} />
             <MenuStatusCard today={summary.menus.today} tomorrow={summary.menus.tomorrow} />
           </div>
         </div>

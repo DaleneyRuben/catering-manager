@@ -2,53 +2,49 @@ import { render, screen } from '@testing-library/react';
 import { ConnectionsCard } from './ConnectionsCard';
 import type { Connection } from '../../types/dashboard';
 
-const onlineConnection: Connection = {
-  username: 'cocina1',
-  lastLoginAt: new Date(Date.now() - 8 * 60_000).toISOString(),
+const online = (username: string): Connection => ({
+  username,
+  lastLoginAt: new Date(Date.now() - 2 * 60_000).toISOString(),
   online: true,
-};
+});
 
-const offlineConnection: Connection = {
-  username: 'delivery1',
+const offline = (username: string): Connection => ({
+  username,
   lastLoginAt: new Date(Date.now() - 2 * 60 * 60_000).toISOString(),
   online: false,
-};
+});
 
 describe('ConnectionsCard', () => {
   it('shows the title', () => {
-    render(<ConnectionsCard kitchen={null} delivery={null} />);
+    render(<ConnectionsCard connections={[]} />);
     expect(screen.getByText('Última conexión')).toBeInTheDocument();
   });
 
-  it('shows role labels for both rows', () => {
-    render(<ConnectionsCard kitchen={null} delivery={null} />);
-    expect(screen.getByText('Cocina')).toBeInTheDocument();
-    expect(screen.getByText('Delivery')).toBeInTheDocument();
+  it('shows "Sin registro" when the list is empty', () => {
+    render(<ConnectionsCard connections={[]} />);
+    expect(screen.getByText('Sin registro')).toBeInTheDocument();
   });
 
-  it('shows "Sin registro" when a connection is null', () => {
-    render(<ConnectionsCard kitchen={null} delivery={null} />);
-    expect(screen.getAllByText('Sin registro')).toHaveLength(2);
+  it('renders a row for each connection', () => {
+    render(<ConnectionsCard connections={[online('Caro'), online('Randy')]} />);
+    expect(screen.getByText('Caro')).toBeInTheDocument();
+    expect(screen.getByText('Randy')).toBeInTheDocument();
   });
 
-  it('shows the username when a connection is present', () => {
-    render(<ConnectionsCard kitchen={onlineConnection} delivery={null} />);
-    expect(screen.getByText('cocina1')).toBeInTheDocument();
-  });
-
-  it('shows relative time when a connection is present', () => {
-    render(<ConnectionsCard kitchen={onlineConnection} delivery={null} />);
-    expect(screen.getByText(/hace \d+ min/)).toBeInTheDocument();
-  });
-
-  it('shows "Sin registro" only for the null connection when one is provided', () => {
-    render(<ConnectionsCard kitchen={onlineConnection} delivery={null} />);
-    expect(screen.getAllByText('Sin registro')).toHaveLength(1);
-  });
-
-  it('shows relative time for both when both connections are present', () => {
-    render(<ConnectionsCard kitchen={onlineConnection} delivery={offlineConnection} />);
-    expect(screen.queryByText('Sin registro')).not.toBeInTheDocument();
+  it('shows relative time for each connection', () => {
+    render(<ConnectionsCard connections={[online('Caro'), offline('Randy')]} />);
     expect(screen.getAllByText(/hace/)).toHaveLength(2);
+  });
+
+  it('does not show "Sin registro" when connections are present', () => {
+    render(<ConnectionsCard connections={[online('Caro')]} />);
+    expect(screen.queryByText('Sin registro')).not.toBeInTheDocument();
+  });
+
+  it('renders all connections including multiple from the same role', () => {
+    render(<ConnectionsCard connections={[online('Caro'), online('Susy'), offline('Randy')]} />);
+    expect(screen.getByText('Caro')).toBeInTheDocument();
+    expect(screen.getByText('Susy')).toBeInTheDocument();
+    expect(screen.getByText('Randy')).toBeInTheDocument();
   });
 });

@@ -12,7 +12,7 @@ const summary: DashboardSummary = {
   deliveriesToday: 9,
   contractEnding: { today: [], tomorrow: [] },
   birthdays: [],
-  connections: { kitchen: null, delivery: null },
+  connections: [],
   menus: {
     today: { date: '2026-06-23', loaded: true },
     tomorrow: { date: '2026-06-24', loaded: false },

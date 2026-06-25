@@ -29,6 +29,6 @@ export interface DashboardSummary {
   deliveriesToday: number;
   contractEnding: { today: ContractEndingPerson[]; tomorrow: ContractEndingPerson[] };
   birthdays: BirthdayPerson[];
-  connections: { kitchen: Connection | null; delivery: Connection | null };
+  connections: Connection[];
   menus: { today: MenuStatus; tomorrow: MenuStatus };
 }

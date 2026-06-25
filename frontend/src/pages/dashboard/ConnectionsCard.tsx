@@ -3,23 +3,10 @@ import { formatConnectionStamp, formatRelativeTime } from '../../utils/format';
 import type { Connection } from '../../types/dashboard';
 
 interface RowProps {
-  roleLabel: string;
-  connection: Connection | null;
+  connection: Connection;
 }
 
-function ConnectionRow({ roleLabel, connection }: RowProps) {
-  if (!connection) {
-    return (
-      <div className="flex items-center gap-[11px]">
-        <span className="w-2 h-2 rounded-full bg-muted-dot shrink-0" />
-        <div className="flex-1 min-w-0">
-          <p className="text-[13.5px] font-semibold text-ink leading-tight">{roleLabel}</p>
-          <p className="font-mono text-[10.5px] text-faint mt-0.5">Sin registro</p>
-        </div>
-      </div>
-    );
-  }
-
+function ConnectionRow({ connection }: RowProps) {
   return (
     <div className="flex items-center gap-[11px]">
       <span
@@ -45,11 +32,10 @@ function ConnectionRow({ roleLabel, connection }: RowProps) {
 }
 
 interface Props {
-  kitchen: Connection | null;
-  delivery: Connection | null;
+  connections: Connection[];
 }
 
-export function ConnectionsCard({ kitchen, delivery }: Props) {
+export function ConnectionsCard({ connections }: Props) {
   return (
     <div className="bg-paper border border-rule rounded-[14px] px-6 py-[22px]">
       <div className="flex items-center gap-[11px] mb-[18px]">
@@ -58,10 +44,15 @@ export function ConnectionsCard({ kitchen, delivery }: Props) {
         </span>
         <h2 className="font-serif font-semibold text-[20px] text-ink m-0">Última conexión</h2>
       </div>
-      <div className="flex flex-col gap-[14px]">
-        <ConnectionRow roleLabel="Cocina" connection={kitchen} />
-        <ConnectionRow roleLabel="Delivery" connection={delivery} />
-      </div>
+      {connections.length === 0 ? (
+        <p className="font-mono text-[12px] text-faint">Sin registro</p>
+      ) : (
+        <div className="flex flex-col gap-[14px]">
+          {connections.map((c) => (
+            <ConnectionRow key={c.username} connection={c} />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
