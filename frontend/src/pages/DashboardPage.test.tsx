@@ -28,10 +28,11 @@ describe('DashboardPage', () => {
     expect(screen.getByRole('heading', { name: 'Panel' })).toBeInTheDocument();
   });
 
-  it('shows a loading message while data is fetching', () => {
+  it('shows skeleton while data is fetching', () => {
     mockUseDashboard.mockReturnValue({ summary: undefined, isLoading: true });
-    render(<DashboardPage />);
-    expect(screen.getByText('Cargando…')).toBeInTheDocument();
+    const { container } = render(<DashboardPage />);
+    expect(container.querySelector('.animate-pulse')).toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: 'Panel' })).toBeInTheDocument();
   });
 
   it('renders all three KPI cards', () => {
