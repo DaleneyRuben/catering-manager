@@ -3,6 +3,7 @@ import { PageHeader } from '../components/ui/PageHeader';
 import { Icon } from '../components/ui/Icon';
 import { useDeliveryRoute } from '../hooks/useDeliveryRoute';
 import { formatLongDate } from '../utils/format';
+import { Skeleton } from '../components/ui/Skeleton';
 import { DeliveryZoneSection } from './delivery/DeliveryZoneSection';
 import type { DeliveryDayRoute } from '../types/delivery';
 
@@ -49,7 +50,28 @@ export function DeliveryPage() {
         }
       />
 
-      {isLoading && <p className="text-muted">Cargando…</p>}
+      {isLoading && (
+        <div className="flex flex-col gap-[22px]">
+          <div className="flex gap-2">
+            <Skeleton className="w-[90px] h-[38px] rounded-[8px]" />
+            <Skeleton className="w-[100px] h-[38px] rounded-[8px]" />
+          </div>
+          {['a', 'b'].map((k) => (
+            <div
+              key={k}
+              className="bg-paper border border-rule rounded-[13px] p-5 flex flex-col gap-3"
+            >
+              <Skeleton className="w-20 h-3" />
+              {['x', 'y', 'z'].map((r) => (
+                <div key={r} className="flex items-center justify-between">
+                  <Skeleton className="w-36 h-3.5" />
+                  <Skeleton className="w-12 h-3" />
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
+      )}
 
       {!isLoading && (
         <div className="flex flex-col gap-[22px]">
