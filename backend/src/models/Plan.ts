@@ -9,9 +9,6 @@ class Plan extends Model {
   @Column({ type: DataType.ARRAY(DataType.STRING), allowNull: false, defaultValue: [] })
   declare meals: string[];
 
-  @Column({ type: DataType.TEXT })
-  declare description: string;
-
   @Column({ type: DataType.DECIMAL(10, 2), allowNull: false })
   declare price: number;
 
