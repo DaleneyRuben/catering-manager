@@ -12,7 +12,6 @@ const mockPlan = {
   id: 1,
   name: 'Full Plan',
   meals: ['breakfast', 'lunch', 'dinner'],
-  description: 'Three meals a day',
   price: 150.0,
   discount: 0,
 };
@@ -24,7 +23,6 @@ describe('planService.create', () => {
     const result = await planService.create({
       name: 'Full Plan',
       meals: ['breakfast', 'lunch', 'dinner'],
-      description: 'Three meals a day',
       price: 150.0,
       discount: 0,
     });
@@ -40,7 +38,6 @@ describe('planService.create', () => {
       planService.create({
         name: 'Full Plan',
         meals: ['breakfast'],
-        description: '',
         price: 100,
         discount: 0,
       }),

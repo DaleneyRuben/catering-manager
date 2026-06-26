@@ -17,7 +17,6 @@ const mockPlan = {
   id: 1,
   name: 'Full Plan',
   meals: ['breakfast', 'lunch', 'dinner'],
-  description: 'Three meals a day',
   price: 150.0,
   discount: 0,
 };
@@ -25,7 +24,6 @@ const mockPlan = {
 const validPayload = {
   name: 'Full Plan',
   meals: ['breakfast', 'lunch', 'dinner'],
-  description: 'Three meals a day',
   price: 150.0,
   discount: 0,
 };
