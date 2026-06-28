@@ -4,7 +4,7 @@ import { ProtectedRoute } from './components/auth/ProtectedRoute';
 import { LoginPage } from './pages/LoginPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { ClientsPage } from './pages/ClientsPage';
-import { ClientDetailPage } from './pages/ClientDetail';
+import { ClientDetailPage } from './pages/ClientDetailPage';
 import { NewClientPage } from './pages/NewClientPage';
 import { PlansPage } from './pages/PlansPage';
 import { MenuImportPage } from './pages/MenuImportPage';
