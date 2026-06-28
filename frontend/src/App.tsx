@@ -10,7 +10,7 @@ import { PlansPage } from './pages/PlansPage';
 import { MenuImportPage } from './pages/MenuImportPage';
 import { ReportsPage } from './pages/ReportsPage';
 import { HealthPage } from './pages/HealthPage';
-import { UsersPage } from './pages/users/UsersPage';
+import { UsersPage } from './pages/UsersPage';
 import { DeliveryPage } from './pages/DeliveryPage';
 import { ROLES } from './constants/roles';
 

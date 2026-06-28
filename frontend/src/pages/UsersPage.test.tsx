@@ -1,21 +1,21 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { subDays } from 'date-fns';
-import { useUsers } from '../../hooks/useUsers';
-import { formatDateTime } from '../../utils/format';
-import { useAuth } from '../../contexts/AuthContext';
+import { useUsers } from '../hooks/useUsers';
+import { formatDateTime } from '../utils/format';
+import { useAuth } from '../contexts/AuthContext';
 import { UsersPage } from './UsersPage';
 
-jest.mock('../../hooks/useUsers', () => ({
+jest.mock('../hooks/useUsers', () => ({
   useUsers: jest.fn(),
 }));
 
-jest.mock('../../contexts/AuthContext', () => ({
+jest.mock('../contexts/AuthContext', () => ({
   useAuth: jest.fn(),
 }));
 
 let capturedModalProps: Record<string, unknown> = {};
-jest.mock('./UserModal', () => ({
+jest.mock('./users/UserModal', () => ({
   UserModal: (props: Record<string, unknown>) => {
     capturedModalProps = props;
     return <div>user-modal</div>;

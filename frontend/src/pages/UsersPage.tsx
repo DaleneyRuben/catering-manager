@@ -1,16 +1,16 @@
 import { useState } from 'react';
 import { isAfter, parseISO, subDays } from 'date-fns';
-import { Button } from '../../components/ui/Button';
-import { Icon } from '../../components/ui/Icon';
-import { PageHeader } from '../../components/ui/PageHeader';
-import { UsersPageSkeleton } from './UsersPageSkeleton';
-import { useUsers, type AppUser } from '../../hooks/useUsers';
-import { useAuth } from '../../contexts/AuthContext';
-import { UserModal } from './UserModal';
-import { initials } from '../../utils/string';
-import { formatDateTime } from '../../utils/format';
-import type { UserRole } from '../../contexts/AuthContext';
-import { ROLES, ROLE_LABELS } from '../../constants/roles';
+import { Button } from '../components/ui/Button';
+import { Icon } from '../components/ui/Icon';
+import { PageHeader } from '../components/ui/PageHeader';
+import { UsersPageSkeleton } from './users/UsersPageSkeleton';
+import { useUsers, type AppUser } from '../hooks/useUsers';
+import { useAuth } from '../contexts/AuthContext';
+import { UserModal } from './users/UserModal';
+import { initials } from '../utils/string';
+import { formatDateTime } from '../utils/format';
+import type { UserRole } from '../contexts/AuthContext';
+import { ROLES, ROLE_LABELS } from '../constants/roles';
 
 const ROLE_CLASSES: Record<UserRole, string> = {
   super_admin: 'bg-ok-bg text-ok',
