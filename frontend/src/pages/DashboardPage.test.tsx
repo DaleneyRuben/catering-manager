@@ -20,7 +20,15 @@ const summary: DashboardSummary = {
 };
 
 describe('DashboardPage', () => {
-  afterEach(() => jest.clearAllMocks());
+  beforeEach(() => {
+    // Pin to a Thursday so day-dependent labels are deterministic
+    jest.useFakeTimers().setSystemTime(new Date('2026-06-25T12:00:00'));
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+    jest.useRealTimers();
+  });
 
   it('renders the Panel heading', () => {
     mockUseDashboard.mockReturnValue({ summary, isLoading: false });

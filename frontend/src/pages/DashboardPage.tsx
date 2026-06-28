@@ -1,4 +1,4 @@
-import { format } from 'date-fns';
+import { format, isWeekend, getDay, addDays } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Icon } from '../components/ui/Icon';
 import { PageHeader } from '../components/ui/PageHeader';
@@ -15,6 +15,17 @@ function todayIso() {
   return format(new Date(), 'yyyy-MM-dd');
 }
 
+function getWeekendLabels() {
+  const now = new Date();
+  // Sat → +2 days to Monday; Sun → +1 day to Monday
+  const monday = addDays(now, getDay(now) === 6 ? 2 : 1);
+  const tuesday = addDays(monday, 1);
+  return {
+    todayLabel: format(monday, 'EEEE', { locale: es }),
+    tomorrowLabel: format(tuesday, 'EEEE', { locale: es }),
+  };
+}
+
 const todayBadge = (
   <div className="flex items-center gap-[9px] font-mono text-[12px] text-muted bg-paper border border-rule rounded-[9px] px-[14px] py-[9px]">
     <Icon name="calendar" size={15} stroke={1.7} className="text-olive-600" />
@@ -24,6 +35,13 @@ const todayBadge = (
 
 export function DashboardPage() {
   const { summary, isLoading } = useDashboard();
+  const weekend = isWeekend(new Date());
+  const { todayLabel, tomorrowLabel } = weekend
+    ? getWeekendLabels()
+    : { todayLabel: 'hoy', tomorrowLabel: 'mañana' };
+  const deliveryCaption = weekend ? `Entregas el ${todayLabel}` : 'Entregas hoy';
+  // Capitalize for MenuStatusCard where CSS uppercase is not applied
+  const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
   if (isLoading || !summary) {
     return (
@@ -67,6 +85,8 @@ export function DashboardPage() {
             todayColor="text-ink"
             tomorrow={summary.active.tomorrow}
             tomorrowColor="text-olive-700"
+            todayLabel={todayLabel}
+            tomorrowLabel={tomorrowLabel}
           />
           <KpiCard
             icon="pause"
@@ -77,6 +97,8 @@ export function DashboardPage() {
             todayColor="text-ink"
             tomorrow={summary.suspended.tomorrow}
             tomorrowColor="text-warn"
+            todayLabel={todayLabel}
+            tomorrowLabel={tomorrowLabel}
           />
           <KpiCard
             icon="motorcycle"
@@ -84,7 +106,7 @@ export function DashboardPage() {
             iconColor="text-olive-700"
             label="Delivery"
             today={summary.deliveriesToday}
-            singleCaption="Entregas hoy"
+            singleCaption={deliveryCaption}
           />
         </div>
 
@@ -92,6 +114,8 @@ export function DashboardPage() {
           <ContractEndingCard
             today={summary.contractEnding.today}
             tomorrow={summary.contractEnding.tomorrow}
+            todayLabel={todayLabel}
+            tomorrowLabel={tomorrowLabel}
           />
           <BirthdaysCard
             birthdays={summary.birthdays}
@@ -101,7 +125,12 @@ export function DashboardPage() {
           />
           <div className="flex flex-col gap-[18px]">
             <ConnectionsCard connections={summary.connections} />
-            <MenuStatusCard today={summary.menus.today} tomorrow={summary.menus.tomorrow} />
+            <MenuStatusCard
+              today={summary.menus.today}
+              tomorrow={summary.menus.tomorrow}
+              todayLabel={capitalize(todayLabel)}
+              tomorrowLabel={capitalize(tomorrowLabel)}
+            />
           </div>
         </div>
       </div>
