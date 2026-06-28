@@ -18,9 +18,11 @@ jest.mock('../../models/Client');
 jest.mock('../../models/Plan');
 jest.mock('../../models/Subscription');
 jest.mock('../../models/User');
+const mockAppToday = jest.fn(() => '2026-06-25');
+
 jest.mock('../../utils/date', () => ({
   ...jest.requireActual('../../utils/date'),
-  appToday: jest.fn(() => '2026-06-25'),
+  appToday: () => mockAppToday(),
 }));
 
 describe('dashboardService.findCounts', () => {
@@ -61,6 +63,42 @@ describe('dashboardService.findCounts', () => {
 
     const [, options] = (sequelize.query as jest.Mock).mock.calls[0];
     expect(options.replacements).toEqual({ today: '2026-06-25', tomorrow: '2026-06-26' });
+  });
+
+  it('shifts to monday/tuesday when today is saturday', async () => {
+    mockAppToday.mockReturnValueOnce('2026-06-27'); // Saturday
+    (sequelize.query as jest.Mock).mockResolvedValue([
+      {
+        active_today: '0',
+        active_tomorrow: '0',
+        suspended_today: '0',
+        suspended_tomorrow: '0',
+        deliveries_today: '0',
+      },
+    ]);
+
+    await dashboardService.findCounts();
+
+    const [, options] = (sequelize.query as jest.Mock).mock.calls[0];
+    expect(options.replacements).toEqual({ today: '2026-06-29', tomorrow: '2026-06-30' });
+  });
+
+  it('shifts to monday/tuesday when today is sunday', async () => {
+    mockAppToday.mockReturnValueOnce('2026-06-28'); // Sunday
+    (sequelize.query as jest.Mock).mockResolvedValue([
+      {
+        active_today: '0',
+        active_tomorrow: '0',
+        suspended_today: '0',
+        suspended_tomorrow: '0',
+        deliveries_today: '0',
+      },
+    ]);
+
+    await dashboardService.findCounts();
+
+    const [, options] = (sequelize.query as jest.Mock).mock.calls[0];
+    expect(options.replacements).toEqual({ today: '2026-06-29', tomorrow: '2026-06-30' });
   });
 
   it('propagates db errors', async () => {
@@ -117,6 +155,19 @@ describe('dashboardService.findContractEnding', () => {
     const result = await dashboardService.findContractEnding();
 
     expect(result.today.map((p) => p.name)).toEqual(['Ana López', 'Zara Gomez']);
+  });
+
+  it('queries monday and tuesday when today is saturday', async () => {
+    mockAppToday.mockReturnValueOnce('2026-06-27');
+    (Subscription.findAll as jest.Mock).mockResolvedValue([]);
+
+    await dashboardService.findContractEnding();
+
+    const dates = (Subscription.findAll as jest.Mock).mock.calls.map(
+      (call) => call[0].where.contractEndDate,
+    );
+    expect(dates).toContain('2026-06-29');
+    expect(dates).toContain('2026-06-30');
   });
 });
 
@@ -262,6 +313,16 @@ describe('dashboardService.findMenus', () => {
 
     expect(result.today.date).toBe('2026-06-25');
     expect(result.tomorrow.date).toBe('2026-06-26');
+  });
+
+  it('returns monday and tuesday dates when today is saturday', async () => {
+    mockAppToday.mockReturnValueOnce('2026-06-27');
+    (menuService.findByDate as jest.Mock).mockResolvedValue(null);
+
+    const result = await dashboardService.findMenus();
+
+    expect(result.today.date).toBe('2026-06-29');
+    expect(result.tomorrow.date).toBe('2026-06-30');
   });
 });
 

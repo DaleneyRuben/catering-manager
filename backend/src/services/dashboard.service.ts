@@ -7,7 +7,7 @@ import Subscription from '../models/Subscription';
 import User from '../models/User';
 import type Menu from '../models/Menu';
 import { ROLES } from '../constants/roles';
-import { appToday, addCalendarDays } from '../utils/date';
+import { appToday, addCalendarDays, nextDeliveryDay } from '../utils/date';
 import menuService from './menu.service';
 
 const ONLINE_WINDOW_MS = 60 * 60 * 1000;
@@ -38,7 +38,7 @@ type CountsRow = {
 // Pure aggregate counts — no model hydration, mirrors client.service.ts's getCounts().
 // A delivery group counts as one stop regardless of member count.
 const findCounts = async (): Promise<DashboardCounts> => {
-  const today = appToday();
+  const today = nextDeliveryDay(appToday());
   const tomorrow = addCalendarDays(today, 1);
 
   const [row] = await sequelize.query<CountsRow>(
@@ -92,7 +92,7 @@ const findContractEnding = async (): Promise<{
   today: ContractEndingPerson[];
   tomorrow: ContractEndingPerson[];
 }> => {
-  const today = appToday();
+  const today = nextDeliveryDay(appToday());
   const tomorrow = addCalendarDays(today, 1);
 
   const [todayRows, tomorrowRows] = await Promise.all([
@@ -111,7 +111,7 @@ export type BirthdayPerson = {
 };
 
 const findBirthdays = async (): Promise<BirthdayPerson[]> => {
-  const today = appToday();
+  const today = nextDeliveryDay(appToday());
   const todayDate = parseISO(today);
   // getMonth returns 0-based index; SQL EXTRACT(MONTH) is 1-based
   const currentMonth = getMonth(todayDate) + 1;
@@ -166,7 +166,7 @@ const isMenuLoaded = (menu: Menu | null): boolean =>
   !!menu && MEAL_FIELDS.every((field) => !!menu[field]);
 
 const findMenus = async (): Promise<{ today: MenuStatus; tomorrow: MenuStatus }> => {
-  const today = appToday();
+  const today = nextDeliveryDay(appToday());
   const tomorrow = addCalendarDays(today, 1);
 
   const [todayMenu, tomorrowMenu] = await Promise.all([
