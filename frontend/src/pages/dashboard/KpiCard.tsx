@@ -10,6 +10,8 @@ interface Props {
   tomorrow?: number;
   tomorrowColor?: string;
   singleCaption?: string;
+  todayLabel?: string;
+  tomorrowLabel?: string;
 }
 
 export function KpiCard({
@@ -22,6 +24,8 @@ export function KpiCard({
   tomorrow,
   tomorrowColor = 'text-ink',
   singleCaption,
+  todayLabel = 'Hoy',
+  tomorrowLabel = 'Mañana',
 }: Props) {
   return (
     <div className="bg-paper border border-rule rounded-[14px] px-[22px] py-[18px] flex flex-col gap-4 items-center text-center">
@@ -51,7 +55,9 @@ export function KpiCard({
             <span className={`font-serif font-semibold text-[46px] leading-[.85] ${todayColor}`}>
               {today}
             </span>
-            <span className="font-mono text-[9.5px] tracking-[.1em] uppercase text-faint">Hoy</span>
+            <span className="font-mono text-[9.5px] tracking-[.1em] uppercase text-faint">
+              {todayLabel}
+            </span>
           </div>
           <div className="w-px self-stretch bg-hairline my-0.5" />
           <div className="flex flex-col items-center gap-[9px]">
@@ -59,7 +65,7 @@ export function KpiCard({
               {tomorrow}
             </span>
             <span className="font-mono text-[9.5px] tracking-[.1em] uppercase text-faint">
-              Mañana
+              {tomorrowLabel}
             </span>
           </div>
         </div>

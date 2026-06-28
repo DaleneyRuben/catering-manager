@@ -47,4 +47,22 @@ describe('KpiCard', () => {
     expect(screen.getByText('Hoy')).toBeInTheDocument();
     expect(screen.getByText('Mañana')).toBeInTheDocument();
   });
+
+  it('shows custom labels when todayLabel and tomorrowLabel are provided', () => {
+    render(
+      <KpiCard
+        icon="clipboard-check"
+        iconBg="bg-olive-100"
+        iconColor="text-olive-700"
+        label="Activos"
+        today={12}
+        tomorrow={15}
+        todayLabel="lunes"
+        tomorrowLabel="martes"
+      />,
+    );
+    expect(screen.getByText('lunes')).toBeInTheDocument();
+    expect(screen.getByText('martes')).toBeInTheDocument();
+    expect(screen.queryByText('Hoy')).not.toBeInTheDocument();
+  });
 });
