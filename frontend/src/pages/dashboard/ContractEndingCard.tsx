@@ -6,6 +6,8 @@ import type { ContractEndingPerson } from '../../types/dashboard';
 interface Props {
   today: ContractEndingPerson[];
   tomorrow: ContractEndingPerson[];
+  todayLabel?: string;
+  tomorrowLabel?: string;
 }
 
 function PersonRow({ person }: { person: ContractEndingPerson }) {
@@ -43,7 +45,12 @@ function DaySection({ label, people }: { label: string; people: ContractEndingPe
   );
 }
 
-export function ContractEndingCard({ today, tomorrow }: Props) {
+export function ContractEndingCard({
+  today,
+  tomorrow,
+  todayLabel = 'Hoy',
+  tomorrowLabel = 'Mañana',
+}: Props) {
   return (
     <div className="bg-paper border border-rule rounded-[14px] px-6 py-[22px] flex flex-col">
       <div className="flex items-center gap-[11px] mb-[18px]">
@@ -54,9 +61,9 @@ export function ContractEndingCard({ today, tomorrow }: Props) {
       </div>
 
       <div className="mb-[18px]">
-        <DaySection label="Hoy" people={today} />
+        <DaySection label={todayLabel} people={today} />
       </div>
-      <DaySection label="Mañana" people={tomorrow} />
+      <DaySection label={tomorrowLabel} people={tomorrow} />
     </div>
   );
 }

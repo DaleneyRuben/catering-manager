@@ -38,4 +38,12 @@ describe('ContractEndingCard', () => {
     render(<ContractEndingCard today={[]} tomorrow={[person()]} />);
     expect(screen.getAllByText('Sin contratos por terminar')).toHaveLength(1);
   });
+
+  it('shows custom labels when todayLabel and tomorrowLabel are provided', () => {
+    render(
+      <ContractEndingCard today={[]} tomorrow={[]} todayLabel="lunes" tomorrowLabel="martes" />,
+    );
+    expect(screen.getByText('lunes')).toBeInTheDocument();
+    expect(screen.getByText('martes')).toBeInTheDocument();
+  });
 });
