@@ -79,6 +79,7 @@ const findContractEndingForDate = async (date: string): Promise<ContractEndingPe
   });
 
   return subscriptions
+    .filter((s) => s.client != null && s.plan != null)
     .map((s) => ({
       id: (s.client as Client).id,
       name: (s.client as Client).name,
