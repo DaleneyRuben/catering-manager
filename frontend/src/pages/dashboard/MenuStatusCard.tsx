@@ -50,9 +50,16 @@ function MenuRow({ prefix, status }: RowProps) {
 interface Props {
   today: MenuStatus;
   tomorrow: MenuStatus;
+  todayLabel?: string;
+  tomorrowLabel?: string;
 }
 
-export function MenuStatusCard({ today, tomorrow }: Props) {
+export function MenuStatusCard({
+  today,
+  tomorrow,
+  todayLabel = 'Hoy',
+  tomorrowLabel = 'Mañana',
+}: Props) {
   return (
     <div className="bg-paper border border-rule rounded-[14px] px-6 py-[22px]">
       <div className="flex items-center gap-[11px] mb-[16px]">
@@ -62,8 +69,8 @@ export function MenuStatusCard({ today, tomorrow }: Props) {
         <h2 className="font-serif font-semibold text-[20px] text-ink m-0">Menú del día</h2>
       </div>
       <div className="flex flex-col gap-[10px]">
-        <MenuRow prefix="Hoy" status={today} />
-        <MenuRow prefix="Mañana" status={tomorrow} />
+        <MenuRow prefix={todayLabel} status={today} />
+        <MenuRow prefix={tomorrowLabel} status={tomorrow} />
       </div>
     </div>
   );
