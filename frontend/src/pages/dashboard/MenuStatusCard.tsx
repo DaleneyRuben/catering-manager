@@ -1,5 +1,5 @@
 import { Icon } from '../../components/ui/Icon';
-import { formatWeekdayDate } from '../../utils/format';
+import { formatShortDate } from '../../utils/format';
 import type { MenuStatus } from '../../types/dashboard';
 
 interface RowProps {
@@ -30,7 +30,7 @@ function MenuRow({ prefix, status }: RowProps) {
       </span>
       <div className="flex-1 min-w-0">
         <p className="text-[13px] font-semibold text-ink leading-tight">
-          {prefix} · {formatWeekdayDate(status.date)}
+          {prefix} · {formatShortDate(status.date)}
         </p>
         <p className="font-mono text-[10px] text-faint mt-0.5">
           {loaded ? 'Menú cargado' : 'Pendiente de cargar'}

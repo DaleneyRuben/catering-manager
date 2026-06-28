@@ -31,14 +31,14 @@ describe('MenuStatusCard', () => {
     expect(screen.getByText('Pendiente de cargar')).toBeInTheDocument();
   });
 
-  it('shows the Hoy prefix with the formatted today date by default', () => {
+  it('shows the Hoy prefix with the short date by default', () => {
     render(<MenuStatusCard today={todayStatus} tomorrow={tomorrowStatus} />);
-    expect(screen.getByText(/Hoy · Martes 23\/06/)).toBeInTheDocument();
+    expect(screen.getByText(/Hoy · 23\/06/)).toBeInTheDocument();
   });
 
-  it('shows the Mañana prefix with the formatted tomorrow date by default', () => {
+  it('shows the Mañana prefix with the short date by default', () => {
     render(<MenuStatusCard today={todayStatus} tomorrow={tomorrowStatus} />);
-    expect(screen.getByText(/Mañana · Miércoles 24\/06/)).toBeInTheDocument();
+    expect(screen.getByText(/Mañana · 24\/06/)).toBeInTheDocument();
   });
 
   it('shows custom labels when todayLabel and tomorrowLabel are provided', () => {
@@ -50,8 +50,8 @@ describe('MenuStatusCard', () => {
         tomorrowLabel="Martes"
       />,
     );
-    expect(screen.getByText(/Lunes · Martes 23\/06/)).toBeInTheDocument();
-    expect(screen.getByText(/Martes · Miércoles 24\/06/)).toBeInTheDocument();
+    expect(screen.getByText(/Lunes · 23\/06/)).toBeInTheDocument();
+    expect(screen.getByText(/Martes · 24\/06/)).toBeInTheDocument();
   });
 
   it('shows two "Cargado" tags when both days are loaded', () => {
