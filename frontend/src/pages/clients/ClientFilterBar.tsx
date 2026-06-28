@@ -1,5 +1,5 @@
-import { Icon } from '../components/ui/Icon';
-import { CLIENT_STATUS } from '../constants/clientStatus';
+import { Icon } from '../../components/ui/Icon';
+import { CLIENT_STATUS } from '../../constants/clientStatus';
 
 export type FilterValue = (typeof CLIENT_STATUS)[keyof typeof CLIENT_STATUS];
 
