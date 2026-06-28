@@ -1,4 +1,4 @@
-import { format, isWeekend, getDay, addDays } from 'date-fns';
+import { format, isWeekend } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Icon } from '../components/ui/Icon';
 import { PageHeader } from '../components/ui/PageHeader';
@@ -15,15 +15,11 @@ function todayIso() {
   return format(new Date(), 'yyyy-MM-dd');
 }
 
-function getWeekendLabels() {
-  const now = new Date();
-  // Sat → +2 days to Monday; Sun → +1 day to Monday
-  const monday = addDays(now, getDay(now) === 6 ? 2 : 1);
-  const tuesday = addDays(monday, 1);
-  return {
-    todayLabel: format(monday, 'EEEE', { locale: es }),
-    tomorrowLabel: format(tuesday, 'EEEE', { locale: es }),
-  };
+function getDayLabels() {
+  if (!isWeekend(new Date())) {
+    return { todayLabel: 'hoy', tomorrowLabel: 'mañana', deliveryCaption: 'Entregas hoy' };
+  }
+  return { todayLabel: 'lunes', tomorrowLabel: 'martes', deliveryCaption: 'Entregas el lunes' };
 }
 
 const todayBadge = (
@@ -35,12 +31,7 @@ const todayBadge = (
 
 export function DashboardPage() {
   const { summary, isLoading } = useDashboard();
-  const weekend = isWeekend(new Date());
-  const { todayLabel, tomorrowLabel } = weekend
-    ? getWeekendLabels()
-    : { todayLabel: 'hoy', tomorrowLabel: 'mañana' };
-  const deliveryCaption = weekend ? `Entregas el ${todayLabel}` : 'Entregas hoy';
-  // Capitalize for MenuStatusCard where CSS uppercase is not applied
+  const { todayLabel, tomorrowLabel, deliveryCaption } = getDayLabels();
   const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
   if (isLoading || !summary) {
