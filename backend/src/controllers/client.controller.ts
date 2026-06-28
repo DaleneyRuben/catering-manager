@@ -31,15 +31,6 @@ const getAll = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
-const getCounts = async (_req: Request, res: Response, next: NextFunction) => {
-  try {
-    const counts = await clientService.getCounts();
-    sendSuccess(res, counts);
-  } catch (err) {
-    next(err);
-  }
-};
-
 const getById = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const client = await clientService.findById(decodeId(req.params.id));
@@ -108,4 +99,4 @@ const setGroup = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
-export default { create, getAll, getCounts, getById, update, finalize, remove, setGroup };
+export default { create, getAll, getById, update, finalize, remove, setGroup };

@@ -1,5 +1,5 @@
 import { differenceInBusinessDays, parseISO } from 'date-fns';
-import { Op, literal, QueryTypes } from 'sequelize';
+import { Op, literal } from 'sequelize';
 import { appToday, addDeliveryDays, toAppDate } from '../utils/date';
 import { EXPIRY_THRESHOLD_DAYS } from '../constants/subscription.constants';
 import { CLIENT_STATUS } from '../constants/client.constants';
@@ -8,7 +8,6 @@ import Client from '../models/Client';
 import ClientHistory from '../models/ClientHistory';
 import Plan from '../models/Plan';
 import Subscription from '../models/Subscription';
-import sequelize from '../database/sequelize';
 import { CreateClientDto, UpdateClientDto } from '../schemas/client.schema';
 import deliveryGroupService from './deliveryGroup.service';
 
@@ -175,33 +174,6 @@ const findAll = (filters: FindAllFilters = {}) => {
   });
 };
 
-const getCounts = async () => {
-  const todayStr = appToday();
-  const thresholdStr = addDeliveryDays(todayStr, EXPIRY_THRESHOLD_DAYS);
-
-  type Row = { active: string; expiring: string; paused: string; ended: string; total: string };
-  const [rows] = await sequelize.query<Row>(
-    `SELECT
-      COUNT(CASE WHEN c."pausedSince" IS NULL     AND s."contractEndDate" >= :today AND s."finalizedAt" IS NULL AND (s."startDate" IS NULL OR s."startDate" <= :today) AND NOT (:today::date = ANY(s."suspendedDates")) THEN 1 END) AS active,
-      COUNT(CASE WHEN c."pausedSince" IS NULL     AND s."contractEndDate" >= :today AND s."finalizedAt" IS NULL AND (s."startDate" IS NULL OR s."startDate" <= :today) AND s."contractEndDate" <= :threshold             THEN 1 END) AS expiring,
-      COUNT(CASE WHEN (c."pausedSince" IS NOT NULL OR :today::date = ANY(s."suspendedDates") OR (s."startDate" > :today AND s."contractEndDate" >= :today)) AND s."contractEndDate" >= :today AND s."finalizedAt" IS NULL THEN 1 END) AS paused,
-      COUNT(CASE WHEN s."contractEndDate" < :today OR s."contractEndDate" IS NULL OR s."finalizedAt" IS NOT NULL                                                                                                          THEN 1 END) AS ended,
-      COUNT(*)                                                                                                                                                                                                                       AS total
-    FROM clients c
-    LEFT JOIN subscriptions s ON s."id" = (SELECT MAX(s2."id") FROM subscriptions s2 WHERE s2."clientId" = c.id)`,
-    { replacements: { today: todayStr, threshold: thresholdStr }, type: QueryTypes.SELECT },
-  );
-
-  const row = rows as unknown as Row;
-  return {
-    active: Number(row.active),
-    expiring: Number(row.expiring),
-    paused: Number(row.paused),
-    ended: Number(row.ended),
-    total: Number(row.total),
-  };
-};
-
 const findById = async (id: number) => {
   const client = await Client.findByPk(id, { include: INCLUDE_SUBSCRIPTION_ORDERED });
   if (!client) return null;
@@ -289,4 +261,4 @@ const softDelete = async (id: number) => {
   return client;
 };
 
-export default { create, findAll, findById, update, getCounts, finalize, softDelete };
+export default { create, findAll, findById, update, finalize, softDelete };

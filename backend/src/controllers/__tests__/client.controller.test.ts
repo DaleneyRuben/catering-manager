@@ -274,27 +274,6 @@ describe('POST /api/clients', () => {
   });
 });
 
-describe('GET /api/clients/counts', () => {
-  const mockCounts = { active: 10, expiring: 5, paused: 3, ended: 2, total: 20 };
-
-  it('returns 200 with counts', async () => {
-    (clientService.getCounts as jest.Mock).mockResolvedValue(mockCounts);
-
-    const res = await request(app).get('/api/clients/counts');
-
-    expect(res.status).toBe(200);
-    expect(res.body.data).toEqual(mockCounts);
-  });
-
-  it('returns 500 when service throws', async () => {
-    (clientService.getCounts as jest.Mock).mockRejectedValue(new Error('db error'));
-
-    const res = await request(app).get('/api/clients/counts');
-
-    expect(res.status).toBe(500);
-  });
-});
-
 describe('POST /api/clients/:id/finalize', () => {
   it('returns 200 when client is finalized', async () => {
     (clientService.finalize as jest.Mock).mockResolvedValue({});

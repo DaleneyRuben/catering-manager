@@ -1,6 +1,5 @@
 import { Op } from 'sequelize';
 import Client from '../../models/Client';
-import sequelize from '../../database/sequelize';
 import clientService from '../client.service';
 import deliveryGroupService from '../deliveryGroup.service';
 
@@ -319,26 +318,6 @@ describe('clientService.findAll with filters', () => {
     expect(Client.findAndCountAll).toHaveBeenCalledWith(
       expect.objectContaining({ limit: 25, offset: 0 }),
     );
-  });
-});
-
-describe('clientService.getCounts', () => {
-  beforeEach(() => jest.clearAllMocks());
-
-  it('returns counts as numbers from string DB values', async () => {
-    (sequelize.query as jest.Mock).mockResolvedValue([
-      { active: '10', expiring: '5', paused: '3', ended: '2', total: '20' },
-    ]);
-
-    const result = await clientService.getCounts();
-
-    expect(result).toEqual({ active: 10, expiring: 5, paused: 3, ended: 2, total: 20 });
-  });
-
-  it('propagates db errors', async () => {
-    (sequelize.query as jest.Mock).mockRejectedValue(new Error('db error'));
-
-    await expect(clientService.getCounts()).rejects.toThrow('db error');
   });
 });
 
