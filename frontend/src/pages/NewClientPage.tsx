@@ -6,11 +6,11 @@ import { Button } from '../components/ui/Button';
 import { StepIndicator } from '../components/ui/StepIndicator';
 import { useCreateClient } from '../hooks/useCreateClient';
 import { usePlans } from '../hooks/usePlans';
-import { StepConfirm } from './new-client/StepConfirm';
-import { StepIdentity } from './new-client/StepIdentity';
-import { StepPlan } from './new-client/StepPlan';
-import { StepRestrictions } from './new-client/StepRestrictions';
-import type { NewClientFormValues, RestrictionsState } from './new-client/types';
+import { StepConfirm } from './newClient/StepConfirm';
+import { StepIdentity } from './newClient/StepIdentity';
+import { StepPlan } from './newClient/StepPlan';
+import { StepRestrictions } from './newClient/StepRestrictions';
+import type { NewClientFormValues, RestrictionsState } from './newClient/types';
 
 const STEPS = ['Identidad', 'Restricciones', 'Plan', 'Confirmar'];
 
