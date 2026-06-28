@@ -27,6 +27,15 @@ export const subtractDeliveryDays = (startDate: string, days: number): string =>
   return format(result, 'yyyy-MM-dd');
 };
 
+// Returns the same date for Mon–Fri; returns next Monday for Sat or Sun.
+export const nextDeliveryDay = (date: string): string => {
+  const d = parseISO(`${date}T12:00:00`);
+  const day = getDay(d); // 0=Sun, 6=Sat
+  if (day === 6) return format(addDays(d, 2), 'yyyy-MM-dd');
+  if (day === 0) return format(addDays(d, 1), 'yyyy-MM-dd');
+  return date;
+};
+
 // Plain calendar days — unlike addDeliveryDays, weekends are not skipped.
 export const addCalendarDays = (startDate: string, days: number): string => {
   const result = addDays(parseISO(`${startDate}T12:00:00`), days);

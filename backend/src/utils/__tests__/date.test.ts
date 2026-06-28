@@ -4,6 +4,7 @@ import {
   addCalendarDays,
   toAppDate,
   calcContractEndDate,
+  nextDeliveryDay,
 } from '../date';
 
 describe('addCalendarDays', () => {
@@ -76,6 +77,28 @@ describe('calcContractEndDate', () => {
 
   it('returns null when startDate is null', () => {
     expect(calcContractEndDate(null, 20)).toBeNull();
+  });
+});
+
+describe('nextDeliveryDay', () => {
+  it('returns Monday when given a Saturday', () => {
+    expect(nextDeliveryDay('2026-06-27')).toBe('2026-06-29'); // Sat → Mon
+  });
+
+  it('returns Monday when given a Sunday', () => {
+    expect(nextDeliveryDay('2026-06-28')).toBe('2026-06-29'); // Sun → Mon
+  });
+
+  it('returns the same date for a weekday', () => {
+    expect(nextDeliveryDay('2026-06-25')).toBe('2026-06-25'); // Thu unchanged
+  });
+
+  it('returns Monday unchanged when given a Monday', () => {
+    expect(nextDeliveryDay('2026-06-29')).toBe('2026-06-29');
+  });
+
+  it('returns Friday unchanged when given a Friday', () => {
+    expect(nextDeliveryDay('2026-06-26')).toBe('2026-06-26');
   });
 });
 
