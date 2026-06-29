@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
-import { StepConfirm } from './index';
 import type { NewClientFormValues, RestrictionsState, Plan } from '@/features/clients/types';
+import { StepConfirm } from './index';
 
 const plan: Plan = { id: '1', name: 'Completo', price: 1200, meals: ['breakfast'] };
 

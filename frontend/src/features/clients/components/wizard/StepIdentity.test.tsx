@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import { useForm } from 'react-hook-form';
-import { StepIdentity } from './StepIdentity';
 import type { NewClientFormValues } from '@/features/clients/types';
+import { StepIdentity } from './StepIdentity';
 
 function Wrapper() {
   const {

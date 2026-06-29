@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import { useForm } from 'react-hook-form';
-import { StepPlan } from './index';
 import type { NewClientFormValues, Plan } from '@/features/clients/types';
+import { StepPlan } from './index';
 
 const plans: Plan[] = [
   { id: '1', name: 'Completo', price: 1200, meals: ['breakfast', 'lunch'] },

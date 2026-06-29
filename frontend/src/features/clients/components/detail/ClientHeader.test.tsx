@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { ClientHeader } from './ClientHeader';
 import type { Client } from '@/features/clients/types';
+import { ClientHeader } from './ClientHeader';
 
 const client: Client = {
   id: '1',

@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ClientPlanTab } from './ClientPlanTab';
 import type { Client, Subscription } from '@/features/clients/types';
+import { ClientPlanTab } from './ClientPlanTab';
 
 function withQuery(ui: React.ReactElement) {
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });

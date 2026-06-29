@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { StepRestrictions } from './StepRestrictions';
 import type { RestrictionsState } from '@/features/clients/types';
+import { StepRestrictions } from './StepRestrictions';
 
 const baseValue: RestrictionsState = { restrictions: [], underlyingDiseases: [] };
 

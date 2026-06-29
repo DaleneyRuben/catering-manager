@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
-import { ClientOverviewTab } from './ClientOverviewTab';
 import type { Client, Subscription } from '@/features/clients/types';
+import { ClientOverviewTab } from './ClientOverviewTab';
 
 const client: Client = {
   id: '1',

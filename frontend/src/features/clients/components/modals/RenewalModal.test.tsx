@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { RenewalModal } from './RenewalModal';
 import type { Client, Subscription } from '@/features/clients/types';
+import { RenewalModal } from './RenewalModal';
 
 jest.mock('@/features/plans/hooks/usePlans', () => ({
   usePlans: () => ({

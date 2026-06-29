@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { SuspendModal } from './SuspendModal';
 import type { Subscription } from '@/features/clients/types';
+import { SuspendModal } from './SuspendModal';
 
 const sub: Subscription = {
   id: '1',

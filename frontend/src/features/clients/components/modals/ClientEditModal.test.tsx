@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { ClientEditModal } from './ClientEditModal';
 import type { Client } from '@/features/clients/types';
+import { ClientEditModal } from './ClientEditModal';
 
 const client: Client = {
   id: '1',

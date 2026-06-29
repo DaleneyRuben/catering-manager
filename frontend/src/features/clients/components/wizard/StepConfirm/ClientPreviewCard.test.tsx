@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
-import { ClientPreviewCard } from './ClientPreviewCard';
 import type { NewClientFormValues, RestrictionsState, Plan } from '@/features/clients/types';
+import { ClientPreviewCard } from './ClientPreviewCard';
 
 const plan: Plan = { id: '1', name: 'Completo', price: 1200, meals: ['breakfast'] };
 

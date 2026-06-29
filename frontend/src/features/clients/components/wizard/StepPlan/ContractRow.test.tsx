@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import { useForm } from 'react-hook-form';
-import { ContractRow } from './ContractRow';
 import type { NewClientFormValues } from '@/features/clients/types';
+import { ContractRow } from './ContractRow';
 
 function Wrapper({ startDate = '', duration = 0 }: { startDate?: string; duration?: number }) {
   const {

@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { PlanEditorForm } from './PlanEditorForm';
 import type { PlanDraft } from '@/features/plans/types';
+import { PlanEditorForm } from './PlanEditorForm';
 
 const baseDraft: PlanDraft = { name: 'Completo', meals: ['breakfast', 'lunch'], price: '1200' };
 
