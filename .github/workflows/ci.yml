@@ -1,0 +1,34 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  frontend:
+    name: Frontend
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'yarn'
+      - run: yarn install --frozen-lockfile
+      - run: yarn workspace catering-manager-frontend lint
+      - run: yarn workspace catering-manager-frontend typecheck
+      - run: yarn workspace catering-manager-frontend test --no-coverage
+
+  backend:
+    name: Backend
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'yarn'
+      - run: yarn install --frozen-lockfile
+      - run: yarn workspace catering-manager-backend lint
+      - run: yarn workspace catering-manager-backend typecheck
+      - run: yarn workspace catering-manager-backend test --no-coverage
