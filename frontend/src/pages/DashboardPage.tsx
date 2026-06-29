@@ -1,15 +1,15 @@
 import { format, isWeekend } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { Icon } from '../components/ui/Icon';
-import { PageHeader } from '../components/ui/PageHeader';
-import { Skeleton } from '../components/ui/Skeleton';
-import { useDashboard } from '../hooks/useDashboard';
-import { formatLongDate } from '../utils/format';
-import { KpiCard } from './dashboard/KpiCard';
-import { ContractEndingCard } from './dashboard/ContractEndingCard';
-import { BirthdaysCard } from './dashboard/BirthdaysCard';
-import { ConnectionsCard } from './dashboard/ConnectionsCard';
-import { MenuStatusCard } from './dashboard/MenuStatusCard';
+import { Icon } from '@/components/ui/Icon';
+import { PageHeader } from '@/components/ui/PageHeader';
+import { Skeleton } from '@/components/ui/Skeleton';
+import { useDashboard } from '@/features/dashboard/hooks/useDashboard';
+import { formatLongDate } from '@/utils/format';
+import { KpiCard } from '@/features/dashboard/components/KpiCard';
+import { ContractEndingCard } from '@/features/dashboard/components/ContractEndingCard';
+import { BirthdaysCard } from '@/features/dashboard/components/BirthdaysCard';
+import { ConnectionsCard } from '@/features/dashboard/components/ConnectionsCard';
+import { MenuStatusCard } from '@/features/dashboard/components/MenuStatusCard';
 
 function todayIso() {
   return format(new Date(), 'yyyy-MM-dd');

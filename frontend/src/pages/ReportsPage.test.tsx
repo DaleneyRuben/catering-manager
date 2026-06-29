@@ -1,17 +1,17 @@
 import { render, screen } from '@testing-library/react';
-import { ReportsPage } from './ReportsPage';
-import { useAuth } from '../contexts/AuthContext';
+import { ReportsPage } from '@/pages/ReportsPage';
+import { useAuth } from '@/contexts/AuthContext';
 
-jest.mock('./reports/DeliveryListCard', () => ({
+jest.mock('@/features/reports/components/DeliveryListCard', () => ({
   DeliveryListCard: () => <div>delivery-card</div>,
 }));
-jest.mock('./reports/KitchenReportCard', () => ({
+jest.mock('@/features/reports/components/KitchenReportCard', () => ({
   KitchenReportCard: () => <div>kitchen-card</div>,
 }));
-jest.mock('./reports/MenuCard', () => ({
+jest.mock('@/features/reports/components/MenuCard', () => ({
   MenuCard: () => <div>menu-card</div>,
 }));
-jest.mock('../contexts/AuthContext', () => ({
+jest.mock('@/contexts/AuthContext', () => ({
   useAuth: jest.fn(),
 }));
 

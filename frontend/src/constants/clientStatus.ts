@@ -1,4 +1,4 @@
-import type { ClientStatus } from '../types/client';
+import type { ClientStatus } from '@/features/clients/types';
 
 export const CLIENT_STATUS = {
   ACTIVE: 'active',

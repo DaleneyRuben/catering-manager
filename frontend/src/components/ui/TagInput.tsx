@@ -1,5 +1,5 @@
-import { inputCls } from './Field';
-import { Icon } from './Icon';
+import { inputCls } from '@/components/ui/Field';
+import { Icon } from '@/components/ui/Icon';
 
 export function TagInput({
   label,

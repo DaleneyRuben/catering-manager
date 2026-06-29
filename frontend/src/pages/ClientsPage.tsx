@@ -1,23 +1,26 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Icon } from '../components/ui/Icon';
-import { Button } from '../components/ui/Button';
-import { PageHeader } from '../components/ui/PageHeader';
-import { Pagination } from '../components/ui/Pagination';
-import { ClientTableSkeleton } from './clients/ClientTableSkeleton';
-import { ClientFilterBar, type FilterValue } from './clients/ClientFilterBar';
-import { ClientRestrictionPills } from './clients/ClientRestrictionPills';
-import { useClientList } from '../hooks/useClientList';
-import { useDebounce } from '../hooks/useDebounce';
-import { formatDate } from '../utils/format';
+import { Icon } from '@/components/ui/Icon';
+import { Button } from '@/components/ui/Button';
+import { PageHeader } from '@/components/ui/PageHeader';
+import { Pagination } from '@/components/ui/Pagination';
+import { ClientTableSkeleton } from '@/features/clients/components/list/ClientTableSkeleton';
+import {
+  ClientFilterBar,
+  type FilterValue,
+} from '@/features/clients/components/list/ClientFilterBar';
+import { ClientRestrictionPills } from '@/features/clients/components/list/ClientRestrictionPills';
+import { useClientList } from '@/features/clients/hooks/useClientList';
+import { useDebounce } from '@/hooks/useDebounce';
+import { formatDate } from '@/utils/format';
 import {
   STATUS_LABELS,
   STATUS_CLASSES,
   STATUS_DOT_CLASSES,
   CLIENT_STATUS,
-} from '../constants/clientStatus';
-import { SEX_LABELS } from '../constants/clientOptions';
-import { initials } from '../utils/string';
+} from '@/constants/clientStatus';
+import { SEX_LABELS } from '@/constants/clientOptions';
+import { initials } from '@/utils/string';
 
 export function ClientsPage() {
   const navigate = useNavigate();

@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { PageLoader } from './PageLoader';
+import { PageLoader } from '@/components/ui/PageLoader';
 
 const meta: Meta<typeof PageLoader> = {
   component: PageLoader,

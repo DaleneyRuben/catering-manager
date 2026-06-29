@@ -1,4 +1,4 @@
-import { downloadReport } from './downloadReport';
+import { downloadReport } from '@/utils/downloadReport';
 
 const mockClick = jest.fn();
 const mockRevokeObjectURL = jest.fn();

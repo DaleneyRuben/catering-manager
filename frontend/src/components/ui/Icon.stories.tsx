@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { Icon } from './Icon';
+import { Icon } from '@/components/ui/Icon';
 
 const ICON_NAMES = [
   'dashboard',

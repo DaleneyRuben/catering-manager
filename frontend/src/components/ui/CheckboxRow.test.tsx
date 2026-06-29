@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { CheckboxRow } from './CheckboxRow';
+import { CheckboxRow } from '@/components/ui/CheckboxRow';
 
 const baseProps = {
   id: 'test-check',

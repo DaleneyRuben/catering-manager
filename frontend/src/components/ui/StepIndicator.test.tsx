@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react';
-import { StepIndicator } from './StepIndicator';
+import { StepIndicator } from '@/components/ui/StepIndicator';
 
 const STEPS = ['Identidad', 'Restricciones', 'Plan', 'Confirmar'];
 

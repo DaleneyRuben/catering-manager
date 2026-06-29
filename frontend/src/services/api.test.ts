@@ -1,4 +1,4 @@
-import api from './api';
+import api from '@/services/api';
 
 function mockFetch(overrides: object) {
   global.fetch = jest.fn().mockResolvedValue(overrides) as jest.Mock;
@@ -21,14 +21,14 @@ describe('api', () => {
       localStorage.setItem('auth_token', 'my-token');
       mockFetch({ ok: true, status: 200, json: () => Promise.resolve({ data: 'ok' }) });
       await api.get('/secure');
-      const {headers} = (fetch as jest.Mock).mock.calls[0][1];
+      const { headers } = (fetch as jest.Mock).mock.calls[0][1];
       expect(headers.Authorization).toBe('Bearer my-token');
     });
 
     it('omits Authorization header when no token is stored', async () => {
       mockFetch({ ok: true, status: 200, json: () => Promise.resolve({ data: 'ok' }) });
       await api.get('/public');
-      const {headers} = (fetch as jest.Mock).mock.calls[0][1];
+      const { headers } = (fetch as jest.Mock).mock.calls[0][1];
       expect(headers.Authorization).toBeUndefined();
     });
 

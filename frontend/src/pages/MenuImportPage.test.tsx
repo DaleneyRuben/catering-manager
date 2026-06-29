@@ -1,15 +1,15 @@
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { addDays, format, getDay, startOfISOWeek } from 'date-fns';
-import { checkIsWeekend } from '../utils/devFlags';
-import { useMenu } from '../hooks/useMenu';
-import { MenuImportPage } from './MenuImportPage';
+import { checkIsWeekend } from '@/utils/devFlags';
+import { useMenu } from '@/features/menu/hooks/useMenu';
+import { MenuImportPage } from '@/pages/MenuImportPage';
 
-jest.mock('../hooks/useMenu', () => ({
+jest.mock('@/features/menu/hooks/useMenu', () => ({
   useMenu: jest.fn(),
 }));
 
-jest.mock('../utils/devFlags', () => ({
+jest.mock('@/utils/devFlags', () => ({
   checkIsWeekend: jest.fn(),
 }));
 

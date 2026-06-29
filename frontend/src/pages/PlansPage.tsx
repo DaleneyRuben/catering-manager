@@ -1,13 +1,13 @@
 import { useState } from 'react';
-import { Button } from '../components/ui/Button';
-import { Icon } from '../components/ui/Icon';
-import { PageHeader } from '../components/ui/PageHeader';
-import { ConfirmModal } from '../components/ui/ConfirmModal';
-import { usePlans } from '../hooks/usePlans';
-import type { Plan } from '../types/client';
-import { PlanCard } from './plans/PlanCard';
-import { PlanCardSkeleton } from './plans/PlanCardSkeleton';
-import { PlanModal } from './plans/PlanModal';
+import { Button } from '@/components/ui/Button';
+import { Icon } from '@/components/ui/Icon';
+import { PageHeader } from '@/components/ui/PageHeader';
+import { ConfirmModal } from '@/components/ui/ConfirmModal';
+import { usePlans } from '@/features/plans/hooks/usePlans';
+import type { Plan } from '@/features/clients/types';
+import { PlanCard } from '@/features/plans/components/PlanCard';
+import { PlanCardSkeleton } from '@/features/plans/components/PlanCardSkeleton';
+import { PlanModal } from '@/features/plans/components/PlanModal';
 
 export function PlansPage() {
   const { plans, clientCounts, isLoading, isSaving, isCreating, save, create, remove } = usePlans();

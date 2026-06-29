@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { StepIndicator } from './StepIndicator';
+import { StepIndicator } from '@/components/ui/StepIndicator';
 
 const STEPS = ['Datos personales', 'Plan', 'Confirmación'];
 

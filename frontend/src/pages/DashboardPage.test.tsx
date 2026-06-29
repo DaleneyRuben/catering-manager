@@ -1,9 +1,9 @@
 import { render, screen } from '@testing-library/react';
-import { DashboardPage } from './DashboardPage';
-import type { DashboardSummary } from '../types/dashboard';
-import { useDashboard } from '../hooks/useDashboard';
+import { DashboardPage } from '@/pages/DashboardPage';
+import type { DashboardSummary } from '@/features/dashboard/types';
+import { useDashboard } from '@/features/dashboard/hooks/useDashboard';
 
-jest.mock('../hooks/useDashboard');
+jest.mock('@/features/dashboard/hooks/useDashboard');
 const mockUseDashboard = useDashboard as jest.MockedFunction<typeof useDashboard>;
 
 const summary: DashboardSummary = {

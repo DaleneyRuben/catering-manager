@@ -2,15 +2,15 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { format, startOfToday } from 'date-fns';
-import { Button } from '../components/ui/Button';
-import { StepIndicator } from '../components/ui/StepIndicator';
-import { useCreateClient } from '../hooks/useCreateClient';
-import { usePlans } from '../hooks/usePlans';
-import { StepConfirm } from './newClient/StepConfirm';
-import { StepIdentity } from './newClient/StepIdentity';
-import { StepPlan } from './newClient/StepPlan';
-import { StepRestrictions } from './newClient/StepRestrictions';
-import type { NewClientFormValues, RestrictionsState } from './newClient/types';
+import { Button } from '@/components/ui/Button';
+import { StepIndicator } from '@/components/ui/StepIndicator';
+import { useCreateClient } from '@/features/clients/hooks/useCreateClient';
+import { usePlans } from '@/features/plans/hooks/usePlans';
+import { StepConfirm } from '@/features/clients/components/wizard/StepConfirm';
+import { StepIdentity } from '@/features/clients/components/wizard/StepIdentity';
+import { StepPlan } from '@/features/clients/components/wizard/StepPlan';
+import { StepRestrictions } from '@/features/clients/components/wizard/StepRestrictions';
+import type { NewClientFormValues, RestrictionsState } from '@/features/clients/types';
 
 const STEPS = ['Identidad', 'Restricciones', 'Plan', 'Confirmar'];
 

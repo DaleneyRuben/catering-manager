@@ -1,5 +1,5 @@
 import type { ButtonHTMLAttributes, ReactNode } from 'react';
-import { Icon } from './Icon';
+import { Icon } from '@/components/ui/Icon';
 
 export type ButtonVariant = 'primary' | 'secondary' | 'danger' | 'destructive' | 'alert';
 export type ButtonSize = 'sm' | 'md';

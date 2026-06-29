@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { ToggleGroup } from './ToggleGroup';
+import { ToggleGroup } from '@/components/ui/ToggleGroup';
 
 const options = ['Centro', 'Sur'] as const;
 

@@ -1,4 +1,4 @@
-import { toVoid } from './toVoid';
+import { toVoid } from '@/utils/toVoid';
 
 describe('toVoid', () => {
   it('resolves to undefined when the wrapped promise resolves', async () => {

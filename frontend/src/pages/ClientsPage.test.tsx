@@ -2,10 +2,10 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import api from '../services/api';
-import { ClientsPage } from './ClientsPage';
+import api from '@/services/api';
+import { ClientsPage } from '@/pages/ClientsPage';
 
-jest.mock('../services/api', () => ({
+jest.mock('@/services/api', () => ({
   default: { getPaginated: jest.fn() },
 }));
 const mockGetPaginated = api.getPaginated as jest.Mock;

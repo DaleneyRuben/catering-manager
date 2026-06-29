@@ -5,11 +5,12 @@ const config: Config = {
   testEnvironment: 'jsdom',
   setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
   moduleNameMapper: {
-    '^@/(.*)$': '<rootDir>/src/$1',
+    // file-type mocks and specific stubs must precede the @/ alias
+    '@/utils/env$': '<rootDir>/src/__mocks__/env.ts',
+    '@/utils/devFlags$': '<rootDir>/src/__mocks__/devFlags.ts',
     '\\.(css|less|scss|sass)$': 'identity-obj-proxy',
     '\\.(png|jpg|jpeg|gif|svg|ico|webp)$': '<rootDir>/src/__mocks__/fileMock.ts',
-    '.*/utils/env$': '<rootDir>/src/__mocks__/env.ts',
-    '.*/utils/devFlags$': '<rootDir>/src/__mocks__/devFlags.ts',
+    '^@/(.*)$': '<rootDir>/src/$1',
   },
   collectCoverageFrom: [
     'src/**/*.{ts,tsx}',
