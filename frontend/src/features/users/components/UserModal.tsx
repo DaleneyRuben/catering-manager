@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Icon } from '@ui/Icon';
+import { IconButton } from '@ui/IconButton';
 import { Field, inputCls } from '@ui/Field';
 import { Modal } from '@ui/Modal';
 import { Button } from '@ui/Button';
@@ -92,13 +93,14 @@ export function UserModal(props: Props) {
         <p className="flex-1 font-serif font-semibold text-[23px] leading-none text-ink">
           {mode === 'create' ? 'Nuevo usuario' : 'Editar usuario'}
         </p>
-        <button
-          type="button"
+        <IconButton
+          icon="x"
+          label="Cerrar"
           onClick={onClose}
-          className="p-1 flex items-center justify-center text-faint hover:text-ink-2 transition-colors"
-        >
-          <Icon name="x" size={20} stroke={1.8} />
-        </button>
+          size={20}
+          stroke={1.8}
+          className="p-1 text-faint hover:text-ink-2"
+        />
       </div>
 
       <div className="px-[28px] py-[22px] flex flex-col gap-[18px]">
@@ -127,14 +129,14 @@ export function UserModal(props: Props) {
               className={`${inputCls()} pr-[42px]`}
               autoComplete="new-password"
             />
-            <button
-              type="button"
+            <IconButton
+              icon={showPassword ? 'eye-off' : 'eye'}
+              label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
               onClick={() => setShowPassword((v) => !v)}
-              className="absolute right-[8px] top-1/2 -translate-y-1/2 p-[5px] flex items-center justify-center text-faint hover:text-ink-2 transition-colors"
+              size={17}
+              className="absolute right-[8px] top-1/2 -translate-y-1/2 p-[5px] text-faint hover:text-ink-2"
               tabIndex={-1}
-            >
-              <Icon name={showPassword ? 'eye-off' : 'eye'} size={17} />
-            </button>
+            />
           </div>
         </Field>
 

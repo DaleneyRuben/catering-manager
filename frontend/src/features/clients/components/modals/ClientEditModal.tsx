@@ -3,6 +3,7 @@ import { parseISO, startOfToday } from 'date-fns';
 import { Field, inputCls, selectCls } from '@ui/Field';
 import { DatePickerInput } from '@ui/DatePickerInput';
 import { Icon } from '@ui/Icon';
+import { IconButton } from '@ui/IconButton';
 import { Label } from '@ui/Label';
 import { Modal } from '@ui/Modal';
 import { Button } from '@ui/Button';
@@ -90,13 +91,14 @@ export function ClientEditModal({
             </h2>
             <p className="font-mono text-[11px] text-faint mt-[3px]">{client.name}</p>
           </div>
-          <button
-            type="button"
+          <IconButton
+            icon="x"
+            label="Cerrar"
             onClick={onClose}
-            className="p-1 text-faint hover:text-ink-2 transition-colors flex"
-          >
-            <Icon name="x" size={20} stroke={1.8} />
-          </button>
+            size={20}
+            stroke={1.8}
+            className="p-1 text-faint hover:text-ink-2"
+          />
         </div>
 
         <div className="py-[22px] px-[28px] space-y-6">

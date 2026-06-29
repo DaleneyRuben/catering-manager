@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { Toaster } from 'sonner';
 import { Icon } from '@ui/Icon';
+import { IconButton } from '@ui/IconButton';
 import { useAuth } from '@/features/auth/AuthContext';
 import { ROLES, ROLE_LABELS, type UserRole } from '@/constants/roles';
 
@@ -134,28 +135,26 @@ export function Layout({ children }: LayoutProps) {
               {user && ROLE_LABELS[user.role]}
             </p>
           </div>
-          <button
-            type="button"
+          <IconButton
+            icon="logout"
+            label="Cerrar sesión"
             onClick={handleLogout}
-            className="text-olive-50/50 hover:text-olive-50 transition-colors shrink-0"
-            aria-label="Cerrar sesión"
+            size={16}
             title="Cerrar sesión"
-          >
-            <Icon name="logout" size={16} />
-          </button>
+            className="text-olive-50/50 hover:text-olive-50 shrink-0"
+          />
         </div>
       </aside>
 
       <div className="flex flex-col flex-1 min-w-0">
         <header className="flex items-center gap-3 px-4 h-12 bg-gradient-to-b from-olive-800 to-sidebar-deep md:hidden shrink-0">
-          <button
-            type="button"
-            aria-label="Abrir menú"
-            className="text-olive-50/60 hover:text-olive-50"
+          <IconButton
+            icon="menu"
+            label="Abrir menú"
             onClick={() => setMenuOpen(true)}
-          >
-            <Icon name="menu" size={20} />
-          </button>
+            size={20}
+            className="text-olive-50/60 hover:text-olive-50"
+          />
           <p className="font-serif font-semibold text-[20px] leading-none text-olive-50">
             La Oliva
           </p>

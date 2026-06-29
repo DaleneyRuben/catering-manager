@@ -1,4 +1,4 @@
-import { Icon } from '@ui/Icon';
+import { IconButton } from '@ui/IconButton';
 import { Modal } from '@ui/Modal';
 import { Button } from '@ui/Button';
 import { MODAL_CANCEL_STYLE, MODAL_CONFIRM_STYLE } from '@ui/modalButtonStyles';
@@ -44,13 +44,14 @@ export function RenewalModal({ client, sub, isReactivation, onClose, onRenew }: 
           </p>
           <p className="font-mono text-[11px] text-faint mt-[3px]">{client.deliveryZone}</p>
         </div>
-        <button
-          type="button"
+        <IconButton
+          icon="x"
+          label="Cerrar"
           onClick={onClose}
-          className="text-faint hover:text-ink-2 transition-colors p-1"
-        >
-          <Icon name="x" size={20} stroke={1.8} />
-        </button>
+          size={20}
+          stroke={1.8}
+          className="p-1 text-faint hover:text-ink-2"
+        />
       </div>
 
       <div className="py-[22px] px-[28px]">

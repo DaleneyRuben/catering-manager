@@ -1,4 +1,5 @@
 import { Icon } from '@ui/Icon';
+import { IconButton } from '@ui/IconButton';
 import type { Plan } from '@/features/clients/types';
 import { MEAL_LABELS } from '@/constants/meals';
 import { MEAL_KEYS } from '@/features/plans/types';
@@ -68,22 +69,22 @@ export function PlanCard({
           <span className="text-[12.5px] text-muted">{clientsLabel}</span>
         </div>
         <div className="flex items-center">
-          <button
-            type="button"
+          <IconButton
+            icon="trash"
+            label="Eliminar plan"
             onClick={onDelete}
-            aria-label="Eliminar plan"
-            className="w-[34px] h-[34px] flex items-center justify-center rounded-lg text-plan-delete hover:bg-danger-bg hover:text-danger transition-colors"
-          >
-            <Icon name="trash" size={16} stroke={1.7} />
-          </button>
-          <button
-            type="button"
+            size={16}
+            stroke={1.7}
+            className="w-[34px] h-[34px] rounded-lg text-plan-delete hover:bg-danger-bg hover:text-danger"
+          />
+          <IconButton
+            icon="pencil"
+            label="Editar plan"
             onClick={onEdit}
-            aria-label="Editar plan"
-            className="w-[34px] h-[34px] flex items-center justify-center rounded-lg text-plan-edit hover:bg-olive-100 hover:text-olive-700 transition-colors"
-          >
-            <Icon name="pencil" size={16} stroke={1.7} />
-          </button>
+            size={16}
+            stroke={1.7}
+            className="w-[34px] h-[34px] rounded-lg text-plan-edit hover:bg-olive-100 hover:text-olive-700"
+          />
         </div>
       </div>
     </div>

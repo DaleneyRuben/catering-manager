@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Icon } from '@ui/Icon';
+import { IconButton } from '@ui/IconButton';
 import { Modal } from '@ui/Modal';
 import { Button } from '@ui/Button';
 import { MODAL_CANCEL_STYLE, MODAL_CONFIRM_STYLE } from '@ui/modalButtonStyles';
@@ -61,14 +62,14 @@ export function PlanModal(props: Props) {
             </p>
           )}
         </div>
-        <button
-          type="button"
+        <IconButton
+          icon="x"
+          label="Cerrar"
           onClick={onClose}
-          aria-label="Cerrar"
-          className="p-1 flex items-center justify-center text-faint hover:text-ink-2 transition-colors"
-        >
-          <Icon name="x" size={20} stroke={1.8} />
-        </button>
+          size={20}
+          stroke={1.8}
+          className="p-1 text-faint hover:text-ink-2"
+        />
       </div>
 
       <div className="px-[28px] py-[22px]">

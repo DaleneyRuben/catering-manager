@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Button } from '@ui/Button';
 import { Card } from '@ui/Card';
 import { CheckboxRow } from '@ui/CheckboxRow';
-import { Icon } from '@ui/Icon';
+import { IconButton } from '@ui/IconButton';
 import { Label } from '@ui/Label';
 import { inputCls } from '@ui/Field';
 import { MEAL_LABELS } from '@/constants/meals';
@@ -94,14 +94,14 @@ export function ActivePlanCard({ sub, onUpdateBilling, onUpdateInstructions }: P
       <div className="flex items-center mb-[14px]">
         <Label variant="section">Precio y descuento</Label>
         {!editing && (
-          <button
-            type="button"
+          <IconButton
+            icon="pencil"
+            label="Editar"
             onClick={() => setEditing(true)}
-            aria-label="Editar"
+            size={15}
+            stroke={1.7}
             className="ml-auto text-olive-700 hover:opacity-70 transition-opacity p-[3px]"
-          >
-            <Icon name="pencil" size={15} stroke={1.7} />
-          </button>
+          />
         )}
       </div>
       {editing ? (

@@ -18,6 +18,7 @@ import {
 } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Icon } from '@ui/Icon';
+import { IconButton } from '@ui/IconButton';
 import { Modal } from '@ui/Modal';
 import { Button } from '@ui/Button';
 import { MODAL_CANCEL_STYLE, MODAL_CONFIRM_STYLE } from '@ui/modalButtonStyles';
@@ -108,35 +109,35 @@ export function SuspendModal({
           <p className="font-serif text-[20px] leading-tight text-ink">Suspender servicio</p>
           <p className="font-mono text-[11px] text-muted">{clientName} · selecciona los días</p>
         </div>
-        <button
-          type="button"
+        <IconButton
+          icon="x"
+          label="Cerrar"
           onClick={onClose}
-          className="w-[34px] h-[34px] flex items-center justify-center border border-rule rounded-md bg-paper hover:bg-cream-2 transition-colors"
-        >
-          <Icon name="x" size={14} />
-        </button>
+          size={14}
+          className="w-[34px] h-[34px] border border-rule rounded-md bg-paper hover:bg-cream-2"
+        />
       </div>
 
       <div className="p-[22px]">
         {/* Month navigation */}
         <div className="flex items-center gap-3 mb-4">
-          <button
-            type="button"
+          <IconButton
+            icon="arrow-left"
+            label="Mes anterior"
             onClick={() => setAnchor(startOfMonth(subMonths(anchor, 1)))}
-            className="w-9 h-9 flex items-center justify-center border border-rule rounded-md bg-paper hover:bg-cream-2 transition-colors text-muted text-lg"
-          >
-            ‹
-          </button>
+            size={14}
+            className="w-9 h-9 border border-rule rounded-md bg-paper hover:bg-cream-2 text-muted"
+          />
           <p className="flex-1 text-center font-serif text-[18px] capitalize">
             {format(anchor, 'MMMM', { locale: es })} de {format(anchor, 'yyyy')}
           </p>
-          <button
-            type="button"
+          <IconButton
+            icon="arrow-right"
+            label="Mes siguiente"
             onClick={() => setAnchor(startOfMonth(addMonths(anchor, 1)))}
-            className="w-9 h-9 flex items-center justify-center border border-rule rounded-md bg-paper hover:bg-cream-2 transition-colors text-muted text-lg"
-          >
-            ›
-          </button>
+            size={14}
+            className="w-9 h-9 border border-rule rounded-md bg-paper hover:bg-cream-2 text-muted"
+          />
         </div>
 
         {/* Mon–Fri calendar grid */}
@@ -217,13 +218,13 @@ export function SuspendModal({
                     className="inline-flex items-center gap-[7px] px-[10px] py-[5px] rounded-[8px] text-[11.5px] font-mono bg-warn-bg text-warn border border-warn-border"
                   >
                     {formatDate(iso)}
-                    <button
-                      type="button"
+                    <IconButton
+                      icon="x"
+                      label="Quitar"
                       onClick={() => toggle(d)}
+                      size={10}
                       className="opacity-70 hover:opacity-100"
-                    >
-                      ×
-                    </button>
+                    />
                   </span>
                 );
               })}

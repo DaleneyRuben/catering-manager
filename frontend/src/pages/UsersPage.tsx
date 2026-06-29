@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { isAfter, parseISO, subDays } from 'date-fns';
 import { Button } from '@ui/Button';
 import { Icon } from '@ui/Icon';
+import { IconButton } from '@ui/IconButton';
 import { PageHeader } from '@ui/PageHeader';
 import { UsersPageSkeleton } from '@/features/users/components/UsersPageSkeleton';
 import { useUsers, type AppUser } from '@/features/users/hooks/useUsers';
@@ -172,14 +173,13 @@ export function UsersPage() {
                         </span>
                       </td>
                       <td className="px-[22px] py-[13px] text-right">
-                        <button
-                          type="button"
+                        <IconButton
+                          icon="settings"
+                          label={`Editar ${u.username}`}
                           onClick={() => setEditUser(u)}
-                          className="w-8 h-8 flex items-center justify-center rounded-lg text-faint hover:text-ink-2 hover:bg-cream-2 transition-colors"
-                          aria-label={`Editar ${u.username}`}
-                        >
-                          <Icon name="settings" size={15} />
-                        </button>
+                          size={15}
+                          className="w-8 h-8 rounded-lg text-faint hover:text-ink-2 hover:bg-cream-2"
+                        />
                       </td>
                     </tr>
                   );
