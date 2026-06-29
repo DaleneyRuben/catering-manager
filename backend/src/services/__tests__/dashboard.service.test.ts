@@ -101,6 +101,23 @@ describe('dashboardService.findCounts', () => {
     expect(options.replacements).toEqual({ today: '2026-06-29', tomorrow: '2026-06-30' });
   });
 
+  it('excludes soft-deleted clients via deletedAt IS NULL in raw SQL', async () => {
+    (sequelize.query as jest.Mock).mockResolvedValue([
+      {
+        active_today: '0',
+        active_tomorrow: '0',
+        suspended_today: '0',
+        suspended_tomorrow: '0',
+        deliveries_today: '0',
+      },
+    ]);
+
+    await dashboardService.findCounts();
+
+    const [sql] = (sequelize.query as jest.Mock).mock.calls[0];
+    expect(sql).toContain('"deletedAt" IS NULL');
+  });
+
   it('propagates db errors', async () => {
     (sequelize.query as jest.Mock).mockRejectedValue(new Error('db error'));
 

@@ -50,7 +50,8 @@ const findCounts = async (): Promise<DashboardCounts> => {
       COUNT(DISTINCT CASE WHEN c."pausedSince" IS NULL AND (s."startDate" IS NULL OR s."startDate" <= :today) AND s."contractEndDate" >= :today AND s."finalizedAt" IS NULL AND NOT (:today::date = ANY(s."suspendedDates")) AND c."groupToken" IS NOT NULL THEN c."groupToken" END)
         + COUNT(CASE WHEN c."pausedSince" IS NULL AND (s."startDate" IS NULL OR s."startDate" <= :today) AND s."contractEndDate" >= :today AND s."finalizedAt" IS NULL AND NOT (:today::date = ANY(s."suspendedDates")) AND c."groupToken" IS NULL THEN 1 END) AS deliveries_today
     FROM clients c
-    LEFT JOIN subscriptions s ON s."id" = (SELECT MAX(s2."id") FROM subscriptions s2 WHERE s2."clientId" = c.id)`,
+    LEFT JOIN subscriptions s ON s."id" = (SELECT MAX(s2."id") FROM subscriptions s2 WHERE s2."clientId" = c.id)
+    WHERE c."deletedAt" IS NULL`,
     { replacements: { today, tomorrow }, type: QueryTypes.SELECT },
   );
 
