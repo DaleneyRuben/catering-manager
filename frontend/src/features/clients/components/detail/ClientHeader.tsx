@@ -1,14 +1,14 @@
 import { differenceInYears, format, parseISO, startOfToday } from 'date-fns';
-import { Icon } from '@/components/ui/Icon';
-import { Button } from '@/components/ui/Button';
-import { OverflowMenu } from '@/components/ui/OverflowMenu';
+import { Icon } from '@ui/Icon';
+import { Button } from '@ui/Button';
+import { OverflowMenu } from '@ui/OverflowMenu';
 import {
   STATUS_LABELS,
   STATUS_CLASSES,
   STATUS_DOT_CLASSES,
   CLIENT_STATUS,
-} from '@/constants/clientStatus';
-import { SEX_LABELS } from '@/constants/clientOptions';
+} from '@/features/clients/constants/clientStatus';
+import { SEX_LABELS } from '@/features/clients/constants/clientOptions';
 import { initials } from '@/utils/string';
 import type { Client, ClientStatus } from '@/features/clients/types';
 

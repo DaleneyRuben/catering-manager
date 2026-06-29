@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { TagInput } from '@/components/ui/TagInput';
-import { WizardSectionCard } from '@/components/ui/WizardSectionCard';
-import { DISEASES } from '@/constants/diseases';
+import { TagInput } from '@ui/TagInput';
+import { WizardSectionCard } from '@ui/WizardSectionCard';
+import { DISEASES } from '@/features/clients/constants/diseases';
 import type { RestrictionsState } from '@/features/clients/types';
 
 interface Props {

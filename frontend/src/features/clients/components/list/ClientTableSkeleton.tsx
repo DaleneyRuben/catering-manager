@@ -1,4 +1,4 @@
-import { Skeleton } from '@/components/ui/Skeleton';
+import { Skeleton } from '@ui/Skeleton';
 
 const HEADERS = ['Cliente', 'Plan', 'Zona', 'Nacimiento', 'Contrato', 'Estado', 'Precio'];
 const ROW_COUNT = 8;

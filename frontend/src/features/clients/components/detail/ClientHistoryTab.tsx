@@ -1,9 +1,9 @@
 import { format, parseISO } from 'date-fns';
+import { Card } from '@ui/Card';
+import { Skeleton } from '@ui/Skeleton';
 import { useClientHistory } from '@/features/clients/hooks/useClientHistory';
 import { formatDate } from '@/utils/format';
-import { EVENT_LABELS } from '@/constants/historyEvents';
-import { Card } from '@/components/ui/Card';
-import { Skeleton } from '@/components/ui/Skeleton';
+import { EVENT_LABELS } from '@/features/clients/constants/historyEvents';
 import { ClientHistorySummary } from '@/features/clients/components/detail/ClientHistorySummary';
 
 function formatEventDateTime(iso: string) {

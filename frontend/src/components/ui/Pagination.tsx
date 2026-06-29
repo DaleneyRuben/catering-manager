@@ -1,4 +1,4 @@
-import { Icon } from '@/components/ui/Icon';
+import { Icon } from '@ui/Icon';
 
 const LIMIT_OPTIONS = [10, 25, 50];
 

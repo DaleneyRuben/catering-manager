@@ -6,7 +6,7 @@ import api from '@/services/api';
 import { NewClientPage } from '@/pages/NewClientPage';
 
 jest.mock('@/services/api', () => ({ default: { get: jest.fn(), post: jest.fn() } }));
-jest.mock('@/components/ui/DatePickerInput', () => ({
+jest.mock('@ui/DatePickerInput', () => ({
   DatePickerInput: ({
     id,
     value,

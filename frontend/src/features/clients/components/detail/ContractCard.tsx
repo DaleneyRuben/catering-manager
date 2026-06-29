@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { startOfToday } from 'date-fns';
-import { Button } from '@/components/ui/Button';
-import { Card } from '@/components/ui/Card';
-import { DatePickerInput } from '@/components/ui/DatePickerInput';
-import { Icon } from '@/components/ui/Icon';
-import { Label } from '@/components/ui/Label';
+import { Button } from '@ui/Button';
+import { Card } from '@ui/Card';
+import { DatePickerInput } from '@ui/DatePickerInput';
+import { Icon } from '@ui/Icon';
+import { Label } from '@ui/Label';
 import { addBusinessDays } from '@/utils/businessDays';
 import { formatDate } from '@/utils/format';
 import type { Subscription } from '@/features/clients/types';

@@ -1,8 +1,8 @@
 import { type UseFormRegister, type FieldErrors, type Control, Controller } from 'react-hook-form';
 import { startOfToday, isWeekend, parseISO } from 'date-fns';
-import { Field, inputCls } from '@/components/ui/Field';
-import { DatePickerInput } from '@/components/ui/DatePickerInput';
-import { WizardSectionCard } from '@/components/ui/WizardSectionCard';
+import { Field, inputCls } from '@ui/Field';
+import { DatePickerInput } from '@ui/DatePickerInput';
+import { WizardSectionCard } from '@ui/WizardSectionCard';
 import { addBusinessDays } from '@/utils/businessDays';
 import { formatDate } from '@/utils/format';
 import type { NewClientFormValues } from '@/features/clients/types';

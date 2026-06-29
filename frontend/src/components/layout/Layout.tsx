@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { Toaster } from 'sonner';
-import { Icon } from '@/components/ui/Icon';
-import { useAuth } from '@/contexts/AuthContext';
+import { Icon } from '@ui/Icon';
+import { useAuth } from '@/features/auth/AuthContext';
 import { ROLES, ROLE_LABELS, type UserRole } from '@/constants/roles';
 
 interface NavItem {

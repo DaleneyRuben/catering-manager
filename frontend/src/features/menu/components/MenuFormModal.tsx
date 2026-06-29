@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
-import { Modal } from '@/components/ui/Modal';
-import { Button } from '@/components/ui/Button';
-import { Icon } from '@/components/ui/Icon';
-import { Field, inputCls } from '@/components/ui/Field';
-import { MODAL_CANCEL_STYLE, MODAL_CONFIRM_STYLE } from '@/components/ui/modalButtonStyles';
+import { Modal } from '@ui/Modal';
+import { Button } from '@ui/Button';
+import { Icon } from '@ui/Icon';
+import { Field, inputCls } from '@ui/Field';
+import { MODAL_CANCEL_STYLE, MODAL_CONFIRM_STYLE } from '@ui/modalButtonStyles';
 import type { MenuDraft } from '@/features/menu/types';
 import {
   MEAL_FIELDS,

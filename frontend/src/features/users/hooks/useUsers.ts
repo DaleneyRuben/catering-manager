@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { toVoid } from '@/utils/toVoid';
 import api from '@/services/api';
-import type { UserRole } from '@/contexts/AuthContext';
+import type { UserRole } from '@/features/auth/AuthContext';
 
 export type AppUser = {
   id: string;

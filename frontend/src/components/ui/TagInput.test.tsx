@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { TagInput } from '@/components/ui/TagInput';
+import { TagInput } from '@ui/TagInput';
 
 function renderTagInput(tags: string[] = ['gluten', 'lactosa']) {
   const setInput = jest.fn();

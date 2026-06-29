@@ -1,6 +1,6 @@
-import { Button } from '@/components/ui/Button';
-import { Card } from '@/components/ui/Card';
-import { Label } from '@/components/ui/Label';
+import { Button } from '@ui/Button';
+import { Card } from '@ui/Card';
+import { Label } from '@ui/Label';
 import type { Subscription } from '@/features/clients/types';
 import { formatDate } from '@/utils/format';
 

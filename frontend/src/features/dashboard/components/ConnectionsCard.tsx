@@ -1,4 +1,4 @@
-import { Icon } from '@/components/ui/Icon';
+import { Icon } from '@ui/Icon';
 import { formatConnectionStamp, formatRelativeTime } from '@/utils/format';
 import type { Connection } from '@/features/dashboard/types';
 

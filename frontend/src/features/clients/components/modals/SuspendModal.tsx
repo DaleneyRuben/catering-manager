@@ -17,10 +17,10 @@ import {
   subMonths,
 } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { Icon } from '@/components/ui/Icon';
-import { Modal } from '@/components/ui/Modal';
-import { Button } from '@/components/ui/Button';
-import { MODAL_CANCEL_STYLE, MODAL_CONFIRM_STYLE } from '@/components/ui/modalButtonStyles';
+import { Icon } from '@ui/Icon';
+import { Modal } from '@ui/Modal';
+import { Button } from '@ui/Button';
+import { MODAL_CANCEL_STYLE, MODAL_CONFIRM_STYLE } from '@ui/modalButtonStyles';
 import { addBusinessDays, subtractBusinessDays } from '@/utils/businessDays';
 import { formatDate } from '@/utils/format';
 import type { Subscription } from '@/features/clients/types';

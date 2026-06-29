@@ -1,4 +1,4 @@
-import { Icon } from '@/components/ui/Icon';
+import { Icon } from '@ui/Icon';
 import { initials } from '@/utils/string';
 import { formatShortDate } from '@/utils/format';
 import type { ContractEndingPerson } from '@/features/dashboard/types';

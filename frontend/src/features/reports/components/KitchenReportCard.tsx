@@ -1,14 +1,14 @@
 import { useState } from 'react';
 import { format, addDays } from 'date-fns';
-import { Button } from '@/components/ui/Button';
-import { Icon } from '@/components/ui/Icon';
+import { Button } from '@ui/Button';
+import { Icon } from '@ui/Icon';
 import { useMenu } from '@/features/menu/hooks/useMenu';
 import { API_BASE } from '@/utils/env';
 import { downloadReport } from '@/utils/downloadReport';
 import { checkIsWeekend } from '@/utils/devFlags';
 import { DaySelector, type DayOption } from '@/features/reports/components/DaySelector';
 import { ReportNotice } from '@/features/reports/components/ReportNotice';
-import { DISABLED_DOWNLOAD_STYLE } from '@/features/reports/downloadButtonStyles';
+import { DISABLED_DOWNLOAD_STYLE } from '@/features/reports/components/downloadButtonStyles';
 
 const BASE = API_BASE;
 

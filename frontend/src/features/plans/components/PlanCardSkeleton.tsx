@@ -1,4 +1,4 @@
-import { Skeleton } from '@/components/ui/Skeleton';
+import { Skeleton } from '@ui/Skeleton';
 
 const CARD_COUNT = 3;
 

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
-import { PlanRadioList } from '@/components/ui/PlanRadioList';
+import { PlanRadioList } from '@/features/plans/components/PlanRadioList';
 import type { Plan } from '@/features/clients/types';
 
 const plans: Plan[] = [
@@ -37,7 +37,7 @@ function Demo({ size }: { size?: 'sm' | 'md' }) {
 }
 
 const meta: Meta<typeof PlanRadioList> = {
-  title: 'UI/PlanRadioList',
+  title: 'Plans/PlanRadioList',
   component: PlanRadioList,
 };
 export default meta;

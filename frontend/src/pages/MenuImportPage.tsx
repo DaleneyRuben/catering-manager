@@ -1,7 +1,7 @@
 import { addDays, format, getDay, parseISO, startOfISOWeek } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useState } from 'react';
-import { PageHeader } from '@/components/ui/PageHeader';
+import { PageHeader } from '@ui/PageHeader';
 import type { Menu, MenuDraft } from '@/features/menu/types';
 import { useMenu } from '@/features/menu/hooks/useMenu';
 import { checkIsWeekend } from '@/utils/devFlags';

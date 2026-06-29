@@ -1,10 +1,10 @@
 import type { ReactNode } from 'react';
-import type { Plan , NewClientFormValues, RestrictionsState } from '@/features/clients/types';
-import { Card } from '@/components/ui/Card';
-import { Label } from '@/components/ui/Label';
+import { Card } from '@ui/Card';
+import { Label } from '@ui/Label';
+import type { Plan, NewClientFormValues, RestrictionsState } from '@/features/clients/types';
 import { addBusinessDays } from '@/utils/businessDays';
 import { formatDate } from '@/utils/format';
-import { SEX_LABELS } from '@/constants/clientOptions';
+import { SEX_LABELS } from '@/features/clients/constants/clientOptions';
 
 interface Props {
   formValues: NewClientFormValues;

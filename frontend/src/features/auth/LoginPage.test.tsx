@@ -1,10 +1,10 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter, useNavigate } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
-import { LoginPage } from '@/pages/LoginPage';
+import { useAuth } from '@/features/auth/AuthContext';
+import { LoginPage } from '@/features/auth/LoginPage';
 
-jest.mock('@/contexts/AuthContext', () => ({
+jest.mock('@/features/auth/AuthContext', () => ({
   useAuth: jest.fn(),
 }));
 

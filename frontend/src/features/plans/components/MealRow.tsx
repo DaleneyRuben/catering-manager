@@ -1,4 +1,4 @@
-import { Icon } from '@/components/ui/Icon';
+import { Icon } from '@ui/Icon';
 import type { MealKey } from '@/features/plans/types';
 import { MEAL_LABELS } from '@/constants/meals';
 

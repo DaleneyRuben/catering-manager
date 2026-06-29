@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Icon } from '@/components/ui/Icon';
-import { Button } from '@/components/ui/Button';
-import { PageHeader } from '@/components/ui/PageHeader';
-import { Pagination } from '@/components/ui/Pagination';
+import { Icon } from '@ui/Icon';
+import { Button } from '@ui/Button';
+import { PageHeader } from '@ui/PageHeader';
+import { Pagination } from '@ui/Pagination';
 import { ClientTableSkeleton } from '@/features/clients/components/list/ClientTableSkeleton';
 import {
   ClientFilterBar,
@@ -18,8 +18,8 @@ import {
   STATUS_CLASSES,
   STATUS_DOT_CLASSES,
   CLIENT_STATUS,
-} from '@/constants/clientStatus';
-import { SEX_LABELS } from '@/constants/clientOptions';
+} from '@/features/clients/constants/clientStatus';
+import { SEX_LABELS } from '@/features/clients/constants/clientOptions';
 import { initials } from '@/utils/string';
 
 export function ClientsPage() {

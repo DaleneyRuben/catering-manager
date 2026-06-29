@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import { ReportsPage } from '@/pages/ReportsPage';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/features/auth/AuthContext';
 
 jest.mock('@/features/reports/components/DeliveryListCard', () => ({
   DeliveryListCard: () => <div>delivery-card</div>,
@@ -11,7 +11,7 @@ jest.mock('@/features/reports/components/KitchenReportCard', () => ({
 jest.mock('@/features/reports/components/MenuCard', () => ({
   MenuCard: () => <div>menu-card</div>,
 }));
-jest.mock('@/contexts/AuthContext', () => ({
+jest.mock('@/features/auth/AuthContext', () => ({
   useAuth: jest.fn(),
 }));
 

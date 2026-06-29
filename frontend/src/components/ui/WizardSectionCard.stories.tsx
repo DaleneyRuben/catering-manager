@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { WizardSectionCard } from '@/components/ui/WizardSectionCard';
+import { WizardSectionCard } from '@ui/WizardSectionCard';
 
 const meta: Meta<typeof WizardSectionCard> = {
   component: WizardSectionCard,

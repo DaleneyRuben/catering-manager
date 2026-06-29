@@ -1,7 +1,7 @@
 import { useQuery, keepPreviousData } from '@tanstack/react-query';
 import api from '@/services/api';
 import type { Client } from '@/features/clients/types';
-import { CLIENT_STATUS } from '@/constants/clientStatus';
+import { CLIENT_STATUS } from '@/features/clients/constants/clientStatus';
 
 export interface ClientCreateDraft {
   name: string;

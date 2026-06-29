@@ -1,4 +1,4 @@
-import { Icon } from '@/components/ui/Icon';
+import { Icon } from '@ui/Icon';
 import { formatShortDate } from '@/utils/format';
 import type { MenuStatus } from '@/features/dashboard/types';
 

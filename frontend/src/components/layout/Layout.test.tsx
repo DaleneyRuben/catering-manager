@@ -2,9 +2,9 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { Layout } from '@/components/layout/Layout';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/features/auth/AuthContext';
 
-jest.mock('@/contexts/AuthContext', () => ({
+jest.mock('@/features/auth/AuthContext', () => ({
   useAuth: jest.fn(),
 }));
 

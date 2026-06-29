@@ -1,5 +1,5 @@
-import type { Plan , NewClientFormValues, RestrictionsState } from '@/features/clients/types';
-import { Icon } from '@/components/ui/Icon';
+import { Icon } from '@ui/Icon';
+import type { Plan, NewClientFormValues, RestrictionsState } from '@/features/clients/types';
 import { ClientPreviewCard } from '@/features/clients/components/wizard/StepConfirm/ClientPreviewCard';
 
 interface Props {

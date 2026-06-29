@@ -1,5 +1,5 @@
 import { render } from '@testing-library/react';
-import { Icon } from '@/components/ui/Icon';
+import { Icon } from '@ui/Icon';
 
 describe('Icon', () => {
   it('renders an svg for a known icon name', () => {

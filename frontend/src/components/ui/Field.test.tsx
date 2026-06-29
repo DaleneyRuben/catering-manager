@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react';
-import { Field, inputCls } from '@/components/ui/Field';
+import { Field, inputCls } from '@ui/Field';
 
 describe('Field', () => {
   it('renders the label and children', () => {
