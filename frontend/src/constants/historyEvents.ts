@@ -1,4 +1,4 @@
-import type { HistoryEventType } from '../types/client';
+import type { HistoryEventType } from '@/features/clients/types';
 
 export const EVENT_LABELS: Record<HistoryEventType, string> = {
   paused: 'Plan pausado',

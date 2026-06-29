@@ -1,10 +1,10 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import api from '../services/api';
-import { DeliveryPage } from './DeliveryPage';
+import api from '@/services/api';
+import { DeliveryPage } from '@/pages/DeliveryPage';
 
-jest.mock('../services/api', () => ({
+jest.mock('@/services/api', () => ({
   default: { get: jest.fn() },
 }));
 

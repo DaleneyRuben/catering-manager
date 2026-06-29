@@ -1,7 +1,7 @@
-import { Icon } from '../components/ui/Icon';
-import { PageHeader } from '../components/ui/PageHeader';
-import { useHealth, type HealthReport, type ServiceCheck } from '../hooks/useHealth';
-import { formatDateTime } from '../utils/format';
+import { Icon } from '@/components/ui/Icon';
+import { PageHeader } from '@/components/ui/PageHeader';
+import { useHealth, type HealthReport, type ServiceCheck } from '@/features/health/hooks/useHealth';
+import { formatDateTime } from '@/utils/format';
 
 const BANNER_STYLES: Record<
   HealthReport['status'],

@@ -2,11 +2,11 @@ import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
-import api from '../services/api';
-import { NewClientPage } from './NewClientPage';
+import api from '@/services/api';
+import { NewClientPage } from '@/pages/NewClientPage';
 
-jest.mock('../services/api', () => ({ default: { get: jest.fn(), post: jest.fn() } }));
-jest.mock('../components/ui/DatePickerInput', () => ({
+jest.mock('@/services/api', () => ({ default: { get: jest.fn(), post: jest.fn() } }));
+jest.mock('@/components/ui/DatePickerInput', () => ({
   DatePickerInput: ({
     id,
     value,

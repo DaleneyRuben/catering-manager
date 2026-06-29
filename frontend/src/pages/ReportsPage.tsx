@@ -1,9 +1,9 @@
-import { PageHeader } from '../components/ui/PageHeader';
-import { DeliveryListCard } from './reports/DeliveryListCard';
-import { KitchenReportCard } from './reports/KitchenReportCard';
-import { MenuCard } from './reports/MenuCard';
-import { useAuth } from '../contexts/AuthContext';
-import { ROLES } from '../constants/roles';
+import { PageHeader } from '@/components/ui/PageHeader';
+import { DeliveryListCard } from '@/features/reports/components/DeliveryListCard';
+import { KitchenReportCard } from '@/features/reports/components/KitchenReportCard';
+import { MenuCard } from '@/features/reports/components/MenuCard';
+import { useAuth } from '@/contexts/AuthContext';
+import { ROLES } from '@/constants/roles';
 
 export function ReportsPage() {
   const { user } = useAuth();

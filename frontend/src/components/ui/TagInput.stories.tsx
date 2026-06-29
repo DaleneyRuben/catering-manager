@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { TagInput } from './TagInput';
+import { TagInput } from '@/components/ui/TagInput';
 
 const meta: Meta<typeof TagInput> = {
   component: TagInput,

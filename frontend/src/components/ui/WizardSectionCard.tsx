@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
-import { Card } from './Card';
-import { Icon } from './Icon';
+import { Card } from '@/components/ui/Card';
+import { Icon } from '@/components/ui/Icon';
 
 interface Props {
   icon: string;

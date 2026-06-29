@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react';
-import { Modal } from './Modal';
+import { Modal } from '@/components/ui/Modal';
 
 describe('Modal', () => {
   it('renders children inside a dialog', () => {

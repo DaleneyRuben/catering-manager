@@ -1,4 +1,4 @@
-import { initials } from './string';
+import { initials } from '@/utils/string';
 
 describe('initials', () => {
   it('returns first letter of first and last name', () => {

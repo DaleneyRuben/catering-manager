@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
-import { PlanRadioList } from './PlanRadioList';
-import type { Plan } from '../../types/client';
+import { PlanRadioList } from '@/components/ui/PlanRadioList';
+import type { Plan } from '@/features/clients/types';
 
 const plans: Plan[] = [
   { id: '1', name: 'Almuerzo', price: 640, meals: ['lunch'] },

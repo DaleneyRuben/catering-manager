@@ -1,4 +1,4 @@
-import { getAuthHeader } from '../services/api';
+import { getAuthHeader } from '@/services/api';
 
 const parseFileName = (cd: string, fallback: string): string => {
   // RFC 5987: filename*=UTF-8''encoded-name (handles non-ASCII characters)

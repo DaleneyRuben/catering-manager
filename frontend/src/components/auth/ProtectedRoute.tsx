@@ -1,5 +1,5 @@
 import { Navigate, useLocation } from 'react-router-dom';
-import { useAuth, type UserRole } from '../../contexts/AuthContext';
+import { useAuth, type UserRole } from '@/contexts/AuthContext';
 
 type Props = {
   allowedRoles: UserRole[];

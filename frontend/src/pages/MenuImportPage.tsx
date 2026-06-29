@@ -1,15 +1,15 @@
 import { addDays, format, getDay, parseISO, startOfISOWeek } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useState } from 'react';
-import { PageHeader } from '../components/ui/PageHeader';
-import type { Menu, MenuDraft } from '../types/menu';
-import { useMenu } from '../hooks/useMenu';
-import { checkIsWeekend } from '../utils/devFlags';
-import { formatLongDate } from '../utils/format';
-import { MEAL_FIELDS, MEAL_FIELD_LABELS } from './menu/menuFields';
-import { MenuFormModal } from './menu/MenuFormModal';
-import { DayCard } from './menu/DayCard';
-import { MenuImportSkeleton } from './menu/MenuImportSkeleton';
+import { PageHeader } from '@/components/ui/PageHeader';
+import type { Menu, MenuDraft } from '@/features/menu/types';
+import { useMenu } from '@/features/menu/hooks/useMenu';
+import { checkIsWeekend } from '@/utils/devFlags';
+import { formatLongDate } from '@/utils/format';
+import { MEAL_FIELDS, MEAL_FIELD_LABELS } from '@/features/menu/menuFields';
+import { MenuFormModal } from '@/features/menu/components/MenuFormModal';
+import { DayCard } from '@/features/menu/components/DayCard';
+import { MenuImportSkeleton } from '@/features/menu/components/MenuImportSkeleton';
 
 const toIso = (d: Date) => format(d, 'yyyy-MM-dd');
 

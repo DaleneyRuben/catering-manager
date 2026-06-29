@@ -1,5 +1,5 @@
 import { render, screen, act } from '@testing-library/react';
-import { AuthProvider, useAuth } from './AuthContext';
+import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 
 const TOKEN_KEY = 'auth_token';
 const USER_KEY = 'auth_user';

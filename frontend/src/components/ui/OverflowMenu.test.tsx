@@ -1,5 +1,5 @@
 import { render, screen, fireEvent } from '@testing-library/react';
-import { OverflowMenu } from './OverflowMenu';
+import { OverflowMenu } from '@/components/ui/OverflowMenu';
 
 const items = [
   { label: 'Editar datos', onClick: jest.fn() },

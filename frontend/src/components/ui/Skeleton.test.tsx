@@ -1,5 +1,5 @@
 import { render } from '@testing-library/react';
-import { Skeleton } from './Skeleton';
+import { Skeleton } from '@/components/ui/Skeleton';
 
 describe('Skeleton', () => {
   it('renders a div', () => {

@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { Tabs } from './Tabs';
+import { Tabs } from '@/components/ui/Tabs';
 
 const TABS = [
   { id: 'overview', label: 'Resumen' },

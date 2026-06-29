@@ -1,4 +1,4 @@
-import { API_BASE } from '../utils/env';
+import { API_BASE } from '@/utils/env';
 
 const BASE = API_BASE;
 

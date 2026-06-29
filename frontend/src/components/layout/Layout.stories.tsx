@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { MemoryRouter } from 'react-router-dom';
-import { Layout } from './Layout';
+import { Layout } from '@/components/layout/Layout';
 
 const meta: Meta<typeof Layout> = {
   component: Layout,

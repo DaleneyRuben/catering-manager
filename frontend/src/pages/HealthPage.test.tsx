@@ -1,9 +1,9 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { useHealth } from '../hooks/useHealth';
-import { HealthPage } from './HealthPage';
+import { useHealth } from '@/features/health/hooks/useHealth';
+import { HealthPage } from '@/pages/HealthPage';
 
-jest.mock('../hooks/useHealth', () => ({
+jest.mock('@/features/health/hooks/useHealth', () => ({
   useHealth: jest.fn(),
 }));
 

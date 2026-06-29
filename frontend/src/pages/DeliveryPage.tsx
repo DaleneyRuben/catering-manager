@@ -1,11 +1,11 @@
 import { useState } from 'react';
-import { PageHeader } from '../components/ui/PageHeader';
-import { Icon } from '../components/ui/Icon';
-import { useDeliveryRoute } from '../hooks/useDeliveryRoute';
-import { formatLongDate } from '../utils/format';
-import { Skeleton } from '../components/ui/Skeleton';
-import { DeliveryZoneSection } from './delivery/DeliveryZoneSection';
-import type { DeliveryDayRoute } from '../types/delivery';
+import { PageHeader } from '@/components/ui/PageHeader';
+import { Icon } from '@/components/ui/Icon';
+import { useDeliveryRoute } from '@/features/delivery/hooks/useDeliveryRoute';
+import { formatLongDate } from '@/utils/format';
+import { Skeleton } from '@/components/ui/Skeleton';
+import { DeliveryZoneSection } from '@/features/delivery/components/DeliveryZoneSection';
+import type { DeliveryDayRoute } from '@/features/delivery/types';
 
 type Day = 'today' | 'tomorrow';
 

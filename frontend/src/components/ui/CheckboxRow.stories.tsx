@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { CheckboxRow } from './CheckboxRow';
+import { CheckboxRow } from '@/components/ui/CheckboxRow';
 
 const meta: Meta<typeof CheckboxRow> = {
   component: CheckboxRow,

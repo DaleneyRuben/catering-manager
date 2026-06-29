@@ -6,7 +6,7 @@ import {
   formatWeekdayDate,
   formatConnectionStamp,
   formatRelativeTime,
-} from './format';
+} from '@/utils/format';
 
 describe('formatDate', () => {
   it('returns — for null input', () => {

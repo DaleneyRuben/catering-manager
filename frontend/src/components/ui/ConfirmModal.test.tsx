@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { ConfirmModal } from './ConfirmModal';
+import { ConfirmModal } from '@/components/ui/ConfirmModal';
 
 const noop = () => {};
 const noopAsync = () => Promise.resolve();
