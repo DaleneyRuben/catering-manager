@@ -5,11 +5,11 @@ import { Icon } from '@/components/ui/Icon';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { UsersPageSkeleton } from '@/features/users/components/UsersPageSkeleton';
 import { useUsers, type AppUser } from '@/features/users/hooks/useUsers';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/features/auth/AuthContext';
 import { UserModal } from '@/features/users/components/UserModal';
 import { initials } from '@/utils/string';
 import { formatDateTime } from '@/utils/format';
-import type { UserRole } from '@/contexts/AuthContext';
+import type { UserRole } from '@/features/auth/AuthContext';
 import { ROLES, ROLE_LABELS } from '@/constants/roles';
 
 const ROLE_CLASSES: Record<UserRole, string> = {

@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { parseISO } from 'date-fns';
 import { remainingDeliveryDays } from '@/utils/businessDays';
 import { useClient } from '@/features/clients/hooks/useClient';
-import { CLIENT_STATUS } from '@/constants/clientStatus';
+import { CLIENT_STATUS } from '@/features/clients/constants/clientStatus';
 import { ClientEditModal } from '@/features/clients/components/modals/ClientEditModal';
 import type { EditDraft } from '@/features/clients/components/modals/ClientEditModal';
 import { ConfirmFinalizeModal } from '@/features/clients/components/modals/ConfirmFinalizeModal';

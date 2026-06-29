@@ -2,7 +2,7 @@ import { PageHeader } from '@/components/ui/PageHeader';
 import { DeliveryListCard } from '@/features/reports/components/DeliveryListCard';
 import { KitchenReportCard } from '@/features/reports/components/KitchenReportCard';
 import { MenuCard } from '@/features/reports/components/MenuCard';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/features/auth/AuthContext';
 import { ROLES } from '@/constants/roles';
 
 export function ReportsPage() {

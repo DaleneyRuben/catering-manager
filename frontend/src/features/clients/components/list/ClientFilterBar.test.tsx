@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ClientFilterBar } from '@/features/clients/components/list/ClientFilterBar';
-import { CLIENT_STATUS } from '@/constants/clientStatus';
+import { CLIENT_STATUS } from '@/features/clients/constants/clientStatus';
 
 const baseProps = {
   q: '',

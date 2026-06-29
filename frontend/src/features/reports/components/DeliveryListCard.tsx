@@ -7,7 +7,7 @@ import { downloadReport } from '@/utils/downloadReport';
 import { checkIsWeekend } from '@/utils/devFlags';
 import { DaySelector, type DayOption } from '@/features/reports/components/DaySelector';
 import { ReportNotice } from '@/features/reports/components/ReportNotice';
-import { DISABLED_DOWNLOAD_STYLE } from '@/features/reports/downloadButtonStyles';
+import { DISABLED_DOWNLOAD_STYLE } from '@/features/reports/components/downloadButtonStyles';
 
 const BASE = API_BASE;
 

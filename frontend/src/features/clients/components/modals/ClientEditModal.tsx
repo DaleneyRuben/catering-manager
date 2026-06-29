@@ -9,8 +9,8 @@ import { Button } from '@/components/ui/Button';
 import { MODAL_CANCEL_STYLE, MODAL_CONFIRM_STYLE } from '@/components/ui/modalButtonStyles';
 import { TagInput } from '@/components/ui/TagInput';
 import { ToggleGroup } from '@/components/ui/ToggleGroup';
-import { DISEASES } from '@/constants/diseases';
-import { ZONES, DELIVERIES, SEX_OPTIONS } from '@/constants/clientOptions';
+import { DISEASES } from '@/features/clients/constants/diseases';
+import { ZONES, DELIVERIES, SEX_OPTIONS } from '@/features/clients/constants/clientOptions';
 import type { Client } from '@/features/clients/types';
 
 export interface EditDraft {

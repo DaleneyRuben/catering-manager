@@ -3,14 +3,14 @@ import userEvent from '@testing-library/user-event';
 import { subDays } from 'date-fns';
 import { useUsers } from '@/features/users/hooks/useUsers';
 import { formatDateTime } from '@/utils/format';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/features/auth/AuthContext';
 import { UsersPage } from '@/pages/UsersPage';
 
 jest.mock('@/features/users/hooks/useUsers', () => ({
   useUsers: jest.fn(),
 }));
 
-jest.mock('@/contexts/AuthContext', () => ({
+jest.mock('@/features/auth/AuthContext', () => ({
   useAuth: jest.fn(),
 }));
 

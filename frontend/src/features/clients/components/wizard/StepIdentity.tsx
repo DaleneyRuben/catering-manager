@@ -5,7 +5,7 @@ import { ToggleGroup } from '@/components/ui/ToggleGroup';
 import { DatePickerInput } from '@/components/ui/DatePickerInput';
 import { WizardSectionCard } from '@/components/ui/WizardSectionCard';
 import type { NewClientFormValues } from '@/features/clients/types';
-import { ZONES, DELIVERIES, SEX_OPTIONS } from '@/constants/clientOptions';
+import { ZONES, DELIVERIES, SEX_OPTIONS } from '@/features/clients/constants/clientOptions';
 
 interface Props {
   register: UseFormRegister<NewClientFormValues>;

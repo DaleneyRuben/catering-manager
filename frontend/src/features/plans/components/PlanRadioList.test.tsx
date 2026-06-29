@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { PlanRadioList } from '@/components/ui/PlanRadioList';
+import { PlanRadioList } from '@/features/plans/components/PlanRadioList';
 import type { Plan } from '@/features/clients/types';
 
 const plans: Plan[] = [
