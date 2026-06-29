@@ -1,0 +1,24 @@
+name: Delete All Vercel Preview Deployments
+
+on:
+  workflow_dispatch:
+
+jobs:
+  delete-all-previews:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete all preview deployments
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          for PROJECT_ID in ${{ secrets.VERCEL_FRONTEND_PROJECT_ID }} ${{ secrets.VERCEL_BACKEND_PROJECT_ID }}; do
+            UIDS=$(curl -s "https://api.vercel.com/v6/deployments?projectId=$PROJECT_ID&teamSlug=fernando-daleney-s-projects&limit=100&target=preview" \
+              -H "Authorization: Bearer $VERCEL_TOKEN" | \
+              jq -r '.deployments[].uid')
+
+            for DEPLOYMENT_UID in $UIDS; do
+              echo "Deleting $DEPLOYMENT_UID"
+              curl -s -X DELETE "https://api.vercel.com/v13/deployments/$DEPLOYMENT_UID?teamSlug=fernando-daleney-s-projects" \
+                -H "Authorization: Bearer $VERCEL_TOKEN"
+            done
+          done
