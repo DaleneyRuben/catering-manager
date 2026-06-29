@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Modal } from '@ui/Modal';
 import { Button } from '@ui/Button';
-import { Icon } from '@ui/Icon';
+import { IconButton } from '@ui/IconButton';
 import { Field, inputCls } from '@ui/Field';
 import { MODAL_CANCEL_STYLE, MODAL_CONFIRM_STYLE } from '@ui/modalButtonStyles';
 import type { MenuDraft } from '@/features/menu/types';
@@ -52,14 +52,14 @@ export function MenuFormModal({
     <Modal onClose={onClose} className="w-[min(600px,92vw)] max-h-[92vh] overflow-auto">
       <div className="flex items-center justify-between gap-3 px-[28px] py-[22px] border-b border-hairline">
         <p className="font-serif font-semibold text-[24px] leading-none text-ink">{dateLabel}</p>
-        <button
-          type="button"
+        <IconButton
+          icon="x"
+          label="Cerrar"
           onClick={onClose}
-          aria-label="Cerrar"
-          className="p-1 flex items-center justify-center text-faint hover:text-ink-2 transition-colors"
-        >
-          <Icon name="x" size={20} stroke={1.8} />
-        </button>
+          size={20}
+          stroke={1.8}
+          className="p-1 text-faint hover:text-ink-2"
+        />
       </div>
 
       <div className="px-[28px] py-[22px] grid grid-cols-2 grid-rows-4 grid-flow-col gap-4">

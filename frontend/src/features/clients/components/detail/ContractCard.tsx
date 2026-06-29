@@ -3,7 +3,7 @@ import { startOfToday } from 'date-fns';
 import { Button } from '@ui/Button';
 import { Card } from '@ui/Card';
 import { DatePickerInput } from '@ui/DatePickerInput';
-import { Icon } from '@ui/Icon';
+import { IconButton } from '@ui/IconButton';
 import { Label } from '@ui/Label';
 import { addBusinessDays } from '@/utils/businessDays';
 import { formatDate } from '@/utils/format';
@@ -58,14 +58,14 @@ export function ContractCard({ sub, remaining, onUpdateContract }: Props) {
       <div className="flex items-center mb-3">
         <Label variant="section">Contrato</Label>
         {!editing && (
-          <button
-            type="button"
+          <IconButton
+            icon="pencil"
+            label="Editar"
             onClick={() => setEditing(true)}
-            aria-label="Editar"
+            size={15}
+            stroke={1.7}
             className="ml-auto text-olive-700 hover:opacity-70 transition-opacity p-[3px]"
-          >
-            <Icon name="pencil" size={15} stroke={1.7} />
-          </button>
+          />
         )}
       </div>
 

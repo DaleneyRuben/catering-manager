@@ -1,4 +1,5 @@
 import { Icon } from '@ui/Icon';
+import { IconButton } from '@ui/IconButton';
 import { CLIENT_STATUS } from '@/features/clients/constants/clientStatus';
 
 export type FilterValue = (typeof CLIENT_STATUS)[keyof typeof CLIENT_STATUS];
@@ -53,14 +54,14 @@ export function ClientFilterBar({
           className="absolute left-[13px] top-1/2 -translate-y-1/2 text-faint"
         />
         {q && (
-          <button
-            type="button"
-            aria-label="Limpiar búsqueda de cliente"
+          <IconButton
+            icon="x"
+            label="Limpiar búsqueda de cliente"
             onClick={() => onQChange('')}
-            className="absolute right-[9px] top-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-cream-2 text-muted flex items-center justify-center hover:bg-olive-100 hover:text-olive-700 transition-colors"
-          >
-            <Icon name="x" size={12} stroke={2.2} />
-          </button>
+            size={12}
+            stroke={2.2}
+            className="absolute right-[9px] top-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-cream-2 text-muted hover:bg-olive-100 hover:text-olive-700"
+          />
         )}
       </div>
 
@@ -79,14 +80,14 @@ export function ClientFilterBar({
           className="absolute left-[13px] top-1/2 -translate-y-1/2 text-warn-dot"
         />
         {restriction && (
-          <button
-            type="button"
-            aria-label="Limpiar búsqueda de alergia"
+          <IconButton
+            icon="x"
+            label="Limpiar búsqueda de alergia"
             onClick={() => onRestrictionChange('')}
-            className="absolute right-[9px] top-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-cream-2 text-muted flex items-center justify-center hover:bg-warn-border hover:text-ink-2 transition-colors"
-          >
-            <Icon name="x" size={12} stroke={2.2} />
-          </button>
+            size={12}
+            stroke={2.2}
+            className="absolute right-[9px] top-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-cream-2 text-muted hover:bg-warn-border hover:text-ink-2"
+          />
         )}
       </div>
 
