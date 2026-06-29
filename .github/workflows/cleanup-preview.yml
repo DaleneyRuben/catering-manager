@@ -1,0 +1,26 @@
+name: Cleanup Vercel Preview Deployments
+
+on:
+  pull_request:
+    types: [closed]
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete preview deployments for closed PR
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          BRANCH: ${{ github.head_ref }}
+        run: |
+          for PROJECT_ID in ${{ secrets.VERCEL_FRONTEND_PROJECT_ID }} ${{ secrets.VERCEL_BACKEND_PROJECT_ID }}; do
+            UIDS=$(curl -s "https://api.vercel.com/v6/deployments?projectId=$PROJECT_ID&teamSlug=fernando-daleney-s-projects&limit=100&target=preview" \
+              -H "Authorization: Bearer $VERCEL_TOKEN" | \
+              jq -r ".deployments[] | select(.meta.githubCommitRef == \"$BRANCH\") | .uid")
+
+            for UID in $UIDS; do
+              echo "Deleting $UID"
+              curl -s -X DELETE "https://api.vercel.com/v13/deployments/$UID?teamSlug=fernando-daleney-s-projects" \
+                -H "Authorization: Bearer $VERCEL_TOKEN"
+            done
+          done
