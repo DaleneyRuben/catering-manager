@@ -1,4 +1,4 @@
-import { Skeleton } from '@/components/ui/Skeleton';
+import { Skeleton } from '@ui/Skeleton';
 
 const DAY_KEYS = ['mon', 'tue', 'wed', 'thu', 'fri'];
 const MEAL_KEYS = ['a', 'b', 'c', 'd', 'e', 'f', 'g'];

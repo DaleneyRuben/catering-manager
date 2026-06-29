@@ -1,6 +1,6 @@
-import { Card } from '@/components/ui/Card';
-import { Icon } from '@/components/ui/Icon';
-import { Label } from '@/components/ui/Label';
+import { Card } from '@ui/Card';
+import { Icon } from '@ui/Icon';
+import { Label } from '@ui/Label';
 import { MEAL_LABELS } from '@/constants/meals';
 import type { Client, Subscription } from '@/features/clients/types';
 import { CLIENT_STATUS } from '@/features/clients/constants/clientStatus';

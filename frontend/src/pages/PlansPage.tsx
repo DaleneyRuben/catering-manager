@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { Button } from '@/components/ui/Button';
-import { Icon } from '@/components/ui/Icon';
-import { PageHeader } from '@/components/ui/PageHeader';
-import { ConfirmModal } from '@/components/ui/ConfirmModal';
+import { Button } from '@ui/Button';
+import { Icon } from '@ui/Icon';
+import { PageHeader } from '@ui/PageHeader';
+import { ConfirmModal } from '@ui/ConfirmModal';
 import { usePlans } from '@/features/plans/hooks/usePlans';
 import type { Plan } from '@/features/clients/types';
 import { PlanCard } from '@/features/plans/components/PlanCard';

@@ -1,12 +1,12 @@
 import { useState } from 'react';
-import { useClientGroup } from '@/features/clients/hooks/useClientGroup';
-import { useClientList } from '@/features/clients/hooks/useClientList';
+import { Button } from '@ui/Button';
+import { Card } from '@ui/Card';
+import { Icon } from '@ui/Icon';
+import { Label } from '@ui/Label';
+import { inputCls } from '@ui/Field';
 import { useDebounce } from '@/hooks/useDebounce';
-import { Button } from '@/components/ui/Button';
-import { Card } from '@/components/ui/Card';
-import { Icon } from '@/components/ui/Icon';
-import { Label } from '@/components/ui/Label';
-import { inputCls } from '@/components/ui/Field';
+import { useClientList } from '@/features/clients/hooks/useClientList';
+import { useClientGroup } from '@/features/clients/hooks/useClientGroup';
 import type { GroupMember } from '@/features/clients/types';
 
 interface Props {

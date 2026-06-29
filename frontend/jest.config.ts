@@ -10,6 +10,7 @@ const config: Config = {
     '@/utils/devFlags$': '<rootDir>/src/__mocks__/devFlags.ts',
     '\\.(css|less|scss|sass)$': 'identity-obj-proxy',
     '\\.(png|jpg|jpeg|gif|svg|ico|webp)$': '<rootDir>/src/__mocks__/fileMock.ts',
+    '^@ui/(.*)$': '<rootDir>/src/components/ui/$1',
     '^@/(.*)$': '<rootDir>/src/$1',
   },
   collectCoverageFrom: [

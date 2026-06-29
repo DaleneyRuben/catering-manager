@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { Icon } from '@/components/ui/Icon';
-import { Modal } from '@/components/ui/Modal';
-import { Button } from '@/components/ui/Button';
-import { MODAL_CANCEL_STYLE, CONFIRM_DIALOG_STYLE } from '@/components/ui/modalButtonStyles';
+import { Icon } from '@ui/Icon';
+import { Modal } from '@ui/Modal';
+import { Button } from '@ui/Button';
+import { MODAL_CANCEL_STYLE, CONFIRM_DIALOG_STYLE } from '@ui/modalButtonStyles';
 
 interface Props {
   title: string;

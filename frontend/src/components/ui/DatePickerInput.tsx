@@ -3,8 +3,8 @@ import { createPortal } from 'react-dom';
 import { DayPicker, type Matcher } from 'react-day-picker';
 import { es } from 'react-day-picker/locale';
 import { format, parse, isValid } from 'date-fns';
-import { Icon } from '@/components/ui/Icon';
-import { inputCls } from '@/components/ui/Field';
+import { Icon } from '@ui/Icon';
+import { inputCls } from '@ui/Field';
 
 type CaptionLayout = 'label' | 'dropdown' | 'dropdown-months' | 'dropdown-years';
 

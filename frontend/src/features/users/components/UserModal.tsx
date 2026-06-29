@@ -1,12 +1,12 @@
 import { useState } from 'react';
-import { Icon } from '@/components/ui/Icon';
-import { Field, inputCls } from '@/components/ui/Field';
-import type { AppUser, UserDraft, UserUpdateDraft } from '@/features/users/hooks/useUsers';
+import { Icon } from '@ui/Icon';
+import { Field, inputCls } from '@ui/Field';
+import { Modal } from '@ui/Modal';
+import { Button } from '@ui/Button';
+import { ConfirmModal } from '@ui/ConfirmModal';
+import { MODAL_CANCEL_STYLE, MODAL_CONFIRM_STYLE } from '@ui/modalButtonStyles';
 import { ROLES, type UserRole } from '@/constants/roles';
-import { Modal } from '@/components/ui/Modal';
-import { Button } from '@/components/ui/Button';
-import { ConfirmModal } from '@/components/ui/ConfirmModal';
-import { MODAL_CANCEL_STYLE, MODAL_CONFIRM_STYLE } from '@/components/ui/modalButtonStyles';
+import type { AppUser, UserDraft, UserUpdateDraft } from '@/features/users/hooks/useUsers';
 
 const ROLE_OPTIONS: { value: UserRole; label: string }[] = [
   { value: ROLES.SUPER_ADMIN, label: 'Super admin' },

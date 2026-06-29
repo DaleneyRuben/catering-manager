@@ -1,10 +1,10 @@
 import { useState } from 'react';
-import { Button } from '@/components/ui/Button';
-import { Card } from '@/components/ui/Card';
-import { CheckboxRow } from '@/components/ui/CheckboxRow';
-import { Icon } from '@/components/ui/Icon';
-import { Label } from '@/components/ui/Label';
-import { inputCls } from '@/components/ui/Field';
+import { Button } from '@ui/Button';
+import { Card } from '@ui/Card';
+import { CheckboxRow } from '@ui/CheckboxRow';
+import { Icon } from '@ui/Icon';
+import { Label } from '@ui/Label';
+import { inputCls } from '@ui/Field';
 import { MEAL_LABELS } from '@/constants/meals';
 import type { Subscription } from '@/features/clients/types';
 

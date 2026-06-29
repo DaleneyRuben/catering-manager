@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react';
-import { Label } from '@/components/ui/Label';
+import { Label } from '@ui/Label';
 
 describe('Label', () => {
   it('renders the section variant with mono font, muted color, and bold weight', () => {

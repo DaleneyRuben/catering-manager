@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { type UseFormSetValue } from 'react-hook-form';
-import { Field, inputCls } from '@/components/ui/Field';
-import { WizardSectionCard } from '@/components/ui/WizardSectionCard';
+import { Field, inputCls } from '@ui/Field';
+import { WizardSectionCard } from '@ui/WizardSectionCard';
 import type { NewClientFormValues } from '@/features/clients/types';
 
 interface Props {

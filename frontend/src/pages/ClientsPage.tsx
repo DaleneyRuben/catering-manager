@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Icon } from '@/components/ui/Icon';
-import { Button } from '@/components/ui/Button';
-import { PageHeader } from '@/components/ui/PageHeader';
-import { Pagination } from '@/components/ui/Pagination';
+import { Icon } from '@ui/Icon';
+import { Button } from '@ui/Button';
+import { PageHeader } from '@ui/PageHeader';
+import { Pagination } from '@ui/Pagination';
 import { ClientTableSkeleton } from '@/features/clients/components/list/ClientTableSkeleton';
 import {
   ClientFilterBar,

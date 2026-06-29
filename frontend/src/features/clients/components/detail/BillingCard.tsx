@@ -1,5 +1,5 @@
-import { Card } from '@/components/ui/Card';
-import { Label } from '@/components/ui/Label';
+import { Card } from '@ui/Card';
+import { Label } from '@ui/Label';
 
 interface Props {
   nit: string | null;

@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { Icon } from '@/components/ui/Icon';
-import { Modal } from '@/components/ui/Modal';
-import { Button } from '@/components/ui/Button';
-import { MODAL_CANCEL_STYLE, MODAL_CONFIRM_STYLE } from '@/components/ui/modalButtonStyles';
+import { Icon } from '@ui/Icon';
+import { Modal } from '@ui/Modal';
+import { Button } from '@ui/Button';
+import { MODAL_CANCEL_STYLE, MODAL_CONFIRM_STYLE } from '@ui/modalButtonStyles';
 import type { Plan } from '@/features/clients/types';
 import { PlanEditorForm } from '@/features/plans/components/PlanEditorForm';
 import type { MealKey, PlanDraft } from '@/features/plans/types';

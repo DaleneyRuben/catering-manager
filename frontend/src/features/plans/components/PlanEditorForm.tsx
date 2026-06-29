@@ -1,4 +1,4 @@
-import { Field, inputCls } from '@/components/ui/Field';
+import { Field, inputCls } from '@ui/Field';
 import { MealRow } from '@/features/plans/components/MealRow';
 import type { MealKey, PlanDraft } from '@/features/plans/types';
 import { COL1, COL2 } from '@/features/plans/types';

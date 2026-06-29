@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { isAfter, parseISO, subDays } from 'date-fns';
-import { Button } from '@/components/ui/Button';
-import { Icon } from '@/components/ui/Icon';
-import { PageHeader } from '@/components/ui/PageHeader';
+import { Button } from '@ui/Button';
+import { Icon } from '@ui/Icon';
+import { PageHeader } from '@ui/PageHeader';
 import { UsersPageSkeleton } from '@/features/users/components/UsersPageSkeleton';
 import { useUsers, type AppUser } from '@/features/users/hooks/useUsers';
 import { useAuth } from '@/features/auth/AuthContext';

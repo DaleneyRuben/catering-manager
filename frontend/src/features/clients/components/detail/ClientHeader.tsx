@@ -1,7 +1,7 @@
 import { differenceInYears, format, parseISO, startOfToday } from 'date-fns';
-import { Icon } from '@/components/ui/Icon';
-import { Button } from '@/components/ui/Button';
-import { OverflowMenu } from '@/components/ui/OverflowMenu';
+import { Icon } from '@ui/Icon';
+import { Button } from '@ui/Button';
+import { OverflowMenu } from '@ui/OverflowMenu';
 import {
   STATUS_LABELS,
   STATUS_CLASSES,

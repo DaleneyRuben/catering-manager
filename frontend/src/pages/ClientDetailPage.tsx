@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { parseISO } from 'date-fns';
+import { ConfirmModal } from '@ui/ConfirmModal';
+import { Tabs } from '@ui/Tabs';
 import { remainingDeliveryDays } from '@/utils/businessDays';
 import { useClient } from '@/features/clients/hooks/useClient';
 import { CLIENT_STATUS } from '@/features/clients/constants/clientStatus';
@@ -13,8 +15,6 @@ import { ClientHistoryTab } from '@/features/clients/components/detail/ClientHis
 import { ClientPlanTab } from '@/features/clients/components/detail/ClientPlanTab';
 import { ClientHeader } from '@/features/clients/components/detail/ClientHeader';
 import { RenewalModal } from '@/features/clients/components/modals/RenewalModal';
-import { ConfirmModal } from '@/components/ui/ConfirmModal';
-import { Tabs } from '@/components/ui/Tabs';
 import { ClientDetailSkeleton } from '@/features/clients/components/detail/ClientDetailSkeleton';
 
 type TabId = 'overview' | 'plan' | 'history';

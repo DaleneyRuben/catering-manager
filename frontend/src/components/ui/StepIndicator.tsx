@@ -1,5 +1,5 @@
 import { Fragment } from 'react';
-import { Icon } from '@/components/ui/Icon';
+import { Icon } from '@ui/Icon';
 
 function stepCircleClass(isActive: boolean, isDone: boolean): string {
   if (isDone) return 'bg-olive-700 text-olive-50 border-olive-700';

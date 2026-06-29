@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react';
-import { WizardSectionCard } from '@/components/ui/WizardSectionCard';
+import { WizardSectionCard } from '@ui/WizardSectionCard';
 
 describe('WizardSectionCard', () => {
   it('renders the title, icon, and children', () => {

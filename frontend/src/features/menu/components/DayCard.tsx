@@ -1,6 +1,6 @@
 import { format, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { Icon } from '@/components/ui/Icon';
+import { Icon } from '@ui/Icon';
 import type { Menu } from '@/features/menu/types';
 import { MEAL_FIELDS } from '@/features/menu/menuFields';
 

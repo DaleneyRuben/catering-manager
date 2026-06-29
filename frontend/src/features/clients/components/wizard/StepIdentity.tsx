@@ -1,9 +1,9 @@
 import { type UseFormRegister, type FieldErrors, type Control, Controller } from 'react-hook-form';
 import { parseISO, startOfToday } from 'date-fns';
-import { Field, inputCls, selectCls } from '@/components/ui/Field';
-import { ToggleGroup } from '@/components/ui/ToggleGroup';
-import { DatePickerInput } from '@/components/ui/DatePickerInput';
-import { WizardSectionCard } from '@/components/ui/WizardSectionCard';
+import { Field, inputCls, selectCls } from '@ui/Field';
+import { ToggleGroup } from '@ui/ToggleGroup';
+import { DatePickerInput } from '@ui/DatePickerInput';
+import { WizardSectionCard } from '@ui/WizardSectionCard';
 import type { NewClientFormValues } from '@/features/clients/types';
 import { ZONES, DELIVERIES, SEX_OPTIONS } from '@/features/clients/constants/clientOptions';
 

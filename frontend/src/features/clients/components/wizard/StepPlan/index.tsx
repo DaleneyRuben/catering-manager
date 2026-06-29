@@ -6,9 +6,9 @@ import {
   Controller,
   useWatch,
 } from 'react-hook-form';
+import { CheckboxRow } from '@ui/CheckboxRow';
+import { WizardSectionCard } from '@ui/WizardSectionCard';
 import type { Plan, NewClientFormValues } from '@/features/clients/types';
-import { CheckboxRow } from '@/components/ui/CheckboxRow';
-import { WizardSectionCard } from '@/components/ui/WizardSectionCard';
 import { PlanRadioList } from '@/features/plans/components/PlanRadioList';
 import { ContractRow } from '@/features/clients/components/wizard/StepPlan/ContractRow';
 import { BillingRow } from '@/features/clients/components/wizard/StepPlan/BillingRow';

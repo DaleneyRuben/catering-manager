@@ -1,8 +1,8 @@
 import { format, isWeekend } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { Icon } from '@/components/ui/Icon';
-import { PageHeader } from '@/components/ui/PageHeader';
-import { Skeleton } from '@/components/ui/Skeleton';
+import { Icon } from '@ui/Icon';
+import { PageHeader } from '@ui/PageHeader';
+import { Skeleton } from '@ui/Skeleton';
 import { useDashboard } from '@/features/dashboard/hooks/useDashboard';
 import { formatLongDate } from '@/utils/format';
 import { KpiCard } from '@/features/dashboard/components/KpiCard';

@@ -1,4 +1,4 @@
-import { Icon } from '@/components/ui/Icon';
+import { Icon } from '@ui/Icon';
 import { DeliveryGroupCard } from '@/features/delivery/components/DeliveryGroupCard';
 import { DeliveryPersonRow } from '@/features/delivery/components/DeliveryPersonRow';
 import type { DeliveryZone } from '@/features/delivery/types';

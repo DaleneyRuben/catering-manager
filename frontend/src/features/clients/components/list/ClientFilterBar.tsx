@@ -1,4 +1,4 @@
-import { Icon } from '@/components/ui/Icon';
+import { Icon } from '@ui/Icon';
 import { CLIENT_STATUS } from '@/features/clients/constants/clientStatus';
 
 export type FilterValue = (typeof CLIENT_STATUS)[keyof typeof CLIENT_STATUS];

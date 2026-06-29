@@ -1,4 +1,4 @@
-import { Icon } from '@/components/ui/Icon';
+import { Icon } from '@ui/Icon';
 import { initials } from '@/utils/string';
 import type { DeliveryPerson } from '@/features/delivery/types';
 

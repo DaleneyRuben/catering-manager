@@ -1,5 +1,5 @@
-import { Icon } from '@/components/ui/Icon';
-import { PageHeader } from '@/components/ui/PageHeader';
+import { Icon } from '@ui/Icon';
+import { PageHeader } from '@ui/PageHeader';
 import { useHealth, type HealthReport, type ServiceCheck } from '@/features/health/hooks/useHealth';
 import { formatDateTime } from '@/utils/format';
 

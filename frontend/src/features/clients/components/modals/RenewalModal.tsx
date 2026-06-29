@@ -1,7 +1,7 @@
-import { Icon } from '@/components/ui/Icon';
-import { Modal } from '@/components/ui/Modal';
-import { Button } from '@/components/ui/Button';
-import { MODAL_CANCEL_STYLE, MODAL_CONFIRM_STYLE } from '@/components/ui/modalButtonStyles';
+import { Icon } from '@ui/Icon';
+import { Modal } from '@ui/Modal';
+import { Button } from '@ui/Button';
+import { MODAL_CANCEL_STYLE, MODAL_CONFIRM_STYLE } from '@ui/modalButtonStyles';
 import { PlanRadioList } from '@/features/plans/components/PlanRadioList';
 import { usePlans } from '@/features/plans/hooks/usePlans';
 import { formatDate } from '@/utils/format';

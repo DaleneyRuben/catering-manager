@@ -38,7 +38,9 @@ src/
 
 **Rules:**
 
-- All imports use `@/` aliases — no relative `../` paths anywhere
+- Same-directory and one-level-up imports may use relative paths (`./Foo`, `../Foo`)
+- Anything two or more levels up must use an alias — `../../` paths are never allowed
+- Two aliases are available: `@/` maps to `src/`, `@ui/` maps to `src/components/ui/`
 - No barrel `index.ts` files at feature boundaries — import directly from the file
 - `pages/` files are route orchestrators only — no business logic, no complex state
 - New domain code goes in the relevant `features/<feature>/` folder

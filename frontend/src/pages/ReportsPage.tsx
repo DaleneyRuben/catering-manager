@@ -1,4 +1,4 @@
-import { PageHeader } from '@/components/ui/PageHeader';
+import { PageHeader } from '@ui/PageHeader';
 import { DeliveryListCard } from '@/features/reports/components/DeliveryListCard';
 import { KitchenReportCard } from '@/features/reports/components/KitchenReportCard';
 import { MenuCard } from '@/features/reports/components/MenuCard';

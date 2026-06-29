@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import { PageHeader } from '@/components/ui/PageHeader';
-import { Icon } from '@/components/ui/Icon';
+import { PageHeader } from '@ui/PageHeader';
+import { Icon } from '@ui/Icon';
+import { Skeleton } from '@ui/Skeleton';
 import { useDeliveryRoute } from '@/features/delivery/hooks/useDeliveryRoute';
 import { formatLongDate } from '@/utils/format';
-import { Skeleton } from '@/components/ui/Skeleton';
 import { DeliveryZoneSection } from '@/features/delivery/components/DeliveryZoneSection';
 import type { DeliveryDayRoute } from '@/features/delivery/types';
 

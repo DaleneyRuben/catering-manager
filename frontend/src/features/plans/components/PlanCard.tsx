@@ -1,6 +1,6 @@
+import { Icon } from '@ui/Icon';
 import type { Plan } from '@/features/clients/types';
 import { MEAL_LABELS } from '@/constants/meals';
-import { Icon } from '@/components/ui/Icon';
 import { MEAL_KEYS } from '@/features/plans/types';
 import { getPlanTier, TIER_STYLES } from '@/features/plans/tiers';
 
