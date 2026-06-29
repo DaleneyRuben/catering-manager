@@ -18,9 +18,9 @@ jobs:
               -H "Authorization: Bearer $VERCEL_TOKEN" | \
               jq -r ".deployments[] | select(.meta.githubCommitRef == \"$BRANCH\") | .uid")
 
-            for UID in $UIDS; do
-              echo "Deleting $UID"
-              curl -s -X DELETE "https://api.vercel.com/v13/deployments/$UID?teamSlug=fernando-daleney-s-projects" \
+            for DEPLOYMENT_UID in $UIDS; do
+              echo "Deleting $DEPLOYMENT_UID"
+              curl -s -X DELETE "https://api.vercel.com/v13/deployments/$DEPLOYMENT_UID?teamSlug=fernando-daleney-s-projects" \
                 -H "Authorization: Bearer $VERCEL_TOKEN"
             done
           done
