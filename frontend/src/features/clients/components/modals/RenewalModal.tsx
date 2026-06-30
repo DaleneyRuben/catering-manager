@@ -142,18 +142,24 @@ export function RenewalModal({ client, sub, isReactivation, onClose, onRenew }: 
                   { v: 'undefined', l: 'Sin fecha' },
                 ] as { v: StartMode; l: string }[]
               ).map((o) => (
-                <button
+                <Button
                   key={o.v}
-                  type="button"
+                  variant="bare"
                   onClick={() => form.setStartMode(o.v)}
-                  className={`flex-1 text-center py-2 rounded-[8px] text-[12px] border-[1.5px] transition-colors ${
+                  className={`flex-1 border-[1.5px] transition-colors ${
                     form.startMode === o.v
                       ? 'font-semibold bg-olive-100 text-olive-700 border-olive-200'
                       : 'bg-white text-muted border-rule'
                   }`}
+                  style={{
+                    padding: '8px',
+                    fontSize: '12px',
+                    borderRadius: '8px',
+                    lineHeight: 'normal',
+                  }}
                 >
                   {o.l}
-                </button>
+                </Button>
               ))}
             </div>
 

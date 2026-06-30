@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Button } from '@ui/Button';
 import { PageHeader } from '@ui/PageHeader';
 import { Icon } from '@ui/Icon';
 import { Skeleton } from '@ui/Skeleton';
@@ -77,26 +78,38 @@ export function DeliveryPage() {
         <div className="flex flex-col gap-[22px]">
           <div className="flex items-center justify-between gap-[18px] flex-wrap">
             <div className="inline-flex bg-cream-2 border border-rule rounded-[11px] p-1 gap-[3px]">
-              <button
-                type="button"
+              <Button
+                variant="bare"
                 onClick={() => setDay('today')}
-                className={`inline-flex items-center gap-2 text-[13.5px] rounded-[8px] px-[18px] py-2 ${day === 'today' ? TAB_ON : TAB_OFF}`}
+                className={`gap-2 ${day === 'today' ? TAB_ON : TAB_OFF}`}
+                style={{
+                  padding: '8px 18px',
+                  fontSize: '13.5px',
+                  borderRadius: '8px',
+                  lineHeight: 'normal',
+                }}
               >
                 Hoy
                 <span className={day === 'today' ? BADGE_ON : BADGE_OFF}>
                   {entregasTotal(today)}
                 </span>
-              </button>
-              <button
-                type="button"
+              </Button>
+              <Button
+                variant="bare"
                 onClick={() => setDay('tomorrow')}
-                className={`inline-flex items-center gap-2 text-[13.5px] rounded-[8px] px-[18px] py-2 ${day === 'tomorrow' ? TAB_ON : TAB_OFF}`}
+                className={`gap-2 ${day === 'tomorrow' ? TAB_ON : TAB_OFF}`}
+                style={{
+                  padding: '8px 18px',
+                  fontSize: '13.5px',
+                  borderRadius: '8px',
+                  lineHeight: 'normal',
+                }}
               >
                 Mañana
                 <span className={day === 'tomorrow' ? BADGE_ON : BADGE_OFF}>
                   {entregasTotal(tomorrow)}
                 </span>
-              </button>
+              </Button>
             </div>
 
             <div className="flex items-center gap-4 font-mono text-[11.5px] text-muted">

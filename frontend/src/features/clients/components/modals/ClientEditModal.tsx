@@ -10,6 +10,7 @@ import { Button } from '@ui/Button';
 import { MODAL_CANCEL_STYLE, MODAL_CONFIRM_STYLE } from '@ui/modalButtonStyles';
 import { TagInput } from '@ui/TagInput';
 import { ToggleGroup } from '@ui/ToggleGroup';
+import { TogglePill } from '@ui/TogglePill';
 import { DISEASES } from '@/features/clients/constants/diseases';
 import { ZONES, DELIVERIES, SEX_OPTIONS } from '@/features/clients/constants/clientOptions';
 import type { Client } from '@/features/clients/types';
@@ -214,19 +215,14 @@ export function ClientEditModal({
               {DISEASES.map((d) => {
                 const selected = draft.underlyingDiseases.includes(d);
                 return (
-                  <button
+                  <TogglePill
                     key={d}
-                    type="button"
-                    aria-pressed={selected}
+                    pressed={selected}
                     onClick={() => toggleDisease(d)}
-                    className={`py-[6px] px-[13px] rounded-full text-[12.5px] border transition-colors ${
-                      selected
-                        ? 'font-semibold bg-olive-100 text-olive-700 border-olive-200'
-                        : 'font-medium bg-paper text-muted border-rule hover:border-olive-200'
-                    }`}
+                    className="py-[6px] px-[13px] text-[12.5px]"
                   >
                     {d}
-                  </button>
+                  </TogglePill>
                 );
               })}
             </div>

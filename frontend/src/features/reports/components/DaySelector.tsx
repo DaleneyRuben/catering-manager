@@ -1,3 +1,5 @@
+import { Button } from '@ui/Button';
+
 export type DayOption = 'today' | 'tomorrow';
 
 interface Props {
@@ -14,20 +16,26 @@ export function DaySelector({ selected, onSelect, dateLabel }: Props) {
       {OPTIONS.map((opt) => {
         const isSelected = selected === opt;
         return (
-          <button
+          <Button
             key={opt}
-            type="button"
+            variant="bare"
             onClick={() => onSelect(opt)}
             className={[
-              'flex-1 text-center py-[9px] text-[12.5px] rounded-[8px] border-[1.5px] transition-colors',
+              'flex-1 border-[1.5px] transition-colors',
               isSelected
-                ? 'bg-olive-100 text-olive-700 border-olive-200 font-semibold'
+                ? 'font-semibold bg-olive-100 text-olive-700 border-olive-200'
                 : 'bg-white text-muted border-rule',
             ].join(' ')}
+            style={{
+              padding: '9px',
+              fontSize: '12.5px',
+              borderRadius: '8px',
+              lineHeight: 'normal',
+            }}
           >
             {opt === 'today' ? 'Hoy' : 'Mañana'}{' '}
             <span className="opacity-60">({dateLabel(opt)})</span>
-          </button>
+          </Button>
         );
       })}
     </div>

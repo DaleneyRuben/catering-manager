@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { TagInput } from '@ui/TagInput';
+import { TogglePill } from '@ui/TogglePill';
 import { WizardSectionCard } from '@ui/WizardSectionCard';
 import { DISEASES } from '@/features/clients/constants/diseases';
 import type { RestrictionsState } from '@/features/clients/types';
@@ -67,19 +68,14 @@ export function StepRestrictions({ value, onChange }: Props) {
           {DISEASES.map((d) => {
             const selected = value.underlyingDiseases.includes(d);
             return (
-              <button
+              <TogglePill
                 key={d}
-                type="button"
-                aria-pressed={selected}
+                pressed={selected}
                 onClick={() => toggleDisease(d)}
-                className={`py-[7px] px-[15px] rounded-full text-[13px] border transition-colors ${
-                  selected
-                    ? 'font-semibold bg-olive-100 text-olive-700 border-olive-200'
-                    : 'font-normal bg-paper text-muted border-rule hover:border-olive-200'
-                }`}
+                className="py-[7px] px-[15px] text-[13px]"
               >
                 {d}
-              </button>
+              </TogglePill>
             );
           })}
         </div>
