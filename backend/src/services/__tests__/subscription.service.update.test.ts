@@ -176,6 +176,48 @@ describe('subscriptionService.update contract dates', () => {
     expect(mockClient.update).not.toHaveBeenCalled();
   });
 
+  it('extends contractEndDate by surviving suspended dates when duration changes', async () => {
+    const mockInstance = {
+      clientId: 1,
+      startDate: '2026-06-04',
+      duration: 20,
+      contractEndDate: addDeliveryDays(addDeliveryDays('2026-06-04', 19), 2), // base + 2 suspensions
+      suspendedDates: ['2026-06-10', '2026-06-11'],
+      update: jest.fn().mockResolvedValue({}),
+    };
+    (Subscription.findOne as jest.Mock).mockResolvedValue(mockInstance);
+
+    await subscriptionService.update(1, 1, { duration: 15 });
+
+    // base end = 2026-06-04 + 14 delivery days; then +2 for the surviving suspensions
+    const baseEnd = addDeliveryDays('2026-06-04', 14);
+    const expectedEnd = addDeliveryDays(baseEnd, 2);
+    expect(mockInstance.update).toHaveBeenCalledWith(
+      expect.objectContaining({ contractEndDate: expectedEnd }),
+    );
+  });
+
+  it('extends contractEndDate by surviving suspended dates when startDate changes', async () => {
+    const mockInstance = {
+      clientId: 1,
+      startDate: '2026-05-26',
+      duration: 20,
+      contractEndDate: addDeliveryDays(addDeliveryDays('2026-05-26', 19), 3),
+      suspendedDates: ['2026-05-27', '2026-06-10', '2026-06-11'], // 2026-05-27 will be removed
+      update: jest.fn().mockResolvedValue({}),
+    };
+    (Subscription.findOne as jest.Mock).mockResolvedValue(mockInstance);
+
+    await subscriptionService.update(1, 1, { startDate: '2026-06-01' });
+
+    // surviving suspensions: ['2026-06-10', '2026-06-11'] (2026-05-27 < new startDate)
+    const baseEnd = addDeliveryDays('2026-06-01', 19);
+    const expectedEnd = addDeliveryDays(baseEnd, 2);
+    expect(mockInstance.update).toHaveBeenCalledWith(
+      expect.objectContaining({ contractEndDate: expectedEnd }),
+    );
+  });
+
   it('does not recalculate contractEndDate when only contractDate changes', async () => {
     const originalEnd = addDeliveryDays('2026-05-26', 19);
     const mockInstance = {
