@@ -1,6 +1,6 @@
 import { Op } from 'sequelize';
 import Client from '../../models/Client';
-import deliveryGroupService from '../deliveryGroup.service';
+import deliveryGroupService from '../delivery/group.service';
 
 jest.mock('../../models/Client');
 

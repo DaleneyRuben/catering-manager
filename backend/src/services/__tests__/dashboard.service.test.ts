@@ -2,10 +2,15 @@ import sequelize from '../../database/sequelize';
 import Client from '../../models/Client';
 import Subscription from '../../models/Subscription';
 import User from '../../models/User';
-import menuService from '../menu.service';
-import dashboardService from '../dashboard.service';
+import menuService from '../menu/menu.service';
+import countsService from '../dashboard/counts.service';
+import contractEndingService from '../dashboard/contract-ending.service';
+import connectionsService from '../dashboard/connections.service';
+import birthdaysService from '../dashboard/birthdays.service';
+import menusService from '../dashboard/menus.service';
+import summaryService from '../dashboard/summary.service';
 
-jest.mock('../menu.service', () => ({
+jest.mock('../menu/menu.service', () => ({
   __esModule: true,
   default: { findByDate: jest.fn() },
 }));
@@ -39,7 +44,7 @@ describe('dashboardService.findCounts', () => {
       },
     ]);
 
-    const result = await dashboardService.findCounts();
+    const result = await countsService.findCounts();
 
     expect(result).toEqual({
       active: { today: 12, tomorrow: 15 },
@@ -59,7 +64,7 @@ describe('dashboardService.findCounts', () => {
       },
     ]);
 
-    await dashboardService.findCounts();
+    await countsService.findCounts();
 
     const [, options] = (sequelize.query as jest.Mock).mock.calls[0];
     expect(options.replacements).toEqual({ today: '2026-06-25', tomorrow: '2026-06-26' });
@@ -77,7 +82,7 @@ describe('dashboardService.findCounts', () => {
       },
     ]);
 
-    await dashboardService.findCounts();
+    await countsService.findCounts();
 
     const [, options] = (sequelize.query as jest.Mock).mock.calls[0];
     expect(options.replacements).toEqual({ today: '2026-06-29', tomorrow: '2026-06-30' });
@@ -95,7 +100,7 @@ describe('dashboardService.findCounts', () => {
       },
     ]);
 
-    await dashboardService.findCounts();
+    await countsService.findCounts();
 
     const [, options] = (sequelize.query as jest.Mock).mock.calls[0];
     expect(options.replacements).toEqual({ today: '2026-06-29', tomorrow: '2026-06-30' });
@@ -112,7 +117,7 @@ describe('dashboardService.findCounts', () => {
       },
     ]);
 
-    await dashboardService.findCounts();
+    await countsService.findCounts();
 
     const [sql] = (sequelize.query as jest.Mock).mock.calls[0];
     expect(sql).toContain('"deletedAt" IS NULL');
@@ -121,7 +126,7 @@ describe('dashboardService.findCounts', () => {
   it('propagates db errors', async () => {
     (sequelize.query as jest.Mock).mockRejectedValue(new Error('db error'));
 
-    await expect(dashboardService.findCounts()).rejects.toThrow('db error');
+    await expect(countsService.findCounts()).rejects.toThrow('db error');
   });
 });
 
@@ -142,7 +147,7 @@ describe('dashboardService.findContractEnding', () => {
         : Promise.resolve([]),
     );
 
-    const result = await dashboardService.findContractEnding();
+    const result = await contractEndingService.findContractEnding();
 
     expect(result.today).toEqual([
       { id: 1, name: 'Ana López', plan: 'Reductor', date: '2026-06-25' },
@@ -153,7 +158,7 @@ describe('dashboardService.findContractEnding', () => {
   it('queries with finalizedAt IS NULL', async () => {
     (Subscription.findAll as jest.Mock).mockResolvedValue([]);
 
-    await dashboardService.findContractEnding();
+    await contractEndingService.findContractEnding();
 
     const call = (Subscription.findAll as jest.Mock).mock.calls[0][0];
     expect(call.where.finalizedAt).toEqual({ [Symbol.for('is')]: null });
@@ -169,7 +174,7 @@ describe('dashboardService.findContractEnding', () => {
         : Promise.resolve([]),
     );
 
-    const result = await dashboardService.findContractEnding();
+    const result = await contractEndingService.findContractEnding();
 
     expect(result.today.map((p) => p.name)).toEqual(['Ana López', 'Zara Gomez']);
   });
@@ -178,7 +183,7 @@ describe('dashboardService.findContractEnding', () => {
     mockAppToday.mockReturnValueOnce('2026-06-27');
     (Subscription.findAll as jest.Mock).mockResolvedValue([]);
 
-    await dashboardService.findContractEnding();
+    await contractEndingService.findContractEnding();
 
     const dates = (Subscription.findAll as jest.Mock).mock.calls.map(
       (call) => call[0].where.contractEndDate,
@@ -204,7 +209,7 @@ describe('dashboardService.findConnections', () => {
       { username: 'Randy', lastLoginAt: new Date('2026-06-25T11:56:00Z') },
     ]);
 
-    const result = await dashboardService.findConnections();
+    const result = await connectionsService.findConnections();
 
     expect(result).toEqual([
       { username: 'Caro', lastLoginAt: '2026-06-25T11:59:00.000Z', online: true },
@@ -217,7 +222,7 @@ describe('dashboardService.findConnections', () => {
       { username: 'Randy', lastLoginAt: new Date('2026-06-25T08:14:00Z') },
     ]);
 
-    const result = await dashboardService.findConnections();
+    const result = await connectionsService.findConnections();
 
     expect(result[0].online).toBe(false);
   });
@@ -225,7 +230,7 @@ describe('dashboardService.findConnections', () => {
   it('returns an empty array when no kitchen or delivery user has logged in', async () => {
     (User.findAll as jest.Mock).mockResolvedValue([]);
 
-    const result = await dashboardService.findConnections();
+    const result = await connectionsService.findConnections();
 
     expect(result).toEqual([]);
   });
@@ -233,7 +238,7 @@ describe('dashboardService.findConnections', () => {
   it('queries only kitchen and delivery roles with a non-null lastLoginAt', async () => {
     (User.findAll as jest.Mock).mockResolvedValue([]);
 
-    await dashboardService.findConnections();
+    await connectionsService.findConnections();
 
     const call = (User.findAll as jest.Mock).mock.calls[0][0];
     expect(call.where.role).toEqual({ [Symbol.for('in')]: ['kitchen', 'delivery'] });
@@ -249,7 +254,7 @@ describe('dashboardService.findBirthdays', () => {
       { id: 1, name: 'Jorge Rengel', dateOfBirth: '1990-06-06' },
     ]);
 
-    const result = await dashboardService.findBirthdays();
+    const result = await birthdaysService.findBirthdays();
 
     expect(result).toEqual([
       { id: 1, name: 'Jorge Rengel', dateOfBirth: '1990-06-06', isToday: false },
@@ -261,7 +266,7 @@ describe('dashboardService.findBirthdays', () => {
       { id: 1, name: 'Pablo Villarroel', dateOfBirth: '1999-06-25' },
     ]);
 
-    const result = await dashboardService.findBirthdays();
+    const result = await birthdaysService.findBirthdays();
 
     expect(result[0].isToday).toBe(true);
   });
@@ -269,7 +274,7 @@ describe('dashboardService.findBirthdays', () => {
   it('filters by the current month via EXTRACT', async () => {
     (Client.findAll as jest.Mock).mockResolvedValue([]);
 
-    await dashboardService.findBirthdays();
+    await birthdaysService.findBirthdays();
 
     const call = (Client.findAll as jest.Mock).mock.calls[0][0];
     expect(call.where).toBeDefined();
@@ -278,7 +283,7 @@ describe('dashboardService.findBirthdays', () => {
   it('orders by day of month ascending', async () => {
     (Client.findAll as jest.Mock).mockResolvedValue([]);
 
-    await dashboardService.findBirthdays();
+    await birthdaysService.findBirthdays();
 
     const call = (Client.findAll as jest.Mock).mock.calls[0][0];
     expect(call.order).toBeDefined();
@@ -301,7 +306,7 @@ describe('dashboardService.findMenus', () => {
   it('marks loaded true when all 7 meal fields are filled', async () => {
     (menuService.findByDate as jest.Mock).mockResolvedValue(fullMenu);
 
-    const result = await dashboardService.findMenus();
+    const result = await menusService.findMenus();
 
     expect(result.today.loaded).toBe(true);
   });
@@ -309,7 +314,7 @@ describe('dashboardService.findMenus', () => {
   it('marks loaded false when any meal field is missing', async () => {
     (menuService.findByDate as jest.Mock).mockResolvedValue({ ...fullMenu, dinner: null });
 
-    const result = await dashboardService.findMenus();
+    const result = await menusService.findMenus();
 
     expect(result.today.loaded).toBe(false);
   });
@@ -317,7 +322,7 @@ describe('dashboardService.findMenus', () => {
   it('marks loaded false when no menu exists for the date', async () => {
     (menuService.findByDate as jest.Mock).mockResolvedValue(null);
 
-    const result = await dashboardService.findMenus();
+    const result = await menusService.findMenus();
 
     expect(result.today.loaded).toBe(false);
     expect(result.tomorrow.loaded).toBe(false);
@@ -326,7 +331,7 @@ describe('dashboardService.findMenus', () => {
   it('includes the date for each day', async () => {
     (menuService.findByDate as jest.Mock).mockResolvedValue(null);
 
-    const result = await dashboardService.findMenus();
+    const result = await menusService.findMenus();
 
     expect(result.today.date).toBe('2026-06-25');
     expect(result.tomorrow.date).toBe('2026-06-26');
@@ -336,7 +341,7 @@ describe('dashboardService.findMenus', () => {
     mockAppToday.mockReturnValueOnce('2026-06-27');
     (menuService.findByDate as jest.Mock).mockResolvedValue(null);
 
-    const result = await dashboardService.findMenus();
+    const result = await menusService.findMenus();
 
     expect(result.today.date).toBe('2026-06-29');
     expect(result.tomorrow.date).toBe('2026-06-30');
@@ -361,7 +366,7 @@ describe('dashboardService.findSummary', () => {
     (User.findAll as jest.Mock).mockResolvedValue([]);
     (menuService.findByDate as jest.Mock).mockResolvedValue(null);
 
-    const result = await dashboardService.findSummary();
+    const result = await summaryService.findSummary();
 
     expect(result).toEqual({
       active: { today: 12, tomorrow: 15 },

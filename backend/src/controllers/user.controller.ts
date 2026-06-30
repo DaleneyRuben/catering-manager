@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
-import userService from '../services/user.service';
+import userService from '../services/user/user.service';
 import { sendSuccess, sendError } from '../utils/response';
 import { decodeId } from '../utils/sqids';
 

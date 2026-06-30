@@ -1,10 +1,12 @@
 import request from 'supertest';
 import app from '../../app';
-import clientService from '../../services/client.service';
+import clientQueryService from '../../services/client/queries.service';
+import clientMutationService from '../../services/client/mutations.service';
 import { encodeId } from '../../utils/sqids';
 
-jest.mock('../../services/client.service');
-jest.mock('../../services/deliveryGroup.service', () => ({
+jest.mock('../../services/client/queries.service');
+jest.mock('../../services/client/mutations.service');
+jest.mock('../../services/delivery/group.service', () => ({
   __esModule: true,
   default: { setGroup: jest.fn() },
 }));
@@ -48,7 +50,7 @@ const validPayload = {
 
 describe('GET /api/clients', () => {
   it('returns 200 with paginated clients', async () => {
-    (clientService.findAll as jest.Mock).mockResolvedValue({ rows: [mockClient], total: 1 });
+    (clientQueryService.findAll as jest.Mock).mockResolvedValue({ rows: [mockClient], total: 1 });
 
     const res = await request(app).get('/api/clients');
 
@@ -61,65 +63,67 @@ describe('GET /api/clients', () => {
   });
 
   it('forwards page and limit to service', async () => {
-    (clientService.findAll as jest.Mock).mockResolvedValue({ rows: [], total: 0 });
+    (clientQueryService.findAll as jest.Mock).mockResolvedValue({ rows: [], total: 0 });
 
     await request(app).get('/api/clients?page=2&limit=10');
 
-    expect(clientService.findAll).toHaveBeenCalledWith(
+    expect(clientQueryService.findAll).toHaveBeenCalledWith(
       expect.objectContaining({ page: 2, limit: 10 }),
     );
   });
 
   it('defaults to page 1 and limit 25', async () => {
-    (clientService.findAll as jest.Mock).mockResolvedValue({ rows: [], total: 0 });
+    (clientQueryService.findAll as jest.Mock).mockResolvedValue({ rows: [], total: 0 });
 
     await request(app).get('/api/clients');
 
-    expect(clientService.findAll).toHaveBeenCalledWith(
+    expect(clientQueryService.findAll).toHaveBeenCalledWith(
       expect.objectContaining({ page: 1, limit: 25 }),
     );
   });
 
   it('forwards status query param to service', async () => {
-    (clientService.findAll as jest.Mock).mockResolvedValue({ rows: [], total: 0 });
+    (clientQueryService.findAll as jest.Mock).mockResolvedValue({ rows: [], total: 0 });
 
     await request(app).get('/api/clients?status=active');
 
-    expect(clientService.findAll).toHaveBeenCalledWith(
+    expect(clientQueryService.findAll).toHaveBeenCalledWith(
       expect.objectContaining({ status: 'active' }),
     );
   });
 
   it('forwards q query param to service', async () => {
-    (clientService.findAll as jest.Mock).mockResolvedValue({ rows: [], total: 0 });
+    (clientQueryService.findAll as jest.Mock).mockResolvedValue({ rows: [], total: 0 });
 
     await request(app).get('/api/clients?q=maria');
 
-    expect(clientService.findAll).toHaveBeenCalledWith(expect.objectContaining({ q: 'maria' }));
+    expect(clientQueryService.findAll).toHaveBeenCalledWith(
+      expect.objectContaining({ q: 'maria' }),
+    );
   });
 
   it('forwards restriction query param to service', async () => {
-    (clientService.findAll as jest.Mock).mockResolvedValue({ rows: [], total: 0 });
+    (clientQueryService.findAll as jest.Mock).mockResolvedValue({ rows: [], total: 0 });
 
     await request(app).get(`/api/clients?restriction=${encodeURIComponent('maní')}`);
 
-    expect(clientService.findAll).toHaveBeenCalledWith(
+    expect(clientQueryService.findAll).toHaveBeenCalledWith(
       expect.objectContaining({ restriction: 'maní' }),
     );
   });
 
   it('ignores birthMonth query param (filter has been removed)', async () => {
-    (clientService.findAll as jest.Mock).mockResolvedValue({ rows: [], total: 0 });
+    (clientQueryService.findAll as jest.Mock).mockResolvedValue({ rows: [], total: 0 });
 
     await request(app).get('/api/clients?birthMonth=3');
 
-    expect(clientService.findAll).toHaveBeenCalledWith(
+    expect(clientQueryService.findAll).toHaveBeenCalledWith(
       expect.not.objectContaining({ birthMonth: expect.anything() }),
     );
   });
 
   it('returns 500 when service throws', async () => {
-    (clientService.findAll as jest.Mock).mockRejectedValue(new Error('db error'));
+    (clientQueryService.findAll as jest.Mock).mockRejectedValue(new Error('db error'));
 
     const res = await request(app).get('/api/clients');
 
@@ -129,7 +133,7 @@ describe('GET /api/clients', () => {
 
 describe('GET /api/clients/:id', () => {
   it('returns 200 with client when found', async () => {
-    (clientService.findById as jest.Mock).mockResolvedValue(mockClient);
+    (clientQueryService.findById as jest.Mock).mockResolvedValue(mockClient);
 
     const res = await request(app).get(`/api/clients/${id1}`);
 
@@ -138,7 +142,7 @@ describe('GET /api/clients/:id', () => {
   });
 
   it('returns 404 when client not found', async () => {
-    (clientService.findById as jest.Mock).mockResolvedValue(null);
+    (clientQueryService.findById as jest.Mock).mockResolvedValue(null);
 
     const res = await request(app).get(`/api/clients/${id999}`);
 
@@ -146,7 +150,7 @@ describe('GET /api/clients/:id', () => {
   });
 
   it('returns 500 when service throws', async () => {
-    (clientService.findById as jest.Mock).mockRejectedValue(new Error('db error'));
+    (clientQueryService.findById as jest.Mock).mockRejectedValue(new Error('db error'));
 
     const res = await request(app).get(`/api/clients/${id1}`);
 
@@ -157,7 +161,7 @@ describe('GET /api/clients/:id', () => {
 describe('PATCH /api/clients/:id', () => {
   it('returns 200 when setting pausedSince', async () => {
     const pausedSince = '2026-06-10T12:00:00Z';
-    (clientService.update as jest.Mock).mockResolvedValue({ ...mockClient, pausedSince });
+    (clientMutationService.update as jest.Mock).mockResolvedValue({ ...mockClient, pausedSince });
 
     const res = await request(app).patch(`/api/clients/${id1}`).send({ pausedSince });
 
@@ -166,7 +170,7 @@ describe('PATCH /api/clients/:id', () => {
   });
 
   it('returns 200 when updating identity fields', async () => {
-    (clientService.update as jest.Mock).mockResolvedValue({
+    (clientMutationService.update as jest.Mock).mockResolvedValue({
       ...mockClient,
       name: 'Jane Doe',
       phoneNumber: '+9876543210',
@@ -193,7 +197,7 @@ describe('PATCH /api/clients/:id', () => {
   });
 
   it('returns 404 when client not found', async () => {
-    (clientService.update as jest.Mock).mockResolvedValue(null);
+    (clientMutationService.update as jest.Mock).mockResolvedValue(null);
 
     const res = await request(app).patch(`/api/clients/${id999}`).send({ name: 'Jane' });
 
@@ -207,7 +211,7 @@ describe('PATCH /api/clients/:id', () => {
   });
 
   it('returns 500 when service throws', async () => {
-    (clientService.update as jest.Mock).mockRejectedValue(new Error('db error'));
+    (clientMutationService.update as jest.Mock).mockRejectedValue(new Error('db error'));
 
     const res = await request(app).patch(`/api/clients/${id1}`).send({ name: 'Jane' });
 
@@ -217,7 +221,7 @@ describe('PATCH /api/clients/:id', () => {
 
 describe('POST /api/clients', () => {
   it('returns 201 with created client', async () => {
-    (clientService.create as jest.Mock).mockResolvedValue(mockClient);
+    (clientMutationService.create as jest.Mock).mockResolvedValue(mockClient);
 
     const res = await request(app).post('/api/clients').send(validPayload);
 
@@ -266,7 +270,7 @@ describe('POST /api/clients', () => {
   });
 
   it('returns 500 when service throws', async () => {
-    (clientService.create as jest.Mock).mockRejectedValue(new Error('db error'));
+    (clientMutationService.create as jest.Mock).mockRejectedValue(new Error('db error'));
 
     const res = await request(app).post('/api/clients').send(validPayload);
 
@@ -276,7 +280,7 @@ describe('POST /api/clients', () => {
 
 describe('POST /api/clients/:id/finalize', () => {
   it('returns 200 when client is finalized', async () => {
-    (clientService.finalize as jest.Mock).mockResolvedValue({});
+    (clientMutationService.finalize as jest.Mock).mockResolvedValue({});
 
     const res = await request(app).post(`/api/clients/${id1}/finalize`);
 
@@ -284,7 +288,7 @@ describe('POST /api/clients/:id/finalize', () => {
   });
 
   it('returns 404 when client not found', async () => {
-    (clientService.finalize as jest.Mock).mockResolvedValue(null);
+    (clientMutationService.finalize as jest.Mock).mockResolvedValue(null);
 
     const res = await request(app).post(`/api/clients/${id999}/finalize`);
 
@@ -292,7 +296,7 @@ describe('POST /api/clients/:id/finalize', () => {
   });
 
   it('returns 500 when service throws', async () => {
-    (clientService.finalize as jest.Mock).mockRejectedValue(new Error('db error'));
+    (clientMutationService.finalize as jest.Mock).mockRejectedValue(new Error('db error'));
 
     const res = await request(app).post(`/api/clients/${id1}/finalize`);
 
@@ -302,7 +306,7 @@ describe('POST /api/clients/:id/finalize', () => {
 
 describe('DELETE /api/clients/:id', () => {
   it('returns 200 when client is soft-deleted', async () => {
-    (clientService.softDelete as jest.Mock).mockResolvedValue({});
+    (clientMutationService.softDelete as jest.Mock).mockResolvedValue({});
 
     const res = await request(app).delete(`/api/clients/${id1}`);
 
@@ -310,7 +314,7 @@ describe('DELETE /api/clients/:id', () => {
   });
 
   it('returns 404 when client not found', async () => {
-    (clientService.softDelete as jest.Mock).mockResolvedValue(null);
+    (clientMutationService.softDelete as jest.Mock).mockResolvedValue(null);
 
     const res = await request(app).delete(`/api/clients/${id999}`);
 
@@ -318,7 +322,7 @@ describe('DELETE /api/clients/:id', () => {
   });
 
   it('returns 500 when service throws', async () => {
-    (clientService.softDelete as jest.Mock).mockRejectedValue(new Error('db error'));
+    (clientMutationService.softDelete as jest.Mock).mockRejectedValue(new Error('db error'));
 
     const res = await request(app).delete(`/api/clients/${id1}`);
 
@@ -328,7 +332,7 @@ describe('DELETE /api/clients/:id', () => {
 
 describe('PUT /api/clients/:id/group', () => {
   it('returns 200 with updated client after setting group members', async () => {
-    (clientService.findById as jest.Mock).mockResolvedValue({
+    (clientQueryService.findById as jest.Mock).mockResolvedValue({
       id: 1,
       name: 'John',
       groupMembers: [{ id: 2, name: 'Ana' }],
@@ -343,7 +347,7 @@ describe('PUT /api/clients/:id/group', () => {
   });
 
   it('returns 200 with empty groupMembers when memberIds is empty', async () => {
-    (clientService.findById as jest.Mock).mockResolvedValue({
+    (clientQueryService.findById as jest.Mock).mockResolvedValue({
       id: 1,
       name: 'John',
       groupMembers: [],
@@ -361,7 +365,7 @@ describe('PUT /api/clients/:id/group', () => {
   });
 
   it('returns 404 when client is not found', async () => {
-    (clientService.findById as jest.Mock).mockResolvedValue(null);
+    (clientQueryService.findById as jest.Mock).mockResolvedValue(null);
 
     const res = await request(app).put(`/api/clients/${id999}/group`).send({ memberIds: [] });
 

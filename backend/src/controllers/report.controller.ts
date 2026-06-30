@@ -3,8 +3,8 @@ import ExcelJS from 'exceljs';
 import { parse, format, isValid, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { checkIsWeekend } from '../utils/devFlags';
-import menuService from '../services/menu.service';
-import reportService from '../services/report.service';
+import menuService from '../services/menu/menu.service';
+import reportService from '../services/report/report.service';
 import { buildMenu, menuFileName } from '../utils/menuBuilder';
 import { buildKitchenReport, kitchenReportFileName } from '../utils/kitchenReportBuilder';
 

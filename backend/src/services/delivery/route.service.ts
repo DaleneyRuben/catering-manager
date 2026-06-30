@@ -1,8 +1,8 @@
 import { parseISO } from 'date-fns';
-import Client from '../models/Client';
-import { appToday, addCalendarDays } from '../utils/date';
-import { checkIsWeekend } from '../utils/devFlags';
-import { findActiveSubscriptionsForDate } from './subscriptionQueries';
+import Client from '../../models/Client';
+import { appToday, addCalendarDays } from '../../utils/date';
+import { checkIsWeekend } from '../../utils/devFlags';
+import { findActiveSubscriptionsForDate } from '../subscription/queries.service';
 
 // Display order for the Entregas page — Sur first, matching the route layout, not the
 // alphabetical order used for client-facing zone dropdowns elsewhere in the app.
@@ -49,7 +49,7 @@ const toPerson = (c: DeliveryClientRow): DeliveryPerson => ({
 });
 
 // Groups always belong to a single zone, so clustering per-zone first is safe.
-const buildZones = (clients: DeliveryClientRow[]): DeliveryZoneRoute[] =>
+export const buildZones = (clients: DeliveryClientRow[]): DeliveryZoneRoute[] =>
   ZONE_ORDER.map((zone) => {
     const inZone = clients.filter((c) => c.deliveryZone === zone);
 

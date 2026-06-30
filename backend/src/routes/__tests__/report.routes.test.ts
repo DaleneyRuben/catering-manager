@@ -1,12 +1,12 @@
 import request from 'supertest';
 import app from '../../app';
-import authService from '../../services/auth.service';
+import { verifyToken } from '../../services/auth/token.service';
 import { ROLES } from '../../constants/roles';
 
-jest.mock('../../services/auth.service');
+jest.mock('../../services/auth/token.service');
 jest.mock('../../database/sequelize', () => ({ __esModule: true, default: { query: jest.fn() } }));
 
-const mockVerifyToken = authService.verifyToken as jest.Mock;
+const mockVerifyToken = verifyToken as jest.Mock;
 
 const headersForRole = (role: string) => {
   mockVerifyToken.mockReturnValue({ userId: 1, role });

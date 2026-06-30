@@ -1,6 +1,6 @@
 import { Op } from 'sequelize';
 import Menu from '../../models/Menu';
-import menuService from '../menu.service';
+import menuService from '../menu/menu.service';
 
 jest.mock('../../models/Menu');
 jest.mock('../../utils/date', () => ({

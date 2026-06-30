@@ -1,11 +1,12 @@
 import { NextFunction, Request, Response } from 'express';
-import planService from '../services/plan.service';
+import planQueryService from '../services/plan/queries.service';
+import planMutationService from '../services/plan/mutations.service';
 import { sendSuccess, sendError } from '../utils/response';
 import { decodeId } from '../utils/sqids';
 
 const getAll = async (_req: Request, res: Response, next: NextFunction) => {
   try {
-    const plans = await planService.findAll();
+    const plans = await planQueryService.findAll();
     sendSuccess(res, plans);
   } catch (err) {
     next(err);
@@ -14,7 +15,7 @@ const getAll = async (_req: Request, res: Response, next: NextFunction) => {
 
 const getById = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const plan = await planService.findById(decodeId(req.params.id));
+    const plan = await planQueryService.findById(decodeId(req.params.id));
     if (!plan) {
       sendError(res, 'Plan not found', 404);
       return;
@@ -27,7 +28,7 @@ const getById = async (req: Request, res: Response, next: NextFunction) => {
 
 const create = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const plan = await planService.create(req.body);
+    const plan = await planMutationService.create(req.body);
     sendSuccess(res, plan, 201);
   } catch (err) {
     next(err);
@@ -36,7 +37,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
 
 const update = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const plan = await planService.update(decodeId(req.params.id), req.body);
+    const plan = await planMutationService.update(decodeId(req.params.id), req.body);
     if (!plan) {
       sendError(res, 'Plan not found', 404);
       return;
@@ -49,7 +50,7 @@ const update = async (req: Request, res: Response, next: NextFunction) => {
 
 const remove = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const deleted = await planService.remove(decodeId(req.params.id));
+    const deleted = await planMutationService.remove(decodeId(req.params.id));
     if (!deleted) {
       sendError(res, 'Plan not found', 404);
       return;
@@ -62,7 +63,7 @@ const remove = async (req: Request, res: Response, next: NextFunction) => {
 
 const getClientCounts = async (_req: Request, res: Response, next: NextFunction) => {
   try {
-    const counts = await planService.getClientCounts();
+    const counts = await planQueryService.getClientCounts();
     sendSuccess(res, counts);
   } catch (err) {
     next(err);

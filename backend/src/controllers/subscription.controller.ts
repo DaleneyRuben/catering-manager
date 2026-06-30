@@ -1,11 +1,15 @@
 import { NextFunction, Request, Response } from 'express';
-import subscriptionService from '../services/subscription.service';
+import subscriptionCreateService from '../services/subscription/create.service';
+import subscriptionUpdateService from '../services/subscription/update.service';
 import { sendSuccess, sendError } from '../utils/response';
 import { decodeId } from '../utils/sqids';
 
 const create = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const subscription = await subscriptionService.create(decodeId(req.params.clientId), req.body);
+    const subscription = await subscriptionCreateService.create(
+      decodeId(req.params.clientId),
+      req.body,
+    );
     if (!subscription) {
       sendError(res, 'Client not found', 404);
       return;
@@ -18,7 +22,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
 
 const update = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const subscription = await subscriptionService.update(
+    const subscription = await subscriptionUpdateService.update(
       decodeId(req.params.clientId),
       decodeId(req.params.id),
       req.body,

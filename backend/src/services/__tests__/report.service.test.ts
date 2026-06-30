@@ -1,7 +1,7 @@
 import Client from '../../models/Client';
 import Plan from '../../models/Plan';
 import Subscription from '../../models/Subscription';
-import reportService from '../report.service';
+import reportService from '../report/report.service';
 
 jest.mock('../../models/Client');
 jest.mock('../../models/Plan');

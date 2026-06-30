@@ -1,6 +1,6 @@
 import { Op } from 'sequelize';
 import { randomUUID } from 'crypto';
-import Client from '../models/Client';
+import Client from '../../models/Client';
 
 const setGroup = async (clientId: number, memberIds: number[]): Promise<void> => {
   const client = await Client.findByPk(clientId);

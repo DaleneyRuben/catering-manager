@@ -1,7 +1,7 @@
 import Subscription from '../../models/Subscription';
 import Client from '../../models/Client';
 import ClientHistory from '../../models/ClientHistory';
-import subscriptionService from '../subscription.service';
+import subscriptionService from '../subscription/update.service';
 import { addDeliveryDays } from '../../utils/date';
 
 jest.mock('../../models/Subscription');

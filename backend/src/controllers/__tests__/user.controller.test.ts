@@ -1,10 +1,10 @@
 import request from 'supertest';
 import app from '../../app';
-import userService from '../../services/user.service';
+import userService from '../../services/user/user.service';
 import { encodeId } from '../../utils/sqids';
 import { ROLES } from '../../constants/roles';
 
-jest.mock('../../services/user.service');
+jest.mock('../../services/user/user.service');
 jest.mock('../../database/sequelize', () => ({ __esModule: true, default: { query: jest.fn() } }));
 jest.mock('../../middleware/auth', () => ({
   requireAuth: (_req: unknown, _res: unknown, next: () => void) => next(),

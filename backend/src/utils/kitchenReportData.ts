@@ -1,6 +1,6 @@
 import { format, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
-import type { ActiveClientRow } from '../services/report.service';
+import type { ActiveClientRow } from '../services/report/report.service';
 
 export type MenuData = {
   breakfast: string | null;

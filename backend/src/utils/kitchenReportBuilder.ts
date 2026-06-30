@@ -13,7 +13,7 @@ import {
   BorderStyle,
   AlignmentType,
 } from 'docx';
-import type { ActiveClientRow } from '../services/report.service';
+import type { ActiveClientRow } from '../services/report/report.service';
 import {
   type MenuData,
   type MealConfig,

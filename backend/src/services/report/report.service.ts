@@ -1,6 +1,6 @@
-import Client from '../models/Client';
-import Plan from '../models/Plan';
-import { findActiveSubscriptionsForDate } from './subscriptionQueries';
+import Client from '../../models/Client';
+import Plan from '../../models/Plan';
+import { findActiveSubscriptionsForDate } from '../subscription/queries.service';
 
 const findDeliveryClientsForDate = async (date: string): Promise<string[]> => {
   const subscriptions = await findActiveSubscriptionsForDate(date);

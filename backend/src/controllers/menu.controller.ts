@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
-import menuService from '../services/menu.service';
+import menuService from '../services/menu/menu.service';
 import { sendError, sendSuccess } from '../utils/response';
 
 const getAll = async (_req: Request, res: Response, next: NextFunction) => {

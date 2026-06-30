@@ -1,7 +1,7 @@
 import { Op } from 'sequelize';
-import Menu from '../models/Menu';
-import { UpsertMenuDto } from '../schemas/menu.schema';
-import { getCurrentMenuWeek } from '../utils/date';
+import Menu from '../../models/Menu';
+import { UpsertMenuDto } from '../../schemas/menu.schema';
+import { getCurrentMenuWeek } from '../../utils/date';
 
 const pruneOutsideWeek = async (): Promise<void> => {
   const { start, end } = getCurrentMenuWeek();

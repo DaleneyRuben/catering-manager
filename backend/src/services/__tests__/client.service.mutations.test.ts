@@ -1,6 +1,6 @@
 import Client from '../../models/Client';
 import ClientHistory from '../../models/ClientHistory';
-import clientService from '../client.service';
+import clientService from '../client/mutations.service';
 
 jest.mock('../../models/Client');
 jest.mock('../../models/ClientHistory');
@@ -13,7 +13,7 @@ jest.mock('../../utils/date', () => ({
   ...jest.requireActual('../../utils/date'),
   appToday: jest.fn(() => '2026-06-05'),
 }));
-jest.mock('../deliveryGroup.service', () => ({
+jest.mock('../delivery/group.service', () => ({
   __esModule: true,
   default: { findMembers: jest.fn() },
 }));

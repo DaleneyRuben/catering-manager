@@ -1,8 +1,8 @@
 import request from 'supertest';
 import app from '../../app';
-import menuService from '../../services/menu.service';
+import menuService from '../../services/menu/menu.service';
 
-jest.mock('../../services/menu.service');
+jest.mock('../../services/menu/menu.service');
 jest.mock('../../database/sequelize', () => ({ __esModule: true, default: { query: jest.fn() } }));
 jest.mock('../../middleware/auth', () => ({
   requireAuth: (_req: unknown, _res: unknown, next: () => void) => next(),

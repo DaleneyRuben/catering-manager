@@ -1,31 +1,14 @@
 import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
-import User, { type UserRole } from '../models/User';
-import { encodeId } from '../utils/sqids';
+import User, { type UserRole } from '../../models/User';
+import { encodeId } from '../../utils/sqids';
+import { signToken } from './token.service';
 
 const SALT_ROUNDS = 10;
-const JWT_EXPIRY = '8h';
-
-const getSecret = (): string => {
-  const secret = process.env.JWT_SECRET;
-  if (!secret) throw new Error('JWT_SECRET is not set');
-  return secret;
-};
-
-export type TokenPayload = {
-  userId: number;
-  role: UserRole;
-};
 
 const hashPassword = (plain: string): Promise<string> => bcrypt.hash(plain, SALT_ROUNDS);
 
 const verifyPassword = (plain: string, hash: string): Promise<boolean> =>
   bcrypt.compare(plain, hash);
-
-const signToken = (payload: TokenPayload): string =>
-  jwt.sign(payload, getSecret(), { expiresIn: JWT_EXPIRY });
-
-const verifyToken = (token: string): TokenPayload => jwt.verify(token, getSecret()) as TokenPayload;
 
 const login = async (
   username: string,
@@ -51,4 +34,4 @@ const createUser = async (username: string, password: string, role: UserRole): P
   return User.create({ username, password: hashed, role });
 };
 
-export default { login, createUser, verifyToken };
+export default { login, createUser };

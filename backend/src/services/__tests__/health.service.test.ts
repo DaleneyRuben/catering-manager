@@ -1,5 +1,5 @@
 import sequelize from '../../database/sequelize';
-import healthService from '../health.service';
+import healthService from '../health/health.service';
 
 jest.mock('../../database/sequelize', () => ({
   __esModule: true,

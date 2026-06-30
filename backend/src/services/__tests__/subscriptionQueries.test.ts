@@ -1,7 +1,7 @@
 import Client from '../../models/Client';
 import Plan from '../../models/Plan';
 import Subscription from '../../models/Subscription';
-import { findActiveSubscriptionsForDate } from '../subscriptionQueries';
+import { findActiveSubscriptionsForDate } from '../subscription/queries.service';
 
 jest.mock('../../models/Client');
 jest.mock('../../models/Plan');

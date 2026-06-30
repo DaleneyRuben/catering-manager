@@ -1,6 +1,6 @@
 import bcrypt from 'bcrypt';
-import User from '../models/User';
-import type { CreateUserDto, UpdateUserDto } from '../schemas/user.schema';
+import User from '../../models/User';
+import type { CreateUserDto, UpdateUserDto } from '../../schemas/user.schema';
 
 const SALT_ROUNDS = 10;
 

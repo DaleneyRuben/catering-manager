@@ -1,7 +1,7 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import User from '../../models/User';
-import authService from '../auth.service';
+import authService from '../auth/auth.service';
 import { encodeId } from '../../utils/sqids';
 import { ROLES } from '../../constants/roles';
 
@@ -78,31 +78,5 @@ describe('authService.createUser', () => {
       password: '$2b$10$hashed',
       role: ROLES.ADMIN,
     });
-  });
-});
-
-describe('authService.verifyToken', () => {
-  it('returns payload for valid token', () => {
-    const payload = { userId: 1, role: ROLES.KITCHEN };
-    (jwt.verify as jest.Mock).mockReturnValue(payload);
-
-    const result = authService.verifyToken('valid-token');
-
-    expect(result).toEqual(payload);
-    expect(jwt.verify).toHaveBeenCalledWith('valid-token', 'test-secret');
-  });
-
-  it('throws when token is invalid', () => {
-    (jwt.verify as jest.Mock).mockImplementation(() => {
-      throw new Error('invalid signature');
-    });
-
-    expect(() => authService.verifyToken('bad-token')).toThrow('invalid signature');
-  });
-
-  it('throws when JWT_SECRET is not set', () => {
-    delete process.env.JWT_SECRET;
-
-    expect(() => authService.verifyToken('any-token')).toThrow('JWT_SECRET is not set');
   });
 });
