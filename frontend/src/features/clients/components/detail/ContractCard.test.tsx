@@ -57,6 +57,20 @@ it('calls onUpdateContract with correct values on save', async () => {
   );
 });
 
+it('preview end date includes suspended days offset', () => {
+  const subWithSuspensions: Subscription = {
+    ...sub,
+    suspendedDates: ['2026-01-10', '2026-01-11'], // 2 suspensions
+  };
+  render(
+    <ContractCard sub={subWithSuspensions} remaining={25} onUpdateContract={onUpdateContract} />,
+  );
+  fireEvent.click(screen.getByRole('button', { name: /editar/i }));
+
+  // addBusinessDays('2026-01-05', 40 - 1 + 2) = addBusinessDays('2026-01-05', 41) = 2026-03-03
+  expect(screen.getByText('03/03/2026')).toBeInTheDocument();
+});
+
 it('cancels edit without saving', () => {
   render(<ContractCard sub={sub} remaining={25} onUpdateContract={onUpdateContract} />);
   fireEvent.click(screen.getByRole('button', { name: /editar/i }));
