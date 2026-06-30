@@ -100,10 +100,10 @@ export function ClientFilterBar({
               key={v}
               variant="bare"
               onClick={() => onFilterChange(v)}
-              className={`whitespace-nowrap transition-all ${
+              className={`font-semibold whitespace-nowrap transition-all ${
                 filter === v
-                  ? 'font-semibold bg-olive-100 text-olive-700'
-                  : 'font-normal text-muted hover:bg-cream-2 hover:text-ink-2'
+                  ? 'bg-olive-100 text-olive-700'
+                  : 'text-muted hover:bg-cream-2 hover:text-ink-2'
               }`}
               style={{
                 padding: '6px 14px',
