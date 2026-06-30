@@ -1,11 +1,9 @@
 import request from 'supertest';
 import app from '../../app';
-import subscriptionCreateService from '../../services/subscription/create.service';
-import subscriptionUpdateService from '../../services/subscription/update.service';
+import * as subscriptionService from '../../services/subscription';
 import { encodeId } from '../../utils/sqids';
 
-jest.mock('../../services/subscription/create.service');
-jest.mock('../../services/subscription/update.service');
+jest.mock('../../services/subscription');
 jest.mock('../../database/sequelize', () => ({ __esModule: true, default: { query: jest.fn() } }));
 jest.mock('../../middleware/auth', () => ({
   requireAuth: (_req: unknown, _res: unknown, next: () => void) => next(),
@@ -34,7 +32,7 @@ const validPayload = {
 
 describe('POST /api/clients/:clientId/subscriptions', () => {
   it('returns 201 with created subscription', async () => {
-    (subscriptionCreateService.create as jest.Mock).mockResolvedValue(mockSubscription);
+    (subscriptionService.create as jest.Mock).mockResolvedValue(mockSubscription);
 
     const res = await request(app).post(`/api/clients/${id1}/subscriptions`).send(validPayload);
 
@@ -43,7 +41,7 @@ describe('POST /api/clients/:clientId/subscriptions', () => {
   });
 
   it('returns 404 when client does not exist', async () => {
-    (subscriptionCreateService.create as jest.Mock).mockResolvedValue(null);
+    (subscriptionService.create as jest.Mock).mockResolvedValue(null);
 
     const res = await request(app).post(`/api/clients/${id999}/subscriptions`).send(validPayload);
 
@@ -67,7 +65,7 @@ describe('POST /api/clients/:clientId/subscriptions', () => {
   });
 
   it('accepts a past contractDate', async () => {
-    (subscriptionCreateService.create as jest.Mock).mockResolvedValue({
+    (subscriptionService.create as jest.Mock).mockResolvedValue({
       id: 1,
       clientId: 1,
       planId: 2,
@@ -97,7 +95,7 @@ describe('POST /api/clients/:clientId/subscriptions', () => {
   });
 
   it('accepts a weekday startDate', async () => {
-    (subscriptionCreateService.create as jest.Mock).mockResolvedValue({
+    (subscriptionService.create as jest.Mock).mockResolvedValue({
       id: 1,
       clientId: 1,
       planId: 2,
@@ -111,7 +109,7 @@ describe('POST /api/clients/:clientId/subscriptions', () => {
   });
 
   it('returns 500 when service throws', async () => {
-    (subscriptionCreateService.create as jest.Mock).mockRejectedValue(new Error('db error'));
+    (subscriptionService.create as jest.Mock).mockRejectedValue(new Error('db error'));
 
     const res = await request(app).post(`/api/clients/${id1}/subscriptions`).send(validPayload);
 
@@ -122,7 +120,7 @@ describe('POST /api/clients/:clientId/subscriptions', () => {
 describe('PATCH /api/clients/:clientId/subscriptions/:id', () => {
   it('returns 200 with updated subscription', async () => {
     const updated = { ...mockSubscription, contractEndDate: '2026-06-30' };
-    (subscriptionUpdateService.update as jest.Mock).mockResolvedValue(updated);
+    (subscriptionService.update as jest.Mock).mockResolvedValue(updated);
 
     const res = await request(app)
       .patch(`/api/clients/${id1}/subscriptions/${id1}`)
@@ -133,7 +131,7 @@ describe('PATCH /api/clients/:clientId/subscriptions/:id', () => {
   });
 
   it('returns 404 when subscription not found', async () => {
-    (subscriptionUpdateService.update as jest.Mock).mockResolvedValue(null);
+    (subscriptionService.update as jest.Mock).mockResolvedValue(null);
 
     const res = await request(app)
       .patch(`/api/clients/${id1}/subscriptions/${id999}`)
@@ -159,7 +157,7 @@ describe('PATCH /api/clients/:clientId/subscriptions/:id', () => {
   });
 
   it('returns 500 when service throws', async () => {
-    (subscriptionUpdateService.update as jest.Mock).mockRejectedValue(new Error('db error'));
+    (subscriptionService.update as jest.Mock).mockRejectedValue(new Error('db error'));
 
     const res = await request(app)
       .patch(`/api/clients/${id1}/subscriptions/${id1}`)
@@ -172,14 +170,14 @@ describe('PATCH /api/clients/:clientId/subscriptions/:id', () => {
 describe('PATCH /api/clients/:clientId/subscriptions/:id with suspendedDates', () => {
   it('returns 200 when suspendedDates is updated', async () => {
     const updated = { ...mockSubscription, suspendedDates: ['2026-06-10'] };
-    (subscriptionUpdateService.update as jest.Mock).mockResolvedValue(updated);
+    (subscriptionService.update as jest.Mock).mockResolvedValue(updated);
 
     const res = await request(app)
       .patch(`/api/clients/${id1}/subscriptions/${id1}`)
       .send({ suspendedDates: ['2026-06-10'] });
 
     expect(res.status).toBe(200);
-    expect(subscriptionUpdateService.update).toHaveBeenCalledWith(
+    expect(subscriptionService.update).toHaveBeenCalledWith(
       1,
       1,
       expect.objectContaining({ suspendedDates: ['2026-06-10'] }),
@@ -198,14 +196,14 @@ describe('PATCH /api/clients/:clientId/subscriptions/:id with suspendedDates', (
 describe('PATCH /api/clients/:clientId/subscriptions/:id with specialInstructions', () => {
   it('passes specialInstructions to the service', async () => {
     const updated = { ...mockSubscription, specialInstructions: { salad: 'DAR GRANDES' } };
-    (subscriptionUpdateService.update as jest.Mock).mockResolvedValue(updated);
+    (subscriptionService.update as jest.Mock).mockResolvedValue(updated);
 
     const res = await request(app)
       .patch(`/api/clients/${id1}/subscriptions/${id1}`)
       .send({ specialInstructions: { salad: 'DAR GRANDES' } });
 
     expect(res.status).toBe(200);
-    expect(subscriptionUpdateService.update).toHaveBeenCalledWith(
+    expect(subscriptionService.update).toHaveBeenCalledWith(
       1,
       1,
       expect.objectContaining({ specialInstructions: { salad: 'DAR GRANDES' } }),
@@ -214,14 +212,14 @@ describe('PATCH /api/clients/:clientId/subscriptions/:id with specialInstruction
 
   it('passes empty object to clear all instructions', async () => {
     const updated = { ...mockSubscription, specialInstructions: {} };
-    (subscriptionUpdateService.update as jest.Mock).mockResolvedValue(updated);
+    (subscriptionService.update as jest.Mock).mockResolvedValue(updated);
 
     const res = await request(app)
       .patch(`/api/clients/${id1}/subscriptions/${id1}`)
       .send({ specialInstructions: {} });
 
     expect(res.status).toBe(200);
-    expect(subscriptionUpdateService.update).toHaveBeenCalledWith(
+    expect(subscriptionService.update).toHaveBeenCalledWith(
       1,
       1,
       expect.objectContaining({ specialInstructions: {} }),

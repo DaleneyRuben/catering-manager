@@ -3,8 +3,8 @@ import ExcelJS from 'exceljs';
 import { parse, format, isValid, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { checkIsWeekend } from '../utils/devFlags';
-import menuService from '../services/menu/menu.service';
-import reportService from '../services/report/report.service';
+import { findByDate as menuFindByDate } from '../services/menu';
+import { findDeliveryClientsForDate, findActiveClientsWithPlansForDate } from '../services/report';
 import { buildMenu, menuFileName } from '../utils/menuBuilder';
 import { buildKitchenReport, kitchenReportFileName } from '../utils/kitchenReportBuilder';
 
@@ -37,7 +37,7 @@ const downloadActiveClients = async (req: Request, res: Response, next: NextFunc
       return;
     }
 
-    const names = await reportService.findDeliveryClientsForDate(iso);
+    const names = await findDeliveryClientsForDate(iso);
 
     const workbook = new ExcelJS.Workbook();
     const sheet = workbook.addWorksheet('Clientes');
@@ -78,7 +78,7 @@ const exportMenu = async (req: Request, res: Response, next: NextFunction) => {
       return;
     }
 
-    const menu = await menuService.findByDate(date);
+    const menu = await menuFindByDate(date);
     if (!menu) {
       res.status(404).json({ error: 'No menu found for this date' });
       return;
@@ -116,8 +116,8 @@ const exportKitchenReport = async (req: Request, res: Response, next: NextFuncti
     }
 
     const [menu, clients] = await Promise.all([
-      menuService.findByDate(date),
-      reportService.findActiveClientsWithPlansForDate(date),
+      menuFindByDate(date),
+      findActiveClientsWithPlansForDate(date),
     ]);
 
     if (!menu) {

@@ -1,8 +1,8 @@
 import request from 'supertest';
 import app from '../../app';
-import authService from '../../services/auth/auth.service';
+import * as authService from '../../services/auth';
 
-jest.mock('../../services/auth/auth.service');
+jest.mock('../../services/auth');
 jest.mock('../../database/sequelize', () => ({ __esModule: true, default: { query: jest.fn() } }));
 
 const mockLogin = authService.login as jest.Mock;

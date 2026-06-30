@@ -1,9 +1,9 @@
 import { Request, Response, NextFunction } from 'express';
 import { requireAuth, requireRole } from '../auth';
-import { verifyToken } from '../../services/auth/token.service';
+import { verifyToken } from '../../services/auth';
 import { ROLES } from '../../constants/roles';
 
-jest.mock('../../services/auth/token.service');
+jest.mock('../../services/auth');
 
 const mockVerifyToken = verifyToken as jest.Mock;
 

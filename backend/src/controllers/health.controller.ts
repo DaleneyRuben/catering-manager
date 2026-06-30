@@ -1,10 +1,10 @@
 import { NextFunction, Request, Response } from 'express';
-import healthService from '../services/health/health.service';
+import { getReport as healthGetReport } from '../services/health';
 import { sendSuccess } from '../utils/response';
 
 const getStatus = async (_req: Request, res: Response, next: NextFunction) => {
   try {
-    const report = await healthService.getReport();
+    const report = await healthGetReport();
     sendSuccess(res, report);
   } catch (err) {
     next(err);

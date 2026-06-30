@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
-import authService from '../services/auth/auth.service';
+import { login as authLogin } from '../services/auth';
 
 const login = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
@@ -9,7 +9,7 @@ const login = async (req: Request, res: Response, next: NextFunction): Promise<v
       return;
     }
 
-    const result = await authService.login(username, password);
+    const result = await authLogin(username, password);
     res.json(result);
   } catch (err) {
     if (err instanceof Error && err.message === 'INVALID_CREDENTIALS') {
