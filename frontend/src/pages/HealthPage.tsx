@@ -1,3 +1,4 @@
+import { Button } from '@ui/Button';
 import { Icon } from '@ui/Icon';
 import { PageHeader } from '@ui/PageHeader';
 import { useHealth, type HealthReport, type ServiceCheck } from '@/features/health/hooks/useHealth';
@@ -82,10 +83,11 @@ export function HealthPage() {
         label="Estado del sistema"
         title="Health"
         action={
-          <button
-            type="button"
+          <Button
+            variant="bare"
             onClick={() => refresh()}
-            className="inline-flex items-center gap-[9px] bg-paper text-olive-700 border border-olive-200 rounded-[9px] px-[18px] py-[11px] text-[13.5px] font-semibold hover:bg-olive-100 transition-colors"
+            className="font-semibold bg-paper text-olive-700 border border-olive-200 hover:bg-olive-100 transition-colors"
+            style={{ padding: '11px 18px', fontSize: '13.5px', lineHeight: 'normal' }}
           >
             <Icon
               name="refresh"
@@ -94,7 +96,7 @@ export function HealthPage() {
               className={isFetching ? 'animate-spin' : ''}
             />
             Probar conexión
-          </button>
+          </Button>
         }
       />
 

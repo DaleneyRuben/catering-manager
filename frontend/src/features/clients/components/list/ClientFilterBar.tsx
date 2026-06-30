@@ -1,3 +1,4 @@
+import { Button } from '@ui/Button';
 import { Icon } from '@ui/Icon';
 import { IconButton } from '@ui/IconButton';
 import { CLIENT_STATUS } from '@/features/clients/constants/clientStatus';
@@ -95,18 +96,24 @@ export function ClientFilterBar({
       <div className="overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] min-w-0">
         <div className="inline-flex p-[3px] gap-px bg-paper border border-rule rounded-[11px] text-[12.5px]">
           {STATUS_FILTERS.map(({ v, l }) => (
-            <button
-              type="button"
+            <Button
               key={v}
+              variant="bare"
               onClick={() => onFilterChange(v)}
-              className={`px-3.5 py-[6px] rounded-[8px] font-semibold whitespace-nowrap transition-all ${
+              className={`whitespace-nowrap transition-all ${
                 filter === v
-                  ? 'bg-olive-100 text-olive-700'
-                  : 'text-muted font-normal hover:bg-cream-2 hover:text-ink-2'
+                  ? 'font-semibold bg-olive-100 text-olive-700'
+                  : 'font-normal text-muted hover:bg-cream-2 hover:text-ink-2'
               }`}
+              style={{
+                padding: '6px 14px',
+                fontSize: '12.5px',
+                borderRadius: '8px',
+                lineHeight: 'normal',
+              }}
             >
               {l}
-            </button>
+            </Button>
           ))}
         </div>
       </div>

@@ -58,14 +58,15 @@ export function ClientHeader({
 
   return (
     <>
-      <button
-        type="button"
+      <Button
+        variant="ghost"
         onClick={onBack}
-        className="inline-flex items-center gap-[7px] font-mono text-[11px] uppercase tracking-[.08em] text-olive-600 hover:underline mb-5"
+        leftIcon="arrow-left"
+        className="font-mono uppercase tracking-[.08em] hover:underline mb-5"
+        style={{ padding: 0, fontSize: '11px', gap: '7px' }}
       >
-        <Icon name="arrow-left" size={14} />
         Clientes
-      </button>
+      </Button>
 
       <div className="flex flex-col gap-4 mb-6 lg:flex-row lg:items-center">
         <div className="flex items-center gap-3 flex-1 min-w-0">

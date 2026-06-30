@@ -107,13 +107,14 @@ export function NewClientPage() {
     <div>
       <div className="px-4 py-5 lg:px-[44px] lg:pt-[30px] lg:pb-[20px] border-b border-hairline">
         <div className="flex items-center gap-2 font-mono text-[11px] tracking-[.1em] text-faint uppercase mb-3">
-          <button
-            type="button"
+          <Button
+            variant="bare"
             onClick={() => navigate('/clientes')}
             className="text-olive-600 hover:underline"
+            style={{ padding: 0, fontSize: 'inherit' }}
           >
             Clientes
-          </button>
+          </Button>
           <span className="opacity-50">/</span>
           <span>Directorio</span>
         </div>

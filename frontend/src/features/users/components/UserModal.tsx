@@ -144,19 +144,25 @@ export function UserModal(props: Props) {
           <p className="text-[11px] font-mono uppercase tracking-wider text-muted mb-1.5">Rol</p>
           <div className="flex gap-2">
             {ROLE_OPTIONS.map((r) => (
-              <button
+              <Button
                 key={r.value}
-                type="button"
+                variant="bare"
                 onClick={() => setRole(r.value)}
                 className={[
-                  'flex-1 py-[9px] px-[6px] text-[12.5px] rounded-[8px] border-[1.5px] transition-colors whitespace-nowrap',
+                  'flex-1 border-[1.5px] transition-colors whitespace-nowrap',
                   role === r.value
-                    ? 'bg-olive-800 text-olive-50 font-semibold border-olive-800'
-                    : 'bg-white text-muted font-medium border-rule hover:bg-cream-2',
+                    ? 'font-semibold bg-olive-800 text-olive-50 border-olive-800'
+                    : 'font-medium bg-white text-muted border-rule hover:bg-cream-2',
                 ].join(' ')}
+                style={{
+                  padding: '9px 6px',
+                  fontSize: '12.5px',
+                  borderRadius: '8px',
+                  lineHeight: 'normal',
+                }}
               >
                 {r.label}
-              </button>
+              </Button>
             ))}
           </div>
         </div>

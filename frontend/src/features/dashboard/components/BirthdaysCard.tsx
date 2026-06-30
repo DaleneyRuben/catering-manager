@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Icon } from '@ui/Icon';
+import { Button } from '@ui/Button';
 import { initials } from '@/utils/string';
 import { formatShortDate } from '@/utils/format';
 import type { BirthdayPerson } from '@/features/dashboard/types';
@@ -53,10 +54,11 @@ export function BirthdaysCard({ birthdays, monthLabel }: Props) {
       </div>
 
       {hasMore && (
-        <button
-          type="button"
+        <Button
+          variant="ghost"
           onClick={() => setShowAll((v) => !v)}
-          className="mt-[15px] inline-flex items-center justify-center gap-[7px] border-t border-cream-2 pt-[13px] pb-0.5 w-full font-mono text-[11px] font-semibold tracking-[.08em] uppercase text-olive-600 hover:text-olive-700 transition-colors"
+          className="mt-[15px] border-t border-cream-2 w-full font-mono font-semibold tracking-[.08em] uppercase"
+          style={{ padding: '13px 0 2px', fontSize: '11px', gap: '7px' }}
         >
           {showAll ? 'Ver menos' : `Ver ${birthdays.length - LIMIT} más`}
           <Icon
@@ -65,7 +67,7 @@ export function BirthdaysCard({ birthdays, monthLabel }: Props) {
             stroke={2.2}
             className={`transition-transform ${showAll ? 'rotate-180' : ''}`}
           />
-        </button>
+        </Button>
       )}
     </div>
   );

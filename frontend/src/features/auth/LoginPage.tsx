@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Button } from '@ui/Button';
 import { Field, inputCls } from '@ui/Field';
 import { Icon } from '@ui/Icon';
+import { IconButton } from '@ui/IconButton';
 import { API_BASE } from '@/utils/env';
 import { useAuth } from '@/features/auth/AuthContext';
 import { ROLES, type UserRole } from '@/constants/roles';
@@ -121,15 +123,14 @@ export function LoginPage() {
                     className={`${inputCls()} pr-9`}
                     disabled={busy}
                   />
-                  <button
-                    type="button"
+                  <IconButton
+                    icon={showPassword ? 'eye-off' : 'eye'}
+                    label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
                     onClick={() => setShowPassword((v) => !v)}
-                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted hover:text-ink transition-colors"
+                    size={15}
                     tabIndex={-1}
-                    aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
-                  >
-                    <Icon name={showPassword ? 'eye-off' : 'eye'} size={15} />
-                  </button>
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted hover:text-ink"
+                  />
                 </div>
               </Field>
             </div>
@@ -139,15 +140,23 @@ export function LoginPage() {
             )}
 
             <div className="login-fade-4 mt-1">
-              <button
+              <Button
                 type="submit"
+                variant="bare"
                 disabled={busy || !username || !password}
                 className={[
-                  'w-full text-white text-[13px] font-medium rounded-md px-4 py-2.5 transition-all duration-300 flex items-center justify-center gap-2',
+                  'w-full text-white font-medium transition-all duration-300',
                   submitState === 'success'
                     ? 'bg-olive-700 cursor-default'
                     : 'bg-olive-600 hover:bg-olive-700 disabled:opacity-50 disabled:cursor-not-allowed',
                 ].join(' ')}
+                style={{
+                  padding: '10px 16px',
+                  fontSize: '13px',
+                  borderRadius: '6px',
+                  gap: '8px',
+                  lineHeight: 'normal',
+                }}
               >
                 {submitState === 'idle' && 'Ingresar'}
                 {submitState === 'loading' && (
@@ -162,7 +171,7 @@ export function LoginPage() {
                     Listo
                   </span>
                 )}
-              </button>
+              </Button>
             </div>
           </form>
         </div>

@@ -1,5 +1,6 @@
 import { format, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { Button } from '@ui/Button';
 import { Icon } from '@ui/Icon';
 import type { Menu } from '@/features/menu/types';
 import { MEAL_FIELDS } from '@/features/menu/menuFields';
@@ -78,18 +79,18 @@ export function DayCard({ isToday, date, menu, isWeekend, onOpen }: Props) {
           No disponible
         </div>
       ) : (
-        <button
-          type="button"
+        <Button
+          variant="bare"
           onClick={onOpen}
           className={
             isToday
-              ? 'inline-flex items-center gap-2 bg-olive-50 text-olive-800 rounded-[9px] px-5 py-3 text-[13.5px] font-bold whitespace-nowrap shrink-0 hover:bg-white transition-colors'
-              : 'inline-flex items-center gap-2 bg-olive-700 text-white rounded-[9px] px-5 py-3 text-[13.5px] font-bold whitespace-nowrap shrink-0 hover:bg-olive-800 transition-colors'
+              ? 'gap-2 font-bold bg-olive-50 text-olive-800 whitespace-nowrap shrink-0 hover:bg-white transition-colors'
+              : 'gap-2 font-bold bg-olive-700 text-white whitespace-nowrap shrink-0 hover:bg-olive-800 transition-colors'
           }
         >
           <Icon name={actionIcon} size={16} stroke={2.2} />
           {actionLabel}
-        </button>
+        </Button>
       )}
     </div>
   );
