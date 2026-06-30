@@ -27,6 +27,9 @@ export const Variants: Story = {
         Confirmar eliminación
       </Button>
       <Button variant="alert">Finalizar plan</Button>
+      <Button variant="ghost" leftIcon="arrow-left">
+        Volver
+      </Button>
     </>
   ),
 };
