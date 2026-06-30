@@ -35,6 +35,22 @@ describe('Button', () => {
     expect(screen.getByRole('button')).toHaveClass('text-alert');
   });
 
+  it('applies ghost variant', () => {
+    render(<Button variant="ghost">Volver</Button>);
+    expect(screen.getByRole('button')).toHaveClass('text-olive-600');
+    expect(screen.getByRole('button')).not.toHaveClass('bg-olive-700');
+    expect(screen.getByRole('button')).not.toHaveClass('border');
+  });
+
+  it('applies bare variant with no color, bg, or font-weight classes', () => {
+    render(<Button variant="bare">Item</Button>);
+    const btn = screen.getByRole('button');
+    expect(btn).not.toHaveClass('text-muted');
+    expect(btn).not.toHaveClass('bg-olive-700');
+    expect(btn).not.toHaveClass('border');
+    expect(btn).not.toHaveClass('font-semibold');
+  });
+
   it('applies sm size', () => {
     render(<Button size="sm">Acción</Button>);
     expect(screen.getByRole('button')).toHaveClass('px-3', 'py-2');
