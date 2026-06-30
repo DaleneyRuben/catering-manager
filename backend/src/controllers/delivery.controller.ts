@@ -1,10 +1,10 @@
 import { NextFunction, Request, Response } from 'express';
-import { findRoute } from '../services/delivery';
+import * as deliveryService from '../services/delivery';
 import { sendSuccess } from '../utils/response';
 
 const getRoute = async (_req: Request, res: Response, next: NextFunction) => {
   try {
-    const route = await findRoute();
+    const route = await deliveryService.findRoute();
     sendSuccess(res, route);
   } catch (err) {
     next(err);
