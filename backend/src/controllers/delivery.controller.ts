@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
-import deliveryService from '../services/delivery.service';
+import * as deliveryService from '../services/delivery';
 import { sendSuccess } from '../utils/response';
 
 const getRoute = async (_req: Request, res: Response, next: NextFunction) => {

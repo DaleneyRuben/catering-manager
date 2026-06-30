@@ -18,6 +18,34 @@ description: >
 
 ---
 
+## Architecture (backend)
+
+Backend services live under `backend/src/services/<domain>/`. Each domain is a folder with one public function per file, a test subfolder, and an index.
+
+```
+services/
+  <domain>/
+    <function-name>.ts     ← exports exactly one public function (kebab-case filename)
+    _helpers.ts            ← shared private helpers within the domain; never exported
+    __tests__/
+      <function-name>.test.ts
+    index.ts               ← re-exports all public functions for the domain
+```
+
+**Rules:**
+
+- One public function per file — file name is kebab-case matching the function (`find-by-id.ts` exports `findById`)
+- Private helpers used by one function stay colocated in that function's file
+- Private helpers shared across multiple functions in the same domain go in `_helpers.ts`
+- `_helpers.ts` is never re-exported from `index.ts` and never imported outside its domain
+- Each function file has a corresponding `__tests__/<function-name>.test.ts` — test first
+- Controllers import from the domain index only: `import { findById } from '../services/client'`
+- Never import directly from a function file outside its domain
+
+See `docs/adr/003-backend-service-architecture.md` for the full rationale and domain map.
+
+---
+
 ## Architecture (frontend)
 
 The frontend uses **feature-folder colocation** under `src/features/<feature>/`. Each feature owns its hooks, components, and types.
