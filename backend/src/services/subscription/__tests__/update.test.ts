@@ -1,8 +1,9 @@
+import { Op } from 'sequelize';
 import Subscription from '../../../models/Subscription';
 import Client from '../../../models/Client';
 import ClientHistory from '../../../models/ClientHistory';
 import { update } from '../update';
-import { addDeliveryDays } from '../../../utils/date';
+import { addDeliveryDays, subtractDeliveryDays } from '../../../utils/date';
 
 jest.mock('../../../models/Subscription');
 jest.mock('../../../models/Client');
@@ -128,5 +129,54 @@ describe('update', () => {
     expect(mockInstance.update).toHaveBeenCalledWith(
       expect.objectContaining({ contractEndDate: expectedEnd }),
     );
+  });
+
+  it('finalizes other overlapping subscriptions when a startDate is assigned', async () => {
+    const otherSub = { id: 7, update: jest.fn().mockResolvedValue({}) };
+    const mockInstance = {
+      id: 3,
+      clientId: 1,
+      startDate: null,
+      duration: 20,
+      contractEndDate: null,
+      suspendedDates: [],
+      update: jest.fn().mockResolvedValue({}),
+    };
+    (Subscription.findOne as jest.Mock).mockResolvedValue(mockInstance);
+    (Subscription.findAll as jest.Mock).mockResolvedValue([otherSub]);
+    (Client.findByPk as jest.Mock).mockResolvedValue({ id: 1, update: jest.fn() });
+
+    await update(1, 3, { startDate: '2026-07-03' });
+
+    expect(Subscription.findAll).toHaveBeenCalledWith({
+      where: expect.objectContaining({
+        clientId: 1,
+        finalizedAt: null,
+        contractEndDate: { [Op.gte]: '2026-07-03' },
+        id: { [Op.ne]: 3 },
+      }),
+    });
+    expect(otherSub.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        contractEndDate: subtractDeliveryDays('2026-07-03', 1),
+      }),
+    );
+  });
+
+  it('does not look for overlaps when startDate is not being assigned', async () => {
+    const mockInstance = {
+      clientId: 1,
+      startDate: '2026-05-26',
+      duration: 20,
+      contractEndDate: addDeliveryDays('2026-05-26', 19),
+      suspendedDates: [],
+      update: jest.fn().mockResolvedValue({}),
+    };
+    (Subscription.findOne as jest.Mock).mockResolvedValue(mockInstance);
+    (Client.findByPk as jest.Mock).mockResolvedValue({ id: 1, update: jest.fn() });
+
+    await update(1, 1, { duration: 30 });
+
+    expect(Subscription.findAll).not.toHaveBeenCalled();
   });
 });
