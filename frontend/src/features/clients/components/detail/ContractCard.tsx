@@ -32,7 +32,7 @@ export function ContractCard({ sub, remaining, onUpdateContract }: Props) {
   const validDuration = !Number.isNaN(parsedDuration) && parsedDuration > 0 ? parsedDuration : 0;
   const previewEndDate =
     startDate && validDuration > 0
-      ? addBusinessDays(startDate, validDuration - 1) // duration - 1 because startDate counts as day 1
+      ? addBusinessDays(startDate, validDuration - 1 + sub.suspendedDates.length) // duration - 1 because startDate counts as day 1; add suspensions
       : sub.contractEndDate;
 
   const handleSave = async () => {

@@ -16,11 +16,16 @@ export const update = async (clientId: number, id: number, data: UpdateSubscript
     const newStartDate = startDate ?? subscription.startDate;
     const newDuration = duration ?? subscription.duration;
 
-    const newContractEndDate = calcContractEndDate(newStartDate ?? null, newDuration);
+    const baseContractEndDate = calcContractEndDate(newStartDate ?? null, newDuration);
 
     const cleanedSuspendedDates = newStartDate
       ? (subscription.suspendedDates ?? []).filter((d) => d >= newStartDate)
       : [];
+
+    const newContractEndDate =
+      baseContractEndDate && cleanedSuspendedDates.length > 0
+        ? addDeliveryDays(baseContractEndDate, cleanedSuspendedDates.length)
+        : baseContractEndDate;
 
     if (startDate !== undefined) base.startDate = startDate;
     if (duration !== undefined) base.duration = duration;
