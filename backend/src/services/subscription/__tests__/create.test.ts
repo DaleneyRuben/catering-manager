@@ -1,10 +1,11 @@
 import { format } from 'date-fns';
+import { Op } from 'sequelize';
 import Subscription from '../../../models/Subscription';
 import Client from '../../../models/Client';
 import ClientHistory from '../../../models/ClientHistory';
 import Plan from '../../../models/Plan';
 import { create } from '../create';
-import { addDeliveryDays } from '../../../utils/date';
+import { addDeliveryDays, subtractDeliveryDays } from '../../../utils/date';
 
 jest.mock('../../../models/Subscription');
 jest.mock('../../../models/Client');
@@ -122,5 +123,56 @@ describe('create', () => {
     await create(1, { planId: 2, contractDate: today, duration: 20, renewalType: 'renewal' });
 
     expect(mockClient.update).toHaveBeenCalledWith({ pausedSince: today });
+  });
+});
+
+describe('create with overlapping prior subscriptions', () => {
+  it('finalizes prior non-finalized subscriptions overlapping the new startDate', async () => {
+    const oldSub = { id: 7, update: jest.fn().mockResolvedValue({}) };
+    (Client.findByPk as jest.Mock).mockResolvedValue({ id: 1 });
+    (Subscription.findAll as jest.Mock).mockResolvedValue([oldSub]);
+    (Subscription.create as jest.Mock).mockResolvedValue(mockSubscription);
+
+    await create(1, {
+      planId: 2,
+      startDate: '2026-07-03',
+      contractDate: today,
+      duration: 20,
+      renewalType: 'renewal',
+    });
+
+    expect(oldSub.update).toHaveBeenCalledWith({
+      contractEndDate: subtractDeliveryDays('2026-07-03', 1),
+      finalizedAt: today,
+    });
+  });
+
+  it('queries only non-finalized subscriptions of the client ending on or after the new startDate', async () => {
+    (Client.findByPk as jest.Mock).mockResolvedValue({ id: 1 });
+    (Subscription.findAll as jest.Mock).mockResolvedValue([]);
+    (Subscription.create as jest.Mock).mockResolvedValue(mockSubscription);
+
+    await create(1, { planId: 2, startDate: '2026-07-03', contractDate: today, duration: 20 });
+
+    expect(Subscription.findAll).toHaveBeenCalledWith({
+      where: expect.objectContaining({
+        clientId: 1,
+        finalizedAt: null,
+        contractEndDate: { [Op.gte]: '2026-07-03' },
+      }),
+    });
+  });
+
+  it('does not look for overlaps when the new subscription has no startDate', async () => {
+    (Client.findByPk as jest.Mock).mockResolvedValue({ id: 1, update: jest.fn() });
+    (Subscription.create as jest.Mock).mockResolvedValue({
+      ...mockSubscription,
+      startDate: null,
+      contractEndDate: null,
+    });
+
+    await create(1, { planId: 2, contractDate: today, duration: 20, renewalType: 'renewal' });
+
+    expect(Subscription.findAll).not.toHaveBeenCalled();
   });
 });
