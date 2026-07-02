@@ -1,9 +1,9 @@
 import request from 'supertest';
 import app from '../../app';
-import subscriptionService from '../../services/subscription.service';
+import * as subscriptionService from '../../services/subscription';
 import { encodeId } from '../../utils/sqids';
 
-jest.mock('../../services/subscription.service');
+jest.mock('../../services/subscription');
 jest.mock('../../database/sequelize', () => ({ __esModule: true, default: { query: jest.fn() } }));
 jest.mock('../../middleware/auth', () => ({
   requireAuth: (_req: unknown, _res: unknown, next: () => void) => next(),
@@ -65,7 +65,11 @@ describe('POST /api/clients/:clientId/subscriptions', () => {
   });
 
   it('accepts a past contractDate', async () => {
-    (subscriptionService.create as jest.Mock).mockResolvedValue({ id: 1, clientId: 1, planId: 2 });
+    (subscriptionService.create as jest.Mock).mockResolvedValue({
+      id: 1,
+      clientId: 1,
+      planId: 2,
+    });
 
     const res = await request(app)
       .post(`/api/clients/${id1}/subscriptions`)
@@ -91,7 +95,11 @@ describe('POST /api/clients/:clientId/subscriptions', () => {
   });
 
   it('accepts a weekday startDate', async () => {
-    (subscriptionService.create as jest.Mock).mockResolvedValue({ id: 1, clientId: 1, planId: 2 });
+    (subscriptionService.create as jest.Mock).mockResolvedValue({
+      id: 1,
+      clientId: 1,
+      planId: 2,
+    });
 
     const res = await request(app)
       .post(`/api/clients/${id1}/subscriptions`)

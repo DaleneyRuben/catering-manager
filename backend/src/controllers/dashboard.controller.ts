@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
-import dashboardService from '../services/dashboard.service';
+import * as dashboardService from '../services/dashboard';
 import { sendSuccess } from '../utils/response';
 
 const getSummary = async (_req: Request, res: Response, next: NextFunction) => {

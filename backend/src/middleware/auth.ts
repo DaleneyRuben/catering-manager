@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import authService from '../services/auth.service';
+import { verifyToken } from '../services/auth';
 import type { UserRole } from '../models/User';
 
 export const requireAuth = (req: Request, res: Response, next: NextFunction): void => {
@@ -10,7 +10,7 @@ export const requireAuth = (req: Request, res: Response, next: NextFunction): vo
   }
 
   try {
-    req.user = authService.verifyToken(header.slice(7));
+    req.user = verifyToken(header.slice(7));
     next();
   } catch {
     res.status(401).json({ error: 'Token inválido o expirado' });

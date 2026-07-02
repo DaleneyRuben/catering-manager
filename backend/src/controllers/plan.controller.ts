@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
-import planService from '../services/plan.service';
+import * as planService from '../services/plan';
 import { sendSuccess, sendError } from '../utils/response';
 import { decodeId } from '../utils/sqids';
 

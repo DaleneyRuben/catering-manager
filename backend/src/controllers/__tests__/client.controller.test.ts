@@ -1,13 +1,10 @@
 import request from 'supertest';
 import app from '../../app';
-import clientService from '../../services/client.service';
+import * as clientService from '../../services/client';
 import { encodeId } from '../../utils/sqids';
 
-jest.mock('../../services/client.service');
-jest.mock('../../services/deliveryGroup.service', () => ({
-  __esModule: true,
-  default: { setGroup: jest.fn() },
-}));
+jest.mock('../../services/client');
+jest.mock('../../services/delivery');
 jest.mock('../../database/sequelize', () => ({ __esModule: true, default: { query: jest.fn() } }));
 jest.mock('../../middleware/auth', () => ({
   requireAuth: (_req: unknown, _res: unknown, next: () => void) => next(),

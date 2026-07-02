@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
-import subscriptionService from '../services/subscription.service';
+import * as subscriptionService from '../services/subscription';
 import { sendSuccess, sendError } from '../utils/response';
 import { decodeId } from '../utils/sqids';
 

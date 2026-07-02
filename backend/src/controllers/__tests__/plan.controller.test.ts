@@ -1,9 +1,9 @@
 import request from 'supertest';
 import app from '../../app';
-import planService from '../../services/plan.service';
+import * as planService from '../../services/plan';
 import { encodeId } from '../../utils/sqids';
 
-jest.mock('../../services/plan.service');
+jest.mock('../../services/plan');
 jest.mock('../../database/sequelize', () => ({ __esModule: true, default: { query: jest.fn() } }));
 jest.mock('../../middleware/auth', () => ({
   requireAuth: (_req: unknown, _res: unknown, next: () => void) => next(),
