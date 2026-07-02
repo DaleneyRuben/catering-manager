@@ -3,6 +3,7 @@ import ClientHistory from '../../models/ClientHistory';
 import Subscription from '../../models/Subscription';
 import { UpdateSubscriptionDto } from '../../schemas/subscription.schema';
 import { addDeliveryDays, subtractDeliveryDays, calcContractEndDate } from '../../utils/date';
+import { finalizeOverlappingSubscriptions } from './_helpers';
 
 export const update = async (clientId: number, id: number, data: UpdateSubscriptionDto) => {
   const subscription = await Subscription.findOne({ where: { id, clientId } });
@@ -34,6 +35,7 @@ export const update = async (clientId: number, id: number, data: UpdateSubscript
 
     // assigning a start date activates a sin-fecha paused client
     if (startDate) {
+      await finalizeOverlappingSubscriptions(clientId, startDate, subscription.id);
       const client = await Client.findByPk(clientId);
       if (client) await client.update({ pausedSince: null });
     }

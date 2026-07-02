@@ -4,6 +4,7 @@ import Plan from '../../models/Plan';
 import Subscription from '../../models/Subscription';
 import { CreateSubscriptionDto } from '../../schemas/subscription.schema';
 import { appToday, calcContractEndDate } from '../../utils/date';
+import { finalizeOverlappingSubscriptions } from './_helpers';
 
 // TODO: restore contractDate === today validation once backfilling of existing clients is complete
 export const create = async (clientId: number, data: CreateSubscriptionDto) => {
@@ -13,6 +14,8 @@ export const create = async (clientId: number, data: CreateSubscriptionDto) => {
   const today = appToday();
 
   const contractEndDate = calcContractEndDate(data.startDate ?? null, data.duration);
+
+  if (data.startDate) await finalizeOverlappingSubscriptions(clientId, data.startDate);
 
   const subscription = await Subscription.create({
     planId: data.planId,
