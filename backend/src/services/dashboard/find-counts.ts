@@ -16,18 +16,28 @@ type CountsRow = {
   deliveries_today: string;
 };
 
+// SQL mirror of the canonical active-subscription rule in
+// services/subscription/find-active-for-date.ts — keep both in sync if the rule
+// changes. The extra `startDate IS NULL` branch covers renewals created without
+// a start date (those clients are still excluded via `pausedSince` until activated).
+const activeOn = (param: 'today' | 'tomorrow'): string =>
+  `c."pausedSince" IS NULL AND (s."startDate" IS NULL OR s."startDate" <= :${param}) AND s."contractEndDate" >= :${param} AND s."finalizedAt" IS NULL`;
+
+const suspendedOn = (param: 'today' | 'tomorrow'): string =>
+  `:${param}::date = ANY(s."suspendedDates")`;
+
 export const findCounts = async (): Promise<DashboardCounts> => {
   const today = nextDeliveryDay(appToday());
   const tomorrow = addCalendarDays(today, 1);
 
   const [row] = await sequelize.query<CountsRow>(
     `SELECT
-      COUNT(CASE WHEN c."pausedSince" IS NULL AND (s."startDate" IS NULL OR s."startDate" <= :today) AND s."contractEndDate" >= :today AND s."finalizedAt" IS NULL AND NOT (:today::date = ANY(s."suspendedDates")) THEN 1 END) AS active_today,
-      COUNT(CASE WHEN c."pausedSince" IS NULL AND (s."startDate" IS NULL OR s."startDate" <= :tomorrow) AND s."contractEndDate" >= :tomorrow AND s."finalizedAt" IS NULL AND NOT (:tomorrow::date = ANY(s."suspendedDates")) THEN 1 END) AS active_tomorrow,
-      COUNT(CASE WHEN c."pausedSince" IS NULL AND (s."startDate" IS NULL OR s."startDate" <= :today) AND s."contractEndDate" >= :today AND s."finalizedAt" IS NULL AND :today::date = ANY(s."suspendedDates") THEN 1 END) AS suspended_today,
-      COUNT(CASE WHEN c."pausedSince" IS NULL AND (s."startDate" IS NULL OR s."startDate" <= :tomorrow) AND s."contractEndDate" >= :tomorrow AND s."finalizedAt" IS NULL AND :tomorrow::date = ANY(s."suspendedDates") THEN 1 END) AS suspended_tomorrow,
-      COUNT(DISTINCT CASE WHEN c."pausedSince" IS NULL AND (s."startDate" IS NULL OR s."startDate" <= :today) AND s."contractEndDate" >= :today AND s."finalizedAt" IS NULL AND NOT (:today::date = ANY(s."suspendedDates")) AND c."groupToken" IS NOT NULL THEN c."groupToken" END)
-        + COUNT(CASE WHEN c."pausedSince" IS NULL AND (s."startDate" IS NULL OR s."startDate" <= :today) AND s."contractEndDate" >= :today AND s."finalizedAt" IS NULL AND NOT (:today::date = ANY(s."suspendedDates")) AND c."groupToken" IS NULL THEN 1 END) AS deliveries_today
+      COUNT(CASE WHEN ${activeOn('today')} AND NOT (${suspendedOn('today')}) THEN 1 END) AS active_today,
+      COUNT(CASE WHEN ${activeOn('tomorrow')} AND NOT (${suspendedOn('tomorrow')}) THEN 1 END) AS active_tomorrow,
+      COUNT(CASE WHEN ${activeOn('today')} AND ${suspendedOn('today')} THEN 1 END) AS suspended_today,
+      COUNT(CASE WHEN ${activeOn('tomorrow')} AND ${suspendedOn('tomorrow')} THEN 1 END) AS suspended_tomorrow,
+      COUNT(DISTINCT CASE WHEN ${activeOn('today')} AND NOT (${suspendedOn('today')}) AND c."groupToken" IS NOT NULL THEN c."groupToken" END)
+        + COUNT(CASE WHEN ${activeOn('today')} AND NOT (${suspendedOn('today')}) AND c."groupToken" IS NULL THEN 1 END) AS deliveries_today
     FROM clients c
     LEFT JOIN subscriptions s ON s."id" = (SELECT MAX(s2."id") FROM subscriptions s2 WHERE s2."clientId" = c.id)
     WHERE c."deletedAt" IS NULL`,
