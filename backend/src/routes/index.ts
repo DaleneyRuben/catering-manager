@@ -5,6 +5,7 @@ import dashboardRoutes from './dashboard.routes';
 import deliveryRoutes from './delivery.routes';
 import menuRoutes from './menu.routes';
 import planRoutes from './plan.routes';
+import productionRoutes from './production.routes';
 import reportRoutes from './report.routes';
 import subscriptionRoutes from './subscription.routes';
 import userRoutes from './user.routes';
@@ -39,6 +40,12 @@ router.use(
   subscriptionRoutes,
 );
 router.use('/plans', requireAuth, requireRole(ROLES.SUPER_ADMIN, ROLES.ADMIN), planRoutes);
+router.use(
+  '/production',
+  requireAuth,
+  requireRole(ROLES.SUPER_ADMIN, ROLES.ADMIN, ROLES.KITCHEN),
+  productionRoutes,
+);
 router.use(
   '/reports',
   requireAuth,

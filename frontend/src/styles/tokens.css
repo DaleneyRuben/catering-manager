@@ -92,6 +92,13 @@
   --color-plan-delete: #c97b6a;
   --color-plan-edit: #6b9a3a;
 
+  /* Producción page */
+  --color-day-badge-bg: #eef3e2;
+  --color-day-badge-border: #d7e1bd;
+  --color-count-chip-border: #d5e0b7;
+  --color-client-row: #2a3122;
+  --color-empty-italic: #b4b2a0;
+
   /* Plan tier bands (basic reuses olive-50/cream-2) */
   --color-tier-basic-border: #e4e8d6;
   --color-tier-mid-bg: #eaf0dd;

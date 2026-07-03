@@ -21,6 +21,12 @@ const NAV_ITEMS: NavItem[] = [
   { to: '/planes', label: 'Planes', icon: 'plan', allowedRoles: ADMIN_ROLES },
   { to: '/menu', label: 'Menú', icon: 'chef', allowedRoles: [...ADMIN_ROLES, ROLES.KITCHEN] },
   {
+    to: '/produccion',
+    label: 'Producción',
+    icon: 'cloche',
+    allowedRoles: [...ADMIN_ROLES, ROLES.KITCHEN],
+  },
+  {
     to: '/informes',
     label: 'Informes',
     icon: 'report',

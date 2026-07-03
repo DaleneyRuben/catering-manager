@@ -45,7 +45,21 @@ describe('Layout', () => {
     expect(screen.getByText('Clientes')).toBeInTheDocument();
     expect(screen.getByText('Planes')).toBeInTheDocument();
     expect(screen.getByText('Menú')).toBeInTheDocument();
+    expect(screen.getByText('Producción')).toBeInTheDocument();
     expect(screen.getByText('Informes')).toBeInTheDocument();
+  });
+
+  it('places Producción between Menú and Informes', () => {
+    render(
+      <MemoryRouter>
+        <Layout>
+          <span />
+        </Layout>
+      </MemoryRouter>,
+    );
+    const labels = screen.getAllByRole('link').map((link) => link.textContent);
+    expect(labels.indexOf('Producción')).toBe(labels.indexOf('Menú') + 1);
+    expect(labels.indexOf('Informes')).toBe(labels.indexOf('Producción') + 1);
   });
 
   it('renders a hamburger button for mobile', () => {
@@ -149,7 +163,7 @@ describe('Layout', () => {
     expect(aside.className).toContain('-translate-x-full');
   });
 
-  it('shows only Menú and Informes for the kitchen role', () => {
+  it('shows only Menú, Producción and Informes for the kitchen role', () => {
     mockUserRole('kitchen');
     render(
       <MemoryRouter>
@@ -162,6 +176,7 @@ describe('Layout', () => {
     expect(screen.queryByText('Clientes')).not.toBeInTheDocument();
     expect(screen.queryByText('Planes')).not.toBeInTheDocument();
     expect(screen.getByText('Menú')).toBeInTheDocument();
+    expect(screen.getByText('Producción')).toBeInTheDocument();
     expect(screen.getByText('Informes')).toBeInTheDocument();
   });
 
@@ -203,6 +218,7 @@ describe('Layout', () => {
     expect(screen.queryByText('Clientes')).not.toBeInTheDocument();
     expect(screen.queryByText('Planes')).not.toBeInTheDocument();
     expect(screen.queryByText('Menú')).not.toBeInTheDocument();
+    expect(screen.queryByText('Producción')).not.toBeInTheDocument();
     expect(screen.queryByText('Informes')).not.toBeInTheDocument();
     expect(screen.getByText('Entregas')).toBeInTheDocument();
   });

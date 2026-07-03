@@ -8,6 +8,7 @@ import { ClientDetailPage } from '@/pages/ClientDetailPage';
 import { NewClientPage } from '@/pages/NewClientPage';
 import { PlansPage } from '@/pages/PlansPage';
 import { MenuImportPage } from '@/pages/MenuImportPage';
+import { ProductionPage } from '@/pages/ProductionPage';
 import { ReportsPage } from '@/pages/ReportsPage';
 import { HealthPage } from '@/pages/HealthPage';
 import { UsersPage } from '@/pages/UsersPage';
@@ -75,6 +76,14 @@ export function AppRouter() {
                   element={
                     <ProtectedRoute allowedRoles={[...STAFF_ROLES]}>
                       <MenuImportPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/produccion"
+                  element={
+                    <ProtectedRoute allowedRoles={[...STAFF_ROLES]}>
+                      <ProductionPage />
                     </ProtectedRoute>
                   }
                 />

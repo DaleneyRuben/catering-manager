@@ -43,4 +43,14 @@ describe('Icon', () => {
     const { container } = render(<Icon name="wifi" />);
     expect(container.querySelector('svg')).toBeInTheDocument();
   });
+
+  it('renders an svg for cloche', () => {
+    const { container } = render(<Icon name="cloche" />);
+    expect(container.querySelector('svg')).toBeInTheDocument();
+  });
+
+  it('renders an svg for calendar-x', () => {
+    const { container } = render(<Icon name="calendar-x" />);
+    expect(container.querySelector('svg')).toBeInTheDocument();
+  });
 });

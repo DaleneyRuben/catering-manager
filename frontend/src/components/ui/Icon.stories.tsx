@@ -20,6 +20,8 @@ const ICON_NAMES = [
   'phone',
   'pin',
   'calendar',
+  'calendar-x',
+  'cloche',
   'search',
   'filter',
   'download',
