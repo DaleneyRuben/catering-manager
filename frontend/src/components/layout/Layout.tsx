@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { Fragment, useState, useEffect, useRef } from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { Toaster } from 'sonner';
 import { Icon } from '@ui/Icon';
@@ -10,39 +10,54 @@ interface NavItem {
   to: string;
   label: string;
   icon: string;
-  allowedRoles?: UserRole[];
+  allowedRoles: UserRole[];
+}
+
+interface NavSection {
+  label: string;
+  items: NavItem[];
+  separated?: boolean;
 }
 
 const ADMIN_ROLES: UserRole[] = [ROLES.SUPER_ADMIN, ROLES.ADMIN];
+const KITCHEN_ROLES: UserRole[] = [...ADMIN_ROLES, ROLES.KITCHEN];
 
-const NAV_ITEMS: NavItem[] = [
-  { to: '/', label: 'Panel', icon: 'dashboard', allowedRoles: ADMIN_ROLES },
-  { to: '/clientes', label: 'Clientes', icon: 'users', allowedRoles: ADMIN_ROLES },
-  { to: '/planes', label: 'Planes', icon: 'plan', allowedRoles: ADMIN_ROLES },
-  { to: '/menu', label: 'Menú', icon: 'chef', allowedRoles: [...ADMIN_ROLES, ROLES.KITCHEN] },
+const NAV_SECTIONS: NavSection[] = [
   {
-    to: '/produccion',
-    label: 'Producción',
-    icon: 'cloche',
-    allowedRoles: [...ADMIN_ROLES, ROLES.KITCHEN],
+    label: 'Gestión',
+    items: [
+      { to: '/', label: 'Panel', icon: 'dashboard', allowedRoles: ADMIN_ROLES },
+      { to: '/clientes', label: 'Clientes', icon: 'users', allowedRoles: ADMIN_ROLES },
+      { to: '/planes', label: 'Planes', icon: 'plan', allowedRoles: ADMIN_ROLES },
+    ],
   },
   {
-    to: '/informes',
-    label: 'Informes',
-    icon: 'report',
-    allowedRoles: [...ADMIN_ROLES, ROLES.KITCHEN],
+    label: 'Cocina',
+    items: [
+      { to: '/menu', label: 'Menú', icon: 'chef', allowedRoles: KITCHEN_ROLES },
+      { to: '/produccion', label: 'Producción', icon: 'cloche', allowedRoles: KITCHEN_ROLES },
+      { to: '/informes', label: 'Informes', icon: 'report', allowedRoles: KITCHEN_ROLES },
+    ],
   },
   {
-    to: '/entregas',
-    label: 'Entregas',
-    icon: 'motorcycle',
-    allowedRoles: [...ADMIN_ROLES, ROLES.DELIVERY],
+    label: 'Logística',
+    items: [
+      {
+        to: '/entregas',
+        label: 'Entregas',
+        icon: 'motorcycle',
+        allowedRoles: [...ADMIN_ROLES, ROLES.DELIVERY],
+      },
+    ],
   },
-];
-
-const SUPER_ADMIN_NAV_ITEMS: NavItem[] = [
-  { to: '/usuarios', label: 'Usuarios', icon: 'user-plus' },
-  { to: '/health', label: 'Health', icon: 'stethoscope' },
+  {
+    label: 'Administración',
+    separated: true,
+    items: [
+      { to: '/usuarios', label: 'Usuarios', icon: 'user-plus', allowedRoles: [ROLES.SUPER_ADMIN] },
+      { to: '/health', label: 'Health', icon: 'stethoscope', allowedRoles: [ROLES.SUPER_ADMIN] },
+    ],
+  },
 ];
 
 interface LayoutProps {
@@ -103,31 +118,26 @@ export function Layout({ children }: LayoutProps) {
           </p>
         </div>
         <nav className="flex-1 py-[18px] flex flex-col gap-0.5">
-          <p className="font-mono text-[9px] tracking-[.2em] text-olive-300/60 uppercase px-[22px] pt-[6px] pb-2">
-            Gestión
-          </p>
-          {NAV_ITEMS.filter(
-            ({ allowedRoles }) => !allowedRoles || (user && allowedRoles.includes(user.role)),
-          ).map(({ to, label, icon }) => (
-            <NavLink key={to} to={to} end={to === '/'} className={navLinkClass}>
-              <Icon name={icon} size={17} />
-              {label}
-            </NavLink>
-          ))}
-          {user?.role === ROLES.SUPER_ADMIN && (
-            <>
-              <div className="h-px bg-white/12 mx-[22px] my-[14px]" />
-              <p className="font-mono text-[9px] tracking-[.2em] text-olive-300/60 uppercase px-[22px] pt-0.5 pb-2">
-                Administración
-              </p>
-              {SUPER_ADMIN_NAV_ITEMS.map(({ to, label, icon }) => (
-                <NavLink key={to} to={to} className={navLinkClass}>
-                  <Icon name={icon} size={17} />
-                  {label}
-                </NavLink>
-              ))}
-            </>
-          )}
+          {NAV_SECTIONS.map(({ label: sectionLabel, items, separated }) => {
+            const visibleItems = items.filter(
+              ({ allowedRoles }) => user && allowedRoles.includes(user.role),
+            );
+            if (visibleItems.length === 0) return null;
+            return (
+              <Fragment key={sectionLabel}>
+                {separated && <div className="h-px bg-white/12 mx-[22px] my-[14px]" />}
+                <p className="font-mono text-[9px] tracking-[.2em] text-olive-300/60 uppercase px-[22px] pt-[6px] pb-2">
+                  {sectionLabel}
+                </p>
+                {visibleItems.map(({ to, label, icon }) => (
+                  <NavLink key={to} to={to} end={to === '/'} className={navLinkClass}>
+                    <Icon name={icon} size={17} />
+                    {label}
+                  </NavLink>
+                ))}
+              </Fragment>
+            );
+          })}
         </nav>
         <div className="border-t border-white/10 px-[18px] py-[14px] flex items-center gap-[11px]">
           <div className="w-[34px] h-[34px] rounded-full bg-olive-400 text-sidebar-deep flex items-center justify-center font-bold text-[13px] shrink-0">
