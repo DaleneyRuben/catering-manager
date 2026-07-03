@@ -152,6 +152,23 @@ export function Icon({ name, size = 16, stroke = 1.5, className }: IconProps) {
           <path d="M3 9h18M8 3v4M16 3v4" />
         </svg>
       );
+    case 'calendar-x':
+      return (
+        <svg {...props}>
+          <rect x="3" y="5" width="18" height="16" rx="2" />
+          <path d="M3 9h18M8 3v4M16 3v4" />
+          <path d="M9.5 13.5l5 5M14.5 13.5l-5 5" />
+        </svg>
+      );
+    case 'cloche':
+      return (
+        <svg {...props}>
+          <path d="M3 17h18" />
+          <path d="M5 17a7 7 0 0 1 14 0" />
+          <path d="M12 7V5.4" />
+          <path d="M10.4 5.4h3.2" />
+        </svg>
+      );
     case 'search':
       return (
         <svg {...props}>
