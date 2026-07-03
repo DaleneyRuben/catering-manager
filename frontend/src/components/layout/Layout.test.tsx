@@ -113,7 +113,7 @@ describe('Layout', () => {
     expect(screen.getByText('Catering · con altura')).toBeInTheDocument();
   });
 
-  it('renders the Gestión nav group label', () => {
+  it('renders the Gestión, Cocina and Logística section labels for the admin role', () => {
     render(
       <MemoryRouter>
         <Layout>
@@ -122,6 +122,78 @@ describe('Layout', () => {
       </MemoryRouter>,
     );
     expect(screen.getByText('Gestión')).toBeInTheDocument();
+    expect(screen.getByText('Cocina')).toBeInTheDocument();
+    expect(screen.getByText('Logística')).toBeInTheDocument();
+    expect(screen.queryByText('Administración')).not.toBeInTheDocument();
+  });
+
+  it('groups nav items under their sections in order', () => {
+    render(
+      <MemoryRouter>
+        <Layout>
+          <span />
+        </Layout>
+      </MemoryRouter>,
+    );
+    const nav = screen.getByRole('navigation');
+    const texts = Array.from(nav.querySelectorAll('p, a')).map((el) => el.textContent);
+    expect(texts).toEqual([
+      'Gestión',
+      'Panel',
+      'Clientes',
+      'Planes',
+      'Cocina',
+      'Menú',
+      'Producción',
+      'Informes',
+      'Logística',
+      'Entregas',
+    ]);
+  });
+
+  it('shows only the Cocina section label for the kitchen role', () => {
+    mockUserRole('kitchen');
+    render(
+      <MemoryRouter>
+        <Layout>
+          <span />
+        </Layout>
+      </MemoryRouter>,
+    );
+    expect(screen.getByText('Cocina')).toBeInTheDocument();
+    expect(screen.queryByText('Gestión')).not.toBeInTheDocument();
+    expect(screen.queryByText('Logística')).not.toBeInTheDocument();
+    expect(screen.queryByText('Administración')).not.toBeInTheDocument();
+  });
+
+  it('shows only the Logística section label for the delivery role', () => {
+    mockUserRole('delivery');
+    render(
+      <MemoryRouter>
+        <Layout>
+          <span />
+        </Layout>
+      </MemoryRouter>,
+    );
+    expect(screen.getByText('Logística')).toBeInTheDocument();
+    expect(screen.queryByText('Gestión')).not.toBeInTheDocument();
+    expect(screen.queryByText('Cocina')).not.toBeInTheDocument();
+    expect(screen.queryByText('Administración')).not.toBeInTheDocument();
+  });
+
+  it('shows all four section labels for the super_admin role', () => {
+    mockUserRole('super_admin');
+    render(
+      <MemoryRouter>
+        <Layout>
+          <span />
+        </Layout>
+      </MemoryRouter>,
+    );
+    expect(screen.getByText('Gestión')).toBeInTheDocument();
+    expect(screen.getByText('Cocina')).toBeInTheDocument();
+    expect(screen.getByText('Logística')).toBeInTheDocument();
+    expect(screen.getByText('Administración')).toBeInTheDocument();
   });
 
   it('renders the Administración nav group label for super_admin', () => {
