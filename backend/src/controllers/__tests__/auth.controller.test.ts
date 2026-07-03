@@ -20,11 +20,12 @@ describe('POST /api/auth/login', () => {
 
     const res = await request(app)
       .post('/api/auth/login')
+      .set('User-Agent', 'test-agent/1.0')
       .send({ username: 'ada', password: 'secret123' });
 
     expect(res.status).toBe(200);
     expect(res.body).toEqual(loginResponse);
-    expect(mockLogin).toHaveBeenCalledWith('ada', 'secret123');
+    expect(mockLogin).toHaveBeenCalledWith('ada', 'secret123', 'test-agent/1.0');
   });
 
   it('returns 400 when username is missing', async () => {
