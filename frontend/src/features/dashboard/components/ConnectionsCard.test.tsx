@@ -6,12 +6,25 @@ const online = (username: string): Connection => ({
   username,
   lastLoginAt: new Date(Date.now() - 2 * 60_000).toISOString(),
   online: true,
+  lastDeviceType: null,
+  lastOs: null,
+  lastBrowser: null,
 });
 
 const offline = (username: string): Connection => ({
   username,
   lastLoginAt: new Date(Date.now() - 2 * 60 * 60_000).toISOString(),
   online: false,
+  lastDeviceType: null,
+  lastOs: null,
+  lastBrowser: null,
+});
+
+const withDevice = (username: string): Connection => ({
+  ...online(username),
+  lastDeviceType: 'mobile',
+  lastOs: 'Android 14',
+  lastBrowser: 'Chrome 126',
 });
 
 describe('ConnectionsCard', () => {
@@ -46,5 +59,15 @@ describe('ConnectionsCard', () => {
     expect(screen.getByText('Caro')).toBeInTheDocument();
     expect(screen.getByText('Susy')).toBeInTheDocument();
     expect(screen.getByText('Randy')).toBeInTheDocument();
+  });
+
+  it('shows the last device under the connection stamp', () => {
+    render(<ConnectionsCard connections={[withDevice('Caro')]} />);
+    expect(screen.getByText('Chrome 126 · Android 14 · Móvil')).toBeInTheDocument();
+  });
+
+  it('omits the device line when no device is known', () => {
+    render(<ConnectionsCard connections={[online('Caro')]} />);
+    expect(screen.queryByText(/·.*·/)).not.toBeInTheDocument();
   });
 });
