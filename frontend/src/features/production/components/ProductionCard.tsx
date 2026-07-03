@@ -8,7 +8,7 @@ interface Props {
 }
 
 const WEEKEND_MESSAGE =
-  'Los sábados y domingos no hay entregas. La producción se planifica de domingo a jueves para las entregas de lunes a viernes — volvé el domingo para preparar el lunes.';
+  'Los sábados y domingos no hay entregas. La producción se planifica de domingo a jueves para las entregas de lunes a viernes — vuelve el domingo para preparar el lunes.';
 
 const COLUMNS: { label: string; key: keyof ProductionSummary['groups'] }[] = [
   { label: 'Jugo', key: 'juice' },

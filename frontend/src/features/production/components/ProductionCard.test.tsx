@@ -58,7 +58,11 @@ describe('ProductionCard', () => {
     render(<ProductionCard summary={weekendSummary} />);
 
     expect(screen.getByText('No hay entregas mañana')).toBeInTheDocument();
-    expect(screen.getByText(/La producción se planifica de domingo a jueves/)).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        'Los sábados y domingos no hay entregas. La producción se planifica de domingo a jueves para las entregas de lunes a viernes — vuelve el domingo para preparar el lunes.',
+      ),
+    ).toBeInTheDocument();
     expect(screen.queryByText('Jugo')).not.toBeInTheDocument();
     expect(screen.getByText('—')).toBeInTheDocument();
   });
