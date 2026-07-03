@@ -1,6 +1,6 @@
 import Client from '../../models/Client';
 import Plan from '../../models/Plan';
-import { findActiveSubscriptionsForDate } from '../subscription/find-active-for-date';
+import { findActiveSubscriptionsForDate } from '../subscription';
 
 export type ActiveClientRow = {
   name: string;

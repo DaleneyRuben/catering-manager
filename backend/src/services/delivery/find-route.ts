@@ -2,7 +2,7 @@ import { parseISO } from 'date-fns';
 import Client from '../../models/Client';
 import { appToday, addCalendarDays } from '../../utils/date';
 import { checkIsWeekend } from '../../utils/devFlags';
-import { findActiveSubscriptionsForDate } from '../subscription/find-active-for-date';
+import { findActiveSubscriptionsForDate } from '../subscription';
 
 // Display order for the Entregas page — Sur first, matching the route layout, not the
 // alphabetical order used for client-facing zone dropdowns elsewhere in the app.

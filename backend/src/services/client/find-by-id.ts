@@ -1,5 +1,5 @@
 import Client from '../../models/Client';
-import { findMembers } from '../delivery/find-members';
+import { findMembers } from '../delivery';
 import { withStatus, INCLUDE_SUBSCRIPTION_ORDERED } from './_helpers';
 
 export const findById = async (id: number) => {

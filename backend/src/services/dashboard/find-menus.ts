@@ -1,6 +1,6 @@
 import type Menu from '../../models/Menu';
 import { appToday, addCalendarDays, nextDeliveryDay } from '../../utils/date';
-import { findByDate } from '../menu/find-by-date';
+import { findByDate } from '../menu';
 
 export type MenuStatus = {
   date: string;
