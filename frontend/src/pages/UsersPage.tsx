@@ -8,8 +8,9 @@ import { UsersPageSkeleton } from '@/features/users/components/UsersPageSkeleton
 import { useUsers, type AppUser } from '@/features/users/hooks/useUsers';
 import { useAuth } from '@/features/auth/AuthContext';
 import { UserModal } from '@/features/users/components/UserModal';
+import { LoginHistoryModal } from '@/features/users/components/LoginHistoryModal';
 import { initials } from '@/utils/string';
-import { formatDateTime } from '@/utils/format';
+import { formatDateTime, formatDevice } from '@/utils/format';
 import type { UserRole } from '@/features/auth/AuthContext';
 import { ROLES, ROLE_LABELS } from '@/constants/roles';
 
@@ -44,6 +45,7 @@ export function UsersPage() {
   const { users, isLoading, isSaving, create, update, remove } = useUsers();
   const [createOpen, setCreateOpen] = useState(false);
   const [editUser, setEditUser] = useState<AppUser | null>(null);
+  const [historyUser, setHistoryUser] = useState<AppUser | null>(null);
   const [query, setQuery] = useState('');
 
   if (isLoading) return <UsersPageSkeleton />;
@@ -135,6 +137,7 @@ export function UsersPage() {
               <tbody>
                 {filteredUsers.map((u) => {
                   const isActive = isActiveUser(u.lastLoginAt);
+                  const device = formatDevice(u.lastBrowser, u.lastOs, u.lastDeviceType);
                   return (
                     <tr
                       key={u.id}
@@ -158,7 +161,8 @@ export function UsersPage() {
                         </span>
                       </td>
                       <td className="px-[22px] py-[13px] text-[12px] font-mono text-muted tabular-nums whitespace-nowrap">
-                        {u.lastLoginAt ? formatDateTime(u.lastLoginAt) : 'Nunca'}
+                        <p>{u.lastLoginAt ? formatDateTime(u.lastLoginAt) : 'Nunca'}</p>
+                        {device && <p className="text-[11px] text-faint mt-0.5">{device}</p>}
                       </td>
                       <td className="px-[22px] py-[13px]">
                         <span
@@ -172,7 +176,14 @@ export function UsersPage() {
                           {isActive ? 'Activo' : 'Inactivo'}
                         </span>
                       </td>
-                      <td className="px-[22px] py-[13px] text-right">
+                      <td className="px-[22px] py-[13px] text-right whitespace-nowrap">
+                        <IconButton
+                          icon="history"
+                          label={`Historial de ${u.username}`}
+                          onClick={() => setHistoryUser(u)}
+                          size={15}
+                          className="w-8 h-8 rounded-lg text-faint hover:text-ink-2 hover:bg-cream-2"
+                        />
                         <IconButton
                           icon="settings"
                           label={`Editar ${u.username}`}
@@ -210,6 +221,8 @@ export function UsersPage() {
           onClose={() => setEditUser(null)}
         />
       )}
+
+      {historyUser && <LoginHistoryModal user={historyUser} onClose={() => setHistoryUser(null)} />}
     </div>
   );
 }
