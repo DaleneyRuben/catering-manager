@@ -1,10 +1,12 @@
 import request from 'supertest';
 import app from '../../app';
 import * as userService from '../../services/user';
+import * as loginEventService from '../../services/login-event';
 import { encodeId } from '../../utils/sqids';
 import { ROLES } from '../../constants/roles';
 
 jest.mock('../../services/user');
+jest.mock('../../services/login-event');
 jest.mock('../../database/sequelize', () => ({ __esModule: true, default: { query: jest.fn() } }));
 jest.mock('../../middleware/auth', () => ({
   requireAuth: (_req: unknown, _res: unknown, next: () => void) => next(),
@@ -167,6 +169,45 @@ describe('DELETE /api/users/:id', () => {
     mockRemove.mockRejectedValue(new Error('db error'));
 
     const res = await request(app).delete(`/api/users/${id1}`);
+
+    expect(res.status).toBe(500);
+  });
+});
+
+describe('GET /api/users/:id/logins', () => {
+  const mockFindForUser = loginEventService.findForUser as jest.Mock;
+
+  it('returns the login history for the user', async () => {
+    const entries = [
+      {
+        deviceType: 'mobile',
+        os: 'Android 14',
+        browser: 'Chrome 126',
+        createdAt: '2026-07-03T12:30:00.000Z',
+      },
+    ];
+    mockFindForUser.mockResolvedValue(entries);
+
+    const res = await request(app).get(`/api/users/${id1}/logins`);
+
+    expect(res.status).toBe(200);
+    expect(res.body.data).toEqual(entries);
+    expect(mockFindForUser).toHaveBeenCalledWith(1);
+  });
+
+  it('returns an empty list when the user has no logins', async () => {
+    mockFindForUser.mockResolvedValue([]);
+
+    const res = await request(app).get(`/api/users/${id999}/logins`);
+
+    expect(res.status).toBe(200);
+    expect(res.body.data).toEqual([]);
+  });
+
+  it('returns 500 when service throws', async () => {
+    mockFindForUser.mockRejectedValue(new Error('db error'));
+
+    const res = await request(app).get(`/api/users/${id1}/logins`);
 
     expect(res.status).toBe(500);
   });
