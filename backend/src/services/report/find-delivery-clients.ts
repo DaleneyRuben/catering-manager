@@ -1,5 +1,5 @@
 import Client from '../../models/Client';
-import { findActiveSubscriptionsForDate } from '../subscription/find-active-for-date';
+import { findActiveSubscriptionsForDate } from '../subscription';
 
 export const findDeliveryClientsForDate = async (date: string): Promise<string[]> => {
   const subscriptions = await findActiveSubscriptionsForDate(date);
