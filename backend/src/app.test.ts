@@ -33,6 +33,18 @@ describe('CORS', () => {
     expect(res.headers['access-control-allow-origin']).toBe(previewOrigin);
   });
 
+  it('allows requests from vercel git branch alias deployments', async () => {
+    const branchOrigin =
+      'https://la-oliva-frontend-git-fix-ve-badeeb-fernando-daleney-s-projects.vercel.app';
+
+    const res = await request(app)
+      .options('/api/health')
+      .set('Origin', branchOrigin)
+      .set('Access-Control-Request-Method', 'GET');
+
+    expect(res.headers['access-control-allow-origin']).toBe(branchOrigin);
+  });
+
   it('rejects requests from unrelated origins', async () => {
     const res = await request(app)
       .options('/api/health')
