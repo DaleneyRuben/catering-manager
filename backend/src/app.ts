@@ -9,7 +9,8 @@ const app = express();
 
 const allowedOrigins: (string | RegExp)[] = [
   process.env.CORS_ORIGIN || 'http://localhost:3000',
-  /^https:\/\/la-oliva-frontend-[a-z0-9]+-fernando-daleney-s-projects\.vercel\.app$/,
+  // [a-z0-9-] covers both random-hash and git-branch alias preview URLs
+  /^https:\/\/la-oliva-frontend-[a-z0-9-]+-fernando-daleney-s-projects\.vercel\.app$/,
 ];
 
 app.use(helmet());
