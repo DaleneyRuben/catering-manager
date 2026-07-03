@@ -68,6 +68,7 @@ import { setGroup, findMembers } from '../services/delivery';
 | `health`       | `getReport`                                                                                        |
 | `menu`         | `upsert`, `findByDate`, `findAll`                                                                  |
 | `plan`         | `findAll`, `findById`, `getClientCounts`, `create`, `update`, `remove`                             |
+| `production`   | `findGroups`                                                                                       |
 | `report`       | `findDeliveryClientsForDate`, `findActiveClientsWithPlansForDate`                                  |
 | `subscription` | `create`, `update`, `findActiveSubscriptionsForDate`                                               |
 | `user`         | `findAll`, `findById`, `create`, `update`, `remove`                                                |
