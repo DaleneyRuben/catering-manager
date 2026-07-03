@@ -7,10 +7,15 @@ import errorHandler from './middleware/error-handler';
 
 const app = express();
 
+const allowedOrigins: (string | RegExp)[] = [
+  process.env.CORS_ORIGIN || 'http://localhost:3000',
+  /^https:\/\/la-oliva-frontend-[a-z0-9]+-fernando-daleney-s-projects\.vercel\.app$/,
+];
+
 app.use(helmet());
 app.use(
   cors({
-    origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
+    origin: allowedOrigins,
     exposedHeaders: ['Content-Disposition'],
   }),
 );
