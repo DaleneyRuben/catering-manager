@@ -1,3 +1,4 @@
 {
+  "relatedProjects": ["prj_pEHkskqPD2iAIEt2gRmnHYotVA6X"],
   "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
 }

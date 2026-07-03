@@ -15,5 +15,5 @@
       "@/*": ["src/*"]
     }
   },
-  "include": ["src", "jest.config.ts", "jest.setup.ts", "vite.config.ts"]
+  "include": ["src", "vite", "jest.config.ts", "jest.setup.ts", "vite.config.ts"]
 }
