@@ -38,19 +38,35 @@ export const findGroups = async (): Promise<ProductionSummary> => {
 
   const subscriptions = await findActiveSubscriptionsForDate(tomorrow);
   const groups = emptyGroups();
+  // Total counts distinct clients placed in at least one group ("clientes a preparar"),
+  // not all active clients — an unclassifiable plan (e.g. breakfast-only) is excluded.
+  let total = 0;
 
   subscriptions.forEach((subscription) => {
-    const {name} = (subscription.client as Client);
-    const {meals} = (subscription.plan as Plan);
+    const { name } = subscription.client as Client;
+    const { meals } = subscription.plan as Plan;
+    let placed = false;
 
-    if (meals.includes('juice')) groups.juice.push(name);
+    if (meals.includes('juice')) {
+      groups.juice.push(name);
+      placed = true;
+    }
 
-    if (meals.length >= FULL_MIN_MEALS) groups.full.push(name);
-    else if (meals.includes('lunch') && meals.includes('dinner')) groups.lunchAndDinner.push(name);
-    else if (meals.includes('lunch')) groups.lunchOnly.push(name);
+    if (meals.length >= FULL_MIN_MEALS) {
+      groups.full.push(name);
+      placed = true;
+    } else if (meals.includes('lunch') && meals.includes('dinner')) {
+      groups.lunchAndDinner.push(name);
+      placed = true;
+    } else if (meals.includes('lunch')) {
+      groups.lunchOnly.push(name);
+      placed = true;
+    }
+
+    if (placed) total += 1;
   });
 
   Object.values(groups).forEach((names) => names.sort((a, b) => a.localeCompare(b, 'es')));
 
-  return { date: tomorrow, isDeliveryDay: true, total: subscriptions.length, groups };
+  return { date: tomorrow, isDeliveryDay: true, total, groups };
 };

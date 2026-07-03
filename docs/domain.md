@@ -135,8 +135,8 @@ Not to be confused with the **Producción section** of the kitchen `.docx` repor
   - **Completo** (`full`) — plan has **6 or more** meal types, counting all entries including `juice` and `extra`. Checked first.
   - **Almuerzo y cena** (`lunchAndDinner`) — plan has both `lunch` and `dinner` (and fewer than 6 meals).
   - **Almuerzo** (`lunchOnly`) — plan has `lunch` and no `dinner` (and fewer than 6 meals).
-  - A client matching none of the three non-juice groups (e.g. breakfast-only plan) appears only in Jugo if applicable, otherwise in no group — but still counts toward the card's total.
-- The card total is the number of distinct active clients for tomorrow, computed server-side.
+  - A client matching none of the three non-juice groups (e.g. breakfast-only plan) appears only in Jugo if applicable, otherwise in no group.
+- The card total ("clientes a preparar") is the number of distinct clients placed in at least one group, computed server-side. Active clients whose plan matches no group are not counted.
 
 ---
 
