@@ -94,7 +94,7 @@ describe('findGroups', () => {
     expect(groups.full).toEqual([]);
   });
 
-  it('leaves unclassifiable clients out of all groups but counts them in total', async () => {
+  it('excludes unclassifiable clients from all groups and from the total', async () => {
     mockSubscriptions([
       makeSubscription('Breakfast Only Client', ['breakfast']),
       makeSubscription('Lunch Client', ['lunch']),
@@ -102,11 +102,22 @@ describe('findGroups', () => {
 
     const result = await findGroups();
 
-    expect(result.total).toBe(2);
+    expect(result.total).toBe(1);
     expect(result.groups.juice).toEqual([]);
     expect(result.groups.lunchOnly).toEqual(['Lunch Client']);
     expect(result.groups.full).toEqual([]);
     expect(result.groups.lunchAndDinner).toEqual([]);
+  });
+
+  it('counts a client placed in juice and another group once in the total', async () => {
+    mockSubscriptions([
+      makeSubscription('Juice And Lunch Client', ['juice', 'lunch']),
+      makeSubscription('Juice Breakfast Client', ['juice', 'breakfast']),
+    ]);
+
+    const result = await findGroups();
+
+    expect(result.total).toBe(2);
   });
 
   it('sorts names within each group with spanish collation', async () => {
