@@ -15,7 +15,15 @@ describe('findAll', () => {
     const result = await findAll();
 
     expect(User.findAll).toHaveBeenCalledWith({
-      attributes: ['id', 'username', 'role', 'lastLoginAt'],
+      attributes: [
+        'id',
+        'username',
+        'role',
+        'lastLoginAt',
+        'lastDeviceType',
+        'lastOs',
+        'lastBrowser',
+      ],
       order: [['username', 'ASC']],
     });
     expect(result).toEqual([mockUser]);

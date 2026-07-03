@@ -15,15 +15,41 @@ describe('findConnections', () => {
 
   it('returns all kitchen and delivery users sorted by lastLoginAt desc', async () => {
     (User.findAll as jest.Mock).mockResolvedValue([
-      { username: 'Caro', lastLoginAt: new Date('2026-06-25T11:59:00Z') },
-      { username: 'Randy', lastLoginAt: new Date('2026-06-25T11:56:00Z') },
+      {
+        username: 'Caro',
+        lastLoginAt: new Date('2026-06-25T11:59:00Z'),
+        lastDeviceType: 'mobile',
+        lastOs: 'Android 14',
+        lastBrowser: 'Chrome 126',
+      },
+      {
+        username: 'Randy',
+        lastLoginAt: new Date('2026-06-25T11:56:00Z'),
+        lastDeviceType: null,
+        lastOs: null,
+        lastBrowser: null,
+      },
     ]);
 
     const result = await findConnections();
 
     expect(result).toEqual([
-      { username: 'Caro', lastLoginAt: '2026-06-25T11:59:00.000Z', online: true },
-      { username: 'Randy', lastLoginAt: '2026-06-25T11:56:00.000Z', online: true },
+      {
+        username: 'Caro',
+        lastLoginAt: '2026-06-25T11:59:00.000Z',
+        online: true,
+        lastDeviceType: 'mobile',
+        lastOs: 'Android 14',
+        lastBrowser: 'Chrome 126',
+      },
+      {
+        username: 'Randy',
+        lastLoginAt: '2026-06-25T11:56:00.000Z',
+        online: true,
+        lastDeviceType: null,
+        lastOs: null,
+        lastBrowser: null,
+      },
     ]);
   });
 
