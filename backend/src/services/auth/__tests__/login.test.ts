@@ -2,18 +2,24 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import User from '../../../models/User';
 import { login } from '../login';
+import { record } from '../../login-event';
 import { encodeId } from '../../../utils/sqids';
 import { ROLES } from '../../../constants/roles';
 
 jest.mock('../../../models/User');
+jest.mock('../../login-event');
 jest.mock('bcrypt');
 jest.mock('jsonwebtoken');
+
+const ANDROID_CHROME_UA =
+  'Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Mobile Safari/537.36';
 
 const OLD_ENV = process.env;
 
 beforeEach(() => {
   jest.resetAllMocks();
   process.env = { ...OLD_ENV, JWT_SECRET: 'test-secret' };
+  (record as jest.Mock).mockResolvedValue({ deviceType: null, os: null, browser: null });
 });
 
 afterAll(() => {
@@ -41,14 +47,45 @@ describe('login', () => {
     expect(bcrypt.compare).toHaveBeenCalledWith('correct-password', mockUser.password);
   });
 
-  it('updates lastLoginAt on successful login', async () => {
+  it('updates lastLoginAt and the device snapshot on successful login', async () => {
     (User.findOne as jest.Mock).mockResolvedValue(mockUser);
     (bcrypt.compare as jest.Mock).mockResolvedValue(true);
     (jwt.sign as jest.Mock).mockReturnValue('signed-token');
+    (record as jest.Mock).mockResolvedValue({
+      deviceType: 'mobile',
+      os: 'Android 14',
+      browser: 'Chrome 126',
+    });
 
-    await login('ada', 'correct-password');
+    await login('ada', 'correct-password', ANDROID_CHROME_UA);
 
-    expect(mockUser.update).toHaveBeenCalledWith({ lastLoginAt: expect.any(Date) });
+    expect(mockUser.update).toHaveBeenCalledWith({
+      lastLoginAt: expect.any(Date),
+      lastDeviceType: 'mobile',
+      lastOs: 'Android 14',
+      lastBrowser: 'Chrome 126',
+    });
+  });
+
+  it('records a login event with the user agent', async () => {
+    (User.findOne as jest.Mock).mockResolvedValue(mockUser);
+    (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+    (jwt.sign as jest.Mock).mockReturnValue('signed-token');
+    (record as jest.Mock).mockResolvedValue({ deviceType: null, os: null, browser: null });
+
+    await login('ada', 'correct-password', ANDROID_CHROME_UA);
+
+    expect(record).toHaveBeenCalledWith(1, ANDROID_CHROME_UA);
+  });
+
+  it('does not record a login event when credentials are invalid', async () => {
+    (User.findOne as jest.Mock).mockResolvedValue(mockUser);
+    (bcrypt.compare as jest.Mock).mockResolvedValue(false);
+
+    await expect(login('ada', 'wrong-password', ANDROID_CHROME_UA)).rejects.toThrow(
+      'INVALID_CREDENTIALS',
+    );
+    expect(record).not.toHaveBeenCalled();
   });
 
   it('throws INVALID_CREDENTIALS when user not found', async () => {
