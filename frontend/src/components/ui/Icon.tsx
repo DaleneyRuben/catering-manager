@@ -169,6 +169,14 @@ export function Icon({ name, size = 16, stroke = 1.5, className }: IconProps) {
           <path d="M10.4 5.4h3.2" />
         </svg>
       );
+    case 'history':
+      return (
+        <svg {...props}>
+          <path d="M3 3v5h5" />
+          <path d="M3.05 13A9 9 0 1 0 6 5.3L3 8" />
+          <path d="M12 7v5l4 2" />
+        </svg>
+      );
     case 'search':
       return (
         <svg {...props}>
