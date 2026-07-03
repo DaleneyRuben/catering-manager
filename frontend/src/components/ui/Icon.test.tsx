@@ -53,4 +53,9 @@ describe('Icon', () => {
     const { container } = render(<Icon name="calendar-x" />);
     expect(container.querySelector('svg')).toBeInTheDocument();
   });
+
+  it('renders an svg for history', () => {
+    const { container } = render(<Icon name="history" />);
+    expect(container.querySelector('svg')).toBeInTheDocument();
+  });
 });
