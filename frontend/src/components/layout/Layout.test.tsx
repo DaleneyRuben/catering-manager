@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { Layout } from '@/components/layout/Layout';
@@ -160,10 +160,12 @@ describe('Layout', () => {
         </Layout>
       </MemoryRouter>,
     );
-    expect(screen.getByText('Cocina')).toBeInTheDocument();
-    expect(screen.queryByText('Gestión')).not.toBeInTheDocument();
-    expect(screen.queryByText('Logística')).not.toBeInTheDocument();
-    expect(screen.queryByText('Administración')).not.toBeInTheDocument();
+    // scoped to the nav — the footer role label for kitchen users is also "Cocina"
+    const nav = within(screen.getByRole('navigation'));
+    expect(nav.getByText('Cocina')).toBeInTheDocument();
+    expect(nav.queryByText('Gestión')).not.toBeInTheDocument();
+    expect(nav.queryByText('Logística')).not.toBeInTheDocument();
+    expect(nav.queryByText('Administración')).not.toBeInTheDocument();
   });
 
   it('shows only the Logística section label for the delivery role', () => {
