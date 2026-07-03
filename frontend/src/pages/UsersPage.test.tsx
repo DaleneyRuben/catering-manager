@@ -22,19 +22,33 @@ jest.mock('@/features/users/components/UserModal', () => ({
   },
 }));
 
+let capturedHistoryProps: Record<string, unknown> = {};
+jest.mock('@/features/users/components/LoginHistoryModal', () => ({
+  LoginHistoryModal: (props: Record<string, unknown>) => {
+    capturedHistoryProps = props;
+    return <div>login-history-modal</div>;
+  },
+}));
+
+const noDevice = { lastDeviceType: null, lastOs: null, lastBrowser: null };
+
 const defaultUsers = [
   {
     id: '1',
     username: 'admin',
     role: 'admin' as const,
     lastLoginAt: subDays(new Date(), 3).toISOString(),
+    lastDeviceType: 'mobile',
+    lastOs: 'Android 14',
+    lastBrowser: 'Chrome 126',
   },
-  { id: '2', username: 'chef', role: 'kitchen' as const, lastLoginAt: null },
+  { id: '2', username: 'chef', role: 'kitchen' as const, lastLoginAt: null, ...noDevice },
   {
     id: '3',
     username: 'rocio',
     role: 'kitchen' as const,
     lastLoginAt: subDays(new Date(), 10).toISOString(),
+    ...noDevice,
   },
 ];
 
@@ -54,6 +68,7 @@ describe('UsersPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     capturedModalProps = {};
+    capturedHistoryProps = {};
     (useAuth as jest.Mock).mockReturnValue({ user: { id: '1', username: 'admin', role: 'admin' } });
     setupUsers();
   });
@@ -143,5 +158,17 @@ describe('UsersPage', () => {
   it('shows Inactivo for users who have not logged in within the last 7 days, including those who never logged in', () => {
     render(<UsersPage />);
     expect(screen.getAllByText('Inactivo')).toHaveLength(2);
+  });
+
+  it('shows the last device under the last login', () => {
+    render(<UsersPage />);
+    expect(screen.getByText('Chrome 126 · Android 14 · Móvil')).toBeInTheDocument();
+  });
+
+  it('opens the login history modal for the clicked user', async () => {
+    render(<UsersPage />);
+    await userEvent.click(screen.getByRole('button', { name: 'Historial de admin' }));
+    expect(screen.getByText('login-history-modal')).toBeInTheDocument();
+    expect((capturedHistoryProps.user as { id: string }).id).toBe('1');
   });
 });
