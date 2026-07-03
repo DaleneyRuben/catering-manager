@@ -2149,6 +2149,13 @@
   resolved "https://registry.yarnpkg.com/@unrs/resolver-binding-win32-x64-msvc/-/resolver-binding-win32-x64-msvc-1.12.1.tgz#32c441b69e54582ca0c5f51a0fa2bb69b45de24a"
   integrity sha512-rXHMTryD4YT8wuGDhV8UevKiD02/wUrdKLyokgNQQf/AcO6BCUEkQu5WGQ9i41bA4tlSfKo02WmAcAgxuP6izA==
 
+"@vercel/related-projects@^1.1.0":
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/@vercel/related-projects/-/related-projects-1.1.0.tgz#5063b9088f5a4640750476a9c004275dfce072b1"
+  integrity sha512-4YjXj8rL9UVX444vaKuSmXgZD0ABOEgQNd6BR75vACaeAcuwU8powNyKDoAM9JIPfVhx7/zHCum5z+7lx2Mp9g==
+  optionalDependencies:
+    ajv "^6.12.3"
+
 "@vitejs/plugin-react@^6.0.2":
   version "6.0.2"
   resolved "https://registry.npmjs.org/@vitejs/plugin-react/-/plugin-react-6.0.2.tgz"
@@ -2245,7 +2252,7 @@ agent-base@6:
   dependencies:
     debug "4"
 
-ajv@^6.12.4:
+ajv@^6.12.3, ajv@^6.12.4:
   version "6.15.0"
   resolved "https://registry.npmjs.org/ajv/-/ajv-6.15.0.tgz"
   integrity sha512-fgFx7Hfoq60ytK2c7DhnF8jIvzYgOMxfugjLOSMHjLIPgenqa7S7oaagATUq99mV6IYvN2tRmC0wnTYX6iPbMw==
