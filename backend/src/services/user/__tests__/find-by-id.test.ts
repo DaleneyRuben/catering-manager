@@ -15,7 +15,15 @@ describe('findById', () => {
     const result = await findById(1);
 
     expect(User.findByPk).toHaveBeenCalledWith(1, {
-      attributes: ['id', 'username', 'role', 'lastLoginAt'],
+      attributes: [
+        'id',
+        'username',
+        'role',
+        'lastLoginAt',
+        'lastDeviceType',
+        'lastOs',
+        'lastBrowser',
+      ],
     });
     expect(result).toEqual(mockUser);
   });
