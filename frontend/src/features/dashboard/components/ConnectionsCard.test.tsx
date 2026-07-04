@@ -70,4 +70,11 @@ describe('ConnectionsCard', () => {
     render(<ConnectionsCard connections={[online('Caro')]} />);
     expect(screen.queryByText(/·.*·/)).not.toBeInTheDocument();
   });
+
+  it('top-aligns the status dot so rows with a device line stay consistent', () => {
+    render(<ConnectionsCard connections={[withDevice('Caro')]} />);
+    const row = screen.getByText('Caro').closest('div')!.parentElement!;
+    expect(row.className).toContain('items-start');
+    expect(row.className).not.toContain('items-center');
+  });
 });
