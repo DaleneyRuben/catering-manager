@@ -66,6 +66,7 @@ import { setGroup, findMembers } from '../services/delivery';
 | `dashboard`    | `findCounts`, `findContractEnding`, `findConnections`, `findBirthdays`, `findMenus`, `findSummary` |
 | `delivery`     | `setGroup`, `findMembers`, `findRoute`                                                             |
 | `health`       | `getReport`                                                                                        |
+| `login-event`  | `record`, `findForUser`                                                                            |
 | `menu`         | `upsert`, `findByDate`, `findAll`                                                                  |
 | `plan`         | `findAll`, `findById`, `getClientCounts`, `create`, `update`, `remove`                             |
 | `production`   | `findGroups`                                                                                       |

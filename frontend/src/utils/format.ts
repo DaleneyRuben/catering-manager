@@ -39,6 +39,22 @@ export function formatConnectionStamp(iso: string, now = new Date()) {
   return isToday ? `Hoy · ${time}` : `${format(date, 'dd/MM')} · ${time}`;
 }
 
+const DEVICE_TYPE_LABELS: Record<string, string> = {
+  mobile: 'Móvil',
+  desktop: 'Escritorio',
+  tablet: 'Tableta',
+};
+
+// Returns "Chrome 126 · Android 14 · Móvil" (missing parts omitted), or null when nothing is known
+export function formatDevice(
+  browser: string | null,
+  os: string | null,
+  deviceType: string | null,
+): string | null {
+  const parts = [browser, os, deviceType ? DEVICE_TYPE_LABELS[deviceType] : null].filter(Boolean);
+  return parts.length > 0 ? parts.join(' · ') : null;
+}
+
 // Returns "hace X min", "hace X h", or "hace X días"
 export function formatRelativeTime(iso: string, now = Date.now()) {
   const date = parseISO(iso);

@@ -1,5 +1,5 @@
 import { Icon } from '@ui/Icon';
-import { formatConnectionStamp, formatRelativeTime } from '@/utils/format';
+import { formatConnectionStamp, formatRelativeTime, formatDevice } from '@/utils/format';
 import type { Connection } from '@/features/dashboard/types';
 
 interface RowProps {
@@ -7,6 +7,8 @@ interface RowProps {
 }
 
 function ConnectionRow({ connection }: RowProps) {
+  const device = formatDevice(connection.lastBrowser, connection.lastOs, connection.lastDeviceType);
+
   return (
     <div className="flex items-center gap-[11px]">
       <span
@@ -21,6 +23,7 @@ function ConnectionRow({ connection }: RowProps) {
         <p className="font-mono text-[10.5px] text-faint mt-0.5">
           {formatConnectionStamp(connection.lastLoginAt)}
         </p>
+        {device && <p className="font-mono text-[10.5px] text-muted mt-0.5 truncate">{device}</p>}
       </div>
       <span
         className={`font-mono text-[11px] whitespace-nowrap ${connection.online ? 'text-olive-600' : 'text-faint'}`}

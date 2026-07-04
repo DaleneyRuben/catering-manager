@@ -16,6 +16,9 @@ export interface Connection {
   username: string;
   lastLoginAt: string;
   online: boolean;
+  lastDeviceType: string | null;
+  lastOs: string | null;
+  lastBrowser: string | null;
 }
 
 export interface MenuStatus {

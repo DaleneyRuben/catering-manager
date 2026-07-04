@@ -6,6 +6,9 @@ export type Connection = {
   username: string;
   lastLoginAt: string;
   online: boolean;
+  lastDeviceType: string | null;
+  lastOs: string | null;
+  lastBrowser: string | null;
 };
 
 const ONLINE_WINDOW_MS = 60 * 60 * 1000;
@@ -26,6 +29,9 @@ export const findConnections = async (): Promise<Connection[]> => {
       username: user.username,
       lastLoginAt: lastLoginAt.toISOString(),
       online: now - lastLoginAt.getTime() <= ONLINE_WINDOW_MS,
+      lastDeviceType: user.lastDeviceType,
+      lastOs: user.lastOs,
+      lastBrowser: user.lastBrowser,
     };
   });
 };

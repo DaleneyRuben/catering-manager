@@ -16,6 +16,15 @@ class User extends Model {
 
   @Column({ type: DataType.DATE, allowNull: true })
   declare lastLoginAt: Date | null;
+
+  @Column({ type: DataType.STRING, allowNull: true })
+  declare lastDeviceType: string | null;
+
+  @Column({ type: DataType.STRING, allowNull: true })
+  declare lastOs: string | null;
+
+  @Column({ type: DataType.STRING, allowNull: true })
+  declare lastBrowser: string | null;
 }
 
 export default User;

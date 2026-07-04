@@ -31,6 +31,18 @@ UI labels are neutral Spanish. Each entry: term (code identifier) — definition
   client on a plan named "Completo" is usually in the `full` group, but the two concepts are
   independent.
 
+## Login tracking
+
+- **Login event** (`loginEvent`) — an append-only record of one successful login: who, when,
+  and from what device (parsed from the browser's User-Agent). Failed logins are never
+  recorded. Events older than 180 days are pruned automatically.
+- **Device snapshot** — the `lastDeviceType` / `lastOs` / `lastBrowser` fields on a user,
+  overwritten on each login (like `lastLoginAt`). A denormalized copy of the latest login
+  event, kept for fast display; the events table is the history.
+- **Device type** (`deviceType`) — `mobile` | `desktop` | `tablet`, stored as English keys,
+  displayed in Spanish ("Móvil" / "Escritorio" / "Tableta"). `null` when the login request
+  carried no User-Agent.
+
 ## Existing core terms (referenced by production)
 
 - **Active subscription (for a date)** — a subscription whose `startDate`–`contractEndDate`

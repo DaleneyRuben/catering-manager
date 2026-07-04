@@ -9,6 +9,9 @@ export type AppUser = {
   username: string;
   role: UserRole;
   lastLoginAt: string | null;
+  lastDeviceType: string | null;
+  lastOs: string | null;
+  lastBrowser: string | null;
 };
 
 export type UserDraft = {

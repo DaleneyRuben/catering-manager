@@ -6,6 +6,7 @@ import {
   formatWeekdayDate,
   formatConnectionStamp,
   formatRelativeTime,
+  formatDevice,
 } from '@/utils/format';
 
 describe('formatDate', () => {
@@ -122,5 +123,33 @@ describe('formatRelativeTime', () => {
   it('returns "hace X días" for 24+ hours', () => {
     const iso = new Date(base - 3 * 24 * 60 * 60_000).toISOString();
     expect(formatRelativeTime(iso, base)).toBe('hace 3 días');
+  });
+});
+
+describe('formatDevice', () => {
+  it('joins browser, os and the spanish device label', () => {
+    expect(formatDevice('Chrome 126', 'Android 14', 'mobile')).toBe(
+      'Chrome 126 · Android 14 · Móvil',
+    );
+  });
+
+  it('maps desktop and tablet device types to spanish', () => {
+    expect(formatDevice('Chrome 126', 'Windows 10', 'desktop')).toBe(
+      'Chrome 126 · Windows 10 · Escritorio',
+    );
+    expect(formatDevice('Safari 17', 'iOS 17', 'tablet')).toBe('Safari 17 · iOS 17 · Tableta');
+  });
+
+  it('omits missing parts', () => {
+    expect(formatDevice('Chrome 126', null, null)).toBe('Chrome 126');
+    expect(formatDevice(null, 'Android 14', 'mobile')).toBe('Android 14 · Móvil');
+  });
+
+  it('ignores an unknown device type key', () => {
+    expect(formatDevice('Chrome 126', null, 'watch')).toBe('Chrome 126');
+  });
+
+  it('returns null when nothing is known', () => {
+    expect(formatDevice(null, null, null)).toBeNull();
   });
 });

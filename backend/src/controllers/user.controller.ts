@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import * as userService from '../services/user';
+import { findForUser } from '../services/login-event';
 import { sendSuccess, sendError } from '../utils/response';
 import { decodeId } from '../utils/sqids';
 
@@ -47,4 +48,13 @@ const remove = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
-export default { getAll, create, update, remove };
+const getLogins = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const entries = await findForUser(decodeId(req.params.id));
+    sendSuccess(res, entries);
+  } catch (err) {
+    next(err);
+  }
+};
+
+export default { getAll, create, update, remove, getLogins };
