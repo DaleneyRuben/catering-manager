@@ -8,6 +8,8 @@ const ANDROID_CHROME_UA =
   'Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Mobile Safari/537.36';
 const WINDOWS_CHROME_UA =
   'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36';
+const MAC_CHROME_UA =
+  'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36';
 
 beforeEach(() => {
   jest.resetAllMocks();
@@ -22,17 +24,31 @@ describe('record', () => {
     expect(LoginEvent.create).toHaveBeenCalledWith({
       userId: 7,
       deviceType: 'mobile',
-      os: 'Android 14',
+      os: 'Android',
       browser: 'Chrome 126',
       userAgent: ANDROID_CHROME_UA,
     });
+  });
+
+  it('stores the os name without a version', async () => {
+    await record(7, WINDOWS_CHROME_UA);
+
+    expect(LoginEvent.create).toHaveBeenCalledWith(expect.objectContaining({ os: 'Windows' }));
+  });
+
+  it('normalizes Mac OS to macOS', async () => {
+    await record(7, MAC_CHROME_UA);
+
+    expect(LoginEvent.create).toHaveBeenCalledWith(
+      expect.objectContaining({ deviceType: 'desktop', os: 'macOS', browser: 'Chrome 149' }),
+    );
   });
 
   it('maps an undetected device type to desktop', async () => {
     await record(7, WINDOWS_CHROME_UA);
 
     expect(LoginEvent.create).toHaveBeenCalledWith(
-      expect.objectContaining({ deviceType: 'desktop', os: 'Windows 10', browser: 'Chrome 126' }),
+      expect.objectContaining({ deviceType: 'desktop', os: 'Windows', browser: 'Chrome 126' }),
     );
   });
 
@@ -51,7 +67,7 @@ describe('record', () => {
   it('returns the parsed device info', async () => {
     const parsed = await record(7, ANDROID_CHROME_UA);
 
-    expect(parsed).toEqual({ deviceType: 'mobile', os: 'Android 14', browser: 'Chrome 126' });
+    expect(parsed).toEqual({ deviceType: 'mobile', os: 'Android', browser: 'Chrome 126' });
   });
 
   it('prunes events older than the retention window', async () => {
