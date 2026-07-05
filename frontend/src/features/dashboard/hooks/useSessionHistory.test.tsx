@@ -54,6 +54,17 @@ describe('useSessionHistory', () => {
     expect(result.current.entries).toEqual(entries);
   });
 
+  it('requests only the given roles via the query string', async () => {
+    mockGet.mockResolvedValue([]);
+
+    const { result } = renderHook(() => useSessionHistory(['kitchen', 'delivery']), {
+      wrapper: makeWrapper(),
+    });
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    expect(mockGet).toHaveBeenCalledWith('/dashboard/sessions?roles=kitchen,delivery');
+  });
+
   it('exposes the query error', async () => {
     mockGet.mockRejectedValue(new Error('falló'));
 
