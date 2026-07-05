@@ -1,5 +1,5 @@
 import { Table, Column, Model, DataType } from 'sequelize-typescript';
-import { ROLE_VALUES, type UserRole } from '../constants/roles';
+import { ROLE_VALUES, type UserRole } from '../constants/roles.constants';
 
 export type { UserRole };
 

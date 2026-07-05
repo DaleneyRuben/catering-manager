@@ -1,7 +1,7 @@
 import { findGroups } from '../find-groups';
-import { findActiveSubscriptionsForDate } from '../../subscription/find-active-for-date';
+import { findActiveSubscriptionsForDate } from '../../subscription/find-active-subscriptions-for-date';
 
-jest.mock('../../subscription/find-active-for-date', () => ({
+jest.mock('../../subscription/find-active-subscriptions-for-date', () => ({
   findActiveSubscriptionsForDate: jest.fn(),
 }));
 

@@ -4,7 +4,7 @@ import User from '../../../models/User';
 import { login } from '../login';
 import { record } from '../../login-event';
 import { encodeId } from '../../../utils/sqids';
-import { ROLES } from '../../../constants/roles';
+import { ROLES } from '../../../constants/roles.constants';
 
 jest.mock('../../../models/User');
 jest.mock('../../login-event');

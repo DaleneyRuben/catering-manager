@@ -1,7 +1,7 @@
 import bcrypt from 'bcrypt';
 import User from '../../../models/User';
 import { update } from '../update';
-import { ROLES } from '../../../constants/roles';
+import { ROLES } from '../../../constants/roles.constants';
 
 jest.mock('../../../models/User');
 jest.mock('bcrypt');

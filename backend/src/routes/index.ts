@@ -11,7 +11,7 @@ import reportRoutes from './report.routes';
 import subscriptionRoutes from './subscription.routes';
 import userRoutes from './user.routes';
 import { requireAuth, requireRole } from '../middleware/auth';
-import { ROLES } from '../constants/roles';
+import { ROLES } from '../constants/roles.constants';
 
 const router = Router();
 

@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
 import { signToken } from '../sign-token';
-import { ROLES } from '../../../constants/roles';
+import { ROLES } from '../../../constants/roles.constants';
 
 jest.mock('jsonwebtoken');
 

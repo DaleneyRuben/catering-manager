@@ -1,6 +1,6 @@
 import User from '../../../models/User';
 import { findById } from '../find-by-id';
-import { ROLES } from '../../../constants/roles';
+import { ROLES } from '../../../constants/roles.constants';
 
 jest.mock('../../../models/User');
 
