@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { subDays } from 'date-fns';
+import { subHours, subMinutes } from 'date-fns';
 import { useUsers } from '@/features/users/hooks/useUsers';
 import { formatLastSeen } from '@/utils/format';
 import { useAuth } from '@/features/auth/AuthContext';
@@ -37,7 +37,7 @@ const defaultUsers = [
     id: '1',
     username: 'admin',
     role: 'admin' as const,
-    lastLoginAt: subDays(new Date(), 3).toISOString(),
+    lastLoginAt: subMinutes(new Date(), 8).toISOString(),
     lastDeviceType: 'mobile',
     lastOs: 'Android 14',
     lastBrowser: 'Chrome 126',
@@ -47,7 +47,7 @@ const defaultUsers = [
     id: '3',
     username: 'rocio',
     role: 'kitchen' as const,
-    lastLoginAt: subDays(new Date(), 10).toISOString(),
+    lastLoginAt: subHours(new Date(), 10).toISOString(),
     ...noDevice,
   },
 ];
@@ -150,12 +150,12 @@ describe('UsersPage', () => {
     expect(screen.getAllByText('Nunca')).toHaveLength(1);
   });
 
-  it('shows Activo for users who logged in within the last 7 days', () => {
+  it('shows Activo for users who logged in within the last 8 hours', () => {
     render(<UsersPage />);
     expect(screen.getAllByText('Activo')).toHaveLength(1);
   });
 
-  it('shows Inactivo for users who have not logged in within the last 7 days, including those who never logged in', () => {
+  it('shows Inactivo for users who have not logged in within the last 8 hours, including those who never logged in', () => {
     render(<UsersPage />);
     expect(screen.getAllByText('Inactivo')).toHaveLength(2);
   });

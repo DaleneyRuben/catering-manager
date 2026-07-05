@@ -53,14 +53,24 @@ describe('findConnections', () => {
     ]);
   });
 
-  it('marks online false when the last login was over an hour ago', async () => {
+  it('marks online false when the last login was over 8 hours ago', async () => {
+    (User.findAll as jest.Mock).mockResolvedValue([
+      { username: 'Randy', lastLoginAt: new Date('2026-06-25T02:00:00Z') },
+    ]);
+
+    const result = await findConnections();
+
+    expect(result[0].online).toBe(false);
+  });
+
+  it('marks online true when the last login was under 8 hours ago', async () => {
     (User.findAll as jest.Mock).mockResolvedValue([
       { username: 'Randy', lastLoginAt: new Date('2026-06-25T08:14:00Z') },
     ]);
 
     const result = await findConnections();
 
-    expect(result[0].online).toBe(false);
+    expect(result[0].online).toBe(true);
   });
 
   it('returns an empty array when no kitchen or delivery user has logged in', async () => {

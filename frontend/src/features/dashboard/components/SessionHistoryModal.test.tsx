@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { set, subDays, subMinutes } from 'date-fns';
+import { set, subDays, subHours, subMinutes } from 'date-fns';
 import { SessionHistoryModal } from '@/features/dashboard/components/SessionHistoryModal';
 import { useSessionHistory, type SessionEntry } from '@/features/dashboard/hooks/useSessionHistory';
 
@@ -76,7 +76,7 @@ describe('SessionHistoryModal', () => {
     expect(screen.getByText('Chrome 149 · Android · Móvil')).toBeInTheDocument();
   });
 
-  it('shows the Activa badge only for logins within the last hour', () => {
+  it('shows the Activa badge only for logins within the 8h session window', () => {
     mockSessions({ entries });
     render(<SessionHistoryModal onClose={jest.fn()} />);
 
@@ -90,6 +90,24 @@ describe('SessionHistoryModal', () => {
     expect(screen.getByTestId('icon-smartphone')).toBeInTheDocument();
     // header icon + fallback chip for the entry without device info
     expect(screen.getAllByTestId('icon-history')).toHaveLength(2);
+  });
+
+  it('shows the Activa badge for a login several hours old but still within the 8h session window', () => {
+    mockSessions({
+      entries: [
+        {
+          username: 'merlyn',
+          role: 'kitchen',
+          deviceType: 'mobile',
+          os: 'Android',
+          browser: 'Chrome 149',
+          createdAt: subHours(new Date(), 3).toISOString(),
+        },
+      ],
+    });
+    render(<SessionHistoryModal onClose={jest.fn()} />);
+
+    expect(screen.getByText('Activa')).toBeInTheDocument();
   });
 
   it('does not render a standalone status dot next to the device icon', () => {

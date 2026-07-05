@@ -9,6 +9,7 @@ import {
   subDays,
 } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { SESSION_DURATION_HOURS } from '@/constants/session';
 
 export function formatDate(iso: string | null | undefined) {
   if (!iso) return '—';
@@ -113,4 +114,10 @@ export function formatRelativeTime(iso: string, now = Date.now()) {
   const hours = differenceInHours(now, date);
   if (hours < 24) return `hace ${hours} h`;
   return `hace ${differenceInDays(now, date)} días`;
+}
+
+// A user is "active" while their login token is still valid — same window
+// as the backend's session token lifetime (SESSION_DURATION_HOURS).
+export function isOnline(iso: string, now = new Date()) {
+  return differenceInHours(now, parseISO(iso)) < SESSION_DURATION_HOURS;
 }

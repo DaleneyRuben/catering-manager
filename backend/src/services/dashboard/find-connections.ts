@@ -1,6 +1,7 @@
 import { Op } from 'sequelize';
 import User from '../../models/User';
 import { ROLES } from '../../constants/roles';
+import { SESSION_DURATION_HOURS } from '../../constants/session.constants';
 
 export type Connection = {
   username: string;
@@ -11,7 +12,7 @@ export type Connection = {
   lastBrowser: string | null;
 };
 
-const ONLINE_WINDOW_MS = 60 * 60 * 1000;
+const ONLINE_WINDOW_MS = SESSION_DURATION_HOURS * 60 * 60 * 1000;
 
 export const findConnections = async (): Promise<Connection[]> => {
   const users = await User.findAll({

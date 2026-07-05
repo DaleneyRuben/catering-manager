@@ -276,7 +276,7 @@ The system has four roles (`super_admin`, `admin`, `kitchen`, `delivery`). Role 
 - **kitchen** — can view the kitchen report and menu; cannot access the kitchen report download on the Reports page (that card is hidden for this role).
 - **delivery** — delivery route view only.
 
-The dashboard's connections widget shows online/offline status for `kitchen` and `delivery` users based on last login time (online = within the last hour).
+The dashboard's connections widget shows online/offline status for `kitchen` and `delivery` users based on last login time (online = within the last 8 hours, matching the login token's lifetime). The Usuarios table's "Estado" column (Activo/Inactivo) uses the same 8-hour rule, applied to all four roles.
 
 ### Login tracking
 
@@ -286,5 +286,5 @@ Each successful login records a **login event** (device type, OS, browser — pa
 - The snapshot is still recorded on every login but is **not displayed** — device details appear only inside the two history views (which read from login events). The connections widget and the Usuarios table show login times only; the Usuarios "Último acceso" column uses a relative stamp (`Hace X min` / `Hace X horas` / `Hoy · HH:mm` / `Ayer · HH:mm` / `Hace X días`).
 - Both history views share a **14-day (2-week) window**:
   - **Per-user history** — browsable from the Usuarios page (super_admin only), grouped by day.
-  - **Global session history** (`GET /api/dashboard/sessions`) — opened from the dashboard's "Última conexión" card (admin + super_admin). The endpoint accepts an optional `roles` query param (comma-separated); the panel modal requests `roles=kitchen,delivery`, so it lists operational staff logins only. A login within the last hour shows an "Activa" badge (same rule as the connections widget's online status); no session duration is tracked.
+  - **Global session history** (`GET /api/dashboard/sessions`) — opened from the dashboard's "Última conexión" card (admin + super_admin). The endpoint accepts an optional `roles` query param (comma-separated); the panel modal requests `roles=kitchen,delivery`, so it lists operational staff logins only. A login within the last 8 hours shows an "Activa" badge (same rule as the connections widget's online status); no session duration is tracked.
 - Device type is stored as an English key (`mobile` | `desktop` | `tablet`) and displayed in Spanish (Móvil / Escritorio / Tableta). All device fields are null when the login request has no User-Agent.
