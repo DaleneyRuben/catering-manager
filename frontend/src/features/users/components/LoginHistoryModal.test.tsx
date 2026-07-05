@@ -1,5 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { set, subDays } from 'date-fns';
 import { LoginHistoryModal } from '@/features/users/components/LoginHistoryModal';
 import { useLoginHistory, type LoginEntry } from '@/features/users/hooks/useLoginHistory';
 import type { AppUser } from '@/features/users/hooks/useUsers';
@@ -16,18 +17,25 @@ const user: AppUser = {
   role: 'kitchen',
   lastLoginAt: '2026-07-03T12:30:00.000Z',
   lastDeviceType: 'mobile',
-  lastOs: 'Android 14',
+  lastOs: 'Android',
   lastBrowser: 'Chrome 126',
 };
+
+const todayNoon = set(new Date(), { hours: 12, minutes: 30, seconds: 0, milliseconds: 0 });
 
 const entries: LoginEntry[] = [
   {
     deviceType: 'mobile',
-    os: 'Android 14',
+    os: 'Android',
     browser: 'Chrome 126',
-    createdAt: '2026-07-03T12:30:00.000Z',
+    createdAt: todayNoon.toISOString(),
   },
-  { deviceType: null, os: null, browser: null, createdAt: '2026-07-01T08:00:00.000Z' },
+  {
+    deviceType: null,
+    os: null,
+    browser: null,
+    createdAt: set(subDays(todayNoon, 3), { hours: 8, minutes: 0 }).toISOString(),
+  },
 ];
 
 function mockHistory(overrides: Partial<ReturnType<typeof useLoginHistory>> = {}) {
@@ -42,12 +50,20 @@ function mockHistory(overrides: Partial<ReturnType<typeof useLoginHistory>> = {}
 beforeEach(() => jest.clearAllMocks());
 
 describe('LoginHistoryModal', () => {
-  it('shows the title with the username', () => {
+  it('shows the username as title with the two week subtitle', () => {
     mockHistory();
     render(<LoginHistoryModal user={user} onClose={jest.fn()} />);
 
-    expect(screen.getByText('Historial de acceso')).toBeInTheDocument();
     expect(screen.getByText('caro')).toBeInTheDocument();
+    expect(screen.getByText('Historial de accesos · últimas 2 semanas')).toBeInTheDocument();
+  });
+
+  it('shows the user initials in a role-colored avatar', () => {
+    mockHistory();
+    render(<LoginHistoryModal user={user} onClose={jest.fn()} />);
+
+    const avatar = screen.getByText('c');
+    expect(avatar.className).toContain('bg-warn-bg');
   });
 
   it('fetches the history for the given user', () => {
@@ -57,11 +73,26 @@ describe('LoginHistoryModal', () => {
     expect(mockUseLoginHistory).toHaveBeenCalledWith('abc');
   });
 
-  it('renders a row per entry with timestamp and device', () => {
+  it('groups entries under day headers', () => {
     mockHistory({ entries });
     render(<LoginHistoryModal user={user} onClose={jest.fn()} />);
 
-    expect(screen.getByText('Chrome 126 · Android 14 · Móvil')).toBeInTheDocument();
+    expect(screen.getByText(/^Hoy · /)).toBeInTheDocument();
+  });
+
+  it('renders browser and os with the device label and time per entry', () => {
+    mockHistory({ entries });
+    render(<LoginHistoryModal user={user} onClose={jest.fn()} />);
+
+    expect(screen.getByText('Chrome 126 · Android')).toBeInTheDocument();
+    expect(screen.getByText('Móvil')).toBeInTheDocument();
+    expect(screen.getByText('12:30')).toBeInTheDocument();
+  });
+
+  it('marks entries without device info as unknown', () => {
+    mockHistory({ entries });
+    render(<LoginHistoryModal user={user} onClose={jest.fn()} />);
+
     expect(screen.getByText('Dispositivo desconocido')).toBeInTheDocument();
   });
 
