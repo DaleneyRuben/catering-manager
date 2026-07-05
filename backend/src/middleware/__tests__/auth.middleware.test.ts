@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { requireAuth, requireRole } from '../auth';
 import { verifyToken } from '../../services/auth';
-import { ROLES } from '../../constants/roles';
+import { ROLES } from '../../constants/roles.constants';
 
 jest.mock('../../services/auth');
 

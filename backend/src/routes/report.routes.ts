@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import reportController from '../controllers/report.controller';
 import { requireRole } from '../middleware/auth';
-import { ROLES } from '../constants/roles';
+import { ROLES } from '../constants/roles.constants';
 
 const router = Router();
 

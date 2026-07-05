@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { ROLE_VALUES } from '../constants/roles';
+import { ROLE_VALUES } from '../constants/roles.constants';
 
 export const createUserSchema = z.object({
   username: z.string().min(1),

@@ -1,7 +1,7 @@
 import request from 'supertest';
 import app from '../../app';
 import { verifyToken } from '../../services/auth';
-import { ROLES } from '../../constants/roles';
+import { ROLES } from '../../constants/roles.constants';
 
 jest.mock('../../services/auth');
 jest.mock('../../database/sequelize', () => ({ __esModule: true, default: { query: jest.fn() } }));

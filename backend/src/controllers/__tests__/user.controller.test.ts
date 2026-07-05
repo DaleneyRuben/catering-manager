@@ -3,7 +3,7 @@ import app from '../../app';
 import * as userService from '../../services/user';
 import * as loginEventService from '../../services/login-event';
 import { encodeId } from '../../utils/sqids';
-import { ROLES } from '../../constants/roles';
+import { ROLES } from '../../constants/roles.constants';
 
 jest.mock('../../services/user');
 jest.mock('../../services/login-event');

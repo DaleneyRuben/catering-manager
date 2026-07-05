@@ -1,6 +1,6 @@
 import { Op } from 'sequelize';
 import User from '../../models/User';
-import { ROLES } from '../../constants/roles';
+import { ROLES } from '../../constants/roles.constants';
 import { SESSION_DURATION_HOURS } from '../../constants/session.constants';
 
 export type Connection = {
