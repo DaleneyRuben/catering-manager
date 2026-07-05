@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { format, isWeekend } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Icon } from '@ui/Icon';
@@ -10,6 +11,7 @@ import { ContractEndingCard } from '@/features/dashboard/components/ContractEndi
 import { BirthdaysCard } from '@/features/dashboard/components/BirthdaysCard';
 import { ConnectionsCard } from '@/features/dashboard/components/ConnectionsCard';
 import { MenuStatusCard } from '@/features/dashboard/components/MenuStatusCard';
+import { SessionHistoryModal } from '@/features/dashboard/components/SessionHistoryModal';
 
 function todayIso() {
   return format(new Date(), 'yyyy-MM-dd');
@@ -31,6 +33,7 @@ const todayBadge = (
 
 export function DashboardPage() {
   const { summary, isLoading } = useDashboard();
+  const [sessionsOpen, setSessionsOpen] = useState(false);
   const { todayLabel, tomorrowLabel, deliveryCaption } = getDayLabels();
   const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
@@ -115,7 +118,10 @@ export function DashboardPage() {
             )}
           />
           <div className="flex flex-col gap-[18px]">
-            <ConnectionsCard connections={summary.connections} />
+            <ConnectionsCard
+              connections={summary.connections}
+              onOpenHistory={() => setSessionsOpen(true)}
+            />
             <MenuStatusCard
               today={summary.menus.today}
               tomorrow={summary.menus.tomorrow}
@@ -125,6 +131,8 @@ export function DashboardPage() {
           </div>
         </div>
       </div>
+
+      {sessionsOpen && <SessionHistoryModal onClose={() => setSessionsOpen(false)} />}
     </div>
   );
 }
