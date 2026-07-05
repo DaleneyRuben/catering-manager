@@ -1,3 +1,4 @@
+import { Button } from '@ui/Button';
 import { Icon } from '@ui/Icon';
 import { formatConnectionStamp, formatRelativeTime, formatDevice } from '@/utils/format';
 import type { Connection } from '@/features/dashboard/types';
@@ -37,9 +38,10 @@ function ConnectionRow({ connection }: RowProps) {
 
 interface Props {
   connections: Connection[];
+  onOpenHistory?: () => void;
 }
 
-export function ConnectionsCard({ connections }: Props) {
+export function ConnectionsCard({ connections, onOpenHistory }: Props) {
   return (
     <div className="bg-paper border border-rule rounded-[14px] px-6 py-[22px]">
       <div className="flex items-center gap-[11px] mb-[18px]">
@@ -47,6 +49,17 @@ export function ConnectionsCard({ connections }: Props) {
           <Icon name="wifi" size={17} stroke={1.6} />
         </span>
         <h2 className="font-serif font-semibold text-[20px] text-ink m-0">Última conexión</h2>
+        {onOpenHistory && (
+          <Button
+            variant="ghost"
+            onClick={onOpenHistory}
+            className="ml-auto font-mono font-semibold tracking-[.08em] uppercase"
+            style={{ padding: '4px 2px', fontSize: '10.5px', gap: '6px' }}
+          >
+            <Icon name="history" size={13} stroke={2} />
+            Historial
+          </Button>
+        )}
       </div>
       {connections.length === 0 ? (
         <p className="font-mono text-[12px] text-faint">Sin registro</p>
