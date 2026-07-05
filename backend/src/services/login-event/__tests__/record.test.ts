@@ -1,4 +1,3 @@
-import { Op } from 'sequelize';
 import LoginEvent from '../../../models/LoginEvent';
 import { record } from '../record';
 
@@ -70,14 +69,9 @@ describe('record', () => {
     expect(parsed).toEqual({ deviceType: 'mobile', os: 'Android', browser: 'Chrome 126' });
   });
 
-  it('prunes events older than the retention window', async () => {
+  it('never deletes past events', async () => {
     await record(7, ANDROID_CHROME_UA);
 
-    expect(LoginEvent.destroy).toHaveBeenCalledWith({
-      where: { createdAt: { [Op.lt]: expect.any(Date) } },
-    });
-    const cutoff = (LoginEvent.destroy as jest.Mock).mock.calls[0][0].where.createdAt[Op.lt];
-    const daysAgo = (Date.now() - cutoff.getTime()) / (24 * 60 * 60 * 1000);
-    expect(Math.round(daysAgo)).toBe(180);
+    expect(LoginEvent.destroy).not.toHaveBeenCalled();
   });
 });
