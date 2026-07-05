@@ -3,7 +3,7 @@ import { Icon } from '@ui/Icon';
 import { IconButton } from '@ui/IconButton';
 import { Modal } from '@ui/Modal';
 import { useSessionHistory, type SessionEntry } from '@/features/dashboard/hooks/useSessionHistory';
-import { ROLE_LABELS } from '@/constants/roles';
+import { ROLES, ROLE_LABELS } from '@/constants/roles';
 import { formatDayGroupLabel, formatDevice, formatTime } from '@/utils/format';
 import { groupByDay } from '@/utils/groupByDay';
 
@@ -13,6 +13,9 @@ interface Props {
 
 // Same threshold as the connections widget's online rule
 const isActiveSession = (iso: string) => differenceInMinutes(new Date(), parseISO(iso)) < 60;
+
+// The panel history tracks operational staff only, not admin logins
+const SESSION_ROLES = [ROLES.KITCHEN, ROLES.DELIVERY];
 
 function SessionRow({ entry }: { entry: SessionEntry }) {
   const active = isActiveSession(entry.createdAt);
@@ -63,7 +66,7 @@ function SessionRow({ entry }: { entry: SessionEntry }) {
 }
 
 export function SessionHistoryModal({ onClose }: Props) {
-  const { entries, isLoading } = useSessionHistory();
+  const { entries, isLoading } = useSessionHistory(SESSION_ROLES);
 
   const renderBody = () => {
     if (isLoading) return <p className="font-mono text-[12px] text-faint py-3">Cargando…</p>;
