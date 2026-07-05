@@ -92,6 +92,13 @@ describe('SessionHistoryModal', () => {
     expect(screen.getAllByTestId('icon-history')).toHaveLength(2);
   });
 
+  it('does not render a standalone status dot next to the device icon', () => {
+    mockSessions({ entries });
+    render(<SessionHistoryModal onClose={jest.fn()} />);
+
+    expect(document.querySelectorAll('.w-\\[9px\\].h-\\[9px\\].rounded-full')).toHaveLength(0);
+  });
+
   it('marks sessions without device info as unknown', () => {
     mockSessions({ entries });
     render(<SessionHistoryModal onClose={jest.fn()} />);
