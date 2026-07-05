@@ -1,4 +1,5 @@
 import {
+  differenceInCalendarDays,
   differenceInDays,
   differenceInHours,
   differenceInMinutes,
@@ -88,6 +89,20 @@ export function formatDevice(
 ): string | null {
   const parts = [browser, os, deviceType ? DEVICE_TYPE_LABELS[deviceType] : null].filter(Boolean);
   return parts.length > 0 ? parts.join(' · ') : null;
+}
+
+// Last-access stamp for the users table: "Hace X min", "Hace X horas",
+// "Hoy · HH:mm", "Ayer · HH:mm", or "Hace X días". The 4-hour cutoff is where
+// the design switches from a relative stamp to the "Hoy · HH:mm" form.
+export function formatLastSeen(iso: string, now = new Date()) {
+  const date = parseISO(iso);
+  const mins = differenceInMinutes(now, date);
+  if (mins < 60) return `Hace ${mins} min`;
+  const hours = differenceInHours(now, date);
+  if (hours < 4) return hours === 1 ? 'Hace 1 hora' : `Hace ${hours} horas`;
+  if (isSameDay(date, now)) return `Hoy · ${format(date, 'HH:mm')}`;
+  if (isSameDay(date, subDays(now, 1))) return `Ayer · ${format(date, 'HH:mm')}`;
+  return `Hace ${differenceInCalendarDays(now, date)} días`;
 }
 
 // Returns "hace X min", "hace X h", or "hace X días"
