@@ -58,4 +58,19 @@ describe('Icon', () => {
     const { container } = render(<Icon name="history" />);
     expect(container.querySelector('svg')).toBeInTheDocument();
   });
+
+  it('renders an svg for monitor', () => {
+    const { container } = render(<Icon name="monitor" />);
+    expect(container.querySelector('svg')).toBeInTheDocument();
+  });
+
+  it('renders an svg for smartphone', () => {
+    const { container } = render(<Icon name="smartphone" />);
+    expect(container.querySelector('svg')).toBeInTheDocument();
+  });
+
+  it('renders an svg for tablet', () => {
+    const { container } = render(<Icon name="tablet" />);
+    expect(container.querySelector('svg')).toBeInTheDocument();
+  });
 });
