@@ -13,10 +13,16 @@ export type RecentLoginEntry = {
   createdAt: string;
 };
 
-export const findRecent = async (): Promise<RecentLoginEntry[]> => {
+export const findRecent = async (roles?: string[]): Promise<RecentLoginEntry[]> => {
   const events = await LoginEvent.findAll({
     where: { createdAt: { [Op.gte]: subDays(new Date(), WINDOW_DAYS) } },
-    include: [{ model: User, attributes: ['username', 'role'] }],
+    include: [
+      {
+        model: User,
+        attributes: ['username', 'role'],
+        ...(roles ? { where: { role: roles } } : {}),
+      },
+    ],
     order: [['createdAt', 'DESC']],
   });
 
