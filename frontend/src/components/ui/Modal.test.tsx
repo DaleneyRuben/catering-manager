@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { Modal } from '@ui/Modal';
 
 describe('Modal', () => {
@@ -37,5 +37,27 @@ describe('Modal', () => {
     );
     screen.getByTestId('modal-backdrop').click();
     expect(onClose).toHaveBeenCalled();
+  });
+
+  it('calls onClose when Escape is pressed', () => {
+    const onClose = jest.fn();
+    render(
+      <Modal onClose={onClose}>
+        <p>contenido</p>
+      </Modal>,
+    );
+    fireEvent.keyDown(document, { key: 'Escape' });
+    expect(onClose).toHaveBeenCalled();
+  });
+
+  it('does not close on other keys', () => {
+    const onClose = jest.fn();
+    render(
+      <Modal onClose={onClose}>
+        <p>contenido</p>
+      </Modal>,
+    );
+    fireEvent.keyDown(document, { key: 'Enter' });
+    expect(onClose).not.toHaveBeenCalled();
   });
 });
