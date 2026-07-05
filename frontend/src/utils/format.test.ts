@@ -13,6 +13,7 @@ import {
   formatDeviceType,
   deviceIcon,
   formatLastSeen,
+  isOnline,
 } from '@/utils/format';
 
 describe('formatDate', () => {
@@ -252,5 +253,21 @@ describe('formatLastSeen', () => {
 
   it('counts calendar days, not 24h periods', () => {
     expect(formatLastSeen('2026-07-02T23:50:00', now)).toBe('Hace 2 días');
+  });
+});
+
+describe('isOnline', () => {
+  const now = new Date('2026-07-05T14:00:00');
+
+  it('returns true for a login under 8 hours ago', () => {
+    expect(isOnline('2026-07-05T10:00:00', now)).toBe(true);
+  });
+
+  it('returns false for a login exactly 8 hours ago', () => {
+    expect(isOnline('2026-07-05T06:00:00', now)).toBe(false);
+  });
+
+  it('returns false for a login over 8 hours ago', () => {
+    expect(isOnline('2026-07-05T02:00:00', now)).toBe(false);
   });
 });
