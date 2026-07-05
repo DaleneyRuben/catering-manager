@@ -3,19 +3,19 @@ import authRoutes from './auth.routes';
 import clientRoutes from './client.routes';
 import dashboardRoutes from './dashboard.routes';
 import deliveryRoutes from './delivery.routes';
+import healthRoutes from './health.routes';
 import menuRoutes from './menu.routes';
 import planRoutes from './plan.routes';
 import productionRoutes from './production.routes';
 import reportRoutes from './report.routes';
 import subscriptionRoutes from './subscription.routes';
 import userRoutes from './user.routes';
-import healthController from '../controllers/health.controller';
 import { requireAuth, requireRole } from '../middleware/auth';
 import { ROLES } from '../constants/roles';
 
 const router = Router();
 
-router.get('/health', requireAuth, requireRole(ROLES.SUPER_ADMIN), healthController.getStatus);
+router.use('/health', requireAuth, requireRole(ROLES.SUPER_ADMIN), healthRoutes);
 
 router.use('/auth', authRoutes);
 

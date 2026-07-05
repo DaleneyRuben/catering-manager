@@ -4,11 +4,6 @@ import * as authService from '../services/auth';
 const login = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { username, password } = req.body;
-    if (!username || !password) {
-      res.status(400).json({ error: 'Usuario y contraseña son requeridos' });
-      return;
-    }
-
     const result = await authService.login(username, password, req.get('user-agent'));
     res.json(result);
   } catch (err) {
