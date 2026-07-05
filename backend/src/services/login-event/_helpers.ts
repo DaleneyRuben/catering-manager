@@ -1,6 +1,9 @@
 import { UAParser } from 'ua-parser-js';
 import type { DeviceType } from '../../models/LoginEvent';
 
+// per-user and global history views share the same window
+export const WINDOW_DAYS = 14;
+
 export type ParsedDevice = {
   deviceType: DeviceType | null;
   os: string | null;

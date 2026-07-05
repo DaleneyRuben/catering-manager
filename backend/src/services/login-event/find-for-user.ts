@@ -1,6 +1,7 @@
 import { Op } from 'sequelize';
 import { subDays } from 'date-fns';
 import LoginEvent from '../../models/LoginEvent';
+import { WINDOW_DAYS } from './_helpers';
 
 export type LoginEventEntry = {
   deviceType: string | null;
@@ -8,8 +9,6 @@ export type LoginEventEntry = {
   browser: string | null;
   createdAt: string;
 };
-
-const WINDOW_DAYS = 14;
 
 export const findForUser = async (userId: number): Promise<LoginEventEntry[]> => {
   const events = await LoginEvent.findAll({
