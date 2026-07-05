@@ -67,6 +67,24 @@ describe('findRecent', () => {
     ]);
   });
 
+  it('filters events to the given roles via the user include', async () => {
+    (LoginEvent.findAll as jest.Mock).mockResolvedValue([]);
+
+    await findRecent(['kitchen', 'delivery']);
+
+    expect(LoginEvent.findAll).toHaveBeenCalledWith(
+      expect.objectContaining({
+        include: [
+          {
+            model: User,
+            attributes: ['username', 'role'],
+            where: { role: ['kitchen', 'delivery'] },
+          },
+        ],
+      }),
+    );
+  });
+
   it('returns an empty array when there are no events', async () => {
     (LoginEvent.findAll as jest.Mock).mockResolvedValue([]);
 
