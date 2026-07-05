@@ -1,7 +1,7 @@
 import Client from '../../../models/Client';
 import Plan from '../../../models/Plan';
 import Subscription from '../../../models/Subscription';
-import { findActiveClientsWithPlansForDate } from '../find-active-clients';
+import { findActiveClientsWithPlansForDate } from '../find-active-clients-with-plans-for-date';
 
 jest.mock('../../../models/Client');
 jest.mock('../../../models/Plan');

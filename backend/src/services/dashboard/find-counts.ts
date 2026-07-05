@@ -17,7 +17,7 @@ type CountsRow = {
 };
 
 // SQL mirror of the canonical active-subscription rule in
-// services/subscription/find-active-for-date.ts — keep both in sync if the rule
+// services/subscription/find-active-subscriptions-for-date.ts — keep both in sync if the rule
 // changes. The extra `startDate IS NULL` branch covers renewals created without
 // a start date (those clients are still excluded via `pausedSince` until activated).
 const activeOn = (param: 'today' | 'tomorrow'): string =>

@@ -1,7 +1,7 @@
-import { findActiveSubscriptionsForDate } from '../../subscription/find-active-for-date';
+import { findActiveSubscriptionsForDate } from '../../subscription/find-active-subscriptions-for-date';
 import { findRoute } from '../find-route';
 
-jest.mock('../../subscription/find-active-for-date', () => ({
+jest.mock('../../subscription/find-active-subscriptions-for-date', () => ({
   findActiveSubscriptionsForDate: jest.fn(),
 }));
 jest.mock('../../../utils/date', () => ({
