@@ -13,19 +13,7 @@ import { initials } from '@/utils/string';
 import { formatDateTime, formatDevice } from '@/utils/format';
 import type { UserRole } from '@/features/auth/AuthContext';
 import { ROLES, ROLE_LABELS } from '@/constants/roles';
-
-const ROLE_CLASSES: Record<UserRole, string> = {
-  super_admin: 'bg-ok-bg text-ok',
-  admin: 'bg-olive-100 text-olive-700',
-  kitchen: 'bg-warn-bg text-warn',
-  delivery: 'bg-taupe-bg text-taupe',
-};
-
-// Super admin's avatar/icon uses a darker olive than its badge text — every other role reuses ROLE_CLASSES as-is.
-const ROLE_ICON_CLASSES: Record<UserRole, string> = {
-  ...ROLE_CLASSES,
-  super_admin: 'bg-ok-bg text-olive-800',
-};
+import { ROLE_CLASSES, ROLE_ICON_CLASSES } from '@/features/users/roleStyles';
 
 const ROLE_ICONS: Record<UserRole, string> = {
   super_admin: 'shield-check',
