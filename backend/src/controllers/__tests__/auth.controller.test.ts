@@ -32,7 +32,7 @@ describe('POST /api/auth/login', () => {
     const res = await request(app).post('/api/auth/login').send({ password: 'secret123' });
 
     expect(res.status).toBe(400);
-    expect(res.body).toEqual({ error: 'Usuario y contraseña son requeridos' });
+    expect(res.body).toEqual({ message: 'Usuario y contraseña son requeridos' });
     expect(mockLogin).not.toHaveBeenCalled();
   });
 
@@ -40,7 +40,7 @@ describe('POST /api/auth/login', () => {
     const res = await request(app).post('/api/auth/login').send({ username: 'ada' });
 
     expect(res.status).toBe(400);
-    expect(res.body).toEqual({ error: 'Usuario y contraseña son requeridos' });
+    expect(res.body).toEqual({ message: 'Usuario y contraseña son requeridos' });
     expect(mockLogin).not.toHaveBeenCalled();
   });
 
@@ -48,7 +48,7 @@ describe('POST /api/auth/login', () => {
     const res = await request(app).post('/api/auth/login').send({});
 
     expect(res.status).toBe(400);
-    expect(res.body).toEqual({ error: 'Usuario y contraseña son requeridos' });
+    expect(res.body).toEqual({ message: 'Usuario y contraseña son requeridos' });
     expect(mockLogin).not.toHaveBeenCalled();
   });
 
