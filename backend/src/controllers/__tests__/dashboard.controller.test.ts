@@ -1,8 +1,10 @@
 import request from 'supertest';
 import app from '../../app';
 import * as dashboardService from '../../services/dashboard';
+import * as loginEventService from '../../services/login-event';
 
 jest.mock('../../services/dashboard');
+jest.mock('../../services/login-event');
 jest.mock('../../database/sequelize', () => ({ __esModule: true, default: { query: jest.fn() } }));
 jest.mock('../../middleware/auth', () => ({
   requireAuth: (_req: unknown, _res: unknown, next: () => void) => next(),
@@ -38,6 +40,37 @@ describe('GET /api/dashboard', () => {
     (dashboardService.findSummary as jest.Mock).mockRejectedValue(new Error('db error'));
 
     const res = await request(app).get('/api/dashboard');
+
+    expect(res.status).toBe(500);
+  });
+});
+
+describe('GET /api/dashboard/sessions', () => {
+  beforeEach(() => jest.clearAllMocks());
+
+  it('returns 200 with the recent login entries', async () => {
+    const entries = [
+      {
+        username: 'merlyn',
+        role: 'kitchen',
+        deviceType: 'mobile',
+        os: 'Android',
+        browser: 'Chrome 149',
+        createdAt: '2026-07-04T10:29:00.000Z',
+      },
+    ];
+    (loginEventService.findRecent as jest.Mock).mockResolvedValue(entries);
+
+    const res = await request(app).get('/api/dashboard/sessions');
+
+    expect(res.status).toBe(200);
+    expect(res.body.data).toEqual(entries);
+  });
+
+  it('returns 500 when the service throws', async () => {
+    (loginEventService.findRecent as jest.Mock).mockRejectedValue(new Error('db error'));
+
+    const res = await request(app).get('/api/dashboard/sessions');
 
     expect(res.status).toBe(500);
   });
