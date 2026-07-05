@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { subDays } from 'date-fns';
 import { useUsers } from '@/features/users/hooks/useUsers';
-import { formatDateTime } from '@/utils/format';
+import { formatLastSeen } from '@/utils/format';
 import { useAuth } from '@/features/auth/AuthContext';
 import { UsersPage } from '@/pages/UsersPage';
 
@@ -140,9 +140,9 @@ describe('UsersPage', () => {
     expect(screen.queryByText('admin')).not.toBeInTheDocument();
   });
 
-  it('shows the formatted last login date', () => {
+  it('shows the last login as a relative stamp', () => {
     render(<UsersPage />);
-    expect(screen.getByText(formatDateTime(defaultUsers[0].lastLoginAt!))).toBeInTheDocument();
+    expect(screen.getByText(formatLastSeen(defaultUsers[0].lastLoginAt!))).toBeInTheDocument();
   });
 
   it('shows Nunca when the user has never logged in', () => {
@@ -160,9 +160,9 @@ describe('UsersPage', () => {
     expect(screen.getAllByText('Inactivo')).toHaveLength(2);
   });
 
-  it('shows the last device under the last login', () => {
+  it('does not show device details in the last access column', () => {
     render(<UsersPage />);
-    expect(screen.getByText('Chrome 126 · Android 14 · Móvil')).toBeInTheDocument();
+    expect(screen.queryByText('Chrome 126 · Android 14 · Móvil')).not.toBeInTheDocument();
   });
 
   it('opens the login history modal for the clicked user', async () => {

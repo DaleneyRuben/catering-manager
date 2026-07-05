@@ -1,4 +1,5 @@
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { ConnectionsCard } from '@/features/dashboard/components/ConnectionsCard';
 import type { Connection } from '@/features/dashboard/types';
 
@@ -61,20 +62,28 @@ describe('ConnectionsCard', () => {
     expect(screen.getByText('Randy')).toBeInTheDocument();
   });
 
-  it('shows the last device under the connection stamp', () => {
+  it('does not show device details even when a device snapshot exists', () => {
     render(<ConnectionsCard connections={[withDevice('Caro')]} />);
-    expect(screen.getByText('Chrome 126 · Android 14 · Móvil')).toBeInTheDocument();
+    expect(screen.queryByText('Chrome 126 · Android 14 · Móvil')).not.toBeInTheDocument();
   });
 
-  it('omits the device line when no device is known', () => {
+  it('shows the Historial link when onOpenHistory is provided', async () => {
+    const onOpenHistory = jest.fn();
+    render(<ConnectionsCard connections={[]} onOpenHistory={onOpenHistory} />);
+
+    await userEvent.setup().click(screen.getByRole('button', { name: /Historial/ }));
+    expect(onOpenHistory).toHaveBeenCalled();
+  });
+
+  it('omits the Historial link without onOpenHistory', () => {
+    render(<ConnectionsCard connections={[]} />);
+    expect(screen.queryByRole('button', { name: /Historial/ })).not.toBeInTheDocument();
+  });
+
+  it('centers the status dot against the two-line row', () => {
     render(<ConnectionsCard connections={[online('Caro')]} />);
-    expect(screen.queryByText(/·.*·/)).not.toBeInTheDocument();
-  });
-
-  it('top-aligns the status dot so rows with a device line stay consistent', () => {
-    render(<ConnectionsCard connections={[withDevice('Caro')]} />);
     const row = screen.getByText('Caro').closest('div')!.parentElement!;
-    expect(row.className).toContain('items-start');
-    expect(row.className).not.toContain('items-center');
+    expect(row.className).toContain('items-center');
+    expect(row.className).not.toContain('items-start');
   });
 });

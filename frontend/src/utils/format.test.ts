@@ -7,6 +7,12 @@ import {
   formatConnectionStamp,
   formatRelativeTime,
   formatDevice,
+  formatTime,
+  formatDayGroupLabel,
+  formatBrowserOs,
+  formatDeviceType,
+  deviceIcon,
+  formatLastSeen,
 } from '@/utils/format';
 
 describe('formatDate', () => {
@@ -151,5 +157,100 @@ describe('formatDevice', () => {
 
   it('returns null when nothing is known', () => {
     expect(formatDevice(null, null, null)).toBeNull();
+  });
+});
+
+describe('formatTime', () => {
+  it('formats an ISO timestamp as HH:mm', () => {
+    expect(formatTime('2026-07-04T08:12:00')).toBe('08:12');
+  });
+});
+
+describe('formatDayGroupLabel', () => {
+  const now = new Date('2026-07-04T12:00:00');
+
+  it('prefixes Hoy for today', () => {
+    expect(formatDayGroupLabel('2026-07-04T08:12:00', now)).toBe('Hoy · Sábado 04/07');
+  });
+
+  it('prefixes Ayer for yesterday', () => {
+    expect(formatDayGroupLabel('2026-07-03T19:40:00', now)).toBe('Ayer · Viernes 03/07');
+  });
+
+  it('returns the capitalized weekday and date for older days', () => {
+    expect(formatDayGroupLabel('2026-07-01T09:00:00', now)).toBe('Miércoles 01/07');
+  });
+});
+
+describe('formatBrowserOs', () => {
+  it('joins browser and os', () => {
+    expect(formatBrowserOs('Chrome 149', 'macOS')).toBe('Chrome 149 · macOS');
+  });
+
+  it('omits missing parts', () => {
+    expect(formatBrowserOs('Chrome 149', null)).toBe('Chrome 149');
+    expect(formatBrowserOs(null, 'macOS')).toBe('macOS');
+  });
+
+  it('returns null when nothing is known', () => {
+    expect(formatBrowserOs(null, null)).toBeNull();
+  });
+});
+
+describe('formatDeviceType', () => {
+  it('translates device keys to spanish', () => {
+    expect(formatDeviceType('desktop')).toBe('Escritorio');
+    expect(formatDeviceType('mobile')).toBe('Móvil');
+    expect(formatDeviceType('tablet')).toBe('Tableta');
+  });
+
+  it('returns null for null or unknown keys', () => {
+    expect(formatDeviceType(null)).toBeNull();
+    expect(formatDeviceType('watch')).toBeNull();
+  });
+});
+
+describe('deviceIcon', () => {
+  it('maps device keys to icon names', () => {
+    expect(deviceIcon('desktop')).toBe('monitor');
+    expect(deviceIcon('mobile')).toBe('smartphone');
+    expect(deviceIcon('tablet')).toBe('tablet');
+  });
+
+  it('returns null for null or unknown keys', () => {
+    expect(deviceIcon(null)).toBeNull();
+    expect(deviceIcon('watch')).toBeNull();
+  });
+});
+
+describe('formatLastSeen', () => {
+  const now = new Date('2026-07-04T12:00:00');
+
+  it('returns "Hace X min" for under an hour', () => {
+    expect(formatLastSeen('2026-07-04T11:55:00', now)).toBe('Hace 5 min');
+  });
+
+  it('returns "Hace 1 hora" for exactly one hour', () => {
+    expect(formatLastSeen('2026-07-04T11:00:00', now)).toBe('Hace 1 hora');
+  });
+
+  it('returns "Hace X horas" for under four hours', () => {
+    expect(formatLastSeen('2026-07-04T10:00:00', now)).toBe('Hace 2 horas');
+  });
+
+  it('returns "Hoy · HH:mm" for earlier today', () => {
+    expect(formatLastSeen('2026-07-04T06:15:00', now)).toBe('Hoy · 06:15');
+  });
+
+  it('returns "Ayer · HH:mm" for yesterday', () => {
+    expect(formatLastSeen('2026-07-03T18:40:00', now)).toBe('Ayer · 18:40');
+  });
+
+  it('returns "Hace X días" for older dates', () => {
+    expect(formatLastSeen('2026-06-26T09:30:00', now)).toBe('Hace 8 días');
+  });
+
+  it('counts calendar days, not 24h periods', () => {
+    expect(formatLastSeen('2026-07-02T23:50:00', now)).toBe('Hace 2 días');
   });
 });

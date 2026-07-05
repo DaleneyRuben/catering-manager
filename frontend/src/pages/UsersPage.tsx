@@ -10,22 +10,10 @@ import { useAuth } from '@/features/auth/AuthContext';
 import { UserModal } from '@/features/users/components/UserModal';
 import { LoginHistoryModal } from '@/features/users/components/LoginHistoryModal';
 import { initials } from '@/utils/string';
-import { formatDateTime, formatDevice } from '@/utils/format';
+import { formatLastSeen } from '@/utils/format';
 import type { UserRole } from '@/features/auth/AuthContext';
 import { ROLES, ROLE_LABELS } from '@/constants/roles';
-
-const ROLE_CLASSES: Record<UserRole, string> = {
-  super_admin: 'bg-ok-bg text-ok',
-  admin: 'bg-olive-100 text-olive-700',
-  kitchen: 'bg-warn-bg text-warn',
-  delivery: 'bg-taupe-bg text-taupe',
-};
-
-// Super admin's avatar/icon uses a darker olive than its badge text — every other role reuses ROLE_CLASSES as-is.
-const ROLE_ICON_CLASSES: Record<UserRole, string> = {
-  ...ROLE_CLASSES,
-  super_admin: 'bg-ok-bg text-olive-800',
-};
+import { ROLE_CLASSES, ROLE_ICON_CLASSES } from '@/features/users/roleStyles';
 
 const ROLE_ICONS: Record<UserRole, string> = {
   super_admin: 'shield-check',
@@ -137,7 +125,6 @@ export function UsersPage() {
               <tbody>
                 {filteredUsers.map((u) => {
                   const isActive = isActiveUser(u.lastLoginAt);
-                  const device = formatDevice(u.lastBrowser, u.lastOs, u.lastDeviceType);
                   return (
                     <tr
                       key={u.id}
@@ -161,8 +148,7 @@ export function UsersPage() {
                         </span>
                       </td>
                       <td className="px-[22px] py-[13px] text-[12px] font-mono text-muted tabular-nums whitespace-nowrap">
-                        <p>{u.lastLoginAt ? formatDateTime(u.lastLoginAt) : 'Nunca'}</p>
-                        {device && <p className="text-[11px] text-faint mt-0.5">{device}</p>}
+                        {u.lastLoginAt ? formatLastSeen(u.lastLoginAt) : 'Nunca'}
                       </td>
                       <td className="px-[22px] py-[13px]">
                         <span

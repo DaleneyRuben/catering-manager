@@ -59,6 +59,11 @@
   /* Modal */
   --color-modal-backdrop: rgba(21, 42, 6, 0.42);
 
+  /* Login history modals */
+  --color-device-chip-bg: #eef1e6;
+  --color-history-row-border: #e8e5d6;
+  --color-day-label: #a8a893;
+
   /* Shadows */
   --shadow-dropdown: 0 12px 32px rgba(20, 40, 6, 0.16);
   --shadow-dialog: 0 24px 60px rgba(20, 40, 6, 0.32);

@@ -1,22 +1,34 @@
 import { Op } from 'sequelize';
 import { subDays } from 'date-fns';
 import LoginEvent from '../../models/LoginEvent';
+import User from '../../models/User';
 import { WINDOW_DAYS } from './_helpers';
 
-export type LoginEventEntry = {
+export type RecentLoginEntry = {
+  username: string;
+  role: string;
   deviceType: string | null;
   os: string | null;
   browser: string | null;
   createdAt: string;
 };
 
-export const findForUser = async (userId: number): Promise<LoginEventEntry[]> => {
+export const findRecent = async (roles?: string[]): Promise<RecentLoginEntry[]> => {
   const events = await LoginEvent.findAll({
-    where: { userId, createdAt: { [Op.gte]: subDays(new Date(), WINDOW_DAYS) } },
+    where: { createdAt: { [Op.gte]: subDays(new Date(), WINDOW_DAYS) } },
+    include: [
+      {
+        model: User,
+        attributes: ['username', 'role'],
+        ...(roles ? { where: { role: roles } } : {}),
+      },
+    ],
     order: [['createdAt', 'DESC']],
   });
 
   return events.map((event) => ({
+    username: event.user.username,
+    role: event.user.role,
     deviceType: event.deviceType,
     os: event.os,
     browser: event.browser,
