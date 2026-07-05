@@ -7,6 +7,11 @@ import {
   formatConnectionStamp,
   formatRelativeTime,
   formatDevice,
+  formatTime,
+  formatDayGroupLabel,
+  formatBrowserOs,
+  formatDeviceType,
+  deviceIcon,
 } from '@/utils/format';
 
 describe('formatDate', () => {
@@ -151,5 +156,68 @@ describe('formatDevice', () => {
 
   it('returns null when nothing is known', () => {
     expect(formatDevice(null, null, null)).toBeNull();
+  });
+});
+
+describe('formatTime', () => {
+  it('formats an ISO timestamp as HH:mm', () => {
+    expect(formatTime('2026-07-04T08:12:00')).toBe('08:12');
+  });
+});
+
+describe('formatDayGroupLabel', () => {
+  const now = new Date('2026-07-04T12:00:00');
+
+  it('prefixes Hoy for today', () => {
+    expect(formatDayGroupLabel('2026-07-04T08:12:00', now)).toBe('Hoy · Sábado 04/07');
+  });
+
+  it('prefixes Ayer for yesterday', () => {
+    expect(formatDayGroupLabel('2026-07-03T19:40:00', now)).toBe('Ayer · Viernes 03/07');
+  });
+
+  it('returns the capitalized weekday and date for older days', () => {
+    expect(formatDayGroupLabel('2026-07-01T09:00:00', now)).toBe('Miércoles 01/07');
+  });
+});
+
+describe('formatBrowserOs', () => {
+  it('joins browser and os', () => {
+    expect(formatBrowserOs('Chrome 149', 'macOS')).toBe('Chrome 149 · macOS');
+  });
+
+  it('omits missing parts', () => {
+    expect(formatBrowserOs('Chrome 149', null)).toBe('Chrome 149');
+    expect(formatBrowserOs(null, 'macOS')).toBe('macOS');
+  });
+
+  it('returns null when nothing is known', () => {
+    expect(formatBrowserOs(null, null)).toBeNull();
+  });
+});
+
+describe('formatDeviceType', () => {
+  it('translates device keys to spanish', () => {
+    expect(formatDeviceType('desktop')).toBe('Escritorio');
+    expect(formatDeviceType('mobile')).toBe('Móvil');
+    expect(formatDeviceType('tablet')).toBe('Tableta');
+  });
+
+  it('returns null for null or unknown keys', () => {
+    expect(formatDeviceType(null)).toBeNull();
+    expect(formatDeviceType('watch')).toBeNull();
+  });
+});
+
+describe('deviceIcon', () => {
+  it('maps device keys to icon names', () => {
+    expect(deviceIcon('desktop')).toBe('monitor');
+    expect(deviceIcon('mobile')).toBe('smartphone');
+    expect(deviceIcon('tablet')).toBe('tablet');
+  });
+
+  it('returns null for null or unknown keys', () => {
+    expect(deviceIcon(null)).toBeNull();
+    expect(deviceIcon('watch')).toBeNull();
   });
 });
