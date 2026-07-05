@@ -8,6 +8,10 @@ jest.mock('@/features/dashboard/hooks/useSessionHistory', () => ({
   useSessionHistory: jest.fn(),
 }));
 
+jest.mock('@ui/Icon', () => ({
+  Icon: ({ name }: { name: string }) => <span data-testid={`icon-${name}`} />,
+}));
+
 const mockUseSessionHistory = useSessionHistory as jest.Mock;
 
 const entries: SessionEntry[] = [
@@ -77,6 +81,22 @@ describe('SessionHistoryModal', () => {
     render(<SessionHistoryModal onClose={jest.fn()} />);
 
     expect(screen.getAllByText('Activa')).toHaveLength(1);
+  });
+
+  it('shows the device icon chip per session, falling back to history', () => {
+    mockSessions({ entries });
+    render(<SessionHistoryModal onClose={jest.fn()} />);
+
+    expect(screen.getByTestId('icon-smartphone')).toBeInTheDocument();
+    // header icon + fallback chip for the entry without device info
+    expect(screen.getAllByTestId('icon-history')).toHaveLength(2);
+  });
+
+  it('does not render a standalone status dot next to the device icon', () => {
+    mockSessions({ entries });
+    render(<SessionHistoryModal onClose={jest.fn()} />);
+
+    expect(document.querySelectorAll('.w-\\[9px\\].h-\\[9px\\].rounded-full')).toHaveLength(0);
   });
 
   it('marks sessions without device info as unknown', () => {

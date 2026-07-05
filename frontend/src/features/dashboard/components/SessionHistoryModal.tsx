@@ -4,7 +4,7 @@ import { IconButton } from '@ui/IconButton';
 import { Modal } from '@ui/Modal';
 import { useSessionHistory, type SessionEntry } from '@/features/dashboard/hooks/useSessionHistory';
 import { ROLES, ROLE_LABELS } from '@/constants/roles';
-import { formatDayGroupLabel, formatDevice, formatTime } from '@/utils/format';
+import { deviceIcon, formatDayGroupLabel, formatDevice, formatTime } from '@/utils/format';
 import { groupByDay } from '@/utils/groupByDay';
 
 interface Props {
@@ -29,11 +29,9 @@ function SessionRow({ entry }: { entry: SessionEntry }) {
           : 'bg-paper border-history-row-border'
       }`}
     >
-      <span
-        className={`w-[9px] h-[9px] rounded-full shrink-0 ${
-          active ? 'bg-olive-400 shadow-[var(--shadow-glow-online)]' : 'bg-rule-2'
-        }`}
-      />
+      <span className="w-[30px] h-[30px] rounded-lg bg-device-chip-bg text-olive-600 flex items-center justify-center shrink-0">
+        <Icon name={deviceIcon(entry.deviceType) ?? 'history'} size={16} stroke={1.7} />
+      </span>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
           <span className="text-[13.5px] font-semibold text-ink leading-tight truncate">
