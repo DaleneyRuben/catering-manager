@@ -177,6 +177,27 @@ export function Icon({ name, size = 16, stroke = 1.5, className }: IconProps) {
           <path d="M12 7v5l4 2" />
         </svg>
       );
+    case 'monitor':
+      return (
+        <svg {...props}>
+          <rect x="2" y="3" width="20" height="14" rx="2" />
+          <path d="M8 21h8M12 17v4" />
+        </svg>
+      );
+    case 'smartphone':
+      return (
+        <svg {...props}>
+          <rect x="6" y="2" width="12" height="20" rx="2.5" />
+          <path d="M11 18h2" />
+        </svg>
+      );
+    case 'tablet':
+      return (
+        <svg {...props}>
+          <rect x="4" y="2" width="16" height="20" rx="2.5" />
+          <path d="M11 18h2" />
+        </svg>
+      );
     case 'search':
       return (
         <svg {...props}>
