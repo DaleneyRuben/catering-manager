@@ -1,4 +1,5 @@
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { ConnectionsCard } from '@/features/dashboard/components/ConnectionsCard';
 import type { Connection } from '@/features/dashboard/types';
 
@@ -69,6 +70,19 @@ describe('ConnectionsCard', () => {
   it('omits the device line when no device is known', () => {
     render(<ConnectionsCard connections={[online('Caro')]} />);
     expect(screen.queryByText(/·.*·/)).not.toBeInTheDocument();
+  });
+
+  it('shows the Historial link when onOpenHistory is provided', async () => {
+    const onOpenHistory = jest.fn();
+    render(<ConnectionsCard connections={[]} onOpenHistory={onOpenHistory} />);
+
+    await userEvent.setup().click(screen.getByRole('button', { name: /Historial/ }));
+    expect(onOpenHistory).toHaveBeenCalled();
+  });
+
+  it('omits the Historial link without onOpenHistory', () => {
+    render(<ConnectionsCard connections={[]} />);
+    expect(screen.queryByRole('button', { name: /Historial/ })).not.toBeInTheDocument();
   });
 
   it('top-aligns the status dot so rows with a device line stay consistent', () => {
