@@ -59,4 +59,16 @@ describe('MenuStatusCard', () => {
     render(<MenuStatusCard today={todayStatus} tomorrow={bothLoaded} />);
     expect(screen.getAllByText('Cargado')).toHaveLength(2);
   });
+
+  it('applies the loaded background token to a loaded row', () => {
+    render(<MenuStatusCard today={todayStatus} tomorrow={tomorrowStatus} />);
+    expect(screen.getByText('Menú cargado').closest('div.border')).toHaveClass('bg-menu-loaded-bg');
+  });
+
+  it('applies the empty background token to an unloaded row', () => {
+    render(<MenuStatusCard today={todayStatus} tomorrow={tomorrowStatus} />);
+    expect(screen.getByText('Pendiente de cargar').closest('div.border')).toHaveClass(
+      'bg-menu-empty-bg',
+    );
+  });
 });

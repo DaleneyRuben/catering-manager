@@ -13,8 +13,8 @@ function MenuRow({ prefix, status }: RowProps) {
     <div
       className={`flex items-center gap-[11px] px-[13px] py-[11px] rounded-[9px] border ${
         loaded
-          ? 'bg-menu-loaded border-menu-loaded-border'
-          : 'bg-menu-empty border-menu-empty-border'
+          ? 'bg-menu-loaded-bg border-menu-loaded-border'
+          : 'bg-menu-empty-bg border-menu-empty-border'
       }`}
     >
       <span
