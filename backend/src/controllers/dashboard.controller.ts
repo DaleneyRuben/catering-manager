@@ -12,9 +12,10 @@ const getSummary = async (_req: Request, res: Response, next: NextFunction) => {
   }
 };
 
-const getSessions = async (_req: Request, res: Response, next: NextFunction) => {
+const getSessions = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const entries = await findRecent();
+    const roles = typeof req.query.roles === 'string' ? req.query.roles.split(',') : undefined;
+    const entries = await findRecent(roles);
     sendSuccess(res, entries);
   } catch (err) {
     next(err);
