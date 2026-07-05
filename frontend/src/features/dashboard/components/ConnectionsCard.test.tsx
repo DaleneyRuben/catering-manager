@@ -62,14 +62,9 @@ describe('ConnectionsCard', () => {
     expect(screen.getByText('Randy')).toBeInTheDocument();
   });
 
-  it('shows the last device under the connection stamp', () => {
+  it('does not show device details even when a device snapshot exists', () => {
     render(<ConnectionsCard connections={[withDevice('Caro')]} />);
-    expect(screen.getByText('Chrome 126 · Android 14 · Móvil')).toBeInTheDocument();
-  });
-
-  it('omits the device line when no device is known', () => {
-    render(<ConnectionsCard connections={[online('Caro')]} />);
-    expect(screen.queryByText(/·.*·/)).not.toBeInTheDocument();
+    expect(screen.queryByText('Chrome 126 · Android 14 · Móvil')).not.toBeInTheDocument();
   });
 
   it('shows the Historial link when onOpenHistory is provided', async () => {
@@ -85,10 +80,10 @@ describe('ConnectionsCard', () => {
     expect(screen.queryByRole('button', { name: /Historial/ })).not.toBeInTheDocument();
   });
 
-  it('top-aligns the status dot so rows with a device line stay consistent', () => {
-    render(<ConnectionsCard connections={[withDevice('Caro')]} />);
+  it('centers the status dot against the two-line row', () => {
+    render(<ConnectionsCard connections={[online('Caro')]} />);
     const row = screen.getByText('Caro').closest('div')!.parentElement!;
-    expect(row.className).toContain('items-start');
-    expect(row.className).not.toContain('items-center');
+    expect(row.className).toContain('items-center');
+    expect(row.className).not.toContain('items-start');
   });
 });
