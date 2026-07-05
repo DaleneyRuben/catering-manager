@@ -1,24 +1,26 @@
-import { differenceInMinutes, parseISO } from 'date-fns';
 import { Icon } from '@ui/Icon';
 import { IconButton } from '@ui/IconButton';
 import { Modal } from '@ui/Modal';
 import { useSessionHistory, type SessionEntry } from '@/features/dashboard/hooks/useSessionHistory';
 import { ROLES, ROLE_LABELS } from '@/constants/roles';
-import { deviceIcon, formatDayGroupLabel, formatDevice, formatTime } from '@/utils/format';
+import {
+  deviceIcon,
+  formatDayGroupLabel,
+  formatDevice,
+  formatTime,
+  isOnline,
+} from '@/utils/format';
 import { groupByDay } from '@/utils/groupByDay';
 
 interface Props {
   onClose: () => void;
 }
 
-// Same threshold as the connections widget's online rule
-const isActiveSession = (iso: string) => differenceInMinutes(new Date(), parseISO(iso)) < 60;
-
 // The panel history tracks operational staff only, not admin logins
 const SESSION_ROLES = [ROLES.KITCHEN, ROLES.DELIVERY];
 
 function SessionRow({ entry }: { entry: SessionEntry }) {
-  const active = isActiveSession(entry.createdAt);
+  const active = isOnline(entry.createdAt);
   const meta = formatDevice(entry.browser, entry.os, entry.deviceType);
 
   return (
