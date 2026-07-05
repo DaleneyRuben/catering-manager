@@ -3,7 +3,9 @@ import {
   differenceInHours,
   differenceInMinutes,
   format,
+  isSameDay,
   parseISO,
+  subDays,
 } from 'date-fns';
 import { es } from 'date-fns/locale';
 
@@ -31,6 +33,19 @@ export function formatWeekdayDate(iso: string) {
   return label.charAt(0).toUpperCase() + label.slice(1);
 }
 
+export function formatTime(iso: string) {
+  return format(parseISO(iso), 'HH:mm');
+}
+
+// Returns "Hoy · Sábado 04/07", "Ayer · Viernes 03/07", or "Miércoles 01/07"
+export function formatDayGroupLabel(iso: string, now = new Date()) {
+  const date = parseISO(iso);
+  const base = formatWeekdayDate(iso);
+  if (isSameDay(date, now)) return `Hoy · ${base}`;
+  if (isSameDay(date, subDays(now, 1))) return `Ayer · ${base}`;
+  return base;
+}
+
 // Returns "Hoy · 14:32" if iso is today, otherwise "12/06 · 14:32"
 export function formatConnectionStamp(iso: string, now = new Date()) {
   const date = parseISO(iso);
@@ -44,6 +59,26 @@ const DEVICE_TYPE_LABELS: Record<string, string> = {
   desktop: 'Escritorio',
   tablet: 'Tableta',
 };
+
+export function formatDeviceType(deviceType: string | null): string | null {
+  return deviceType ? (DEVICE_TYPE_LABELS[deviceType] ?? null) : null;
+}
+
+const DEVICE_TYPE_ICONS: Record<string, string> = {
+  mobile: 'smartphone',
+  desktop: 'monitor',
+  tablet: 'tablet',
+};
+
+export function deviceIcon(deviceType: string | null): string | null {
+  return deviceType ? (DEVICE_TYPE_ICONS[deviceType] ?? null) : null;
+}
+
+// Returns "Chrome 149 · macOS" (missing parts omitted), or null when nothing is known
+export function formatBrowserOs(browser: string | null, os: string | null): string | null {
+  const parts = [browser, os].filter(Boolean);
+  return parts.length > 0 ? parts.join(' · ') : null;
+}
 
 // Returns "Chrome 126 · Android 14 · Móvil" (missing parts omitted), or null when nothing is known
 export function formatDevice(
