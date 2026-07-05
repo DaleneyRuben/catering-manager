@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import type { ReactNode } from 'react';
 
@@ -8,6 +9,14 @@ interface Props {
 }
 
 export function Modal({ onClose, children, className = '' }: Props) {
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') onClose();
+    };
+    document.addEventListener('keydown', onKeyDown);
+    return () => document.removeEventListener('keydown', onKeyDown);
+  }, [onClose]);
+
   // Portal escapes any ancestor `transform` (e.g. page-enter animation) that would
   // otherwise make `fixed` children position relative to that element, not the viewport.
   return createPortal(
