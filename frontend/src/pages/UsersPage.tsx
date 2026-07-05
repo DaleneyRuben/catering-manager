@@ -10,7 +10,7 @@ import { useAuth } from '@/features/auth/AuthContext';
 import { UserModal } from '@/features/users/components/UserModal';
 import { LoginHistoryModal } from '@/features/users/components/LoginHistoryModal';
 import { initials } from '@/utils/string';
-import { formatDateTime, formatDevice } from '@/utils/format';
+import { formatLastSeen } from '@/utils/format';
 import type { UserRole } from '@/features/auth/AuthContext';
 import { ROLES, ROLE_LABELS } from '@/constants/roles';
 import { ROLE_CLASSES, ROLE_ICON_CLASSES } from '@/features/users/roleStyles';
@@ -125,7 +125,6 @@ export function UsersPage() {
               <tbody>
                 {filteredUsers.map((u) => {
                   const isActive = isActiveUser(u.lastLoginAt);
-                  const device = formatDevice(u.lastBrowser, u.lastOs, u.lastDeviceType);
                   return (
                     <tr
                       key={u.id}
@@ -149,8 +148,7 @@ export function UsersPage() {
                         </span>
                       </td>
                       <td className="px-[22px] py-[13px] text-[12px] font-mono text-muted tabular-nums whitespace-nowrap">
-                        <p>{u.lastLoginAt ? formatDateTime(u.lastLoginAt) : 'Nunca'}</p>
-                        {device && <p className="text-[11px] text-faint mt-0.5">{device}</p>}
+                        {u.lastLoginAt ? formatLastSeen(u.lastLoginAt) : 'Nunca'}
                       </td>
                       <td className="px-[22px] py-[13px]">
                         <span
