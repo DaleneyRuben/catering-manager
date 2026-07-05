@@ -283,8 +283,8 @@ The dashboard's connections widget shows online/offline status for `kitchen` and
 Each successful login records a **login event** (device type, OS, browser — parsed server-side from the User-Agent — plus the raw UA string) and overwrites a last-device snapshot on the user (`lastDeviceType`, `lastOs`, `lastBrowser`, alongside `lastLoginAt`). Failed logins are never recorded.
 
 - Events are append-only and **never pruned**; deleting a user cascades to their events.
-- The snapshot is shown on the dashboard connections widget and the Usuarios page.
+- The snapshot is still recorded on every login but is **not displayed** — device details appear only inside the two history views (which read from login events). The connections widget and the Usuarios table show login times only; the Usuarios "Último acceso" column uses a relative stamp (`Hace X min` / `Hace X horas` / `Hoy · HH:mm` / `Ayer · HH:mm` / `Hace X días`).
 - Both history views share a **14-day (2-week) window**:
   - **Per-user history** — browsable from the Usuarios page (super_admin only), grouped by day.
-  - **Global session history** (`GET /api/dashboard/sessions`) — all users' logins, opened from the dashboard's "Última conexión" card (admin + super_admin). A login within the last hour shows an "Activa" badge (same rule as the connections widget's online status); no session duration is tracked.
+  - **Global session history** (`GET /api/dashboard/sessions`) — opened from the dashboard's "Última conexión" card (admin + super_admin). The endpoint accepts an optional `roles` query param (comma-separated); the panel modal requests `roles=kitchen,delivery`, so it lists operational staff logins only. A login within the last hour shows an "Activa" badge (same rule as the connections widget's online status); no session duration is tracked.
 - Device type is stored as an English key (`mobile` | `desktop` | `tablet`) and displayed in Spanish (Móvil / Escritorio / Tableta). All device fields are null when the login request has no User-Agent.
