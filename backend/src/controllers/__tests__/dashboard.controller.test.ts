@@ -67,6 +67,23 @@ describe('GET /api/dashboard/sessions', () => {
     expect(res.body.data).toEqual(entries);
   });
 
+  it('passes the roles query param to the service as a list', async () => {
+    (loginEventService.findRecent as jest.Mock).mockResolvedValue([]);
+
+    const res = await request(app).get('/api/dashboard/sessions?roles=kitchen,delivery');
+
+    expect(res.status).toBe(200);
+    expect(loginEventService.findRecent).toHaveBeenCalledWith(['kitchen', 'delivery']);
+  });
+
+  it('calls the service without roles when the param is absent', async () => {
+    (loginEventService.findRecent as jest.Mock).mockResolvedValue([]);
+
+    await request(app).get('/api/dashboard/sessions');
+
+    expect(loginEventService.findRecent).toHaveBeenCalledWith(undefined);
+  });
+
   it('returns 500 when the service throws', async () => {
     (loginEventService.findRecent as jest.Mock).mockRejectedValue(new Error('db error'));
 
