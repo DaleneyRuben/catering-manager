@@ -1,6 +1,6 @@
 import { Button } from '@ui/Button';
 import { Icon } from '@ui/Icon';
-import { formatConnectionStamp, formatRelativeTime, formatDevice } from '@/utils/format';
+import { formatConnectionStamp, formatRelativeTime } from '@/utils/format';
 import type { Connection } from '@/features/dashboard/types';
 
 interface RowProps {
@@ -8,13 +8,10 @@ interface RowProps {
 }
 
 function ConnectionRow({ connection }: RowProps) {
-  const device = formatDevice(connection.lastBrowser, connection.lastOs, connection.lastDeviceType);
-
   return (
-    <div className="flex items-start gap-[11px]">
-      {/* mt centers the 8px dot against the 13.5px username line, which items-start pins to the top */}
+    <div className="flex items-center gap-[11px]">
       <span
-        className={`w-2 h-2 rounded-full shrink-0 mt-[5px] ${
+        className={`w-2 h-2 rounded-full shrink-0 ${
           connection.online
             ? 'bg-olive-400 shadow-[var(--shadow-glow-online)]'
             : 'bg-warn-dot shadow-[var(--shadow-glow-offline)]'
@@ -25,10 +22,9 @@ function ConnectionRow({ connection }: RowProps) {
         <p className="font-mono text-[10.5px] text-faint mt-0.5">
           {formatConnectionStamp(connection.lastLoginAt)}
         </p>
-        {device && <p className="font-mono text-[10.5px] text-muted mt-0.5 truncate">{device}</p>}
       </div>
       <span
-        className={`font-mono text-[11px] whitespace-nowrap mt-[2px] ${connection.online ? 'text-olive-600' : 'text-faint'}`}
+        className={`font-mono text-[11px] whitespace-nowrap ${connection.online ? 'text-olive-600' : 'text-faint'}`}
       >
         {formatRelativeTime(connection.lastLoginAt)}
       </span>
