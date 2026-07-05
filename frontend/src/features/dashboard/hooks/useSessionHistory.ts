@@ -11,10 +11,12 @@ export type SessionEntry = {
   createdAt: string;
 };
 
-export function useSessionHistory() {
+export function useSessionHistory(roles?: UserRole[]) {
+  const url = roles ? `/dashboard/sessions?roles=${roles.join(',')}` : '/dashboard/sessions';
+
   const query = useQuery({
-    queryKey: ['dashboard', 'sessions'],
-    queryFn: (): Promise<SessionEntry[]> => api.get<SessionEntry[]>('/dashboard/sessions'),
+    queryKey: ['dashboard', 'sessions', roles ?? null],
+    queryFn: (): Promise<SessionEntry[]> => api.get<SessionEntry[]>(url),
   });
 
   return {
