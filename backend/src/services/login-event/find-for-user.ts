@@ -1,3 +1,5 @@
+import { Op } from 'sequelize';
+import { subDays } from 'date-fns';
 import LoginEvent from '../../models/LoginEvent';
 
 export type LoginEventEntry = {
@@ -7,13 +9,12 @@ export type LoginEventEntry = {
   createdAt: string;
 };
 
-const MAX_ENTRIES = 20;
+const WINDOW_DAYS = 14;
 
 export const findForUser = async (userId: number): Promise<LoginEventEntry[]> => {
   const events = await LoginEvent.findAll({
-    where: { userId },
+    where: { userId, createdAt: { [Op.gte]: subDays(new Date(), WINDOW_DAYS) } },
     order: [['createdAt', 'DESC']],
-    limit: MAX_ENTRIES,
   });
 
   return events.map((event) => ({
