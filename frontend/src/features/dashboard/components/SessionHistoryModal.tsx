@@ -29,11 +29,6 @@ function SessionRow({ entry }: { entry: SessionEntry }) {
           : 'bg-paper border-history-row-border'
       }`}
     >
-      <span
-        className={`w-[9px] h-[9px] rounded-full shrink-0 ${
-          active ? 'bg-olive-400 shadow-[var(--shadow-glow-online)]' : 'bg-rule-2'
-        }`}
-      />
       <span className="w-[30px] h-[30px] rounded-lg bg-device-chip-bg text-olive-600 flex items-center justify-center shrink-0">
         <Icon name={deviceIcon(entry.deviceType) ?? 'history'} size={16} stroke={1.7} />
       </span>
