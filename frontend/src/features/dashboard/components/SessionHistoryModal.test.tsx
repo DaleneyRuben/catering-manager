@@ -49,6 +49,13 @@ describe('SessionHistoryModal', () => {
     expect(screen.getByText('2 sesiones · últimas 2 semanas')).toBeInTheDocument();
   });
 
+  it('requests only kitchen and delivery sessions', () => {
+    mockSessions();
+    render(<SessionHistoryModal onClose={jest.fn()} />);
+
+    expect(mockUseSessionHistory).toHaveBeenCalledWith(['kitchen', 'delivery']);
+  });
+
   it('groups sessions under day headers', () => {
     mockSessions({ entries });
     render(<SessionHistoryModal onClose={jest.fn()} />);
