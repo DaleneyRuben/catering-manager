@@ -1,9 +1,12 @@
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { DashboardPage } from '@/pages/DashboardPage';
 import type { DashboardSummary } from '@/features/dashboard/types';
 import { useDashboard } from '@/features/dashboard/hooks/useDashboard';
 
 jest.mock('@/features/dashboard/hooks/useDashboard');
+jest.mock('@/features/dashboard/hooks/useSessionHistory', () => ({
+  useSessionHistory: () => ({ entries: [], isLoading: false, error: null }),
+}));
 const mockUseDashboard = useDashboard as jest.MockedFunction<typeof useDashboard>;
 
 const summary: DashboardSummary = {
@@ -73,5 +76,13 @@ describe('DashboardPage', () => {
     mockUseDashboard.mockReturnValue({ summary, isLoading: false });
     render(<DashboardPage />);
     expect(screen.getByText('Menú del día')).toBeInTheDocument();
+  });
+
+  it('opens the session history modal from the connections card', () => {
+    mockUseDashboard.mockReturnValue({ summary, isLoading: false });
+    render(<DashboardPage />);
+
+    fireEvent.click(screen.getByRole('button', { name: /Historial/ }));
+    expect(screen.getByText('Historial de sesiones')).toBeInTheDocument();
   });
 });
