@@ -1,18 +1,16 @@
 import { useState } from 'react';
-import { format, addDays } from 'date-fns';
+import { format } from 'date-fns';
 import { Button } from '@ui/Button';
 import { Icon } from '@ui/Icon';
 import { useMenu } from '@/features/menu/hooks/useMenu';
 import { API_BASE } from '@/utils/env';
 import { downloadReport } from '@/utils/downloadReport';
-import { checkIsWeekend } from '@/utils/devFlags';
-import { DaySelector, type DayOption } from '@/features/reports/components/DaySelector';
+import { DaySelector } from '@/features/reports/components/DaySelector';
 import { ReportNotice } from '@/features/reports/components/ReportNotice';
 import { DISABLED_DOWNLOAD_STYLE } from '@/features/reports/components/downloadButtonStyles';
+import { useDaySelector } from '@/features/reports/hooks/useDaySelector';
 
 const BASE = API_BASE;
-
-const toIso = (d: Date) => format(d, 'yyyy-MM-dd');
 
 function downloadMenuCard(isoDate: string) {
   return downloadReport(
@@ -22,19 +20,13 @@ function downloadMenuCard(isoDate: string) {
 }
 
 export function MenuCard() {
-  const [selected, setSelected] = useState<DayOption>('today');
+  const { selected, setSelected, resolvedDate, isWeekend, shortDateForOption } = useDaySelector();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const { menus } = useMenu();
 
-  const today = new Date();
-  const isoForOption = (opt: DayOption) => toIso(opt === 'today' ? today : addDays(today, 1));
-  const shortDateForOption = (opt: DayOption) =>
-    format(opt === 'today' ? today : addDays(today, 1), 'dd/MM');
-
-  const selectedIso = isoForOption(selected);
-  const isSelectedWeekend = checkIsWeekend(selected === 'today' ? today : addDays(today, 1));
+  const selectedIso = format(resolvedDate, 'yyyy-MM-dd');
   const menuExists = menus.some((m) => m.date === selectedIso);
 
   const handleDownload = async () => {
@@ -64,9 +56,9 @@ export function MenuCard() {
       <p className="font-mono text-[10px] tracking-[.1em] uppercase text-faint mb-[9px]">Fecha</p>
       <DaySelector selected={selected} onSelect={setSelected} dateLabel={shortDateForOption} />
 
-      {isSelectedWeekend && <ReportNotice>No hay entregas los fines de semana.</ReportNotice>}
+      {isWeekend && <ReportNotice>No hay entregas los fines de semana.</ReportNotice>}
 
-      {!isSelectedWeekend && !menuExists && (
+      {!isWeekend && !menuExists && (
         <ReportNotice>No hay menú registrado para esta fecha.</ReportNotice>
       )}
 
@@ -74,11 +66,11 @@ export function MenuCard() {
 
       <Button
         onClick={handleDownload}
-        disabled={isSelectedWeekend || !menuExists}
+        disabled={isWeekend || !menuExists}
         loading={loading}
         leftIcon="download"
         className="mt-auto"
-        style={isSelectedWeekend || !menuExists ? DISABLED_DOWNLOAD_STYLE : undefined}
+        style={isWeekend || !menuExists ? DISABLED_DOWNLOAD_STYLE : undefined}
       >
         Descargar .docx
       </Button>
