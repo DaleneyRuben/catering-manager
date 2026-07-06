@@ -76,6 +76,16 @@ describe('findActiveSubscriptionsForDate', () => {
     );
   });
 
+  it('orders results by createdAt ascending, oldest first', async () => {
+    (Subscription.findAll as jest.Mock).mockResolvedValue([]);
+
+    await findActiveSubscriptionsForDate('2026-06-15');
+
+    expect(Subscription.findAll).toHaveBeenCalledWith(
+      expect.objectContaining({ order: [['createdAt', 'ASC']] }),
+    );
+  });
+
   it('returns an empty array when nothing matches', async () => {
     (Subscription.findAll as jest.Mock).mockResolvedValue([]);
 
