@@ -44,7 +44,7 @@ src/
   contexts/AuthContext.tsx
 ```
 
-All imports use `@/` path aliases — no relative `../` paths anywhere in the codebase.
+Same-directory and one-level-up imports may use relative paths (`./Foo`, `../Foo`); anything two or more levels up must use the `@/` alias.
 
 ## Alternatives Considered
 
@@ -60,7 +60,7 @@ All imports use `@/` path aliases — no relative `../` paths anywhere in the co
 
 - All code for a feature lives in one place — opening `features/clients/` gives the full picture.
 - Moving or renaming a feature is a single directory operation.
-- `@/` aliases eliminate brittle relative import chains.
+- `@/` aliases eliminate brittle deep relative import chains, while still allowing short local relative imports where they're unambiguous.
 - Clear rule for where new code goes: if it belongs to a feature, put it in that feature's folder; if it's truly shared across many features, it goes in `components/ui/` or `utils/`.
 
 **Negative / trade-offs:**
@@ -75,4 +75,4 @@ All imports use `@/` path aliases — no relative `../` paths anywhere in the co
 2. Generic UI primitives (no domain knowledge) go in `components/ui/`.
 3. No barrel `index.ts` files at feature boundaries — import directly from the file.
 4. `pages/` files are route orchestrators only — no business logic, no local state beyond UI toggles.
-5. All imports use `@/` aliases; no relative `../` imports.
+5. Same-directory and one-level-up imports may use relative paths; anything two or more levels up must use a `@/` alias.
