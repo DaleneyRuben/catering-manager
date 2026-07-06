@@ -10,6 +10,7 @@ const makeClient = (name: string) => ({ name });
 
 const makeSubscription = (
   overrides: Partial<{
+    startDate: string;
     suspendedDates: string[];
     client: { name: string };
   }> = {},
@@ -25,11 +26,23 @@ const makeSubscription = (
 describe('findDeliveryClientsForDate', () => {
   beforeEach(() => jest.clearAllMocks());
 
-  it('returns names of active clients sorted A-Z for the given date', async () => {
+  it('returns names of active clients sorted by startDate, oldest first', async () => {
     (Subscription.findAll as jest.Mock).mockResolvedValue([
-      makeSubscription({ client: makeClient('Zara Gomez') }),
-      makeSubscription({ client: makeClient('Ana López') }),
-      makeSubscription({ client: makeClient('María Torres') }),
+      makeSubscription({ startDate: '2026-06-10', client: makeClient('Zara Gomez') }),
+      makeSubscription({ startDate: '2026-05-01', client: makeClient('María Torres') }),
+      makeSubscription({ startDate: '2026-06-05', client: makeClient('Ana López') }),
+    ]);
+
+    const names = await findDeliveryClientsForDate('2026-06-15');
+
+    expect(names).toEqual(['María Torres', 'Ana López', 'Zara Gomez']);
+  });
+
+  it('breaks ties on the same startDate alphabetically by name', async () => {
+    (Subscription.findAll as jest.Mock).mockResolvedValue([
+      makeSubscription({ startDate: '2026-06-01', client: makeClient('Zara Gomez') }),
+      makeSubscription({ startDate: '2026-06-01', client: makeClient('Ana López') }),
+      makeSubscription({ startDate: '2026-06-01', client: makeClient('María Torres') }),
     ]);
 
     const names = await findDeliveryClientsForDate('2026-06-15');
