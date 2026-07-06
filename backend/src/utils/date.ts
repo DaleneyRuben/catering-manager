@@ -7,6 +7,7 @@ import {
   startOfISOWeek,
   addDays,
 } from 'date-fns';
+import { es } from 'date-fns/locale';
 import { formatInTimeZone } from 'date-fns-tz';
 
 const APP_TIMEZONE = 'America/La_Paz';
@@ -34,6 +35,14 @@ export const nextDeliveryDay = (date: string): string => {
   if (day === 6) return format(addDays(d, 2), 'yyyy-MM-dd');
   if (day === 0) return format(addDays(d, 1), 'yyyy-MM-dd');
   return date;
+};
+
+// Shared by report/kitchen-report file downloads: "Lunes 15-06.docx" / "Lunes 15-06.xlsx".
+export const spanishWeekdayFileName = (date: string, extension: string): string => {
+  const parsed = parseISO(date);
+  const dayName = format(parsed, 'EEEE', { locale: es });
+  const capitalized = dayName.charAt(0).toUpperCase() + dayName.slice(1);
+  return `${capitalized} ${format(parsed, 'dd-MM')}.${extension}`;
 };
 
 // Plain calendar days — unlike addDeliveryDays, weekends are not skipped.

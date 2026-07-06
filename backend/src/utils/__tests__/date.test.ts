@@ -5,7 +5,22 @@ import {
   toAppDate,
   calcContractEndDate,
   nextDeliveryDay,
+  spanishWeekdayFileName,
 } from '../date';
+
+describe('spanishWeekdayFileName', () => {
+  it('capitalizes the Spanish weekday name and appends dd-MM plus the given extension', () => {
+    expect(spanishWeekdayFileName('2026-06-15', 'docx')).toBe('Lunes 15-06.docx');
+  });
+
+  it('supports a different extension for the same date', () => {
+    expect(spanishWeekdayFileName('2026-06-15', 'xlsx')).toBe('Lunes 15-06.xlsx');
+  });
+
+  it('formats a different weekday correctly', () => {
+    expect(spanishWeekdayFileName('2026-06-19', 'docx')).toBe('Viernes 19-06.docx');
+  });
+});
 
 describe('addCalendarDays', () => {
   it('adds calendar days without skipping weekends', () => {
