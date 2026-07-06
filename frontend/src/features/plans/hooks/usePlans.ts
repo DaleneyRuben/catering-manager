@@ -18,7 +18,13 @@ export function usePlans() {
 
   const clientCountsQuery = useQuery({
     queryKey: ['plans', 'client-counts'],
-    queryFn: (): Promise<Record<string, number>> => api.get('/plans/client-counts'),
+    queryFn: async (): Promise<Record<string, number>> => {
+      const rows = await api.get<{ planId: string; count: number }[]>('/plans/client-counts');
+      return rows.reduce<Record<string, number>>((acc, r) => {
+        acc[r.planId] = r.count;
+        return acc;
+      }, {});
+    },
   });
 
   const planBody = (draft: PlanDraft) => ({

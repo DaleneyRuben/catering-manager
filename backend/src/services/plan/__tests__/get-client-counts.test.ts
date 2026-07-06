@@ -10,7 +10,7 @@ jest.mock('../../../database/sequelize', () => ({
 describe('getClientCounts', () => {
   beforeEach(() => jest.clearAllMocks());
 
-  it('returns a planId → count map as numbers', async () => {
+  it('returns an array of planId/count rows as numbers', async () => {
     (sequelize.query as jest.Mock).mockResolvedValue([
       { planId: 1, count: '5' },
       { planId: 2, count: '3' },
@@ -18,15 +18,18 @@ describe('getClientCounts', () => {
 
     const result = await getClientCounts();
 
-    expect(result).toEqual({ 1: 5, 2: 3 });
+    expect(result).toEqual([
+      { planId: 1, count: 5 },
+      { planId: 2, count: 3 },
+    ]);
   });
 
-  it('returns an empty object when no active clients exist', async () => {
+  it('returns an empty array when no active clients exist', async () => {
     (sequelize.query as jest.Mock).mockResolvedValue([]);
 
     const result = await getClientCounts();
 
-    expect(result).toEqual({});
+    expect(result).toEqual([]);
   });
 
   it('excludes finalized subscriptions from the count query', async () => {
@@ -36,6 +39,15 @@ describe('getClientCounts', () => {
 
     const sql: string = (sequelize.query as jest.Mock).mock.calls[0][0];
     expect(sql).toContain('"finalizedAt" IS NULL');
+  });
+
+  it('excludes subscriptions that have not started yet', async () => {
+    (sequelize.query as jest.Mock).mockResolvedValue([]);
+
+    await getClientCounts();
+
+    const sql: string = (sequelize.query as jest.Mock).mock.calls[0][0];
+    expect(sql).toContain('"startDate" <= :today');
   });
 
   it('propagates db errors', async () => {
