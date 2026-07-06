@@ -124,8 +124,9 @@ This project uses **GitHub Flow**:
 
 1. Create a feature branch off `main` before starting any change (`git checkout -b <type>/<short-description>`)
 2. Work on the branch with atomic commits (use `/commit`)
-3. Open a PR — CI runs lint, typecheck, frontend tests, and backend tests
-4. Merge to `main` only after CI passes
+3. Verify the change end-to-end via Playwright (see "Verify end-to-end before calling it done" below) — this is a hard stop before step 4, not an optional follow-up
+4. Open a PR — CI runs lint, typecheck, frontend tests, and backend tests
+5. Merge to `main` only after CI passes
 
 `main` is always production. Never commit directly to `main`.
 
@@ -169,6 +170,8 @@ After tests are green, verify through the running app using the Playwright MCP t
 - **Bug fixes involving a data claim** (counts, totals, filters): use Playwright to cross-check the result against an independent source of truth in the app (a different view/table showing the same underlying data) rather than trusting a single code path.
 
 If the environment doesn't allow running or testing the app, say so explicitly instead of declaring the task complete.
+
+**This check gates PR creation, not just "done."** Treat every `gh pr create` as a hard stop: before running it, confirm Playwright verification has actually been performed for that specific change in this session. When working through a multi-item list where each item gets its own branch/PR, this check must be repeated per item — passing tests + typecheck + lint on item 3 does not carry over from having Playwright-verified item 1.
 
 ---
 
