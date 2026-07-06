@@ -1,7 +1,7 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import User from '../../../models/User';
-import { login } from '../login';
+import { login, InvalidCredentialsError } from '../login';
 import { record } from '../../login-event';
 import { encodeId } from '../../../utils/sqids';
 import { ROLES } from '../../../constants/roles.constants';
@@ -82,22 +82,22 @@ describe('login', () => {
     (User.findOne as jest.Mock).mockResolvedValue(mockUser);
     (bcrypt.compare as jest.Mock).mockResolvedValue(false);
 
-    await expect(login('ada', 'wrong-password', ANDROID_CHROME_UA)).rejects.toThrow(
-      'INVALID_CREDENTIALS',
+    await expect(login('ada', 'wrong-password', ANDROID_CHROME_UA)).rejects.toBeInstanceOf(
+      InvalidCredentialsError,
     );
     expect(record).not.toHaveBeenCalled();
   });
 
-  it('throws INVALID_CREDENTIALS when user not found', async () => {
+  it('throws InvalidCredentialsError when user not found', async () => {
     (User.findOne as jest.Mock).mockResolvedValue(null);
 
-    await expect(login('unknown', 'any')).rejects.toThrow('INVALID_CREDENTIALS');
+    await expect(login('unknown', 'any')).rejects.toBeInstanceOf(InvalidCredentialsError);
   });
 
-  it('throws INVALID_CREDENTIALS when password is wrong', async () => {
+  it('throws InvalidCredentialsError when password is wrong', async () => {
     (User.findOne as jest.Mock).mockResolvedValue(mockUser);
     (bcrypt.compare as jest.Mock).mockResolvedValue(false);
 
-    await expect(login('ada', 'wrong-password')).rejects.toThrow('INVALID_CREDENTIALS');
+    await expect(login('ada', 'wrong-password')).rejects.toBeInstanceOf(InvalidCredentialsError);
   });
 });
