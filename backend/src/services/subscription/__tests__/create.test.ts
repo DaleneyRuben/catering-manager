@@ -1,11 +1,10 @@
-import { format } from 'date-fns';
 import { Op } from 'sequelize';
 import Subscription from '../../../models/Subscription';
 import Client from '../../../models/Client';
 import ClientHistory from '../../../models/ClientHistory';
 import Plan from '../../../models/Plan';
 import { create } from '../create';
-import { addDeliveryDays, subtractDeliveryDays } from '../../../utils/date';
+import { addDeliveryDays, appToday, subtractDeliveryDays } from '../../../utils/date';
 
 jest.mock('../../../models/Subscription');
 jest.mock('../../../models/Client');
@@ -16,7 +15,7 @@ beforeEach(() => {
   jest.clearAllMocks();
 });
 
-const today = format(new Date(), 'yyyy-MM-dd');
+const today = appToday();
 const startDate = '2026-05-26';
 const contractEndDate = addDeliveryDays(startDate, 19);
 
