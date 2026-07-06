@@ -1,13 +1,13 @@
 import { useState } from 'react';
-import { format, addDays } from 'date-fns';
+import { format } from 'date-fns';
 import { Button } from '@ui/Button';
 import { Icon } from '@ui/Icon';
 import { API_BASE } from '@/utils/env';
 import { downloadReport } from '@/utils/downloadReport';
-import { checkIsWeekend } from '@/utils/devFlags';
-import { DaySelector, type DayOption } from '@/features/reports/components/DaySelector';
+import { DaySelector } from '@/features/reports/components/DaySelector';
 import { ReportNotice } from '@/features/reports/components/ReportNotice';
 import { DISABLED_DOWNLOAD_STYLE } from '@/features/reports/components/downloadButtonStyles';
+import { useDaySelector } from '@/features/reports/hooks/useDaySelector';
 
 const BASE = API_BASE;
 
@@ -19,23 +19,15 @@ function downloadDeliveryList(date: string) {
 }
 
 export function DeliveryListCard() {
-  const [selected, setSelected] = useState<DayOption>('today');
+  const { selected, setSelected, resolvedDate, isWeekend, shortDateForOption } = useDaySelector();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  const today = new Date();
-  const dateForOption = (opt: DayOption) =>
-    format(opt === 'today' ? today : addDays(today, 1), 'dd/MM/yyyy');
-  const shortDateForOption = (opt: DayOption) =>
-    format(opt === 'today' ? today : addDays(today, 1), 'dd/MM');
-
-  const isSelectedWeekend = checkIsWeekend(selected === 'today' ? today : addDays(today, 1));
 
   const handleDownload = async () => {
     setError(null);
     setLoading(true);
     try {
-      await downloadDeliveryList(dateForOption(selected));
+      await downloadDeliveryList(format(resolvedDate, 'dd/MM/yyyy'));
     } catch {
       setError('No se pudo generar el archivo. Intenta de nuevo.');
     } finally {
@@ -58,17 +50,17 @@ export function DeliveryListCard() {
       <p className="font-mono text-[10px] tracking-[.1em] uppercase text-faint mb-[9px]">Fecha</p>
       <DaySelector selected={selected} onSelect={setSelected} dateLabel={shortDateForOption} />
 
-      {isSelectedWeekend && <ReportNotice>No hay entregas los fines de semana.</ReportNotice>}
+      {isWeekend && <ReportNotice>No hay entregas los fines de semana.</ReportNotice>}
 
       {error && <p className="text-[12px] text-alert mb-4">{error}</p>}
 
       <Button
         onClick={handleDownload}
-        disabled={isSelectedWeekend}
+        disabled={isWeekend}
         loading={loading}
         leftIcon="download"
         className="mt-auto"
-        style={isSelectedWeekend ? DISABLED_DOWNLOAD_STYLE : undefined}
+        style={isWeekend ? DISABLED_DOWNLOAD_STYLE : undefined}
       >
         Descargar .xlsx
       </Button>

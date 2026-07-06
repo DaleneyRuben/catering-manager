@@ -1,8 +1,8 @@
 import { NextFunction, Request, Response } from 'express';
 import ExcelJS from 'exceljs';
 import { parse, format, isValid, parseISO } from 'date-fns';
-import { es } from 'date-fns/locale';
 import { checkIsWeekend } from '../utils/devFlags';
+import { spanishWeekdayFileName } from '../utils/date';
 import * as menuService from '../services/menu';
 import * as reportService from '../services/report';
 import { buildMenu, menuFileName } from '../utils/menuBuilder';
@@ -12,14 +12,6 @@ const parseDMY = (value: string): string | null => {
   const parsed = parse(value, 'dd/MM/yyyy', new Date());
   if (!isValid(parsed)) return null;
   return format(parsed, 'yyyy-MM-dd');
-};
-
-const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
-
-const toSpanishFileName = (iso: string): string => {
-  const d = parseISO(iso);
-  const dayName = capitalize(format(d, 'EEEE', { locale: es }));
-  return `${dayName} ${format(d, 'dd-MM')}.xlsx`;
 };
 
 const downloadActiveClients = async (req: Request, res: Response, next: NextFunction) => {
@@ -45,7 +37,7 @@ const downloadActiveClients = async (req: Request, res: Response, next: NextFunc
     names.forEach((name) => sheet.addRow({ name }));
 
     const buffer = await workbook.xlsx.writeBuffer();
-    const fileName = toSpanishFileName(iso);
+    const fileName = spanishWeekdayFileName(iso, 'xlsx');
 
     res.setHeader(
       'Content-Type',
