@@ -80,6 +80,16 @@ describe('findAll', () => {
     );
   });
 
+  it('orders results by createdAt ascending, oldest first', async () => {
+    (Client.findAndCountAll as jest.Mock).mockResolvedValue({ rows: [], count: 0 });
+
+    await findAll();
+
+    expect(Client.findAndCountAll).toHaveBeenCalledWith(
+      expect.objectContaining({ order: [['createdAt', 'ASC']] }),
+    );
+  });
+
   it('defaults to page 1 and limit 25', async () => {
     (Client.findAndCountAll as jest.Mock).mockResolvedValue({ rows: [], count: 0 });
 

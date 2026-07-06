@@ -122,6 +122,7 @@ export const findAll = (filters: FindAllFilters = {}) => {
         required: subscriptionRequired,
       },
     ],
+    order: [['createdAt', 'ASC']],
     limit,
     offset,
     distinct: true,
