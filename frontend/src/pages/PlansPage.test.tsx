@@ -31,7 +31,7 @@ const mockPlan2 = {
 function setupMocks(plans = [mockPlan1, mockPlan2]) {
   mockGet.mockImplementation((url: string) => {
     if (url === '/plans') return Promise.resolve(plans);
-    if (url === '/plans/client-counts') return Promise.resolve({});
+    if (url === '/plans/client-counts') return Promise.resolve([]);
     return Promise.reject(new Error(`Unknown URL: ${url}`));
   });
 }
@@ -196,7 +196,7 @@ describe('PlansPage', () => {
 
     mockGet.mockImplementation((url: string) => {
       if (url === '/plans') return Promise.resolve([mockPlan2]);
-      if (url === '/plans/client-counts') return Promise.resolve({});
+      if (url === '/plans/client-counts') return Promise.resolve([]);
       return Promise.reject(new Error(`Unknown URL: ${url}`));
     });
 
