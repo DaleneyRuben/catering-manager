@@ -29,13 +29,19 @@ const validPayload = {
 };
 
 describe('GET /api/plans/client-counts', () => {
-  it('returns 200 with plan client counts', async () => {
-    (planService.getClientCounts as jest.Mock).mockResolvedValue({ 1: 5, 2: 3 });
+  it('returns 200 with plan client counts, keyed by encoded planId', async () => {
+    (planService.getClientCounts as jest.Mock).mockResolvedValue([
+      { planId: 1, count: 5 },
+      { planId: 2, count: 3 },
+    ]);
 
     const res = await request(app).get('/api/plans/client-counts');
 
     expect(res.status).toBe(200);
-    expect(res.body.data).toEqual({ 1: 5, 2: 3 });
+    expect(res.body.data).toEqual([
+      { planId: id1, count: 5 },
+      { planId: encodeId(2), count: 3 },
+    ]);
   });
 
   it('returns 500 when service throws', async () => {
