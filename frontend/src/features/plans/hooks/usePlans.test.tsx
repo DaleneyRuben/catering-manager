@@ -27,7 +27,7 @@ beforeEach(() => {
   jest.clearAllMocks();
   mockGet.mockImplementation((url: string) => {
     if (url === '/plans') return Promise.resolve([plan1, plan2]);
-    if (url === '/plans/client-counts') return Promise.resolve({});
+    if (url === '/plans/client-counts') return Promise.resolve([]);
     return Promise.reject(new Error(`Unknown URL: ${url}`));
   });
 });
@@ -42,7 +42,7 @@ describe('usePlans', () => {
   it('normalizes price to a number when the API returns a decimal string', async () => {
     mockGet.mockImplementation((url: string) => {
       if (url === '/plans') return Promise.resolve([{ ...plan1, price: '1200.00' }]);
-      if (url === '/plans/client-counts') return Promise.resolve({});
+      if (url === '/plans/client-counts') return Promise.resolve([]);
       return Promise.reject(new Error(`Unknown URL: ${url}`));
     });
     const { result } = renderHook(() => usePlans(), { wrapper: makeWrapper() });
@@ -101,10 +101,10 @@ describe('usePlans', () => {
     expect(mockDelete).toHaveBeenCalledWith('/plans/1');
   });
 
-  it('clientCounts comes from /plans/client-counts endpoint', async () => {
+  it('clientCounts is built from the /plans/client-counts array, keyed by planId', async () => {
     mockGet.mockImplementation((url: string) => {
       if (url === '/plans') return Promise.resolve([plan1]);
-      if (url === '/plans/client-counts') return Promise.resolve({ 1: 2 });
+      if (url === '/plans/client-counts') return Promise.resolve([{ planId: '1', count: 2 }]);
       return Promise.reject(new Error(`Unknown: ${url}`));
     });
 
