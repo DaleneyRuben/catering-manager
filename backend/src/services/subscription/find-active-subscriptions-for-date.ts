@@ -14,6 +14,7 @@ export const findActiveSubscriptionsForDate = async (date: string): Promise<Subs
       finalizedAt: { [Op.is]: null },
     },
     include: [{ model: Client, where: { pausedSince: null } }, { model: Plan }],
+    order: [['createdAt', 'ASC']],
   });
 
   return subscriptions.filter((s) => !s.suspendedDates.includes(date));

@@ -162,11 +162,11 @@ Never write implementation code before a failing test exists. Never ship a backe
 
 Passing unit tests, typecheck, and lint proves the code is internally consistent — it does not prove the fix works. Unit tests mock the API/DB boundary, so they can't catch mismatches in how layers are actually wired together (e.g. a response-shape or encoding change that breaks a consumer silently).
 
-After tests are green:
+After tests are green, verify through the running app using the Playwright MCP tools — never a standalone script that imports services/models directly or talks to the DB out of band:
 
-- **Frontend/UI changes**: load the page in a running browser and exercise the golden path plus edge cases.
-- **Backend changes that affect an API contract or cross a service boundary**: hit the real endpoint, or drive it through the running frontend, and confirm the actual behavior — not just that mocked tests pass.
-- **Bug fixes involving a data claim** (counts, totals, filters): cross-check the result against an independent source of truth in the app (a different view/table showing the same underlying data) rather than trusting a single code path.
+- **Frontend/UI changes**: use Playwright to load the page in the running browser and exercise the golden path plus edge cases.
+- **Backend changes that affect an API contract or cross a service boundary**: use Playwright to drive the change through the running frontend (or hit the real endpoint via its network tools) and confirm the actual behavior — not just that mocked tests pass.
+- **Bug fixes involving a data claim** (counts, totals, filters): use Playwright to cross-check the result against an independent source of truth in the app (a different view/table showing the same underlying data) rather than trusting a single code path.
 
 If the environment doesn't allow running or testing the app, say so explicitly instead of declaring the task complete.
 
