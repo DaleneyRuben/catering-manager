@@ -1,27 +1,14 @@
 import { useState } from 'react';
 import { Button } from '@ui/Button';
 import { Icon } from '@ui/Icon';
-import { IconButton } from '@ui/IconButton';
 import { PageHeader } from '@ui/PageHeader';
 import { UsersPageSkeleton } from '@/features/users/components/UsersPageSkeleton';
+import { UserRoleStats } from '@/features/users/components/UserRoleStats';
+import { UserTable } from '@/features/users/components/UserTable';
 import { useUsers, type AppUser } from '@/features/users/hooks/useUsers';
 import { useAuth } from '@/features/auth/AuthContext';
 import { UserModal } from '@/features/users/components/UserModal';
 import { LoginHistoryModal } from '@/features/users/components/LoginHistoryModal';
-import { initials } from '@/utils/string';
-import { formatLastSeen, isOnline } from '@/utils/format';
-import type { UserRole } from '@/features/auth/AuthContext';
-import { ROLES, ROLE_LABELS } from '@/constants/roles';
-import { ROLE_CLASSES, ROLE_ICON_CLASSES } from '@/features/users/roleStyles';
-
-const ROLE_ICONS: Record<UserRole, string> = {
-  super_admin: 'shield-check',
-  admin: 'shield',
-  kitchen: 'utensils',
-  delivery: 'motorcycle',
-};
-
-const ROLE_ORDER: UserRole[] = [ROLES.SUPER_ADMIN, ROLES.ADMIN, ROLES.KITCHEN, ROLES.DELIVERY];
 
 export function UsersPage() {
   const { user: currentUser } = useAuth();
@@ -47,26 +34,7 @@ export function UsersPage() {
         }
       />
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-[18px] mb-5">
-        {ROLE_ORDER.map((role) => (
-          <div
-            key={role}
-            className="bg-paper border border-rule rounded-[13px] px-5 py-[18px] flex items-center gap-3.5"
-          >
-            <span
-              className={`w-[38px] h-[38px] rounded-[10px] flex items-center justify-center shrink-0 ${ROLE_ICON_CLASSES[role]}`}
-            >
-              <Icon name={ROLE_ICONS[role]} size={19} stroke={1.6} />
-            </span>
-            <div>
-              <p className="font-serif font-semibold text-[26px] leading-none text-ink">
-                {users.filter((u) => u.role === role).length}
-              </p>
-              <p className="text-[12px] text-muted mt-1">{ROLE_LABELS[role]}</p>
-            </div>
-          </div>
-        ))}
-      </div>
+      <UserRoleStats users={users} />
 
       <div className="flex items-center gap-3 mb-4 flex-wrap">
         <div className="relative flex-1 min-w-[200px] max-w-[320px]">
@@ -87,100 +55,7 @@ export function UsersPage() {
         </p>
       </div>
 
-      {users.length === 0 ? (
-        <div className="py-16 text-center bg-paper border border-rule rounded-lg">
-          <p className="font-semibold text-ink">Sin usuarios</p>
-          <p className="text-sm text-muted mt-1">
-            Agregá el primer usuario usando el botón de arriba.
-          </p>
-        </div>
-      ) : (
-        <div className="bg-paper border border-rule rounded-[13px] overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="bg-olive-50">
-                  <th className="text-left px-[22px] py-[13px] text-[10px] font-mono font-semibold uppercase tracking-[.13em] text-muted border-b border-rule">
-                    Usuario
-                  </th>
-                  <th className="text-left px-[22px] py-[13px] text-[10px] font-mono font-semibold uppercase tracking-[.13em] text-muted border-b border-rule">
-                    Rol
-                  </th>
-                  <th className="text-left px-[22px] py-[13px] text-[10px] font-mono font-semibold uppercase tracking-[.13em] text-muted border-b border-rule">
-                    Último acceso
-                  </th>
-                  <th className="text-left px-[22px] py-[13px] text-[10px] font-mono font-semibold uppercase tracking-[.13em] text-muted border-b border-rule">
-                    Estado
-                  </th>
-                  <th className="w-12 border-b border-rule" scope="col">
-                    <span className="sr-only">Acciones</span>
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredUsers.map((u) => {
-                  const isActive = !!u.lastLoginAt && isOnline(u.lastLoginAt);
-                  return (
-                    <tr
-                      key={u.id}
-                      className="border-b border-cream-2 last:border-0 hover:bg-row-hover transition-colors"
-                    >
-                      <td className="px-[22px] py-[13px]">
-                        <div className="flex items-center gap-3">
-                          <div
-                            className={`w-9 h-9 rounded-full flex items-center justify-center font-mono text-[12px] font-semibold shrink-0 ${ROLE_ICON_CLASSES[u.role]}`}
-                          >
-                            {initials(u.username)}
-                          </div>
-                          <p className="text-[14px] font-semibold text-ink">{u.username}</p>
-                        </div>
-                      </td>
-                      <td className="px-[22px] py-[13px]">
-                        <span
-                          className={`inline-flex items-center px-3 py-1 rounded-[7px] text-[12.5px] font-semibold ${ROLE_CLASSES[u.role]}`}
-                        >
-                          {ROLE_LABELS[u.role]}
-                        </span>
-                      </td>
-                      <td className="px-[22px] py-[13px] text-[12px] font-mono text-muted tabular-nums whitespace-nowrap">
-                        {u.lastLoginAt ? formatLastSeen(u.lastLoginAt) : 'Nunca'}
-                      </td>
-                      <td className="px-[22px] py-[13px]">
-                        <span
-                          className={`inline-flex items-center gap-[7px] text-[12.5px] font-semibold ${
-                            isActive ? 'text-ok' : 'text-faint'
-                          }`}
-                        >
-                          <span
-                            className={`w-[7px] h-[7px] rounded-full ${isActive ? 'bg-ok' : 'bg-rule-2'}`}
-                          />
-                          {isActive ? 'Activo' : 'Inactivo'}
-                        </span>
-                      </td>
-                      <td className="px-[22px] py-[13px] text-right whitespace-nowrap">
-                        <IconButton
-                          icon="history"
-                          label={`Historial de ${u.username}`}
-                          onClick={() => setHistoryUser(u)}
-                          size={15}
-                          className="w-8 h-8 rounded-lg text-faint hover:text-ink-2 hover:bg-cream-2"
-                        />
-                        <IconButton
-                          icon="settings"
-                          label={`Editar ${u.username}`}
-                          onClick={() => setEditUser(u)}
-                          size={15}
-                          className="w-8 h-8 rounded-lg text-faint hover:text-ink-2 hover:bg-cream-2"
-                        />
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
+      <UserTable users={filteredUsers} onHistory={setHistoryUser} onEdit={setEditUser} />
 
       {createOpen && (
         <UserModal
