@@ -1,6 +1,7 @@
 import request from 'supertest';
 import app from '../../app';
 import * as authService from '../../services/auth';
+import { InvalidCredentialsError } from '../../services/auth';
 
 jest.mock('../../services/auth');
 jest.mock('../../database/sequelize', () => ({ __esModule: true, default: { query: jest.fn() } }));
@@ -53,7 +54,7 @@ describe('POST /api/auth/login', () => {
   });
 
   it('returns 401 on invalid credentials', async () => {
-    mockLogin.mockRejectedValue(new Error('INVALID_CREDENTIALS'));
+    mockLogin.mockRejectedValue(new InvalidCredentialsError());
 
     const res = await request(app)
       .post('/api/auth/login')
