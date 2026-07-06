@@ -65,7 +65,7 @@ describe('App', () => {
 
   it('blocks kitchen role from the clients page', async () => {
     renderAt('/clientes', 'kitchen');
-    expect(await screen.findByText('No tenés acceso a esta sección.')).toBeInTheDocument();
+    expect(await screen.findByText('No tienes acceso a esta sección.')).toBeInTheDocument();
   });
 
   it('lets delivery role reach /entregas', async () => {
@@ -75,7 +75,7 @@ describe('App', () => {
 
   it('blocks delivery role from the menu page', async () => {
     renderAt('/menu', 'delivery');
-    expect(await screen.findByText('No tenés acceso a esta sección.')).toBeInTheDocument();
+    expect(await screen.findByText('No tienes acceso a esta sección.')).toBeInTheDocument();
   });
 
   it('lets admin role reach /entregas', async () => {

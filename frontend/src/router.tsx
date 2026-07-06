@@ -123,7 +123,7 @@ export function AppRouter() {
                   path="/sin-acceso"
                   element={
                     <div className="flex items-center justify-center h-64 text-muted text-sm">
-                      No tenés acceso a esta sección.
+                      No tienes acceso a esta sección.
                     </div>
                   }
                 />
