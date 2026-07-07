@@ -138,6 +138,8 @@ Not to be confused with the **Producción section** of the kitchen `.docx` repor
   - A client matching none of the three non-juice groups (e.g. breakfast-only plan) appears only in Jugo if applicable, otherwise in no group.
 - The card total ("clientes a preparar") is the number of distinct clients placed in at least one group, computed server-side. Active clients whose plan matches no group are not counted.
 
+**Clientes activos por día:** a second card on the same view shows the active-client count for each weekday (Mon–Fri) of the current display week (same Mon–Fri bounds used by Menú, resetting to the upcoming week on Sunday). Each day's count is the same active-subscription rule applied to that specific date, independent of the "Mañana" card above. Returned as `weeklyCounts` on the same `GET /api/production` response.
+
 ---
 
 ## Entregas View (Delivery Route)

@@ -1,11 +1,11 @@
 import { useQuery } from '@tanstack/react-query';
 import api from '@/services/api';
-import type { ProductionSummary } from '@/features/production/types';
+import type { ProductionData } from '@/features/production/types';
 
 export function useProduction() {
   const query = useQuery({
     queryKey: ['production'],
-    queryFn: (): Promise<ProductionSummary> => api.get<ProductionSummary>('/production'),
+    queryFn: (): Promise<ProductionData> => api.get<ProductionData>('/production'),
   });
 
   return {

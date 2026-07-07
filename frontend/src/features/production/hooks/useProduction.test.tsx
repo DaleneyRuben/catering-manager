@@ -2,12 +2,12 @@ import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import api from '@/services/api';
 import { useProduction } from '@/features/production/hooks/useProduction';
-import type { ProductionSummary } from '@/features/production/types';
+import type { ProductionData } from '@/features/production/types';
 
 jest.mock('@/services/api', () => ({ default: { get: jest.fn() } }));
 const mockGet = api.get as jest.Mock;
 
-const summary: ProductionSummary = {
+const summary: ProductionData = {
   date: '2026-07-02',
   isDeliveryDay: true,
   total: 2,
@@ -16,6 +16,17 @@ const summary: ProductionSummary = {
     lunchOnly: ['Ana Flores'],
     lunchAndDinner: ['Carlos Ríos'],
     full: [],
+  },
+  weeklyCounts: {
+    weekStart: '2026-06-29',
+    weekEnd: '2026-07-03',
+    days: [
+      { date: '2026-06-29', count: 10 },
+      { date: '2026-06-30', count: 11 },
+      { date: '2026-07-01', count: 12 },
+      { date: '2026-07-02', count: 9 },
+      { date: '2026-07-03', count: 8 },
+    ],
   },
 };
 
