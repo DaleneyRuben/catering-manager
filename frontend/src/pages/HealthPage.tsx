@@ -4,6 +4,7 @@ import { PageHeader } from '@ui/PageHeader';
 import { useHealth } from '@/features/health/hooks/useHealth';
 import { HealthStatusBanner } from '@/features/health/components/HealthStatusBanner';
 import { HealthMetricsGrid } from '@/features/health/components/HealthMetricsGrid';
+import { HealthPageSkeleton } from '@/features/health/components/HealthPageSkeleton';
 import { HealthServicesTable } from '@/features/health/components/HealthServicesTable';
 
 export function HealthPage() {
@@ -36,10 +37,7 @@ export function HealthPage() {
       />
 
       {isLoading || !report ? (
-        <div className="flex items-center gap-4 p-4 rounded-lg border border-rule bg-paper">
-          <Icon name="refresh" size={20} className="text-muted animate-spin" />
-          <span className="text-muted text-sm">Verificando...</span>
-        </div>
+        <HealthPageSkeleton />
       ) : (
         <>
           <HealthStatusBanner status={report.status} checkedAt={report.checkedAt} />
