@@ -49,7 +49,8 @@ describe('HealthPage', () => {
   it('shows a loading skeleton when there is no report yet', () => {
     setup({ report: undefined, isLoading: true });
     render(<HealthPage />);
-    expect(screen.getByText('Verificando...')).toBeInTheDocument();
+    expect(screen.getByTestId('health-skeleton-banner')).toBeInTheDocument();
+    expect(screen.queryByText('Todos los sistemas operativos')).not.toBeInTheDocument();
   });
 
   it('shows the ok banner message', () => {
