@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { format } from 'date-fns';
 import { Button } from '@ui/Button';
 import { Icon } from '@ui/Icon';
-import { useMenu } from '@/features/menu/hooks/useMenu';
+import type { Menu } from '@/features/menu/types';
 import { API_BASE } from '@/utils/env';
 import { downloadReport } from '@/utils/downloadReport';
 import { DaySelector } from '@/features/reports/components/DaySelector';
@@ -19,12 +19,14 @@ function downloadMenuCard(isoDate: string) {
   );
 }
 
-export function MenuCard() {
+interface Props {
+  menus: Menu[];
+}
+
+export function MenuCard({ menus }: Props) {
   const { selected, setSelected, resolvedDate, isWeekend, shortDateForOption } = useDaySelector();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  const { menus } = useMenu();
 
   const selectedIso = format(resolvedDate, 'yyyy-MM-dd');
   const menuExists = menus.some((m) => m.date === selectedIso);
