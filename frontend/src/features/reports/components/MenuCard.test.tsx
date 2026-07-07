@@ -51,6 +51,14 @@ describe('MenuCard', () => {
     expect(screen.getByText('No hay menú registrado para esta fecha.')).toBeInTheDocument();
   });
 
+  it('shows a skeleton while loading and hides the no-menu warning', () => {
+    (useMenu as jest.Mock).mockReturnValue({ menus: [], isLoading: true });
+    const { container } = render(<MenuCard />);
+    expect(screen.queryByRole('heading', { name: 'Menú del día' })).not.toBeInTheDocument();
+    expect(screen.queryByText('No hay menú registrado para esta fecha.')).not.toBeInTheDocument();
+    expect(container.querySelector('.animate-pulse')).toBeInTheDocument();
+  });
+
   it('calls downloadReport when the download button is clicked', async () => {
     render(<MenuCard />);
     await userEvent.click(screen.getByRole('button', { name: /descargar/i }));
