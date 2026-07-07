@@ -18,10 +18,14 @@ const makeClient = (overrides: Partial<Record<string, unknown>> = {}) => ({
   phoneNumber: '+591 7000 0000',
   deliveryZone: 'Centro',
   groupToken: null,
+  address: 'Av. Siempre Viva #123',
   ...overrides,
 });
 
-const makeSubscription = (client = makeClient()) => ({ client });
+const makeSubscription = (client = makeClient(), startDate = '2020-01-01') => ({
+  client,
+  startDate,
+});
 
 describe('findRoute', () => {
   beforeEach(() => jest.clearAllMocks());
@@ -93,8 +97,22 @@ describe('findRoute', () => {
         {
           groupToken: 'tok-1',
           members: [
-            { id: 1, name: 'Carmen Tapia', phone: '+591 7000 0000', deliveryZone: 'Centro' },
-            { id: 2, name: 'Jorge Rengel', phone: '+591 7000 0000', deliveryZone: 'Centro' },
+            {
+              id: 1,
+              name: 'Carmen Tapia',
+              phone: '+591 7000 0000',
+              deliveryZone: 'Centro',
+              address: 'Av. Siempre Viva #123',
+              isNew: false,
+            },
+            {
+              id: 2,
+              name: 'Jorge Rengel',
+              phone: '+591 7000 0000',
+              deliveryZone: 'Centro',
+              address: 'Av. Siempre Viva #123',
+              isNew: false,
+            },
           ],
         },
       ]);
@@ -112,7 +130,14 @@ describe('findRoute', () => {
       const centro = result['2026-06-23'].zones.find((z) => z.zone === 'Centro');
       expect(centro?.groups).toEqual([]);
       expect(centro?.singles).toEqual([
-        { id: 1, name: 'Ana López', phone: '+591 7000 0000', deliveryZone: 'Centro' },
+        {
+          id: 1,
+          name: 'Ana López',
+          phone: '+591 7000 0000',
+          deliveryZone: 'Centro',
+          address: 'Av. Siempre Viva #123',
+          isNew: false,
+        },
       ]);
     });
 
@@ -165,6 +190,60 @@ describe('findRoute', () => {
 
       const centro = result['2026-06-23'].zones.find((z) => z.zone === 'Centro');
       expect(centro?.entregas).toBe(3);
+    });
+  });
+
+  describe('isNew flag', () => {
+    it('flags a client as new when their subscription starts on the route day', async () => {
+      (appToday as jest.Mock).mockReturnValue('2026-06-23');
+      (findActiveSubscriptionsForDate as jest.Mock).mockResolvedValue([
+        makeSubscription(makeClient({ id: 1, name: 'Ana López' }), '2026-06-23'),
+      ]);
+
+      const result = await findRoute();
+
+      const centro = result['2026-06-23'].zones.find((z) => z.zone === 'Centro');
+      expect(centro?.singles[0].isNew).toBe(true);
+    });
+
+    it('does not flag a client whose subscription started before the route day', async () => {
+      (appToday as jest.Mock).mockReturnValue('2026-06-23');
+      (findActiveSubscriptionsForDate as jest.Mock).mockResolvedValue([
+        makeSubscription(makeClient({ id: 1, name: 'Ana López' }), '2026-06-01'),
+      ]);
+
+      const result = await findRoute();
+
+      const centro = result['2026-06-23'].zones.find((z) => z.zone === 'Centro');
+      expect(centro?.singles[0].isNew).toBe(false);
+    });
+
+    it('evaluates isNew independently per day, since tomorrow has a different route day', async () => {
+      (appToday as jest.Mock).mockReturnValue('2026-06-23');
+      (findActiveSubscriptionsForDate as jest.Mock).mockResolvedValue([
+        makeSubscription(makeClient({ id: 1, name: 'Ana López' }), '2026-06-24'),
+      ]);
+
+      const result = await findRoute();
+
+      const centroToday = result['2026-06-23'].zones.find((z) => z.zone === 'Centro');
+      const centroTomorrow = result['2026-06-24'].zones.find((z) => z.zone === 'Centro');
+      expect(centroToday?.singles[0].isNew).toBe(false);
+      expect(centroTomorrow?.singles[0].isNew).toBe(true);
+    });
+  });
+
+  describe('address', () => {
+    it('passes the client address through to the delivery person', async () => {
+      (appToday as jest.Mock).mockReturnValue('2026-06-23');
+      (findActiveSubscriptionsForDate as jest.Mock).mockResolvedValue([
+        makeSubscription(makeClient({ id: 1, name: 'Ana López', address: 'C. Los Cusis #18' })),
+      ]);
+
+      const result = await findRoute();
+
+      const centro = result['2026-06-23'].zones.find((z) => z.zone === 'Centro');
+      expect(centro?.singles[0].address).toBe('C. Los Cusis #18');
     });
   });
 });
