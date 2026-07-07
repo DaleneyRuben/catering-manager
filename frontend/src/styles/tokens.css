@@ -102,6 +102,11 @@
   --color-day-badge-border: #d7e1bd;
   --color-count-chip-border: #d5e0b7;
   --color-client-row: #2a3122;
+  --color-week-cell-bg: #fdfcf8;
+  --color-week-cell-border: #e8e5d7;
+  --color-week-label: #5c6150;
+  --color-week-count-today: #2b5e15;
+  --color-week-unit-label: #a3a390;
   --color-empty-italic: #b4b2a0;
 
   /* Plan tier bands (basic reuses olive-50/cream-2) */
