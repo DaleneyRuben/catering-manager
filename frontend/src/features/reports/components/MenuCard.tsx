@@ -2,11 +2,10 @@ import { useState } from 'react';
 import { format } from 'date-fns';
 import { Button } from '@ui/Button';
 import { Icon } from '@ui/Icon';
-import { useMenu } from '@/features/menu/hooks/useMenu';
+import type { Menu } from '@/features/menu/types';
 import { API_BASE } from '@/utils/env';
 import { downloadReport } from '@/utils/downloadReport';
 import { DaySelector } from '@/features/reports/components/DaySelector';
-import { ReportCardSkeleton } from '@/features/reports/components/ReportCardSkeleton';
 import { ReportNotice } from '@/features/reports/components/ReportNotice';
 import { DISABLED_DOWNLOAD_STYLE } from '@/features/reports/components/downloadButtonStyles';
 import { useDaySelector } from '@/features/reports/hooks/useDaySelector';
@@ -20,12 +19,14 @@ function downloadMenuCard(isoDate: string) {
   );
 }
 
-export function MenuCard() {
+interface Props {
+  menus: Menu[];
+}
+
+export function MenuCard({ menus }: Props) {
   const { selected, setSelected, resolvedDate, isWeekend, shortDateForOption } = useDaySelector();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  const { menus, isLoading } = useMenu();
 
   const selectedIso = format(resolvedDate, 'yyyy-MM-dd');
   const menuExists = menus.some((m) => m.date === selectedIso);
@@ -41,8 +42,6 @@ export function MenuCard() {
       setLoading(false);
     }
   };
-
-  if (isLoading) return <ReportCardSkeleton />;
 
   return (
     <div className="flex-[1_1_340px] min-w-[320px] bg-paper border border-rule rounded-[14px] px-[26px] py-[24px] flex flex-col">
