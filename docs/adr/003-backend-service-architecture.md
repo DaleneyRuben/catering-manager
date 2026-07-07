@@ -69,7 +69,7 @@ import { setGroup, findMembers } from '../services/delivery';
 | `login-event`  | `record`, `findForUser`                                                                            |
 | `menu`         | `upsert`, `findByDate`, `findAll`                                                                  |
 | `plan`         | `findAll`, `findById`, `getClientCounts`, `create`, `update`, `remove`                             |
-| `production`   | `findGroups`                                                                                       |
+| `production`   | `findGroups`, `findWeeklyCounts`                                                                   |
 | `report`       | `findDeliveryClientsForDate`, `findActiveClientsWithPlansForDate`                                  |
 | `subscription` | `create`, `update`, `findActiveSubscriptionsForDate`, `findSuspendedSubscriptionsForDate`          |
 | `user`         | `findAll`, `findById`, `create`, `update`, `remove`                                                |
