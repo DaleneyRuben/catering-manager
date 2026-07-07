@@ -156,6 +156,27 @@ describe('NewClientPage', () => {
     expect(screen.getByRole('button', { name: /completo/i })).toBeInTheDocument();
   });
 
+  it('shows a plan loading skeleton on step 3 before plans resolve', async () => {
+    let resolvePlans!: (value: unknown) => void;
+    mockGet.mockReturnValueOnce(
+      new Promise((res) => {
+        resolvePlans = res;
+      }),
+    );
+    renderPage();
+    await fillStep1();
+    await userEvent.click(screen.getByRole('button', { name: /siguiente/i }));
+    await userEvent.click(screen.getByRole('button', { name: /siguiente/i }));
+
+    expect(screen.queryByRole('button', { name: /completo/i })).not.toBeInTheDocument();
+    expect(screen.getAllByTestId('plan-radio-skeleton-row')).toHaveLength(3);
+
+    resolvePlans([makePlan()]);
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: /completo/i })).toBeInTheDocument(),
+    );
+  });
+
   it('shows precio and billing fields on step 3', async () => {
     await navigateToStep3();
     expect(screen.getByLabelText(/precio final/i)).toBeInTheDocument();

@@ -22,7 +22,7 @@ const STEP_FIELDS: Partial<Record<number, (keyof NewClientFormValues)[]>> = {
 export function NewClientPage() {
   const navigate = useNavigate();
   const { create, isCreating } = useCreateClient();
-  const { plans } = usePlans();
+  const { plans, isLoading: plansLoading } = usePlans();
   const [step, setStep] = useState(1);
   const [restrictions, setRestrictions] = useState<RestrictionsState>({
     restrictions: [],
@@ -145,6 +145,7 @@ export function NewClientPage() {
               errors={errors}
               plans={plans}
               setValue={setValue}
+              isLoading={plansLoading}
             />
           )}
           {step === 4 && (
