@@ -71,7 +71,7 @@ import { setGroup, findMembers } from '../services/delivery';
 | `plan`         | `findAll`, `findById`, `getClientCounts`, `create`, `update`, `remove`                             |
 | `production`   | `findGroups`                                                                                       |
 | `report`       | `findDeliveryClientsForDate`, `findActiveClientsWithPlansForDate`                                  |
-| `subscription` | `create`, `update`, `findActiveSubscriptionsForDate`                                               |
+| `subscription` | `create`, `update`, `findActiveSubscriptionsForDate`, `findSuspendedSubscriptionsForDate`          |
 | `user`         | `findAll`, `findById`, `create`, `update`, `remove`                                                |
 
 ## Alternatives Considered
