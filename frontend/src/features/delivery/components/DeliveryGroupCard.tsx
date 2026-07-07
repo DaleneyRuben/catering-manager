@@ -73,6 +73,14 @@ export function DeliveryGroupCard({ group, colorIndex }: Props) {
           {group.members.length} clientes
         </span>
       </div>
+      {group.members[0] && (
+        <div className={`flex items-start gap-2 ${c.label}`}>
+          <Icon name="pin" size={14} className="shrink-0 mt-px" />
+          <span className="font-mono text-[11.5px] font-medium tracking-[.01em] leading-[1.35] text-ink-2">
+            {group.members[0].address}
+          </span>
+        </div>
+      )}
       <div className="flex flex-col">
         {group.members.map((m) => (
           <DeliveryPersonRow

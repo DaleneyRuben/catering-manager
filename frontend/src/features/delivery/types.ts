@@ -3,6 +3,8 @@ export interface DeliveryPerson {
   name: string;
   phone: string;
   deliveryZone: string;
+  address: string;
+  isNew: boolean;
 }
 
 export interface DeliveryGroup {

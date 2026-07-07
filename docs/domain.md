@@ -140,6 +140,17 @@ Not to be confused with the **Producción section** of the kitchen `.docx` repor
 
 ---
 
+## Entregas View (Delivery Route)
+
+A screen (sidebar item **Entregas**) that shows staff the day's delivery route: active clients grouped by delivery zone, then by delivery group (same-address stops, see Delivery groups) vs. individual stops. Visible to `delivery`, `admin`, and `super_admin` roles.
+
+- **Hoy / Mañana tabs** show the active-client route for today and for the literal next calendar day, computed server-side (`GET /api/delivery`, no date parameter, keyed by both dates). Same active-subscription rule as chef reports and Producción (within contract dates, not finalized, not paused, not suspended on that day). Weekends return an empty route without querying.
+- **Zone grouping**: clients are split by `deliveryZone` (Sur, then Centro), then within each zone by `groupToken` — members sharing a token render as one group card (one delivery stop), everyone else renders as an individual row under "Individuales".
+- **Address**: each delivery stop shows the client's address. For a group, the address is shown once at the group-card level (all members of a group share one address); for an individual stop, the address is shown on that client's own row.
+- **"Nuevo" badge**: a client's name is flagged **Nuevo** on the specific day (Hoy or Mañana) that equals their subscription's `startDate` — i.e. the day of their very first delivery. This is a display-only flag recomputed per rendered day; it is not stored.
+
+---
+
 ## Reports
 
 Three downloadable reports are currently implemented on the Reports page:

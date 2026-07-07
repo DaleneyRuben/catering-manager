@@ -48,6 +48,7 @@ export function DeliveryZoneSection({ zone, colorIndexOffset }: Props) {
                 person={p}
                 avatarClass="bg-cream-2 border-hairline text-muted"
                 rowBorderClass="border-cream-2"
+                showAddress
               />
             ))}
           </div>

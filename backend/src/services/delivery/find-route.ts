@@ -13,6 +13,8 @@ export type DeliveryPerson = {
   name: string;
   phone: string;
   deliveryZone: string;
+  address: string;
+  isNew: boolean;
 };
 
 export type DeliveryGroup = {
@@ -37,18 +39,24 @@ type DeliveryClientRow = {
   phoneNumber: string;
   deliveryZone: string;
   groupToken: string | null;
+  address: string;
+  startDate: string | null;
 };
 
 const byName = (a: DeliveryPerson, b: DeliveryPerson) => a.name.localeCompare(b.name, 'es');
 
-const toPerson = (c: DeliveryClientRow): DeliveryPerson => ({
+// A client is "new" on the day their subscription's start date matches the route
+// day being rendered — i.e. this is their first delivery.
+const toPerson = (c: DeliveryClientRow, date: string): DeliveryPerson => ({
   id: c.id,
   name: c.name,
   phone: c.phoneNumber,
   deliveryZone: c.deliveryZone,
+  address: c.address,
+  isNew: c.startDate === date,
 });
 
-const buildZones = (clients: DeliveryClientRow[]): DeliveryZoneRoute[] =>
+const buildZones = (clients: DeliveryClientRow[], date: string): DeliveryZoneRoute[] =>
   ZONE_ORDER.map((zone) => {
     const inZone = clients.filter((c) => c.deliveryZone === zone);
 
@@ -61,13 +69,13 @@ const buildZones = (clients: DeliveryClientRow[]): DeliveryZoneRoute[] =>
       groupToken,
       members: inZone
         .filter((c) => c.groupToken === groupToken)
-        .map(toPerson)
+        .map((c) => toPerson(c, date))
         .sort(byName),
     }));
 
     const singles = inZone
       .filter((c) => !c.groupToken)
-      .map(toPerson)
+      .map((c) => toPerson(c, date))
       .sort(byName);
 
     return { zone, entregas: groups.length + singles.length, groups, singles };
@@ -86,10 +94,12 @@ const buildDayRoute = async (date: string): Promise<DeliveryDayRoute> => {
       phoneNumber: c.phoneNumber,
       deliveryZone: c.deliveryZone,
       groupToken: c.groupToken,
+      address: c.address,
+      startDate: s.startDate,
     };
   });
 
-  return { zones: buildZones(clients) };
+  return { zones: buildZones(clients, date) };
 };
 
 export const findRoute = async (): Promise<Record<string, DeliveryDayRoute>> => {

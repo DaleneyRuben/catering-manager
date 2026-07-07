@@ -8,8 +8,22 @@ import type { DeliveryGroup } from '@/features/delivery/types';
 const group: DeliveryGroup = {
   groupToken: 'tok-1',
   members: [
-    { id: '1', name: 'Carmen Tapia', phone: '72591232', deliveryZone: 'Centro' },
-    { id: '2', name: 'Jorge Rengel', phone: '76651200', deliveryZone: 'Centro' },
+    {
+      id: '1',
+      name: 'Carmen Tapia',
+      phone: '72591232',
+      deliveryZone: 'Centro',
+      address: 'C. Sucre #88, Centro',
+      isNew: false,
+    },
+    {
+      id: '2',
+      name: 'Jorge Rengel',
+      phone: '76651200',
+      deliveryZone: 'Centro',
+      address: 'C. Sucre #88, Centro',
+      isNew: false,
+    },
   ],
 };
 
@@ -28,6 +42,11 @@ describe('DeliveryGroupCard', () => {
     render(<DeliveryGroupCard group={group} colorIndex={0} />);
     expect(screen.getByText('Carmen Tapia')).toBeInTheDocument();
     expect(screen.getByText('Jorge Rengel')).toBeInTheDocument();
+  });
+
+  it('shows the shared address once, taken from the first member', () => {
+    render(<DeliveryGroupCard group={group} colorIndex={0} />);
+    expect(screen.getAllByText('C. Sucre #88, Centro')).toHaveLength(1);
   });
 
   it('wraps the colorIndex around the palette size', () => {
