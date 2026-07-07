@@ -1,4 +1,3 @@
-import sequelize from '../../../database/sequelize';
 import Client from '../../../models/Client';
 import Subscription from '../../../models/Subscription';
 import User from '../../../models/User';
@@ -7,10 +6,6 @@ import { findSummary } from '../find-summary';
 
 jest.mock('../../menu/find-by-date', () => ({
   findByDate: jest.fn(),
-}));
-jest.mock('../../../database/sequelize', () => ({
-  __esModule: true,
-  default: { query: jest.fn() },
 }));
 jest.mock('../../../models/Client');
 jest.mock('../../../models/Plan');
@@ -26,15 +21,6 @@ describe('findSummary', () => {
   beforeEach(() => jest.clearAllMocks());
 
   it('composes all sections into one response', async () => {
-    (sequelize.query as jest.Mock).mockResolvedValue([
-      {
-        active_today: '12',
-        active_tomorrow: '15',
-        suspended_today: '4',
-        suspended_tomorrow: '3',
-        deliveries_today: '9',
-      },
-    ]);
     (Subscription.findAll as jest.Mock).mockResolvedValue([]);
     (Client.findAll as jest.Mock).mockResolvedValue([]);
     (User.findAll as jest.Mock).mockResolvedValue([]);
@@ -43,9 +29,9 @@ describe('findSummary', () => {
     const result = await findSummary();
 
     expect(result).toEqual({
-      active: { today: 12, tomorrow: 15 },
-      suspended: { today: 4, tomorrow: 3 },
-      deliveriesToday: 9,
+      active: { today: 0, tomorrow: 0 },
+      suspended: { today: 0, tomorrow: 0 },
+      deliveriesToday: 0,
       contractEnding: { today: [], tomorrow: [] },
       birthdays: [],
       connections: [],

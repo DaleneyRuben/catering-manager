@@ -1,9 +1,12 @@
-import sequelize from '../../../database/sequelize';
+import {
+  findActiveSubscriptionsForDate,
+  findSuspendedSubscriptionsForDate,
+} from '../../subscription';
 import { findCounts } from '../find-counts';
 
-jest.mock('../../../database/sequelize', () => ({
-  __esModule: true,
-  default: { query: jest.fn() },
+jest.mock('../../subscription', () => ({
+  findActiveSubscriptionsForDate: jest.fn(),
+  findSuspendedSubscriptionsForDate: jest.fn(),
 }));
 
 const mockAppToday = jest.fn(() => '2026-06-25');
@@ -12,66 +15,69 @@ jest.mock('../../../utils/date', () => ({
   appToday: () => mockAppToday(),
 }));
 
+const makeSubscription = (groupToken: string | null = null) => ({
+  client: { groupToken },
+});
+
 describe('findCounts', () => {
   beforeEach(() => jest.clearAllMocks());
 
-  it('returns counts as numbers from string DB values', async () => {
-    (sequelize.query as jest.Mock).mockResolvedValue([
-      {
-        active_today: '12',
-        active_tomorrow: '15',
-        suspended_today: '4',
-        suspended_tomorrow: '3',
-        deliveries_today: '9',
-      },
-    ]);
+  it('returns active and suspended counts as the length of each query result', async () => {
+    (findActiveSubscriptionsForDate as jest.Mock).mockImplementation((date: string) =>
+      Promise.resolve(
+        date === '2026-06-25' ? [makeSubscription(), makeSubscription()] : [makeSubscription()],
+      ),
+    );
+    (findSuspendedSubscriptionsForDate as jest.Mock).mockImplementation((date: string) =>
+      Promise.resolve(date === '2026-06-25' ? [] : [makeSubscription()]),
+    );
 
     const result = await findCounts();
 
-    expect(result).toEqual({
-      active: { today: 12, tomorrow: 15 },
-      suspended: { today: 4, tomorrow: 3 },
-      deliveriesToday: 9,
-    });
+    expect(result.active).toEqual({ today: 2, tomorrow: 1 });
+    expect(result.suspended).toEqual({ today: 0, tomorrow: 1 });
   });
 
   it('shifts to monday/tuesday when today is saturday', async () => {
     mockAppToday.mockReturnValueOnce('2026-06-27');
-    (sequelize.query as jest.Mock).mockResolvedValue([
-      {
-        active_today: '0',
-        active_tomorrow: '0',
-        suspended_today: '0',
-        suspended_tomorrow: '0',
-        deliveries_today: '0',
-      },
-    ]);
+    (findActiveSubscriptionsForDate as jest.Mock).mockResolvedValue([]);
+    (findSuspendedSubscriptionsForDate as jest.Mock).mockResolvedValue([]);
 
     await findCounts();
 
-    const [, options] = (sequelize.query as jest.Mock).mock.calls[0];
-    expect(options.replacements).toEqual({ today: '2026-06-29', tomorrow: '2026-06-30' });
+    expect(findActiveSubscriptionsForDate).toHaveBeenCalledWith('2026-06-29');
+    expect(findActiveSubscriptionsForDate).toHaveBeenCalledWith('2026-06-30');
+    expect(findSuspendedSubscriptionsForDate).toHaveBeenCalledWith('2026-06-29');
+    expect(findSuspendedSubscriptionsForDate).toHaveBeenCalledWith('2026-06-30');
   });
 
-  it('excludes soft-deleted clients via deletedAt IS NULL in raw SQL', async () => {
-    (sequelize.query as jest.Mock).mockResolvedValue([
-      {
-        active_today: '0',
-        active_tomorrow: '0',
-        suspended_today: '0',
-        suspended_tomorrow: '0',
-        deliveries_today: '0',
-      },
+  it('counts a shared groupToken as a single delivery', async () => {
+    (findActiveSubscriptionsForDate as jest.Mock).mockResolvedValue([
+      makeSubscription('tok-1'),
+      makeSubscription('tok-1'),
     ]);
+    (findSuspendedSubscriptionsForDate as jest.Mock).mockResolvedValue([]);
 
-    await findCounts();
+    const result = await findCounts();
 
-    const [sql] = (sequelize.query as jest.Mock).mock.calls[0];
-    expect(sql).toContain('"deletedAt" IS NULL');
+    expect(result.deliveriesToday).toBe(1);
   });
 
-  it('propagates db errors', async () => {
-    (sequelize.query as jest.Mock).mockRejectedValue(new Error('db error'));
+  it('counts each client without a groupToken as its own delivery', async () => {
+    (findActiveSubscriptionsForDate as jest.Mock).mockResolvedValue([
+      makeSubscription(),
+      makeSubscription(),
+    ]);
+    (findSuspendedSubscriptionsForDate as jest.Mock).mockResolvedValue([]);
+
+    const result = await findCounts();
+
+    expect(result.deliveriesToday).toBe(2);
+  });
+
+  it('propagates errors from the active-subscriptions query', async () => {
+    (findActiveSubscriptionsForDate as jest.Mock).mockRejectedValue(new Error('db error'));
+    (findSuspendedSubscriptionsForDate as jest.Mock).mockResolvedValue([]);
 
     await expect(findCounts()).rejects.toThrow('db error');
   });
