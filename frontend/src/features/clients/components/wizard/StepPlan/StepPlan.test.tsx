@@ -8,7 +8,13 @@ const plans: Plan[] = [
   { id: '2', name: 'Ligero', price: 800, meals: ['lunch'] },
 ];
 
-function Wrapper({ availablePlans = plans }: { availablePlans?: Plan[] }) {
+function Wrapper({
+  availablePlans = plans,
+  isLoading = false,
+}: {
+  availablePlans?: Plan[];
+  isLoading?: boolean;
+}) {
   const {
     register,
     control,
@@ -31,6 +37,7 @@ function Wrapper({ availablePlans = plans }: { availablePlans?: Plan[] }) {
       errors={errors}
       plans={availablePlans}
       setValue={setValue}
+      isLoading={isLoading}
     />
   );
 }
@@ -54,4 +61,10 @@ it('renders the billing section', () => {
 it('renders the contract section', () => {
   render(<Wrapper />);
   expect(screen.getByText('Contrato')).toBeInTheDocument();
+});
+
+it('shows a loading skeleton instead of the plan list while plans are loading', () => {
+  render(<Wrapper availablePlans={[]} isLoading />);
+  expect(screen.queryByText('Completo')).not.toBeInTheDocument();
+  expect(screen.getAllByTestId('plan-radio-skeleton-row')).toHaveLength(3);
 });

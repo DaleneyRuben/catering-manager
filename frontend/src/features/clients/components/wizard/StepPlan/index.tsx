@@ -10,6 +10,7 @@ import { CheckboxRow } from '@ui/CheckboxRow';
 import { WizardSectionCard } from '@ui/WizardSectionCard';
 import type { Plan, NewClientFormValues } from '@/features/clients/types';
 import { PlanRadioList } from '@/features/plans/components/PlanRadioList';
+import { PlanRadioListSkeleton } from '@/features/plans/components/PlanRadioListSkeleton';
 import { ContractRow } from '@/features/clients/components/wizard/StepPlan/ContractRow';
 import { BillingRow } from '@/features/clients/components/wizard/StepPlan/BillingRow';
 
@@ -19,9 +20,10 @@ interface Props {
   errors: FieldErrors<NewClientFormValues>;
   plans: Plan[];
   setValue: UseFormSetValue<NewClientFormValues>;
+  isLoading?: boolean;
 }
 
-export function StepPlan({ register, control, errors, plans, setValue }: Props) {
+export function StepPlan({ register, control, errors, plans, setValue, isLoading }: Props) {
   const startDate = useWatch({ control, name: 'startDate' });
   const duration = useWatch({ control, name: 'duration' });
   const planId = useWatch({ control, name: 'planId' });
@@ -37,19 +39,23 @@ export function StepPlan({ register, control, errors, plans, setValue }: Props) 
         iconColor="text-olive-700"
         title="Elegir plan"
       >
-        <Controller
-          name="planId"
-          control={control}
-          rules={{ required: 'Plan es requerido' }}
-          render={({ field }) => (
-            <>
-              <PlanRadioList plans={plans} selectedId={field.value} onSelect={field.onChange} />
-              {errors.planId && (
-                <p className="text-[12px] text-warn mt-2">{errors.planId.message}</p>
-              )}
-            </>
-          )}
-        />
+        {isLoading ? (
+          <PlanRadioListSkeleton />
+        ) : (
+          <Controller
+            name="planId"
+            control={control}
+            rules={{ required: 'Plan es requerido' }}
+            render={({ field }) => (
+              <>
+                <PlanRadioList plans={plans} selectedId={field.value} onSelect={field.onChange} />
+                {errors.planId && (
+                  <p className="text-[12px] text-warn mt-2">{errors.planId.message}</p>
+                )}
+              </>
+            )}
+          />
+        )}
       </WizardSectionCard>
 
       <ContractRow
