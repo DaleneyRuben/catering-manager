@@ -2,7 +2,10 @@ import { Skeleton } from '@ui/Skeleton';
 
 export function ReportCardSkeleton() {
   return (
-    <div className="flex-[1_1_340px] min-w-[320px] bg-paper border border-rule rounded-[14px] px-[26px] py-[24px] flex flex-col">
+    <div
+      data-testid="report-card-skeleton"
+      className="flex-[1_1_340px] min-w-[320px] bg-paper border border-rule rounded-[14px] px-[26px] py-[24px] flex flex-col"
+    >
       <div className="flex items-center gap-[11px] mb-3">
         <Skeleton className="w-9 h-9 rounded-[10px] shrink-0" />
         <Skeleton className="w-40 h-5" />
