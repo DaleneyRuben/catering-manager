@@ -4,8 +4,11 @@ import { sendSuccess } from '../utils/response';
 
 const getGroups = async (_req: Request, res: Response, next: NextFunction) => {
   try {
-    const summary = await productionService.findGroups();
-    sendSuccess(res, summary);
+    const [summary, weeklyCounts] = await Promise.all([
+      productionService.findGroups(),
+      productionService.findWeeklyCounts(),
+    ]);
+    sendSuccess(res, { ...summary, weeklyCounts });
   } catch (err) {
     next(err);
   }
