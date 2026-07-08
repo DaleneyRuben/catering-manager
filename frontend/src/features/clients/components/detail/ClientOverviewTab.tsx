@@ -15,6 +15,8 @@ interface Props {
 
 export function ClientOverviewTab({ client, sub, remaining }: Props) {
   const { status } = client;
+  const delivered = sub ? Math.max(0, sub.duration - remaining) : 0;
+  const progressPct = sub && sub.duration > 0 ? Math.min(100, (delivered / sub.duration) * 100) : 0;
   return (
     <div className="grid grid-cols-12 gap-[20px]">
       <div className="col-span-12 lg:col-span-7 flex flex-col gap-[20px]">
@@ -47,22 +49,48 @@ export function ClientOverviewTab({ client, sub, remaining }: Props) {
                   </span>
                 ))}
               </div>
-              <div className="flex items-center justify-between gap-3 border-t border-cream-2 pt-[14px]">
-                <p className="font-mono text-[11.5px] text-faint">
-                  {formatDate(sub.startDate)} → {formatDate(sub.contractEndDate)}
-                </p>
-                {(() => {
-                  let cls = 'bg-ok-bg text-ok';
-                  if (remaining <= 0) cls = 'bg-rule text-muted';
-                  else if (remaining <= EXPIRY_THRESHOLD_DAYS) cls = 'bg-warn-bg text-warn';
-                  return (
-                    <span
-                      className={`px-[11px] py-[4px] rounded-full text-[12px] font-semibold ${cls}`}
-                    >
-                      {remaining} día{remaining === 1 ? '' : 's'}
-                    </span>
-                  );
-                })()}
+              <div className="border-t border-cream-2 pt-[15px]">
+                <div className="flex items-center justify-between gap-3 mb-[10px]">
+                  <span className="font-mono text-[10.5px] uppercase tracking-[.06em] text-faint">
+                    Progreso del plan
+                  </span>
+                  {(() => {
+                    let cls = 'bg-ok-bg text-ok';
+                    if (remaining <= 0) cls = 'bg-empty-bg text-faint';
+                    else if (remaining <= EXPIRY_THRESHOLD_DAYS) cls = 'bg-warn-bg text-warn';
+                    return (
+                      <span
+                        className={`px-[11px] py-[4px] rounded-full text-[12px] font-semibold ${cls}`}
+                      >
+                        {remaining} día{remaining === 1 ? '' : 's'}
+                      </span>
+                    );
+                  })()}
+                </div>
+                <div className="relative h-2 mb-[9px]">
+                  <div className="absolute inset-0 rounded-full bg-progress-track" />
+                  <div
+                    data-testid="plan-progress-fill"
+                    className="absolute top-0 bottom-0 left-0 rounded-full bg-gradient-to-r from-olive-300 to-olive-700"
+                    style={{ width: `${progressPct}%` }}
+                  />
+                  <div
+                    className="absolute top-1/2 w-[14px] h-[14px] rounded-full bg-paper"
+                    style={{
+                      left: `${progressPct}%`,
+                      transform: 'translate(-50%, -50%)',
+                      boxShadow: 'inset 0 0 0 3px var(--color-olive-700)',
+                    }}
+                  />
+                </div>
+                <div className="flex justify-between font-mono text-[10.5px] text-ink">
+                  <span>
+                    {formatDate(sub.startDate)} <span className="text-faint">· inicio</span>
+                  </span>
+                  <span>
+                    <span className="text-faint">fin ·</span> {formatDate(sub.contractEndDate)}
+                  </span>
+                </div>
               </div>
             </>
           ) : (
@@ -84,7 +112,7 @@ export function ClientOverviewTab({ client, sub, remaining }: Props) {
               <span className="text-[13.5px] text-ink">{client.address}</span>
             </div>
             <div className="flex items-center gap-3">
-              <Icon name="refresh" size={16} className="text-muted shrink-0" />
+              <Icon name="truck" size={16} className="text-muted shrink-0" />
               <span className="text-[13.5px] text-ink">Entrega: {client.delivery}</span>
             </div>
           </div>
