@@ -34,7 +34,33 @@ it('renders contract dates in read mode', () => {
 
 it('renders remaining days', () => {
   render(<ContractCard sub={sub} remaining={25} onUpdateContract={onUpdateContract} />);
-  expect(screen.getByText(/25 d\. hábiles/i)).toBeInTheDocument();
+  expect(screen.getByText('25')).toBeInTheDocument();
+  expect(screen.getByText('días hábiles')).toBeInTheDocument();
+});
+
+it('renders the delivered-of-duration counter', () => {
+  render(<ContractCard sub={sub} remaining={25} onUpdateContract={onUpdateContract} />);
+  // duration 40 - remaining 25 = 15 delivered
+  expect(screen.getByText('15 de 40')).toBeInTheDocument();
+  expect(screen.getByText('entregados')).toBeInTheDocument();
+});
+
+it('renders the progress bar fill proportional to delivered/duration', () => {
+  render(<ContractCard sub={sub} remaining={25} onUpdateContract={onUpdateContract} />);
+  // 15 / 40 = 37.5%
+  expect(screen.getByTestId('contract-progress-fill')).toHaveStyle({ width: '37.5%' });
+});
+
+it('clamps the delivered counter to 0 when remaining exceeds duration', () => {
+  render(<ContractCard sub={sub} remaining={999} onUpdateContract={onUpdateContract} />);
+  expect(screen.getByText('0 de 40')).toBeInTheDocument();
+  expect(screen.getByTestId('contract-progress-fill')).toHaveStyle({ width: '0%' });
+});
+
+it('renders Duración in the simplified field grid', () => {
+  render(<ContractCard sub={sub} remaining={25} onUpdateContract={onUpdateContract} />);
+  expect(screen.getByText('Duración')).toBeInTheDocument();
+  expect(screen.getByText('40 días hábiles')).toBeInTheDocument();
 });
 
 it('opens edit form when pencil is clicked', () => {

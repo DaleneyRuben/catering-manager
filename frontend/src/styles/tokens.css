@@ -94,6 +94,9 @@
   --color-calendar-out-bg: var(--color-empty-bg);
   --color-calendar-out-text: var(--color-rule-2);
 
+  /* Contract progress bar (client detail, Plan + facturación tab) */
+  --color-progress-track: #e9e6d8;
+
   /* Meal chip (plans page) */
   --color-chip-bg: #f3f1ea;
   --color-chip-border: #e3e0d3;
