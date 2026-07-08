@@ -17,7 +17,7 @@ export function UserTable({ users, onHistory, onEdit }: Props) {
       <div className="py-16 text-center bg-paper border border-rule rounded-lg">
         <p className="font-semibold text-ink">Sin usuarios</p>
         <p className="text-sm text-muted mt-1">
-          Agregá el primer usuario usando el botón de arriba.
+          Agrega el primer usuario usando el botón de arriba.
         </p>
       </div>
     );

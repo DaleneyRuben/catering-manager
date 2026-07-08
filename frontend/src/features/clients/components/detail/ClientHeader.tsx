@@ -140,7 +140,7 @@ export function ClientHeader({
           <div>
             <p className="text-[13px] font-semibold text-warn-text-strong">Plan en pausa</p>
             <p className="font-mono text-[11px] text-warn-text">
-              El cliente no recibe entregas. Reanudá el plan cuando esté listo.
+              El cliente no recibe entregas. Reanuda el plan cuando esté listo.
             </p>
           </div>
         </div>
