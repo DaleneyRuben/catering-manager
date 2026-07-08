@@ -53,3 +53,31 @@ it('shows month navigation buttons', () => {
   expect(screen.getByRole('button', { name: /mes anterior/i })).toBeInTheDocument();
   expect(screen.getByRole('button', { name: /mes siguiente/i })).toBeInTheDocument();
 });
+
+describe('today marker', () => {
+  beforeEach(() => {
+    jest.useFakeTimers().setSystemTime(new Date('2026-02-10T12:00:00'));
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  it("marks only today's cell as today", () => {
+    render(
+      <SuspendModal sub={sub} clientName="Ana Torres" onClose={jest.fn()} onSave={jest.fn()} />,
+    );
+    const todayCells = screen.getAllByTestId('calendar-day-today');
+    expect(todayCells).toHaveLength(1);
+    expect(todayCells[0]).toHaveTextContent('10');
+  });
+
+  it('does not mark any cell as today when viewing a different month', async () => {
+    const user = userEvent.setup({ delay: null });
+    render(
+      <SuspendModal sub={sub} clientName="Ana Torres" onClose={jest.fn()} onSave={jest.fn()} />,
+    );
+    await user.click(screen.getByRole('button', { name: /mes siguiente/i }));
+    expect(screen.queryByTestId('calendar-day-today')).not.toBeInTheDocument();
+  });
+});

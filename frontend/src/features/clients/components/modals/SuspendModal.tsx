@@ -8,6 +8,7 @@ import {
   isBefore,
   isSameDay,
   isSameMonth,
+  isToday,
   format,
   parseISO,
   startOfDay,
@@ -187,8 +188,17 @@ export function SuspendModal({
                       type="button"
                       disabled={!clickable}
                       onClick={() => clickable && toggle(day)}
+                      data-testid={isToday(day) ? 'calendar-day-today' : undefined}
                       className={`h-12 flex items-center justify-center rounded-lg text-[13px] font-mono font-semibold transition-colors ${cursorClass}`}
-                      style={{ backgroundColor: bg, color, border }}
+                      style={{
+                        backgroundColor: bg,
+                        color,
+                        border,
+                        boxShadow: isToday(day)
+                          ? 'inset 0 0 0 2px var(--color-olive-800)'
+                          : undefined,
+                        fontWeight: isToday(day) ? 700 : undefined,
+                      }}
                     >
                       {format(day, 'd')}
                     </button>
