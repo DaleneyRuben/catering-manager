@@ -97,6 +97,9 @@
   /* Contract progress bar (client detail, Plan + facturación tab) */
   --color-progress-track: #e9e6d8;
 
+  /* Special-instructions toggle row (icon variant of CheckboxRow) */
+  --color-toggle-off: #d4d0c0;
+
   /* Meal chip (plans page) */
   --color-chip-bg: #f3f1ea;
   --color-chip-border: #e3e0d3;

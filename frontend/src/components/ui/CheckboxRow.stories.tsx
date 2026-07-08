@@ -45,6 +45,26 @@ export const WithoutDescription: Story = {
   },
 };
 
+export const WithIcon: Story = {
+  args: {
+    id: 'salad-grande-icon',
+    label: 'Ensalada grande',
+    icon: 'salad',
+    checked: false,
+    onChange: () => {},
+  },
+};
+
+export const WithIconChecked: Story = {
+  args: {
+    id: 'salad-grande-icon-checked',
+    label: 'Ensalada grande',
+    icon: 'salad',
+    checked: true,
+    onChange: () => {},
+  },
+};
+
 function InteractiveDemo() {
   const [checked, setChecked] = useState(false);
   return (
