@@ -76,6 +76,13 @@ it('cancels edit without saving', () => {
   expect(screen.queryByRole('button', { name: /guardar/i })).not.toBeInTheDocument();
 });
 
+it('renders the salad toggle with an icon tile when the plan includes salad', () => {
+  const subWithSalad: Subscription = { ...sub, plan: { ...sub.plan, meals: ['salad'] } };
+  render(<ActivePlanCard sub={subWithSalad} onUpdateBilling={onUpdateBilling} />);
+  const toggleLabel = screen.getByLabelText('Ensalada grande').closest('label')!;
+  expect(toggleLabel.querySelector('svg')).toBeInTheDocument();
+});
+
 it('right-aligns the cancelar/guardar buttons', () => {
   render(<ActivePlanCard sub={sub} onUpdateBilling={onUpdateBilling} />);
   fireEvent.click(screen.getByRole('button', { name: /editar/i }));
