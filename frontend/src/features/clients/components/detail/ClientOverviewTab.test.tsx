@@ -61,6 +61,30 @@ it('shows remaining days badge', () => {
   expect(screen.getByText(/10 días/)).toBeInTheDocument();
 });
 
+it('shows a truck icon on the delivery row', () => {
+  const { container } = render(<ClientOverviewTab client={client} sub={sub} remaining={15} />);
+  const deliveryRow = screen.getByText(/entrega: la oliva/i).closest('div')!;
+  expect(deliveryRow.querySelector('svg')).toBeInTheDocument();
+  expect(container.querySelectorAll('svg').length).toBeGreaterThan(0);
+});
+
+it('renders the plan progress bar fill proportional to delivered/duration', () => {
+  render(<ClientOverviewTab client={client} sub={sub} remaining={25} />);
+  // duration 40 - remaining 25 = 15 delivered -> 15/40 = 37.5%
+  expect(screen.getByTestId('plan-progress-fill')).toHaveStyle({ width: '37.5%' });
+});
+
+it('clamps the plan progress fill to 0% when remaining exceeds duration', () => {
+  render(<ClientOverviewTab client={client} sub={sub} remaining={999} />);
+  expect(screen.getByTestId('plan-progress-fill')).toHaveStyle({ width: '0%' });
+});
+
+it('uses the empty-bg/faint style for the badge when no days remain', () => {
+  render(<ClientOverviewTab client={client} sub={sub} remaining={0} />);
+  expect(screen.getByText('0 días').className).toContain('bg-empty-bg');
+  expect(screen.getByText('0 días').className).toContain('text-faint');
+});
+
 it('shows restrictions when present', () => {
   const withRestrictions: Client = {
     ...client,

@@ -78,4 +78,9 @@ describe('Icon', () => {
     const { container } = render(<Icon name="salad" />);
     expect(container.querySelector('svg')).toBeInTheDocument();
   });
+
+  it('renders an svg for truck', () => {
+    const { container } = render(<Icon name="truck" />);
+    expect(container.querySelector('svg')).toBeInTheDocument();
+  });
 });
