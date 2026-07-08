@@ -353,6 +353,15 @@ export function Icon({ name, size = 16, stroke = 1.5, className }: IconProps) {
           <path d="m12 6 .8-1.6a2 2 0 0 1 1.8-1.1" />
         </svg>
       );
+    case 'truck':
+      return (
+        <svg {...props}>
+          <path d="M3 7h11v8H3z" />
+          <path d="M14 9h4l3 3v3h-7z" />
+          <circle cx="7" cy="18" r="2" />
+          <circle cx="18" cy="18" r="2" />
+        </svg>
+      );
     case 'chevron-down':
       return (
         <svg {...props}>
