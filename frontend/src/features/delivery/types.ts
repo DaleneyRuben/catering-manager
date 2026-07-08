@@ -14,7 +14,7 @@ export interface DeliveryGroup {
 
 export interface DeliveryZone {
   zone: string;
-  entregas: number;
+  deliveryCount: number;
   groups: DeliveryGroup[];
   singles: DeliveryPerson[];
 }

@@ -10,8 +10,8 @@ import type { DeliveryDayRoute } from '@/features/delivery/types';
 
 type Day = 'today' | 'tomorrow';
 
-const entregasTotal = (route: DeliveryDayRoute | undefined): number =>
-  (route?.zones ?? []).reduce((sum, z) => sum + z.entregas, 0);
+const deliveryCountTotal = (route: DeliveryDayRoute | undefined): number =>
+  (route?.zones ?? []).reduce((sum, z) => sum + z.deliveryCount, 0);
 
 const TAB_ON = 'bg-paper border border-rule text-ink shadow-[var(--shadow-tab)] font-semibold';
 const TAB_OFF = 'border border-transparent text-muted font-semibold';
@@ -27,7 +27,7 @@ export function DeliveryPage() {
   const selectedDate = day === 'today' ? todayDate : tomorrowDate;
   const selectedRoute = day === 'today' ? today : tomorrow;
   const zones = selectedRoute?.zones ?? [];
-  const totalLabel = entregasTotal(selectedRoute);
+  const totalLabel = deliveryCountTotal(selectedRoute);
 
   let runningOffset = 0;
   const zonesWithOffsets = zones.map((zone) => {
@@ -91,7 +91,7 @@ export function DeliveryPage() {
               >
                 Hoy
                 <span className={day === 'today' ? BADGE_ON : BADGE_OFF}>
-                  {entregasTotal(today)}
+                  {deliveryCountTotal(today)}
                 </span>
               </Button>
               <Button
@@ -107,7 +107,7 @@ export function DeliveryPage() {
               >
                 Mañana
                 <span className={day === 'tomorrow' ? BADGE_ON : BADGE_OFF}>
-                  {entregasTotal(tomorrow)}
+                  {deliveryCountTotal(tomorrow)}
                 </span>
               </Button>
             </div>

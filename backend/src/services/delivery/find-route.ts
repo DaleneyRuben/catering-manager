@@ -24,7 +24,7 @@ export type DeliveryGroup = {
 
 export type DeliveryZoneRoute = {
   zone: string;
-  entregas: number;
+  deliveryCount: number;
   groups: DeliveryGroup[];
   singles: DeliveryPerson[];
 };
@@ -78,8 +78,8 @@ const buildZones = (clients: DeliveryClientRow[], date: string): DeliveryZoneRou
       .map((c) => toPerson(c, date))
       .sort(byName);
 
-    return { zone, entregas: groups.length + singles.length, groups, singles };
-  }).filter((z) => z.entregas > 0);
+    return { zone, deliveryCount: groups.length + singles.length, groups, singles };
+  }).filter((z) => z.deliveryCount > 0);
 
 // Weekends are never delivery days — return an empty route without hitting the DB.
 const buildDayRoute = async (date: string): Promise<DeliveryDayRoute> => {

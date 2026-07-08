@@ -17,8 +17,8 @@ import type { ActiveClientRow } from '../services/report';
 import {
   type MenuData,
   type MealConfig,
-  PASTELERIA_MEALS,
-  PRODUCCION_MEALS,
+  BAKERY_MEALS,
+  MAIN_MEALS,
   computeKitchenReportData,
 } from './kitchenReportData';
 
@@ -292,19 +292,19 @@ export const buildKitchenReport = async (
 ): Promise<Buffer> => {
   const data = computeKitchenReportData(menu, clients, date);
 
-  const pastelariaRows: TableRow[] = [
+  const bakeryRows: TableRow[] = [
     dateRow(data.dateText, data.totalClients),
     specHeaderRow(),
     sectionLabelRow('PASTELERIA'),
-    ...PASTELERIA_MEALS.flatMap((m) => buildMealTableRows(m, menu, clients)),
+    ...BAKERY_MEALS.flatMap((m) => buildMealTableRows(m, menu, clients)),
     ...hiperproteicoTableRows(data.hiperproteico),
   ];
 
-  const produccionRows: TableRow[] = [
+  const mainMealsRows: TableRow[] = [
     dateRow(data.dateText, data.totalClients),
     specHeaderRow(),
     sectionLabelRow('PRODUCCION'),
-    ...PRODUCCION_MEALS.flatMap((m) => buildMealTableRows(m, menu, clients)),
+    ...MAIN_MEALS.flatMap((m) => buildMealTableRows(m, menu, clients)),
   ];
 
   const doc = new Document({
@@ -325,9 +325,9 @@ export const buildKitchenReport = async (
           },
         },
         children: [
-          buildDocxTable(pastelariaRows),
+          buildDocxTable(bakeryRows),
           new Paragraph({ children: [new PageBreak()] }),
-          buildDocxTable(produccionRows),
+          buildDocxTable(mainMealsRows),
         ],
       },
     ],

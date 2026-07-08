@@ -6,19 +6,19 @@ const person = (id: string, name: string) => ({ id, name, phone: '70000000', del
 
 describe('DeliveryZoneSection', () => {
   it('shows the zone label', () => {
-    const zone: DeliveryZone = { zone: 'Sur', entregas: 0, groups: [], singles: [] };
+    const zone: DeliveryZone = { zone: 'Sur', deliveryCount: 0, groups: [], singles: [] };
     render(<DeliveryZoneSection zone={zone} colorIndexOffset={0} />);
     expect(screen.getByText('Zona Sur')).toBeInTheDocument();
   });
 
-  it('shows the entregas count, pluralized', () => {
-    const zone: DeliveryZone = { zone: 'Sur', entregas: 3, groups: [], singles: [] };
+  it('shows the delivery count, pluralized', () => {
+    const zone: DeliveryZone = { zone: 'Sur', deliveryCount: 3, groups: [], singles: [] };
     render(<DeliveryZoneSection zone={zone} colorIndexOffset={0} />);
     expect(screen.getByText('3 entregas')).toBeInTheDocument();
   });
 
   it('shows singular entrega count', () => {
-    const zone: DeliveryZone = { zone: 'Sur', entregas: 1, groups: [], singles: [] };
+    const zone: DeliveryZone = { zone: 'Sur', deliveryCount: 1, groups: [], singles: [] };
     render(<DeliveryZoneSection zone={zone} colorIndexOffset={0} />);
     expect(screen.getByText('1 entrega')).toBeInTheDocument();
   });
@@ -26,7 +26,7 @@ describe('DeliveryZoneSection', () => {
   it('renders group cards when groups exist', () => {
     const zone: DeliveryZone = {
       zone: 'Sur',
-      entregas: 1,
+      deliveryCount: 1,
       groups: [{ groupToken: 'tok-1', members: [person('1', 'Carmen Tapia')] }],
       singles: [],
     };
@@ -38,7 +38,7 @@ describe('DeliveryZoneSection', () => {
   it('renders an Individuales section when singles exist', () => {
     const zone: DeliveryZone = {
       zone: 'Sur',
-      entregas: 1,
+      deliveryCount: 1,
       groups: [],
       singles: [person('1', 'Ana López')],
     };
@@ -51,7 +51,7 @@ describe('DeliveryZoneSection', () => {
   it('does not render an Individuales section when there are no singles', () => {
     const zone: DeliveryZone = {
       zone: 'Sur',
-      entregas: 1,
+      deliveryCount: 1,
       groups: [{ groupToken: 'tok-1', members: [person('1', 'Carmen Tapia')] }],
       singles: [],
     };
@@ -62,7 +62,7 @@ describe('DeliveryZoneSection', () => {
   it('pluralizes singles count for more than one', () => {
     const zone: DeliveryZone = {
       zone: 'Sur',
-      entregas: 2,
+      deliveryCount: 2,
       groups: [],
       singles: [person('1', 'Ana López'), person('2', 'Zara Gomez')],
     };

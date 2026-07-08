@@ -10,7 +10,7 @@ jest.mock('@/services/api', () => ({
 const mockGet = api.get as jest.Mock;
 
 const response = {
-  '2026-06-25': { zones: [{ zone: 'Sur', entregas: 1, groups: [], singles: [] }] },
+  '2026-06-25': { zones: [{ zone: 'Sur', deliveryCount: 1, groups: [], singles: [] }] },
   '2026-06-26': { zones: [] },
 };
 

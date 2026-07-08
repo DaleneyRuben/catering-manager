@@ -17,7 +17,7 @@ export function DeliveryZoneSection({ zone, colorIndexOffset }: Props) {
         </span>
         <h2 className="font-serif font-semibold text-[25px] text-ink">Zona {zone.zone}</h2>
         <span className="font-mono text-[11px] font-semibold tracking-[.06em] text-olive-600 bg-olive-100 border border-olive-200 rounded-full px-[11px] py-1">
-          {zone.entregas} {zone.entregas === 1 ? 'entrega' : 'entregas'}
+          {zone.deliveryCount} {zone.deliveryCount === 1 ? 'entrega' : 'entregas'}
         </span>
         <span className="h-px flex-1 bg-hairline" />
       </div>

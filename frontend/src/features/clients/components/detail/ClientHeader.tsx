@@ -14,14 +14,14 @@ import type { Client, ClientStatus } from '@/features/clients/types';
 
 const OUTLINE_BTN_CLS = 'bg-paper border border-rule hover:border-rule-2';
 const OUTLINE_OLIVE_BTN_CLS = 'bg-paper border border-olive-200 text-olive-700 hover:bg-olive-100';
-const PAUSAR_BTN_STYLE = {
+const PAUSE_BTN_STYLE = {
   padding: '10px 16px',
   fontSize: '13px',
   gap: '8px',
   color: 'var(--color-ink-2)',
 };
-const REANUDAR_BTN_STYLE = { padding: '10px 18px', fontSize: '13px', gap: '8px' };
-const RENOVAR_BTN_STYLE = { padding: '10px 16px', fontSize: '13px', gap: '8px' };
+const RESUME_BTN_STYLE = { padding: '10px 18px', fontSize: '13px', gap: '8px' };
+const RENEW_BTN_STYLE = { padding: '10px 16px', fontSize: '13px', gap: '8px' };
 
 interface Props {
   client: Client;
@@ -101,7 +101,7 @@ export function ClientHeader({
               loading={isUpdating}
               leftIcon={toggleConfig.icon}
               className={toggleConfig.className}
-              style={status === CLIENT_STATUS.PAUSED ? REANUDAR_BTN_STYLE : PAUSAR_BTN_STYLE}
+              style={status === CLIENT_STATUS.PAUSED ? RESUME_BTN_STYLE : PAUSE_BTN_STYLE}
             >
               {toggleConfig.label}
             </Button>
@@ -111,7 +111,7 @@ export function ClientHeader({
             onClick={onRenew}
             leftIcon="refresh"
             className={OUTLINE_OLIVE_BTN_CLS}
-            style={RENOVAR_BTN_STYLE}
+            style={RENEW_BTN_STYLE}
           >
             {status === CLIENT_STATUS.ENDED ? 'Reactivar' : 'Renovar'}
           </Button>
