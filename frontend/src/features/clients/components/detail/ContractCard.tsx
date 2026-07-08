@@ -53,6 +53,9 @@ export function ContractCard({ sub, remaining, onUpdateContract }: Props) {
     setEditing(false);
   };
 
+  const delivered = Math.max(0, sub.duration - remaining);
+  const progressPct = sub.duration > 0 ? Math.min(100, (delivered / sub.duration) * 100) : 0;
+
   return (
     <Card>
       <div className="flex items-center mb-3">
@@ -107,7 +110,7 @@ export function ContractCard({ sub, remaining, onUpdateContract }: Props) {
               <p className="font-mono text-[13px] py-1.5">{formatDate(previewEndDate)}</p>
             </div>
           </div>
-          <div className="flex gap-2 mt-1">
+          <div className="flex justify-end gap-2 mt-1">
             <Button variant="secondary" size="sm" onClick={handleCancel} disabled={saving}>
               Cancelar
             </Button>
@@ -117,24 +120,64 @@ export function ContractCard({ sub, remaining, onUpdateContract }: Props) {
           </div>
         </div>
       ) : (
-        <div className="grid grid-cols-2 gap-3">
-          <div>
-            <Label variant="field">Firma</Label>
-            <p className="font-mono text-[13px]">{formatDate(sub.contractDate)}</p>
+        <div className="flex flex-col">
+          <div className="flex items-end justify-between gap-3 mb-[15px]">
+            <div>
+              <Label variant="field" className="mb-1">
+                Días restantes
+              </Label>
+              <div className="flex items-baseline gap-[7px]">
+                <span className="font-serif font-semibold text-[40px] leading-[.85] text-olive-700">
+                  {remaining}
+                </span>
+                <span className="font-mono text-[12px] text-muted">días hábiles</span>
+              </div>
+            </div>
+            <div className="text-right font-mono text-[10.5px] text-faint leading-[1.5]">
+              <span>
+                {delivered} de {sub.duration}
+              </span>
+              <br />
+              <span>entregados</span>
+            </div>
           </div>
-          <div>
-            <Label variant="field">Inicio</Label>
-            <p className="font-mono text-[13px]">{formatDate(sub.startDate)}</p>
+
+          <div className="relative h-2 mb-[9px]">
+            <div className="absolute inset-0 rounded-full bg-progress-track" />
+            <div
+              data-testid="contract-progress-fill"
+              className="absolute top-0 bottom-0 left-0 rounded-full bg-gradient-to-r from-olive-300 to-olive-700"
+              style={{ width: `${progressPct}%` }}
+            />
+            <div
+              className="absolute top-1/2 w-[14px] h-[14px] rounded-full bg-paper"
+              style={{
+                left: `${progressPct}%`,
+                transform: 'translate(-50%, -50%)',
+                boxShadow: 'inset 0 0 0 3px var(--color-olive-700)',
+              }}
+            />
           </div>
-          <div>
-            <Label variant="field">Fin</Label>
-            <p className="font-mono text-[13px]">{formatDate(sub.contractEndDate)}</p>
+          <div className="flex justify-between font-mono text-[10.5px] text-ink mb-4">
+            <span>
+              {formatDate(sub.startDate)} <span className="text-faint">· inicio</span>
+            </span>
+            <span>
+              <span className="text-faint">fin ·</span> {formatDate(sub.contractEndDate)}
+            </span>
           </div>
-          <div>
-            <Label variant="field">Restan</Label>
-            <p className="font-mono text-[13px] font-semibold text-olive-700">
-              {remaining} d. hábiles
-            </p>
+
+          <hr className="border-cream-2 mb-4" />
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label variant="field">Firma</Label>
+              <p className="font-mono text-[13px]">{formatDate(sub.contractDate)}</p>
+            </div>
+            <div>
+              <Label variant="field">Duración</Label>
+              <p className="font-mono text-[13px]">{sub.duration} días hábiles</p>
+            </div>
           </div>
         </div>
       )}

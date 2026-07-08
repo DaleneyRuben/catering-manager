@@ -137,7 +137,7 @@ export function ActivePlanCard({ sub, onUpdateBilling, onUpdateInstructions }: P
               </p>
             </div>
           </div>
-          <div className="flex gap-2 mt-1">
+          <div className="flex justify-end gap-2 mt-1">
             <Button variant="secondary" size="sm" onClick={handleCancel} disabled={saving}>
               Cancelar
             </Button>
