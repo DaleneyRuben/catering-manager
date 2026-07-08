@@ -2,11 +2,7 @@
 
 exports[`computeKitchenReportData matches snapshot 1`] = `
 {
-  "dateText": "FECHA: 04 – JUNIO – 2026",
-  "hiperproteico": [
-    "Jorge Rengel",
-  ],
-  "pasteleria": [
+  "bakery": [
     {
       "count": 2,
       "dish": "Queque de platano",
@@ -35,7 +31,11 @@ exports[`computeKitchenReportData matches snapshot 1`] = `
       ],
     },
   ],
-  "produccion": [
+  "dateText": "FECHA: 04 – JUNIO – 2026",
+  "hiperproteico": [
+    "Jorge Rengel",
+  ],
+  "mainMeals": [
     {
       "count": 3,
       "dish": "Boloñesa con caracolitos",
