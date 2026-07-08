@@ -39,12 +39,12 @@ describe('WizardSectionCard', () => {
         iconBg="bg-warn-bg"
         iconColor="text-warn"
         title="Alergias"
-        description="Agregá lo que el cliente no puede consumir."
+        description="Agrega lo que el cliente no puede consumir."
       >
         <p>Contenido</p>
       </WizardSectionCard>,
     );
-    const desc = screen.getByText('Agregá lo que el cliente no puede consumir.');
+    const desc = screen.getByText('Agrega lo que el cliente no puede consumir.');
     expect(desc).toHaveClass('ml-[38px]');
   });
 });

@@ -31,7 +31,7 @@ it('renders the Mon-Fri weekday headers', () => {
 
 it('shows the empty state message when no dates are selected', () => {
   render(<SuspendModal sub={sub} clientName="Ana Torres" onClose={jest.fn()} onSave={jest.fn()} />);
-  expect(screen.getByText(/hacé clic en un día/i)).toBeInTheDocument();
+  expect(screen.getByText(/haz clic en un día/i)).toBeInTheDocument();
 });
 
 it('calls onClose when the close button is clicked', async () => {
