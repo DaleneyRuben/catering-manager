@@ -167,15 +167,30 @@ export function SuspendModal({
 
                   let bg = '';
                   let color = '';
-                  let border = '';
+                  let borderWidth: string | undefined;
+                  let borderStyle: string | undefined;
+                  let borderColor: string | undefined;
 
                   if (picked) {
                     bg = 'var(--color-calendar-suspended-bg)';
                     color = 'var(--color-calendar-suspended-text)';
-                    border = '2px solid var(--color-calendar-suspended-border)';
+                    borderWidth = '2px';
+                    borderStyle = 'solid';
+                    borderColor = 'var(--color-calendar-suspended-border)';
                   } else if (!outside && inContract && selectable) {
                     bg = 'var(--color-calendar-selectable)';
                     color = 'var(--color-olive-800)';
+                  }
+
+                  // Today's ring fully replaces (rather than stacks on top of) any other
+                  // border, e.g. the suspended state's own border, avoiding a doubled-ring
+                  // look. Kept as longhand border-* properties throughout — mixing the
+                  // `border` shorthand with longhand overrides across re-renders is a
+                  // React anti-pattern (it warns about conflicting style properties).
+                  if (isToday(day)) {
+                    borderWidth = '2px';
+                    borderStyle = 'solid';
+                    borderColor = 'var(--color-olive-800)';
                   }
 
                   let cursorClass = 'hover:bg-cream-2 cursor-pointer';
@@ -193,10 +208,9 @@ export function SuspendModal({
                       style={{
                         backgroundColor: bg,
                         color,
-                        border,
-                        boxShadow: isToday(day)
-                          ? 'inset 0 0 0 2px var(--color-olive-800)'
-                          : undefined,
+                        borderWidth,
+                        borderStyle,
+                        borderColor,
                         fontWeight: isToday(day) ? 700 : undefined,
                       }}
                     >

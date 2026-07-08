@@ -80,4 +80,21 @@ describe('today marker', () => {
     await user.click(screen.getByRole('button', { name: /mes siguiente/i }));
     expect(screen.queryByTestId('calendar-day-today')).not.toBeInTheDocument();
   });
+
+  it('shows only the today ring, not a doubled border, when today is also suspended', () => {
+    render(
+      <SuspendModal
+        sub={{ ...sub, suspendedDates: ['2026-02-10'] }}
+        clientName="Ana Torres"
+        onClose={jest.fn()}
+        onSave={jest.fn()}
+      />,
+    );
+    const todayCell = screen.getByTestId('calendar-day-today');
+    expect(todayCell).toHaveStyle({
+      borderWidth: '2px',
+      borderStyle: 'solid',
+      borderColor: 'var(--color-olive-800)',
+    });
+  });
 });
