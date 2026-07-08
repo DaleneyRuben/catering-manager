@@ -206,11 +206,12 @@ describe('ClientDetailPage', () => {
     expect(await screen.findByText('Lista clientes')).toBeInTheDocument();
   });
 
-  it('renders 3 navigation tabs', async () => {
+  it('renders 4 navigation tabs', async () => {
     renderPage();
     await screen.findByText('John Doe');
     expect(screen.getByRole('tab', { name: /resumen/i })).toBeInTheDocument();
     expect(screen.getByRole('tab', { name: /plan/i })).toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: /^entregas$/i })).toBeInTheDocument();
     expect(screen.getByRole('tab', { name: /historial/i })).toBeInTheDocument();
     expect(screen.queryByRole('tab', { name: /suspensiones/i })).not.toBeInTheDocument();
     expect(screen.queryByRole('tab', { name: /^grupo$/i })).not.toBeInTheDocument();
@@ -229,17 +230,18 @@ describe('ClientDetailPage', () => {
     expect(screen.getByText(/plan asignado/i)).toBeInTheDocument();
   });
 
-  it('switching to Plan tab shows suspensiones empty state', async () => {
+  it('switching to Entregas tab shows the delivery calendar', async () => {
     renderPage();
     await screen.findByText('John Doe');
-    fireEvent.click(screen.getByRole('tab', { name: /plan/i }));
-    expect(screen.getByText(/sin suspensiones/i)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('tab', { name: /^entregas$/i }));
+    expect(screen.getByText('Calendario de entregas')).toBeInTheDocument();
+    expect(screen.getByText('Resumen del contrato')).toBeInTheDocument();
   });
 
-  it('switching to Plan tab shows entrega conjunta empty state', async () => {
+  it('switching to Entregas tab shows entrega conjunta empty state', async () => {
     renderPage();
     await screen.findByText('John Doe');
-    fireEvent.click(screen.getByRole('tab', { name: /plan/i }));
+    fireEvent.click(screen.getByRole('tab', { name: /^entregas$/i }));
     expect(screen.getByText(/sin miembros en el grupo/i)).toBeInTheDocument();
   });
 
@@ -298,21 +300,23 @@ describe('ClientDetailPage', () => {
     await waitFor(() => expect(mockPost).toHaveBeenCalledWith('/clients/1/finalize', {}));
   });
 
-  it('switching to Plan tab shows suspended days count', async () => {
+  it('switching to Entregas tab shows suspended days count', async () => {
+    jest.useFakeTimers().setSystemTime(new Date('2026-06-01T12:00:00'));
     renderPage({
       ...mockClient,
       subscriptions: [{ ...mockClient.subscriptions[0], suspendedDates: ['2026-06-10'] }],
     });
     await screen.findByText('John Doe');
-    fireEvent.click(screen.getByRole('tab', { name: /plan/i }));
-    expect(await screen.findByText('1')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('tab', { name: /^entregas$/i }));
+    expect(await screen.findAllByText('1')).toHaveLength(2);
+    jest.useRealTimers();
   });
 
-  it('Suspender button opens suspend modal', async () => {
+  it('Suspender días button opens suspend modal', async () => {
     renderPage();
     await screen.findByText('John Doe');
-    fireEvent.click(screen.getByRole('tab', { name: /plan/i }));
-    fireEvent.click(screen.getByRole('button', { name: /^suspender$/i }));
+    fireEvent.click(screen.getByRole('tab', { name: /^entregas$/i }));
+    fireEvent.click(screen.getByRole('button', { name: /suspender días/i }));
     expect(await screen.findByRole('dialog')).toBeInTheDocument();
   });
 
@@ -320,8 +324,8 @@ describe('ClientDetailPage', () => {
     mockPatch.mockResolvedValue({});
     renderPage();
     await screen.findByText('John Doe');
-    fireEvent.click(screen.getByRole('tab', { name: /plan/i }));
-    fireEvent.click(screen.getByRole('button', { name: /^suspender$/i }));
+    fireEvent.click(screen.getByRole('tab', { name: /^entregas$/i }));
+    fireEvent.click(screen.getByRole('button', { name: /suspender días/i }));
     await screen.findByRole('dialog');
     fireEvent.click(screen.getByRole('button', { name: /^guardar$/i }));
     await waitFor(() =>

@@ -13,15 +13,17 @@ import { SuspendModal } from '@/features/clients/components/modals/SuspendModal'
 import { ClientOverviewTab } from '@/features/clients/components/detail/ClientOverviewTab';
 import { ClientHistoryTab } from '@/features/clients/components/detail/ClientHistoryTab';
 import { ClientPlanTab } from '@/features/clients/components/detail/ClientPlanTab';
+import { ClientDeliveryTab } from '@/features/clients/components/detail/ClientDeliveryTab';
 import { ClientHeader } from '@/features/clients/components/detail/ClientHeader';
 import { RenewalModal } from '@/features/clients/components/modals/RenewalModal';
 import { ClientDetailSkeleton } from '@/features/clients/components/detail/ClientDetailSkeleton';
 
-type TabId = 'overview' | 'plan' | 'history';
+type TabId = 'overview' | 'plan' | 'entregas' | 'history';
 
 const TABS: { id: TabId; label: string }[] = [
   { id: 'overview', label: 'Resumen' },
   { id: 'plan', label: 'Plan + facturación' },
+  { id: 'entregas', label: 'Entregas' },
   { id: 'history', label: 'Historial' },
 ];
 
@@ -124,8 +126,11 @@ export function ClientDetailPage() {
           onUpdateContract={(draft) => updateContract(sub!.id, draft)}
           onUpdateBilling={(discount) => updateBilling(sub!.id, discount)}
           onUpdateInstructions={(si) => updateInstructions(sub!.id, si)}
-          onSuspend={() => setSuspendOpen(true)}
         />
+      )}
+
+      {activeTab === 'entregas' && (
+        <ClientDeliveryTab client={client} sub={sub} onSuspend={() => setSuspendOpen(true)} />
       )}
 
       {activeTab === 'history' && (
