@@ -19,6 +19,9 @@ describe('UserTable', () => {
   it('shows the empty state when there are no users', () => {
     render(<UserTable users={[]} onHistory={() => {}} onEdit={() => {}} />);
     expect(screen.getByText('Sin usuarios')).toBeInTheDocument();
+    expect(
+      screen.getByText('Agrega el primer usuario usando el botón de arriba.'),
+    ).toBeInTheDocument();
   });
 
   it('renders a row per user', () => {

@@ -41,7 +41,7 @@ export function StepRestrictions({ value, onChange }: Props) {
         iconBg="bg-warn-bg"
         iconColor="text-warn"
         title="Alergias, intolerancias y gustos"
-        description="Agregá lo que el cliente no puede o no quiere consumir. Se resaltará en la cocina."
+        description="Agrega lo que el cliente no puede o no quiere consumir. Se resaltará en la cocina."
         descriptionMb={18}
       >
         <TagInput
@@ -61,7 +61,7 @@ export function StepRestrictions({ value, onChange }: Props) {
         iconBg="bg-olive-100"
         iconColor="text-olive-700"
         title="Enfermedades de base"
-        description="Seleccioná las que apliquen."
+        description="Selecciona las que apliquen."
         descriptionMb={20}
       >
         <div className="flex flex-wrap gap-[9px]">

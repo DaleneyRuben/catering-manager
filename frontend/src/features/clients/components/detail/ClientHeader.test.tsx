@@ -70,4 +70,5 @@ it('calls onBack when the back link is clicked', async () => {
 it('shows a paused warning banner when status is paused', () => {
   render(<ClientHeader {...baseProps} status="paused" />);
   expect(screen.getByText(/plan en pausa/i)).toBeInTheDocument();
+  expect(screen.getByText(/reanuda el plan cuando esté listo/i)).toBeInTheDocument();
 });

@@ -230,7 +230,7 @@ export function SuspendModal({
           </p>
           {selected.length === 0 ? (
             <p className="font-mono text-[11.5px] text-muted">
-              Hacé clic en un día para suspender ese reparto.
+              Haz clic en un día para suspender ese reparto.
             </p>
           ) : (
             <div className="flex flex-wrap gap-2">

@@ -11,6 +11,14 @@ it('renders disease pills', () => {
   expect(screen.getByRole('button', { name: 'Hipertensión' })).toBeInTheDocument();
 });
 
+it('renders section descriptions in neutral Spanish', () => {
+  render(<StepRestrictions value={baseValue} onChange={jest.fn()} />);
+  expect(
+    screen.getByText(/agrega lo que el cliente no puede o no quiere consumir/i),
+  ).toBeInTheDocument();
+  expect(screen.getByText('Selecciona las que apliquen.')).toBeInTheDocument();
+});
+
 it('disease pills start unpressed', () => {
   render(<StepRestrictions value={baseValue} onChange={jest.fn()} />);
   expect(screen.getByRole('button', { name: 'Diabetes' })).toHaveAttribute('aria-pressed', 'false');
