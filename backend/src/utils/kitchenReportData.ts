@@ -39,18 +39,18 @@ export type MealSection = {
 export type KitchenReportData = {
   dateText: string;
   totalClients: number;
-  pasteleria: MealSection[];
+  bakery: MealSection[];
   hiperproteico: string[];
-  produccion: MealSection[];
+  mainMeals: MealSection[];
 };
 
-export const PASTELERIA_MEALS: MealConfig[] = [
+export const BAKERY_MEALS: MealConfig[] = [
   { key: 'breakfast', label: 'DESAYUNO', menuField: 'breakfast' },
   { key: 'morning_snack', label: 'MEDIA MAÑANA', menuField: 'morningSnack' },
   { key: 'afternoon_snack', label: 'MERIENDA TARDE', menuField: 'afternoonSnack' },
 ];
 
-export const PRODUCCION_MEALS: MealConfig[] = [
+export const MAIN_MEALS: MealConfig[] = [
   { key: 'lunch', label: 'ALMUERZO', menuField: 'lunch' },
   { key: 'salad', label: 'ENSALADA', menuField: 'salad' },
   { key: 'dinner', label: 'CENA', menuField: 'dinner' },
@@ -99,9 +99,9 @@ export const computeKitchenReportData = (
 ): KitchenReportData => ({
   dateText: formatDateText(date),
   totalClients: clients.length,
-  pasteleria: toSection(PASTELERIA_MEALS, menu, clients),
+  bakery: toSection(BAKERY_MEALS, menu, clients),
   hiperproteico: clients.filter((c) => c.planMeals.includes('extra')).map((c) => c.name),
-  produccion: toSection(PRODUCCION_MEALS, menu, clients),
+  mainMeals: toSection(MAIN_MEALS, menu, clients),
 });
 
 export const kitchenReportFileName = (date: string): string => spanishWeekdayFileName(date, 'docx');

@@ -50,10 +50,10 @@ describe('computeKitchenReportData', () => {
     ];
     const data = computeKitchenReportData(mockMenu, clients, '2026-06-04');
 
-    const desayuno = data.pasteleria.find((m) => m.label === 'DESAYUNO')!;
+    const desayuno = data.bakery.find((m) => m.label === 'DESAYUNO')!;
     expect(desayuno.count).toBe(2);
 
-    const almuerzo = data.produccion.find((m) => m.label === 'ALMUERZO')!;
+    const almuerzo = data.mainMeals.find((m) => m.label === 'ALMUERZO')!;
     expect(almuerzo.count).toBe(3);
   });
 
@@ -64,7 +64,7 @@ describe('computeKitchenReportData', () => {
     ];
     const data = computeKitchenReportData(mockMenu, clients, '2026-06-04');
 
-    const desayuno = data.pasteleria.find((m) => m.label === 'DESAYUNO')!;
+    const desayuno = data.bakery.find((m) => m.label === 'DESAYUNO')!;
     expect(desayuno.noDar).toEqual(['Carlos Ríos']);
   });
 
@@ -76,7 +76,7 @@ describe('computeKitchenReportData', () => {
     ];
     const data = computeKitchenReportData(mockMenu, clients, '2026-06-04');
 
-    const ensalada = data.produccion.find((m) => m.label === 'ENSALADA')!;
+    const ensalada = data.mainMeals.find((m) => m.label === 'ENSALADA')!;
     expect(ensalada.instructions).toEqual({ 'DAR GRANDES': ['Ana López', 'Jorge Rengel'] });
   });
 
@@ -84,7 +84,7 @@ describe('computeKitchenReportData', () => {
     const clients = [makeClient('Ana López', allMeals)];
     const data = computeKitchenReportData(mockMenu, clients, '2026-06-04');
 
-    const ensalada = data.produccion.find((m) => m.label === 'ENSALADA')!;
+    const ensalada = data.mainMeals.find((m) => m.label === 'ENSALADA')!;
     expect(ensalada.instructions).toEqual({});
   });
 
@@ -92,26 +92,22 @@ describe('computeKitchenReportData', () => {
     const clients = [makeClient('Ana López', allMeals, { salad: 'DAR GRANDES' })];
     const data = computeKitchenReportData(mockMenu, clients, '2026-06-04');
 
-    const almuerzo = data.produccion.find((m) => m.label === 'ALMUERZO')!;
+    const almuerzo = data.mainMeals.find((m) => m.label === 'ALMUERZO')!;
     expect(almuerzo.instructions).toEqual({});
   });
 
-  it('includes all PASTELERIA meals in order', () => {
+  it('includes all bakery meals in order', () => {
     const clients = [makeClient('Ana López', allMeals)];
     const data = computeKitchenReportData(mockMenu, clients, '2026-06-04');
 
-    expect(data.pasteleria.map((m) => m.label)).toEqual([
-      'DESAYUNO',
-      'MEDIA MAÑANA',
-      'MERIENDA TARDE',
-    ]);
+    expect(data.bakery.map((m) => m.label)).toEqual(['DESAYUNO', 'MEDIA MAÑANA', 'MERIENDA TARDE']);
   });
 
-  it('includes all PRODUCCION meals in order', () => {
+  it('includes all main meals in order', () => {
     const clients = [makeClient('Ana López', allMeals)];
     const data = computeKitchenReportData(mockMenu, clients, '2026-06-04');
 
-    expect(data.produccion.map((m) => m.label)).toEqual(['ALMUERZO', 'ENSALADA', 'CENA']);
+    expect(data.mainMeals.map((m) => m.label)).toEqual(['ALMUERZO', 'ENSALADA', 'CENA']);
   });
 
   it('lists hiperproteico clients', () => {
