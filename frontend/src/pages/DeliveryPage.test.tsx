@@ -50,7 +50,7 @@ describe('DeliveryPage', () => {
   it('shows today data by default', async () => {
     mockGet.mockResolvedValue({
       '2026-06-25': {
-        zones: [{ zone: 'Sur', entregas: 1, groups: [], singles: [person('1', 'Ana López')] }],
+        zones: [{ zone: 'Sur', deliveryCount: 1, groups: [], singles: [person('1', 'Ana López')] }],
       },
       '2026-06-26': { zones: [] },
     });
@@ -61,10 +61,12 @@ describe('DeliveryPage', () => {
   it('switches to manana data when the Mañana tab is clicked', async () => {
     mockGet.mockResolvedValue({
       '2026-06-25': {
-        zones: [{ zone: 'Sur', entregas: 1, groups: [], singles: [person('1', 'Ana López')] }],
+        zones: [{ zone: 'Sur', deliveryCount: 1, groups: [], singles: [person('1', 'Ana López')] }],
       },
       '2026-06-26': {
-        zones: [{ zone: 'Centro', entregas: 1, groups: [], singles: [person('2', 'Zara Gomez')] }],
+        zones: [
+          { zone: 'Centro', deliveryCount: 1, groups: [], singles: [person('2', 'Zara Gomez')] },
+        ],
       },
     });
     renderPage();
@@ -76,13 +78,13 @@ describe('DeliveryPage', () => {
     expect(screen.queryByText('Ana López')).not.toBeInTheDocument();
   });
 
-  it('shows entregas counts on both tab badges', async () => {
+  it('shows delivery counts on both tab badges', async () => {
     mockGet.mockResolvedValue({
       '2026-06-25': {
-        zones: [{ zone: 'Sur', entregas: 2, groups: [], singles: [] }],
+        zones: [{ zone: 'Sur', deliveryCount: 2, groups: [], singles: [] }],
       },
       '2026-06-26': {
-        zones: [{ zone: 'Sur', entregas: 5, groups: [], singles: [] }],
+        zones: [{ zone: 'Sur', deliveryCount: 5, groups: [], singles: [] }],
       },
     });
     renderPage();
@@ -93,7 +95,7 @@ describe('DeliveryPage', () => {
   it('shows the zone for the selected day', async () => {
     mockGet.mockResolvedValue({
       '2026-06-25': {
-        zones: [{ zone: 'Sur', entregas: 1, groups: [], singles: [person('1', 'Ana López')] }],
+        zones: [{ zone: 'Sur', deliveryCount: 1, groups: [], singles: [person('1', 'Ana López')] }],
       },
       '2026-06-26': { zones: [] },
     });

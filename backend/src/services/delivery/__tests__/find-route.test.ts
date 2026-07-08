@@ -177,7 +177,7 @@ describe('findRoute', () => {
       expect(centro?.singles.map((s) => s.name)).toEqual(['Ana López', 'Zara Gomez']);
     });
 
-    it('counts entregas as groups.length + singles.length', async () => {
+    it('counts deliveryCount as groups.length + singles.length', async () => {
       (appToday as jest.Mock).mockReturnValue('2026-06-23');
       (findActiveSubscriptionsForDate as jest.Mock).mockResolvedValue([
         makeSubscription(makeClient({ id: 1, name: 'A', groupToken: 'tok-1' })),
@@ -189,7 +189,7 @@ describe('findRoute', () => {
       const result = await findRoute();
 
       const centro = result['2026-06-23'].zones.find((z) => z.zone === 'Centro');
-      expect(centro?.entregas).toBe(3);
+      expect(centro?.deliveryCount).toBe(3);
     });
   });
 
