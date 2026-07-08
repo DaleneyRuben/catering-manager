@@ -345,6 +345,14 @@ export function Icon({ name, size = 16, stroke = 1.5, className }: IconProps) {
           <path d="M3 21c4-8 9-12 15-12" />
         </svg>
       );
+    case 'salad':
+      return (
+        <svg {...props}>
+          <path d="M7 11a5 5 0 0 1 10 0" />
+          <path d="M3.5 11h17a1 1 0 0 1 1 1.1 9.5 9.5 0 0 1-9.5 8.4A9.5 9.5 0 0 1 2.5 12.1 1 1 0 0 1 3.5 11Z" />
+          <path d="m12 6 .8-1.6a2 2 0 0 1 1.8-1.1" />
+        </svg>
+      );
     case 'chevron-down':
       return (
         <svg {...props}>

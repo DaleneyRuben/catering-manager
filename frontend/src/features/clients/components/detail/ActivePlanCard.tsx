@@ -76,6 +76,7 @@ export function ActivePlanCard({ sub, onUpdateBilling, onUpdateInstructions }: P
           <CheckboxRow
             id="salad-grande"
             label="Ensalada grande"
+            icon="salad"
             checked={!!sub.specialInstructions?.salad}
             onChange={(checked) => {
               const updated = { ...sub.specialInstructions };
