@@ -86,8 +86,8 @@ export function ClientDetailPage() {
   const sub = client.subscriptions[0];
   const { status } = client;
   const isEnded = status === CLIENT_STATUS.ENDED;
-  const visibleTabs = isEnded ? TABS.filter((t) => t.id !== 'plan') : TABS;
-  const activeTab = isEnded && tab === 'plan' ? 'overview' : tab;
+  const visibleTabs = isEnded ? TABS.filter((t) => t.id !== 'plan' && t.id !== 'entregas') : TABS;
+  const activeTab = isEnded && (tab === 'plan' || tab === 'entregas') ? 'overview' : tab;
   const remaining =
     sub && sub.startDate && sub.contractEndDate
       ? remainingDeliveryDays(parseISO(sub.startDate), parseISO(sub.contractEndDate))

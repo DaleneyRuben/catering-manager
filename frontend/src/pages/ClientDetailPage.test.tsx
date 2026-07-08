@@ -217,6 +217,19 @@ describe('ClientDetailPage', () => {
     expect(screen.queryByRole('tab', { name: /^grupo$/i })).not.toBeInTheDocument();
   });
 
+  it('hides the Plan and Entregas tabs for an ended client', async () => {
+    renderPage({
+      ...mockClient,
+      status: 'ended',
+      subscriptions: [{ ...mockClient.subscriptions[0], contractEndDate: '2020-01-01' }],
+    });
+    await screen.findByText('John Doe');
+    expect(screen.getByRole('tab', { name: /resumen/i })).toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: /historial/i })).toBeInTheDocument();
+    expect(screen.queryByRole('tab', { name: /plan/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole('tab', { name: /^entregas$/i })).not.toBeInTheDocument();
+  });
+
   it('shows plan vigente card in Resumen tab by default', async () => {
     renderPage();
     await screen.findByText('John Doe');
