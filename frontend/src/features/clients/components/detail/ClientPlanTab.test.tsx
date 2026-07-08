@@ -51,7 +51,6 @@ it('shows "Sin suscripción activa" when no subscription', () => {
       onUpdateContract={jest.fn()}
       onUpdateBilling={jest.fn()}
       onUpdateInstructions={jest.fn()}
-      onSuspend={jest.fn()}
     />,
   );
   expect(screen.getByText(/sin suscripción activa/i)).toBeInTheDocument();
@@ -67,9 +66,25 @@ it('renders plan content when subscription exists', () => {
         onUpdateContract={jest.fn()}
         onUpdateBilling={jest.fn()}
         onUpdateInstructions={jest.fn()}
-        onSuspend={jest.fn()}
       />,
     ),
   );
   expect(screen.queryByText(/sin suscripción activa/i)).not.toBeInTheDocument();
+});
+
+it('no longer renders suspensions or group management (moved to the Entregas tab)', () => {
+  render(
+    withQuery(
+      <ClientPlanTab
+        client={client}
+        sub={sub}
+        remaining={15}
+        onUpdateContract={jest.fn()}
+        onUpdateBilling={jest.fn()}
+        onUpdateInstructions={jest.fn()}
+      />,
+    ),
+  );
+  expect(screen.queryByText('Suspensiones')).not.toBeInTheDocument();
+  expect(screen.queryByText('Entrega conjunta')).not.toBeInTheDocument();
 });

@@ -87,6 +87,13 @@
   --color-calendar-suspended-text: #7a2418;
   --color-calendar-suspended-border: #c5756a;
 
+  /* Delivery calendar (read-only) */
+  --color-calendar-delivered-bg: var(--color-olive-300);
+  --color-calendar-delivered-text: #1f3d09;
+  --color-calendar-pending-border: var(--color-olive-200);
+  --color-calendar-out-bg: var(--color-empty-bg);
+  --color-calendar-out-text: var(--color-rule-2);
+
   /* Meal chip (plans page) */
   --color-chip-bg: #f3f1ea;
   --color-chip-border: #e3e0d3;
