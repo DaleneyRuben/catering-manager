@@ -134,7 +134,12 @@ export function ClientDetailPage() {
       )}
 
       {activeTab === 'history' && (
-        <ClientHistoryTab clientId={client.id} currentPlanName={sub?.plan.name ?? null} />
+        <ClientHistoryTab
+          clientId={client.id}
+          currentPlanName={sub?.plan.name ?? null}
+          sub={sub}
+          isEnded={isEnded}
+        />
       )}
 
       {editOpen && (
