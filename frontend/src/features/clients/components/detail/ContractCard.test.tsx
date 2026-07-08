@@ -104,3 +104,10 @@ it('cancels edit without saving', () => {
   expect(onUpdateContract).not.toHaveBeenCalled();
   expect(screen.queryByRole('button', { name: /guardar/i })).not.toBeInTheDocument();
 });
+
+it('right-aligns the cancelar/guardar buttons', () => {
+  render(<ContractCard sub={sub} remaining={25} onUpdateContract={onUpdateContract} />);
+  fireEvent.click(screen.getByRole('button', { name: /editar/i }));
+  const cancelBtn = screen.getByRole('button', { name: /cancelar/i });
+  expect(cancelBtn.parentElement).toHaveClass('justify-end');
+});
