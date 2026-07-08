@@ -72,7 +72,7 @@ A plan can include any combination of meal types.
 
 Plan duration is **dynamic** — defined by the user at subscription time (new client, renewal, or reactivation) as a number of days. The API requires an explicit value (no UI default); the DB column has a fallback of 20 that never fires in practice. The system calculates `contractEndDate` automatically by adding the specified number of client-facing business days (Mon–Fri) to the start date.
 
-- Contract date is always set to **today** at creation.
+- Contract date is always set to **today** at creation. (API validation of this rule is temporarily relaxed while existing clients are backfilled — see the TODO in `services/subscription/create.ts`.)
 - Start date is set by the user and may be the same as the contract date or a future date.
 - Contract end date is calculated automatically: add the specified duration (in business days) to the start date.
 - The end date is stored and may later be extended by suspensions (see below).
@@ -107,7 +107,7 @@ All UI-facing views (calendars, suspension picker, delivery history, client-faci
 
 ## Daily Menu Processing
 
-Menus are entered daily and persisted in the `menus` table with a rolling weekly window — records outside the current Sun–Sat week are pruned automatically on each upsert.
+Menus are entered daily and persisted in the `menus` table with a rolling weekly window — records outside the current Mon–Fri display week are pruned automatically on each upsert. The display week is the same one used by the Menú view: it resets to the upcoming week on Sunday.
 
 When a menu is saved the system generates a **chef preparation report** — a downloadable `.docx` file for the kitchen. The report includes:
 
@@ -178,6 +178,17 @@ The reporting layer should remain extensible — additional reports may be added
 - Chef reports only count meals for active, non-suspended, non-paused clients for that delivery day.
 - Delivery zone is stored per client and may be used for future routing/grouping features.
 
+### Derived client status (display)
+
+Each client's displayed status is derived on read from their latest subscription — never stored:
+
+- **ended** — no subscription, manually finalized, or `contractEndDate` in the past (a past end date ends the plan even while paused).
+- **paused** — `pausedSince` is set (covers both mid-plan pauses and "sin fecha" renewals awaiting a start date).
+- **future** — subscription exists but has no dates yet, or the start date is still ahead.
+- **suspended** — today is one of the subscription's suspended dates.
+- **expiring** — `contractEndDate` falls within the next 5 business days (Mon–Fri, as implemented).
+- **active** — everything else within the contract range.
+
 ---
 
 ## Client Lifecycle
@@ -225,13 +236,13 @@ newContractEndDate = nextClientDeliveryDay(resumeDate) + (remainingDays - 1) bus
 
 Where `nextClientDeliveryDay` is the first Mon–Fri day strictly after `resumeDate`. This ensures the client receives their first meal the day after resuming (e.g., resumed on Monday → first delivery on Tuesday).
 
-**UI behavior while paused (Plan + Billing tab):**
+**UI behavior while paused (Plan + Billing tab) (planned — not yet implemented):**
 
-The frontend displays `contractEndDate + 1 client business day` as a visual indicator only. This value is never persisted — the backend computes and stores the real end date only at resume time.
+The frontend should display `contractEndDate + 1 client business day` as a visual indicator only, never persisted — the backend computes and stores the real end date only at resume time. Currently the UI shows the stored `contractEndDate` unchanged while paused.
 
-**Maximum pause duration:**
+**Maximum pause duration (planned — not yet implemented):**
 
-A system-level configuration value `maxPauseDays` (default: 30 calendar days) defines the maximum time a client may remain paused. If `maxPauseDays` is exceeded without a manual resume, the plan is **finalized automatically** — setting `contractEndDate` to today and deactivating the client. The event is recorded in history. This value can be updated in the system configuration without code changes.
+A system-level configuration value `maxPauseDays` (default: 30 calendar days) will define the maximum time a client may remain paused. If `maxPauseDays` is exceeded without a manual resume, the plan will be **finalized automatically** — setting `contractEndDate` to today and deactivating the client, with the event recorded in history. The value should be updatable in the system configuration without code changes. None of this exists yet: today a paused client stays paused indefinitely until manually resumed, and only a past `contractEndDate` ends the plan.
 
 Pause and resume events are recorded in history.
 
@@ -270,14 +281,15 @@ The internal Sun–Thu kitchen schedule is never shown to the client.
 
 ## History
 
-For each client, the system tracks:
+For each client, the system tracks these events:
 
-- Plan start date
-- Plan cost at the time of assignment
-- Subsequent plan changes (date, previous plan, new plan, new cost)
-- Pause, resume, suspension, reactivation, and finalization events
+- Plan assignment (`plan_assigned`) — on subscription creation (metadata: the plan, its price at that moment, start date, duration, end date, and discount) and whenever the start date or duration changes (metadata: the new dates and duration).
+- Renewal (`plan_renewed`) and reactivation (`reactivated`).
+- Pause (`paused`), resume (`resumed`), suspension (`suspended` — with the newly suspended dates), finalization (`finalized`), and client deletion (`deleted`).
 
 History entries are append-only — past records are never overwritten when a plan changes.
+
+Not yet implemented: a dedicated plan-change event (`plan_changed` — date, previous plan, new plan, new cost). The event type is declared but never emitted; changing only the assigned plan on an existing subscription currently records no history entry.
 
 ---
 
@@ -285,7 +297,8 @@ History entries are append-only — past records are never overwritten when a pl
 
 The system has four roles (`super_admin`, `admin`, `kitchen`, `delivery`). Role controls what a user can see and do:
 
-- **super_admin / admin** — full access including user management and all reports.
+- **super_admin** — full access including user management (Usuarios) and the Health view; both are super_admin-only.
+- **admin** — full access to clients, plans, menus, production, deliveries, reports, and the dashboard; no user management or Health view.
 - **kitchen** — can view the kitchen report and menu; cannot access the kitchen report download on the Reports page (that card is hidden for this role).
 - **delivery** — delivery route view only.
 

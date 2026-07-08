@@ -35,7 +35,7 @@ UI labels are neutral Spanish. Each entry: term (code identifier) — definition
 
 - **Login event** (`loginEvent`) — an append-only record of one successful login: who, when,
   and from what device (parsed from the browser's User-Agent). Failed logins are never
-  recorded. Events older than 180 days are pruned automatically.
+  recorded. Events are never pruned; deleting a user cascades to their events.
 - **Device snapshot** — the `lastDeviceType` / `lastOs` / `lastBrowser` fields on a user,
   overwritten on each login (like `lastLoginAt`). A denormalized copy of the latest login
   event, kept for fast display; the events table is the history.
@@ -47,7 +47,7 @@ UI labels are neutral Spanish. Each entry: term (code identifier) — definition
 
 - **Active subscription (for a date)** — a subscription whose `startDate`–`contractEndDate`
   range covers the date, not finalized, client not paused, and the date not in the
-  subscription's suspended dates. Canonical rule: `services/subscription/find-active-for-date.ts`.
+  subscription's suspended dates. Canonical rule: `services/subscription/find-active-subscriptions-for-date.ts`.
   The production view, delivery route, and kitchen reports all count exactly these clients.
 - **Delivery day (client view)** — Monday–Friday. The kitchen preps Sunday–Thursday, always
   for the next calendar day's delivery.
