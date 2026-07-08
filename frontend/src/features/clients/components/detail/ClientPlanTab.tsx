@@ -34,10 +34,10 @@ export function ClientPlanTab({
           onUpdateBilling={onUpdateBilling}
           onUpdateInstructions={onUpdateInstructions}
         />
-        <BillingCard nit={client.nit} businessName={client.businessName} />
       </div>
       <div className="col-span-12 lg:col-span-5 flex flex-col gap-[20px]">
         <ContractCard sub={sub} remaining={remaining} onUpdateContract={onUpdateContract} />
+        <BillingCard nit={client.nit} businessName={client.businessName} />
       </div>
     </div>
   );
