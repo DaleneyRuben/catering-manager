@@ -1,5 +1,11 @@
 import { Request, Response, NextFunction } from 'express';
 import errorHandler from '../error-handler';
+import logger from '../../utils/logger';
+
+jest.mock('../../utils/logger', () => ({
+  __esModule: true,
+  default: { error: jest.fn(), warn: jest.fn() },
+}));
 
 const mockRes = () => {
   const res = {} as Response;
@@ -9,7 +15,11 @@ const mockRes = () => {
 };
 
 const mockNext = () => jest.fn() as unknown as NextFunction;
-const mockReq = () => ({}) as Request;
+const mockReq = () => ({ method: 'GET', originalUrl: '/api/clients' }) as Request;
+
+beforeEach(() => {
+  jest.clearAllMocks();
+});
 
 describe('errorHandler', () => {
   it('responds with the error statusCode and message when set', () => {
@@ -39,5 +49,29 @@ describe('errorHandler', () => {
     errorHandler(err, mockReq(), res, mockNext());
 
     expect(res.json).toHaveBeenCalledWith({ message: 'internal server error' });
+  });
+
+  it('logs 5xx errors at error level with the error and request context', () => {
+    const err = new Error('db exploded');
+
+    errorHandler(err, mockReq(), mockRes(), mockNext());
+
+    expect(logger.error).toHaveBeenCalledWith(
+      { err, method: 'GET', path: '/api/clients', statusCode: 500 },
+      'db exploded',
+    );
+    expect(logger.warn).not.toHaveBeenCalled();
+  });
+
+  it('logs 4xx errors at warn level with the error and request context', () => {
+    const err = Object.assign(new Error('plan not found'), { statusCode: 404 });
+
+    errorHandler(err, mockReq(), mockRes(), mockNext());
+
+    expect(logger.warn).toHaveBeenCalledWith(
+      { err, method: 'GET', path: '/api/clients', statusCode: 404 },
+      'plan not found',
+    );
+    expect(logger.error).not.toHaveBeenCalled();
   });
 });
