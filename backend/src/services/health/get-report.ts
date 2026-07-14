@@ -1,4 +1,5 @@
 import sequelize from '../../database/sequelize';
+import logger from '../../utils/logger';
 
 type ServiceStatus = 'ok' | 'down';
 
@@ -36,7 +37,10 @@ const checkDatabase = async (): Promise<ServiceCheck> => {
   try {
     const latencyMs = await timeIt(() => sequelize.query('SELECT 1'));
     return { name: 'Base de datos', status: 'ok', latencyMs };
-  } catch {
+  } catch (err) {
+    // swallowed on purpose (the report itself carries the "down" status),
+    // so the cause must be logged here — it never reaches the error handler
+    logger.error({ err }, 'database health check failed');
     return { name: 'Base de datos', status: 'down', latencyMs: 0 };
   }
 };
