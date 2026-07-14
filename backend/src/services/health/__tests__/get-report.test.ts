@@ -1,9 +1,15 @@
 import sequelize from '../../../database/sequelize';
+import logger from '../../../utils/logger';
 import { getReport } from '../get-report';
 
 jest.mock('../../../database/sequelize', () => ({
   __esModule: true,
   default: { query: jest.fn() },
+}));
+
+jest.mock('../../../utils/logger', () => ({
+  __esModule: true,
+  default: { error: jest.fn() },
 }));
 
 const mockQuery = sequelize.query as jest.Mock;
@@ -34,6 +40,23 @@ describe('getReport', () => {
     expect(report.services).toEqual(
       expect.arrayContaining([expect.objectContaining({ name: 'Base de datos', status: 'down' })]),
     );
+  });
+
+  it('logs the underlying error when the database check fails', async () => {
+    const err = new Error('connection refused');
+    mockQuery.mockRejectedValue(err);
+
+    await getReport();
+
+    expect(logger.error).toHaveBeenCalledWith({ err }, 'database health check failed');
+  });
+
+  it('does not log when the database check succeeds', async () => {
+    mockQuery.mockResolvedValue([[], {}]);
+
+    await getReport();
+
+    expect(logger.error).not.toHaveBeenCalled();
   });
 
   it('includes a checkedAt ISO timestamp', async () => {
