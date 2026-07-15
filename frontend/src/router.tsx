@@ -13,9 +13,8 @@ import { ReportsPage } from '@/pages/ReportsPage';
 import { HealthPage } from '@/pages/HealthPage';
 import { UsersPage } from '@/pages/UsersPage';
 import { DeliveryPage } from '@/pages/DeliveryPage';
-import { ROLES } from '@/constants/roles';
+import { ADMIN_ROLES, ROLES } from '@/constants/roles';
 
-const ADMIN_ROLES = [ROLES.SUPER_ADMIN, ROLES.ADMIN] as const;
 const STAFF_ROLES = [...ADMIN_ROLES, ROLES.KITCHEN] as const;
 const DELIVERY_ROLES = [...ADMIN_ROLES, ROLES.DELIVERY] as const;
 const SHELL_ROLES = [...STAFF_ROLES, ROLES.DELIVERY] as const;

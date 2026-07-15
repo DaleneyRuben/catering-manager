@@ -25,6 +25,8 @@ export interface WeeklyCounts {
 
 export interface ProductionData extends ProductionSummary {
   weeklyCounts: WeeklyCounts;
+  // Navigable week Mondays (current + forward), owned by the server.
+  weekStarts: string[];
 }
 
 export interface DayClient {

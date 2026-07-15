@@ -1,21 +1,15 @@
-import { format, parseISO } from 'date-fns';
-import { es } from 'date-fns/locale';
 import { Link } from 'react-router-dom';
 import { Icon } from '@ui/Icon';
 import { IconButton } from '@ui/IconButton';
 import { Modal } from '@ui/Modal';
 import { useProductionDay } from '@/features/production/hooks/useProductionDay';
+import { formatWeekdayDate } from '@/utils/format';
 import type { DayClient } from '@/features/production/types';
 
 interface Props {
   date: string;
   onClose: () => void;
 }
-
-const capitalize = (label: string) => label.charAt(0).toUpperCase() + label.slice(1);
-
-const dayTitle = (date: string) =>
-  `Clientes activos · ${capitalize(format(parseISO(date), 'EEEE dd/MM', { locale: es }))}`;
 
 function ClientRow({ client }: { client: DayClient }) {
   return (
@@ -37,9 +31,16 @@ function ClientRow({ client }: { client: DayClient }) {
 }
 
 export function DayClientsModal({ date, onClose }: Props) {
-  const { dayClients, isLoading } = useProductionDay(date);
+  const { dayClients, isLoading, error } = useProductionDay(date);
 
   const renderBody = () => {
+    if (error) {
+      return (
+        <p className="font-mono text-[12px] text-faint py-3">
+          No se pudo cargar la lista de clientes. Intenta de nuevo.
+        </p>
+      );
+    }
     if (isLoading || !dayClients) {
       return <p className="font-mono text-[12px] text-faint py-3">Cargando…</p>;
     }
@@ -72,7 +73,7 @@ export function DayClientsModal({ date, onClose }: Props) {
         </span>
         <div className="flex-1 min-w-0">
           <p className="font-serif font-semibold text-[23px] leading-[1.1] text-ink">
-            {dayTitle(date)}
+            Clientes activos · {formatWeekdayDate(date)}
           </p>
           <p className="font-mono text-[10.5px] uppercase tracking-[.12em] text-faint mt-1">
             {count} {count === 1 ? 'cliente activo' : 'clientes activos'}
