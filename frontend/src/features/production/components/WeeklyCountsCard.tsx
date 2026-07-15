@@ -3,8 +3,8 @@ import { format, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Icon } from '@ui/Icon';
 import { IconButton } from '@ui/IconButton';
-import { Skeleton } from '@ui/Skeleton';
 import { DayClientsModal } from '@/features/production/components/DayClientsModal';
+import { WeekCellsSkeleton } from '@/features/production/components/WeekCellsSkeleton';
 import { useWeeklyCounts } from '@/features/production/hooks/useWeeklyCounts';
 import { formatShortDate } from '@/utils/format';
 import type { WeeklyCounts, WeeklyDayCount } from '@/features/production/types';
@@ -71,16 +71,6 @@ function DayCellContent({ day, isToday, dateLabel }: DayCellContentProps) {
         </span>
       </div>
     </>
-  );
-}
-
-function WeekCellsSkeleton() {
-  return (
-    <div className="grid grid-cols-5 gap-3.5 max-md:grid-cols-1">
-      {[0, 1, 2, 3, 4].map((key) => (
-        <Skeleton key={key} className="w-full h-[86px] rounded-[11px]" />
-      ))}
-    </div>
   );
 }
 

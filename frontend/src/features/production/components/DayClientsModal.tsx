@@ -46,7 +46,15 @@ export function DayClientsModal({ date, onClose }: Props) {
       return (
         <div className="flex flex-col gap-2">
           {[0, 1, 2, 3, 4].map((key) => (
-            <Skeleton key={key} className="w-full h-[54px] rounded-[10px]" />
+            <div
+              key={key}
+              className="flex items-center gap-[13px] px-3.5 py-[11px] rounded-[10px] bg-paper border border-history-row-border"
+            >
+              <div className="flex-1 min-w-0 flex flex-col gap-2">
+                <Skeleton className="w-32 h-3.5" />
+                <Skeleton className="w-24 h-2.5" />
+              </div>
+            </div>
           ))}
         </div>
       );
