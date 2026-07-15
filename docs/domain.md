@@ -140,6 +140,14 @@ Not to be confused with the **Producción section** of the kitchen `.docx` repor
 
 **Clientes activos por día:** a second card on the same view shows the active-client count for each weekday (Mon–Fri) of the current display week (same Mon–Fri bounds used by Menú, resetting to the upcoming week on Sunday). Each day's count is the same active-subscription rule applied to that specific date, independent of the "Mañana" card above. Returned as `weeklyCounts` on the same `GET /api/production` response.
 
+### Admin extensions on "Clientes activos por día"
+
+Two features on this card are visible to `admin` and `super_admin` only. The `kitchen` role sees the card exactly as described above — no navigation, no clickable cells, no per-cell dates — and never calls the admin endpoints.
+
+- **Navigable window is server-owned:** the main `GET /api/production` response includes `weekStarts` — the list of navigable week Mondays (the current display week plus 2 weeks forward; the count comes from `MAX_WEEK_OFFSET` in `constants/production.constants.ts`). The frontend derives the arrows and their bounds from this list and holds no window constant of its own.
+- **Week navigation:** admins page the Mon–Fri grid by **absolute week start**: `GET /api/production/weekly-counts?weekStart=YYYY-MM-DD` (admin/super_admin only; any Monday in `weekStarts` is valid, anything else is a 400). The current week is never fetched from this endpoint — it is served by the main `/api/production` payload. Admin cells additionally show a small dd/MM date beside each weekday label. Future-week counts are a **projection based on contracts already registered** — renewals not yet entered are not included, so they systematically understate; the UI shows a caveat on future weeks and hides the "Hoy" marker outside the current week.
+- **Day drill-down:** clicking a day cell opens a modal listing that day's active clients (name, phone number, delivery zone), each row linking to the client's detail page. Served by `GET /api/production/day-clients?date=YYYY-MM-DD` (admin/super_admin only) — the endpoint applies the **same active-subscription rule as the counts**, so the modal list and the cell count always agree. The date must be a weekday (weekends are rejected with a 400) within the navigable window (first Monday in `weekStarts` through the Friday of the last).
+
 ---
 
 ## Entregas View (Delivery Route)

@@ -1,8 +1,11 @@
 import { format } from 'date-fns';
 import { PageHeader } from '@ui/PageHeader';
 import { Skeleton } from '@ui/Skeleton';
+import { useAuth } from '@/features/auth/AuthContext';
+import { isAdminRole } from '@/constants/roles';
 import { useProduction } from '@/features/production/hooks/useProduction';
 import { ProductionCard } from '@/features/production/components/ProductionCard';
+import { WeekCellsSkeleton } from '@/features/production/components/WeekCellsSkeleton';
 import { WeeklyCountsCard } from '@/features/production/components/WeeklyCountsCard';
 
 function WeeklyCountsSkeleton() {
@@ -15,11 +18,7 @@ function WeeklyCountsSkeleton() {
         </div>
         <Skeleton className="w-[180px] h-[36px] rounded-[9px] shrink-0" />
       </div>
-      <div className="grid grid-cols-5 gap-3.5 max-md:grid-cols-1">
-        {[0, 1, 2, 3, 4].map((key) => (
-          <Skeleton key={key} className="w-full h-[86px] rounded-[11px]" />
-        ))}
-      </div>
+      <WeekCellsSkeleton />
     </div>
   );
 }
@@ -50,6 +49,8 @@ function ProductionSkeleton() {
 
 export function ProductionPage() {
   const { summary, isLoading } = useProduction();
+  const { user } = useAuth();
+  const isAdmin = isAdminRole(user?.role);
   const today = format(new Date(), 'yyyy-MM-dd');
 
   return (
@@ -63,7 +64,12 @@ export function ProductionPage() {
           </>
         ) : (
           <>
-            <WeeklyCountsCard weeklyCounts={summary.weeklyCounts} today={today} />
+            <WeeklyCountsCard
+              weeklyCounts={summary.weeklyCounts}
+              weekStarts={summary.weekStarts}
+              today={today}
+              isAdmin={isAdmin}
+            />
             <ProductionCard summary={summary} />
           </>
         )}

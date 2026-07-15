@@ -2,6 +2,7 @@ import {
   addBusinessDays,
   subBusinessDays,
   format,
+  isValid,
   parseISO,
   getDay,
   startOfISOWeek,
@@ -36,6 +37,10 @@ export const nextDeliveryDay = (date: string): string => {
   if (day === 0) return format(addDays(d, 1), 'yyyy-MM-dd');
   return date;
 };
+
+// Shared by controllers validating date query params.
+export const isIsoDate = (value: string): boolean =>
+  /^\d{4}-\d{2}-\d{2}$/.test(value) && isValid(parseISO(value));
 
 // Shared by report/kitchen-report file downloads: "Lunes 15-06.docx" / "Lunes 15-06.xlsx".
 export const spanishWeekdayFileName = (date: string, extension: string): string => {

@@ -14,6 +14,12 @@ describe('Icon', () => {
     expect(svg).toHaveAttribute('height', '24');
   });
 
+  it('renders a circle with a stem for info', () => {
+    const { container } = render(<Icon name="info" />);
+    expect(container.querySelector('svg')).toBeInTheDocument();
+    expect(container.querySelectorAll('circle').length).toBeGreaterThanOrEqual(1);
+  });
+
   it('returns null for unknown icon names', () => {
     const { container } = render(<Icon name="nonexistent" />);
     expect(container.querySelector('svg')).not.toBeInTheDocument();

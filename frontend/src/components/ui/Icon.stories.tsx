@@ -23,6 +23,7 @@ const ICON_NAMES = [
   'calendar-x',
   'cloche',
   'history',
+  'info',
   'monitor',
   'smartphone',
   'tablet',
