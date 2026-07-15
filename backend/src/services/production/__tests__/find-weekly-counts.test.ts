@@ -52,6 +52,38 @@ describe('findWeeklyCounts', () => {
     expect(findActiveSubscriptionsForDate).toHaveBeenCalledTimes(5);
   });
 
+  it('shifts the window forward by 7 calendar days per week of offset', async () => {
+    const result = await findWeeklyCounts(2);
+
+    expect(result.weekStart).toBe('2026-07-13');
+    expect(result.weekEnd).toBe('2026-07-17');
+    expect(result.days.map((d) => d.date)).toEqual([
+      '2026-07-13',
+      '2026-07-14',
+      '2026-07-15',
+      '2026-07-16',
+      '2026-07-17',
+    ]);
+  });
+
+  it('treats offset 0 as the current display week', async () => {
+    const result = await findWeeklyCounts(0);
+
+    expect(result.weekStart).toBe('2026-06-29');
+    expect(result.weekEnd).toBe('2026-07-03');
+  });
+
+  it('counts active subscriptions for the offset week dates', async () => {
+    (findActiveSubscriptionsForDate as jest.Mock).mockImplementation((date: string) =>
+      Promise.resolve(Array.from({ length: date === '2026-07-06' ? 4 : 0 })),
+    );
+
+    const result = await findWeeklyCounts(1);
+
+    expect(result.days[0]).toEqual({ date: '2026-07-06', count: 4 });
+    expect(result.days[1]).toEqual({ date: '2026-07-07', count: 0 });
+  });
+
   it('delegates the week-start reset (e.g. sunday) to getCurrentMenuWeek', async () => {
     mockGetCurrentMenuWeek.mockReturnValueOnce({ start: '2026-07-06', end: '2026-07-10' });
 
