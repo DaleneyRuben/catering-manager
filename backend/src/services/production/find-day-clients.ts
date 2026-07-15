@@ -1,3 +1,6 @@
+import Client from '../../models/Client';
+import { findActiveSubscriptionsForDate } from '../subscription';
+
 export type DayClient = {
   id: number;
   name: string;
@@ -11,6 +14,15 @@ export type DayClients = {
   clients: DayClient[];
 };
 
-export const findDayClients = async (_date: string): Promise<DayClients> => {
-  throw new Error('not implemented');
+export const findDayClients = async (date: string): Promise<DayClients> => {
+  const subscriptions = await findActiveSubscriptionsForDate(date);
+
+  const clients = subscriptions
+    .map((subscription) => {
+      const { id, name, phoneNumber, deliveryZone } = subscription.client as Client;
+      return { id, name, phoneNumber, deliveryZone };
+    })
+    .sort((a, b) => a.name.localeCompare(b.name, 'es'));
+
+  return { date, count: clients.length, clients };
 };
