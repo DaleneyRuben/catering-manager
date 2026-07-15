@@ -9,7 +9,11 @@ jest.mock('@/features/production/hooks/useProduction');
 const mockUseProduction = useProduction as jest.MockedFunction<typeof useProduction>;
 
 jest.mock('@/features/production/hooks/useWeeklyCounts', () => ({
-  useWeeklyCounts: () => ({ weeklyCounts: null, isLoading: false, error: null }),
+  useWeeklyCounts: (_weekStart: string, opts?: { initialData?: unknown }) => ({
+    weeklyCounts: opts?.initialData ?? null,
+    isLoading: false,
+    error: null,
+  }),
 }));
 
 jest.mock('@/features/auth/AuthContext', () => ({ useAuth: jest.fn() }));
@@ -38,6 +42,7 @@ const summary: ProductionData = {
       { date: '2026-07-03', count: 8 },
     ],
   },
+  weekStarts: ['2026-06-29', '2026-07-06', '2026-07-13'],
 };
 
 beforeEach(() => setRole(ROLES.KITCHEN));

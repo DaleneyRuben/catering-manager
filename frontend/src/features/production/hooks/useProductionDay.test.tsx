@@ -31,7 +31,7 @@ describe('useProductionDay', () => {
     });
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
-    expect(mockGet).toHaveBeenCalledWith('/production/day?date=2026-07-16');
+    expect(mockGet).toHaveBeenCalledWith('/production/day-clients?date=2026-07-16');
     expect(result.current.dayClients).toEqual(dayClients);
   });
 

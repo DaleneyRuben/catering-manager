@@ -83,6 +83,21 @@ describe('DayClientsModal', () => {
     expect(screen.getByText('Cargando…')).toBeInTheDocument();
   });
 
+  it('shows an error message when the request fails instead of loading forever', () => {
+    mockUseProductionDay.mockReturnValue({
+      dayClients: null,
+      isLoading: false,
+      error: new Error('falló'),
+    });
+
+    renderModal();
+
+    expect(
+      screen.getByText('No se pudo cargar la lista de clientes. Intenta de nuevo.'),
+    ).toBeInTheDocument();
+    expect(screen.queryByText('Cargando…')).not.toBeInTheDocument();
+  });
+
   it('calls onClose from the close button', () => {
     const onClose = jest.fn();
     renderModal(onClose);
