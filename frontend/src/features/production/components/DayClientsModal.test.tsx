@@ -75,12 +75,13 @@ describe('DayClientsModal', () => {
     expect(screen.getByText('Sin clientes activos')).toBeInTheDocument();
   });
 
-  it('shows a loading message while fetching', () => {
+  it('shows skeleton rows while fetching', () => {
     mockUseProductionDay.mockReturnValue({ dayClients: null, isLoading: true, error: null });
 
-    renderModal();
+    const { baseElement } = renderModal();
 
-    expect(screen.getByText('Cargando…')).toBeInTheDocument();
+    expect(baseElement.querySelectorAll('.animate-pulse').length).toBeGreaterThanOrEqual(3);
+    expect(screen.queryByText('Cargando…')).not.toBeInTheDocument();
   });
 
   it('shows an error message when the request fails instead of loading forever', () => {
