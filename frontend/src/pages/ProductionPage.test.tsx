@@ -2,9 +2,20 @@ import { render, screen } from '@testing-library/react';
 import { ProductionPage } from '@/pages/ProductionPage';
 import type { ProductionData } from '@/features/production/types';
 import { useProduction } from '@/features/production/hooks/useProduction';
+import { useAuth } from '@/features/auth/AuthContext';
+import { ROLES } from '@/constants/roles';
 
 jest.mock('@/features/production/hooks/useProduction');
 const mockUseProduction = useProduction as jest.MockedFunction<typeof useProduction>;
+
+jest.mock('@/features/production/hooks/useWeeklyCounts', () => ({
+  useWeeklyCounts: () => ({ weeklyCounts: null, isLoading: false, error: null }),
+}));
+
+jest.mock('@/features/auth/AuthContext', () => ({ useAuth: jest.fn() }));
+const mockUseAuth = useAuth as jest.Mock;
+
+const setRole = (role: string) => mockUseAuth.mockReturnValue({ user: { role } });
 
 const summary: ProductionData = {
   date: '2026-07-02',
@@ -29,6 +40,7 @@ const summary: ProductionData = {
   },
 };
 
+beforeEach(() => setRole(ROLES.KITCHEN));
 afterEach(() => jest.clearAllMocks());
 
 describe('ProductionPage', () => {
@@ -66,5 +78,23 @@ describe('ProductionPage', () => {
 
     expect(screen.getByText('Clientes activos por día')).toBeInTheDocument();
     expect(screen.getByText('29 – 3 jul')).toBeInTheDocument();
+  });
+
+  it.each([ROLES.ADMIN, ROLES.SUPER_ADMIN])('enables week navigation for %s', (role) => {
+    setRole(role);
+    mockUseProduction.mockReturnValue({ summary, isLoading: false, error: null });
+
+    render(<ProductionPage />);
+
+    expect(screen.getByLabelText('Semana siguiente')).toBeInTheDocument();
+  });
+
+  it('renders no week navigation for kitchen', () => {
+    setRole(ROLES.KITCHEN);
+    mockUseProduction.mockReturnValue({ summary, isLoading: false, error: null });
+
+    render(<ProductionPage />);
+
+    expect(screen.queryByLabelText('Semana siguiente')).not.toBeInTheDocument();
   });
 });
