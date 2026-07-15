@@ -2,6 +2,7 @@ import {
   addDeliveryDays,
   subtractDeliveryDays,
   addCalendarDays,
+  isIsoDate,
   toAppDate,
   calcContractEndDate,
   nextDeliveryDay,
@@ -135,5 +136,21 @@ describe('subtractDeliveryDays', () => {
 
   it('returns the same date when subtracting 0 days', () => {
     expect(subtractDeliveryDays('2026-05-06', 0)).toBe('2026-05-06');
+  });
+});
+
+describe('isIsoDate', () => {
+  it('accepts a valid YYYY-MM-DD date', () => {
+    expect(isIsoDate('2026-07-16')).toBe(true);
+  });
+
+  it('rejects other formats', () => {
+    expect(isIsoDate('16/07/2026')).toBe(false);
+    expect(isIsoDate('2026-7-16')).toBe(false);
+    expect(isIsoDate('')).toBe(false);
+  });
+
+  it('rejects well-formed but impossible dates', () => {
+    expect(isIsoDate('2026-13-40')).toBe(false);
   });
 });
