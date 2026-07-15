@@ -89,6 +89,14 @@ export function Icon({ name, size = 16, stroke = 1.5, className }: IconProps) {
           <circle cx="12" cy="17.5" r=".5" fill="currentColor" />
         </svg>
       );
+    case 'info':
+      return (
+        <svg {...props}>
+          <circle cx="12" cy="12" r="9" />
+          <path d="M12 11v5" />
+          <circle cx="12" cy="8" r=".5" fill="currentColor" />
+        </svg>
+      );
     case 'check':
       return (
         <svg {...props}>
