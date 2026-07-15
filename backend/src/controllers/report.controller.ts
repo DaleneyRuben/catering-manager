@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from 'express';
 import ExcelJS from 'exceljs';
 import { parse, format, isValid, parseISO } from 'date-fns';
 import { checkIsWeekend } from '../utils/devFlags';
-import { spanishWeekdayFileName } from '../utils/date';
+import { isIsoDate, spanishWeekdayFileName } from '../utils/date';
 import * as menuService from '../services/menu';
 import * as reportService from '../services/report';
 import { buildMenu, menuFileName } from '../utils/menuBuilder';
@@ -52,9 +52,6 @@ const downloadActiveClients = async (req: Request, res: Response, next: NextFunc
     next(err);
   }
 };
-
-const isIsoDate = (value: string): boolean =>
-  /^\d{4}-\d{2}-\d{2}$/.test(value) && isValid(parseISO(value));
 
 const exportMenu = async (req: Request, res: Response, next: NextFunction) => {
   try {

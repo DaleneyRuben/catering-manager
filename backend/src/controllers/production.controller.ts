@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
-import { isValid, parseISO } from 'date-fns';
+import { parseISO } from 'date-fns';
 import * as productionService from '../services/production';
-import { addCalendarDays, getCurrentMenuWeek } from '../utils/date';
+import { addCalendarDays, getCurrentMenuWeek, isIsoDate } from '../utils/date';
 import { checkIsWeekend } from '../utils/devFlags';
 import { sendSuccess } from '../utils/response';
 
@@ -33,9 +33,6 @@ const getWeeklyCounts = async (req: Request, res: Response, next: NextFunction) 
     next(err);
   }
 };
-
-const isIsoDate = (value: string): boolean =>
-  /^\d{4}-\d{2}-\d{2}$/.test(value) && isValid(parseISO(value));
 
 const getDayClients = async (req: Request, res: Response, next: NextFunction) => {
   try {
