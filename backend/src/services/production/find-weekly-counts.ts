@@ -7,10 +7,10 @@ export type WeeklyCounts = {
   days: { date: string; count: number }[];
 };
 
-export const findWeeklyCounts = async (weekOffset = 0): Promise<WeeklyCounts> => {
-  const current = getCurrentMenuWeek();
-  const start = addCalendarDays(current.start, weekOffset * 7);
-  const end = addCalendarDays(current.end, weekOffset * 7);
+// weekStart is an absolute Monday (validated by the caller); defaults to the current display week.
+export const findWeeklyCounts = async (weekStart?: string): Promise<WeeklyCounts> => {
+  const start = weekStart ?? getCurrentMenuWeek().start;
+  const end = addCalendarDays(start, 4);
   const dates = Array.from({ length: 5 }, (_, i) => addCalendarDays(start, i));
 
   const counts = await Promise.all(dates.map((date) => findActiveSubscriptionsForDate(date)));

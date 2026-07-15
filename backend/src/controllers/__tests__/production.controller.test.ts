@@ -43,14 +43,18 @@ const mockWeeklyCounts = {
 describe('GET /api/production', () => {
   beforeEach(() => jest.clearAllMocks());
 
-  it('returns 200 with the production summary merged with weekly counts', async () => {
+  it('returns 200 with the summary, weekly counts, and the navigable week starts', async () => {
     (productionService.findGroups as jest.Mock).mockResolvedValue(mockSummary);
     (productionService.findWeeklyCounts as jest.Mock).mockResolvedValue(mockWeeklyCounts);
 
     const res = await request(app).get('/api/production');
 
     expect(res.status).toBe(200);
-    expect(res.body.data).toEqual({ ...mockSummary, weeklyCounts: mockWeeklyCounts });
+    expect(res.body.data).toEqual({
+      ...mockSummary,
+      weeklyCounts: mockWeeklyCounts,
+      weekStarts: ['2026-06-29', '2026-07-06', '2026-07-13'],
+    });
   });
 
   it('returns 500 when the groups service throws', async () => {
@@ -75,32 +79,41 @@ describe('GET /api/production', () => {
 describe('GET /api/production/weekly-counts', () => {
   beforeEach(() => jest.clearAllMocks());
 
-  it('returns the counts for the requested week offset', async () => {
-    (productionService.findWeeklyCounts as jest.Mock).mockResolvedValue(mockWeeklyCounts);
+  it.each(['2026-06-29', '2026-07-06', '2026-07-13'])(
+    'returns the counts for navigable week start %s',
+    async (weekStart) => {
+      (productionService.findWeeklyCounts as jest.Mock).mockResolvedValue(mockWeeklyCounts);
 
-    const res = await request(app).get('/api/production/weekly-counts').query({ offset: '1' });
+      const res = await request(app).get('/api/production/weekly-counts').query({ weekStart });
 
-    expect(res.status).toBe(200);
-    expect(productionService.findWeeklyCounts).toHaveBeenCalledWith(1);
-    expect(res.body.data).toEqual(mockWeeklyCounts);
-  });
+      expect(res.status).toBe(200);
+      expect(productionService.findWeeklyCounts).toHaveBeenCalledWith(weekStart);
+      expect(res.body.data).toEqual(mockWeeklyCounts);
+    },
+  );
 
-  it('rejects a missing offset with 400', async () => {
+  it('rejects a missing weekStart with 400', async () => {
     const res = await request(app).get('/api/production/weekly-counts');
 
     expect(res.status).toBe(400);
     expect(productionService.findWeeklyCounts).not.toHaveBeenCalled();
   });
 
-  it.each(['-1', '3', 'abc', '1.5'])('rejects offset %s with 400', async (offset) => {
-    const res = await request(app).get('/api/production/weekly-counts').query({ offset });
+  it.each([
+    '2026-06-22', // past week
+    '2026-07-20', // beyond the +2 window
+    '2026-06-30', // inside the window but not a navigable monday
+    '29/06/2026',
+    'abc',
+  ])('rejects non-navigable weekStart %s with 400', async (weekStart) => {
+    const res = await request(app).get('/api/production/weekly-counts').query({ weekStart });
 
     expect(res.status).toBe(400);
     expect(productionService.findWeeklyCounts).not.toHaveBeenCalled();
   });
 });
 
-describe('GET /api/production/day', () => {
+describe('GET /api/production/day-clients', () => {
   const mockDayClients = {
     date: '2026-07-01',
     count: 1,
@@ -112,7 +125,7 @@ describe('GET /api/production/day', () => {
   it('returns the active clients for a weekday inside the window', async () => {
     (productionService.findDayClients as jest.Mock).mockResolvedValue(mockDayClients);
 
-    const res = await request(app).get('/api/production/day').query({ date: '2026-07-01' });
+    const res = await request(app).get('/api/production/day-clients').query({ date: '2026-07-01' });
 
     expect(res.status).toBe(200);
     expect(productionService.findDayClients).toHaveBeenCalledWith('2026-07-01');
@@ -125,7 +138,7 @@ describe('GET /api/production/day', () => {
     'rejects invalid date %s with 400',
     async (date) => {
       const res = await request(app)
-        .get('/api/production/day')
+        .get('/api/production/day-clients')
         .query(date === undefined ? {} : { date });
 
       expect(res.status).toBe(400);
@@ -134,7 +147,7 @@ describe('GET /api/production/day', () => {
   );
 
   it('rejects a weekend date with 400', async () => {
-    const res = await request(app).get('/api/production/day').query({ date: '2026-07-04' });
+    const res = await request(app).get('/api/production/day-clients').query({ date: '2026-07-04' });
 
     expect(res.status).toBe(400);
     expect(productionService.findDayClients).not.toHaveBeenCalled();
@@ -143,7 +156,7 @@ describe('GET /api/production/day', () => {
   it.each(['2026-06-26', '2026-07-20'])(
     'rejects %s outside the current-to-plus-2-weeks window with 400',
     async (date) => {
-      const res = await request(app).get('/api/production/day').query({ date });
+      const res = await request(app).get('/api/production/day-clients').query({ date });
 
       expect(res.status).toBe(400);
       expect(productionService.findDayClients).not.toHaveBeenCalled();
@@ -157,7 +170,7 @@ describe('GET /api/production/day', () => {
       clients: [],
     });
 
-    const res = await request(app).get('/api/production/day').query({ date: '2026-07-17' });
+    const res = await request(app).get('/api/production/day-clients').query({ date: '2026-07-17' });
 
     expect(res.status).toBe(200);
     expect(productionService.findDayClients).toHaveBeenCalledWith('2026-07-17');

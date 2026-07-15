@@ -59,8 +59,8 @@ describe('GET /api/production role guard', () => {
 
 describe('admin-only production routes role guard', () => {
   const routes = [
-    { path: '/api/production/weekly-counts', query: { offset: '1' } },
-    { path: '/api/production/day', query: { date: '2099-01-04' } },
+    { path: '/api/production/weekly-counts', query: { weekStart: '2099-01-04' } },
+    { path: '/api/production/day-clients', query: { date: '2099-01-04' } },
   ];
 
   it.each(routes)('rejects kitchen on $path with 403', async ({ path, query }) => {
