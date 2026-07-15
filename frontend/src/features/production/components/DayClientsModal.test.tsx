@@ -75,12 +75,14 @@ describe('DayClientsModal', () => {
     expect(screen.getByText('Sin clientes activos')).toBeInTheDocument();
   });
 
-  it('shows skeleton rows while fetching', () => {
+  it('shows structured skeleton rows while fetching', () => {
     mockUseProductionDay.mockReturnValue({ dayClients: null, isLoading: true, error: null });
 
     const { baseElement } = renderModal();
 
-    expect(baseElement.querySelectorAll('.animate-pulse').length).toBeGreaterThanOrEqual(3);
+    // 5 bordered row containers, each holding a name bar and a meta bar
+    expect(baseElement.querySelectorAll('.border-history-row-border')).toHaveLength(5);
+    expect(baseElement.querySelectorAll('.animate-pulse').length).toBeGreaterThanOrEqual(10);
     expect(screen.queryByText('Cargando…')).not.toBeInTheDocument();
   });
 
