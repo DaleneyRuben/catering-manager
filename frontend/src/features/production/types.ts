@@ -26,3 +26,16 @@ export interface WeeklyCounts {
 export interface ProductionData extends ProductionSummary {
   weeklyCounts: WeeklyCounts;
 }
+
+export interface DayClient {
+  id: string;
+  name: string;
+  phoneNumber: string;
+  deliveryZone: string;
+}
+
+export interface DayClients {
+  date: string;
+  count: number;
+  clients: DayClient[];
+}
