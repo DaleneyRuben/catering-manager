@@ -56,3 +56,36 @@ describe('GET /api/production role guard', () => {
     expect(res.status).toBe(401);
   });
 });
+
+describe('admin-only production routes role guard', () => {
+  const routes = [
+    { path: '/api/production/weekly-counts', query: { offset: '1' } },
+    { path: '/api/production/day', query: { date: '2099-01-04' } },
+  ];
+
+  it.each(routes)('rejects kitchen on $path with 403', async ({ path, query }) => {
+    const res = await request(app).get(path).query(query).set(headersForRole(ROLES.KITCHEN));
+
+    expect(res.status).toBe(403);
+  });
+
+  it.each(routes)('rejects delivery on $path with 403', async ({ path, query }) => {
+    const res = await request(app).get(path).query(query).set(headersForRole(ROLES.DELIVERY));
+
+    expect(res.status).toBe(403);
+  });
+
+  it.each(routes)('does not 403 admin on $path', async ({ path, query }) => {
+    const res = await request(app).get(path).query(query).set(headersForRole(ROLES.ADMIN));
+
+    expect(res.status).not.toBe(403);
+    expect(res.status).not.toBe(404);
+  });
+
+  it.each(routes)('does not 403 super_admin on $path', async ({ path, query }) => {
+    const res = await request(app).get(path).query(query).set(headersForRole(ROLES.SUPER_ADMIN));
+
+    expect(res.status).not.toBe(403);
+    expect(res.status).not.toBe(404);
+  });
+});
