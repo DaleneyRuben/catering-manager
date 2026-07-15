@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { Icon } from '@ui/Icon';
 import { IconButton } from '@ui/IconButton';
 import { Modal } from '@ui/Modal';
+import { Skeleton } from '@ui/Skeleton';
 import { useProductionDay } from '@/features/production/hooks/useProductionDay';
 import { formatWeekdayDate } from '@/utils/format';
 import type { DayClient } from '@/features/production/types';
@@ -42,7 +43,13 @@ export function DayClientsModal({ date, onClose }: Props) {
       );
     }
     if (isLoading || !dayClients) {
-      return <p className="font-mono text-[12px] text-faint py-3">Cargando…</p>;
+      return (
+        <div className="flex flex-col gap-2">
+          {[0, 1, 2, 3, 4].map((key) => (
+            <Skeleton key={key} className="w-full h-[54px] rounded-[10px]" />
+          ))}
+        </div>
+      );
     }
     if (dayClients.clients.length === 0) {
       return (
@@ -60,7 +67,16 @@ export function DayClientsModal({ date, onClose }: Props) {
     );
   };
 
-  const count = dayClients?.count ?? 0;
+  const countLabel = () => {
+    if (error) return null;
+    if (!dayClients) return <Skeleton className="w-36 h-3 mt-1.5" />;
+    const { count } = dayClients;
+    return (
+      <p className="font-mono text-[10.5px] uppercase tracking-[.12em] text-faint mt-1">
+        {count} {count === 1 ? 'cliente activo' : 'clientes activos'}
+      </p>
+    );
+  };
 
   return (
     <Modal
@@ -75,9 +91,7 @@ export function DayClientsModal({ date, onClose }: Props) {
           <p className="font-serif font-semibold text-[23px] leading-[1.1] text-ink">
             Clientes activos · {formatWeekdayDate(date)}
           </p>
-          <p className="font-mono text-[10.5px] uppercase tracking-[.12em] text-faint mt-1">
-            {count} {count === 1 ? 'cliente activo' : 'clientes activos'}
-          </p>
+          {countLabel()}
         </div>
         <IconButton
           icon="x"
