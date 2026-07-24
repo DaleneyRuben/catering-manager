@@ -60,6 +60,11 @@ describe('Icon', () => {
     expect(container.querySelector('svg')).toBeInTheDocument();
   });
 
+  it('renders an svg for calendar-check', () => {
+    const { container } = render(<Icon name="calendar-check" />);
+    expect(container.querySelector('svg')).toBeInTheDocument();
+  });
+
   it('renders an svg for history', () => {
     const { container } = render(<Icon name="history" />);
     expect(container.querySelector('svg')).toBeInTheDocument();

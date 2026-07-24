@@ -142,6 +142,7 @@ describe('Layout', () => {
       'Panel',
       'Clientes',
       'Planes',
+      'Evaluaciones',
       'Cocina',
       'Menú',
       'Producción',
@@ -149,6 +150,37 @@ describe('Layout', () => {
       'Logística',
       'Entregas',
     ]);
+  });
+
+  it('shows only Evaluaciones for the nutritionist role', () => {
+    mockUserRole('nutritionist');
+    render(
+      <MemoryRouter>
+        <Layout>
+          <span />
+        </Layout>
+      </MemoryRouter>,
+    );
+    expect(screen.queryByText('Panel')).not.toBeInTheDocument();
+    expect(screen.queryByText('Clientes')).not.toBeInTheDocument();
+    expect(screen.queryByText('Planes')).not.toBeInTheDocument();
+    expect(screen.queryByText('Menú')).not.toBeInTheDocument();
+    expect(screen.queryByText('Producción')).not.toBeInTheDocument();
+    expect(screen.queryByText('Informes')).not.toBeInTheDocument();
+    expect(screen.queryByText('Entregas')).not.toBeInTheDocument();
+    expect(screen.getByText('Evaluaciones')).toBeInTheDocument();
+  });
+
+  it('shows the Nutricionista role label in the footer for the nutritionist role', () => {
+    mockUserRole('nutritionist');
+    render(
+      <MemoryRouter>
+        <Layout>
+          <span />
+        </Layout>
+      </MemoryRouter>,
+    );
+    expect(screen.getByText('Nutricionista')).toBeInTheDocument();
   });
 
   it('shows only the Cocina section label for the kitchen role', () => {

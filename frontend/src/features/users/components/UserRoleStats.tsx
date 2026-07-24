@@ -9,6 +9,7 @@ const ROLE_ICONS: Record<UserRole, string> = {
   admin: 'shield',
   kitchen: 'utensils',
   delivery: 'motorcycle',
+  nutritionist: 'calendar-check',
 };
 
 const ROLE_ORDER: UserRole[] = [ROLES.SUPER_ADMIN, ROLES.ADMIN, ROLES.KITCHEN, ROLES.DELIVERY];

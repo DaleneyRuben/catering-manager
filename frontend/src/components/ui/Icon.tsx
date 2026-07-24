@@ -168,6 +168,14 @@ export function Icon({ name, size = 16, stroke = 1.5, className }: IconProps) {
           <path d="M9.5 13.5l5 5M14.5 13.5l-5 5" />
         </svg>
       );
+    case 'calendar-check':
+      return (
+        <svg {...props}>
+          <rect x="3" y="5" width="18" height="16" rx="2" />
+          <path d="M3 9h18M8 3v4M16 3v4" />
+          <path d="M9 14l2 2 4-4" />
+        </svg>
+      );
     case 'cloche':
       return (
         <svg {...props}>

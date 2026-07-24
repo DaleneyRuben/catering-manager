@@ -7,6 +7,7 @@ import { ClientsPage } from '@/pages/ClientsPage';
 import { ClientDetailPage } from '@/pages/ClientDetailPage';
 import { NewClientPage } from '@/pages/NewClientPage';
 import { PlansPage } from '@/pages/PlansPage';
+import { EvaluacionesPage } from '@/pages/EvaluacionesPage';
 import { MenuImportPage } from '@/pages/MenuImportPage';
 import { ProductionPage } from '@/pages/ProductionPage';
 import { ReportsPage } from '@/pages/ReportsPage';
@@ -17,7 +18,7 @@ import { ADMIN_ROLES, ROLES } from '@/constants/roles';
 
 const STAFF_ROLES = [...ADMIN_ROLES, ROLES.KITCHEN] as const;
 const DELIVERY_ROLES = [...ADMIN_ROLES, ROLES.DELIVERY] as const;
-const SHELL_ROLES = [...STAFF_ROLES, ROLES.DELIVERY] as const;
+const SHELL_ROLES = [...STAFF_ROLES, ROLES.DELIVERY, ROLES.NUTRITIONIST] as const;
 
 export function AppRouter() {
   return (
@@ -49,7 +50,7 @@ export function AppRouter() {
                 <Route
                   path="/clientes/nuevo"
                   element={
-                    <ProtectedRoute allowedRoles={[...ADMIN_ROLES]}>
+                    <ProtectedRoute allowedRoles={[...ADMIN_ROLES, ROLES.NUTRITIONIST]}>
                       <NewClientPage />
                     </ProtectedRoute>
                   }
@@ -67,6 +68,14 @@ export function AppRouter() {
                   element={
                     <ProtectedRoute allowedRoles={[...ADMIN_ROLES]}>
                       <PlansPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/evaluaciones"
+                  element={
+                    <ProtectedRoute allowedRoles={[...ADMIN_ROLES, ROLES.NUTRITIONIST]}>
+                      <EvaluacionesPage />
                     </ProtectedRoute>
                   }
                 />
