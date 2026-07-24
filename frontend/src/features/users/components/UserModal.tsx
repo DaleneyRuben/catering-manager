@@ -14,6 +14,7 @@ const ROLE_OPTIONS: { value: UserRole; label: string }[] = [
   { value: ROLES.ADMIN, label: 'Admin' },
   { value: ROLES.KITCHEN, label: 'Cocina' },
   { value: ROLES.DELIVERY, label: 'Delivery' },
+  { value: ROLES.NUTRITIONIST, label: 'Nutricionista' },
 ];
 
 type CreateProps = {
@@ -142,14 +143,14 @@ export function UserModal(props: Props) {
 
         <div>
           <p className="text-[11px] font-mono uppercase tracking-wider text-muted mb-1.5">Rol</p>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             {ROLE_OPTIONS.map((r) => (
               <Button
                 key={r.value}
                 variant="bare"
                 onClick={() => setRole(r.value)}
                 className={[
-                  'flex-1 border-[1.5px] transition-colors whitespace-nowrap',
+                  'flex-1 min-w-[118px] border-[1.5px] transition-colors whitespace-nowrap',
                   role === r.value
                     ? 'font-semibold bg-olive-800 text-olive-50 border-olive-800'
                     : 'font-medium bg-white text-muted border-rule hover:bg-cream-2',
