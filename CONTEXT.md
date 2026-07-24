@@ -61,10 +61,15 @@ UI labels are neutral Spanish. Each entry: term (code identifier) — definition
   an Admin marks it paid from the Evaluaciones screen. See
   [ADR-004](./docs/adr/004-unpaid-clients-as-full-records.md) for why this is a flag on a real
   record rather than a separate draft entity. _Avoid_: treating this as a `ClientStatus` value
-  shown in the Clientes UI — it never reaches that table or its filters at all.
+  shown in the Clientes UI — it never reaches that table or its filters at all. This exclusion
+  is not just from lists: the client's own detail page is unreachable (404) until an Admin
+  marks the subscription paid — there is exactly one place to act on an unpaid client
+  (the "Pendientes de pago" card) until that happens.
 - **Nutricionista** (role: `nutritionist`) — staff role whose only screen is Evaluaciones. Can
   convert an Appointment into a client and choose whether the subscription is paid, but has no
-  access to Clientes, Planes, or any other admin screen.
+  access to Clientes, Planes, or any other admin screen. Appointments are not owned by a
+  specific Nutricionista user — any user with this role sees and can act on the same shared
+  queue. There is currently no concept of "my appointments" vs. someone else's.
 
 ## Existing core terms (referenced by production)
 

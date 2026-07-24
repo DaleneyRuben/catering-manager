@@ -11,6 +11,16 @@ the entire client/subscription schema and the wizard's validation, plan-pricing,
 history-recording logic a second time, only to migrate that data into a real Client later. The
 full-record approach reuses 100% of the existing creation path unchanged.
 
+This means an unpaid client's row is fully queryable by id the instant it's created, which
+raises an obvious question: does `GET /api/clients/:id` (and the client detail page — pause,
+renew, suspend, history) work on it? We decided no — that lookup requires `paid = true` too,
+returning 404 otherwise, identical to a nonexistent client. The alternative (leave the
+single-record lookup unguarded, only filter list/aggregate queries) would mean an unpaid client
+is fully operable through a side door — pausable, renewable, suspendable — while nominally "not
+existing yet" everywhere else. Blocking it keeps the invariant simple: until an Admin confirms
+payment, the only surface that can touch this record at all is Evaluaciones' own
+"Pendientes de pago" card (mark paid / delete).
+
 The trade-off this creates: every place that lists "active clients" — the dashboard, Producción,
 Entregas, chef reports, and the Clientes table itself — must filter on `paid = true`, not just
 on the existing `deriveClientStatus` rules. This is a single predicate added at the query level
