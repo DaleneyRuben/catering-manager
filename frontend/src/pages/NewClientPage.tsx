@@ -1,11 +1,13 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { format, startOfToday } from 'date-fns';
 import { Button } from '@ui/Button';
 import { StepIndicator } from '@ui/StepIndicator';
 import { useCreateClient } from '@/features/clients/hooks/useCreateClient';
 import { usePlans } from '@/features/plans/hooks/usePlans';
+import { useConvertAppointment } from '@/features/evaluations/hooks/useConvertAppointment';
+import { useNutritionistQueue } from '@/features/evaluations/hooks/useNutritionistQueue';
 import { StepConfirm } from '@/features/clients/components/wizard/StepConfirm';
 import { StepIdentity } from '@/features/clients/components/wizard/StepIdentity';
 import { StepPlan } from '@/features/clients/components/wizard/StepPlan';
@@ -21,13 +23,20 @@ const STEP_FIELDS: Partial<Record<number, (keyof NewClientFormValues)[]>> = {
 
 export function NewClientPage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const appointmentId = searchParams.get('appointmentId');
+  const origen: 'Directo' | 'Cita' = appointmentId ? 'Cita' : 'Directo';
   const { create, isCreating } = useCreateClient();
+  const { convert, isConverting } = useConvertAppointment();
+  const { appointments } = useNutritionistQueue({ enabled: origen === 'Cita' });
+  const appointment = appointments.find((a) => a.id === appointmentId) ?? null;
   const { plans, isLoading: plansLoading } = usePlans();
   const [step, setStep] = useState(1);
   const [restrictions, setRestrictions] = useState<RestrictionsState>({
     restrictions: [],
     underlyingDiseases: [],
   });
+  const [paid, setPaid] = useState<boolean | null>(null);
   const [submitError, setSubmitError] = useState('');
 
   const {
@@ -69,39 +78,51 @@ export function NewClientPage() {
 
   const handleBack = () => setStep((s) => s - 1);
 
+  useEffect(() => {
+    if (!appointment) return;
+    if (!getValues('name')) setValue('name', appointment.name);
+    if (!getValues('phoneNumber')) setValue('phoneNumber', appointment.phone);
+  }, [appointment, getValues, setValue]);
+
   const submit = handleSubmit(async (data) => {
     setSubmitError('');
+    const client = {
+      name: data.name,
+      sex: data.sex,
+      dateOfBirth: data.dateOfBirth,
+      phoneNumber: data.phoneNumber,
+      address: data.address,
+      deliveryZone: data.deliveryZone,
+      delivery: data.delivery,
+      ...(data.nit ? { nit: data.nit } : {}),
+      ...(data.businessName ? { businessName: data.businessName } : {}),
+      underlyingDiseases: restrictions.underlyingDiseases,
+      restrictions: restrictions.restrictions,
+    };
+    const subscription = {
+      planId: data.planId!,
+      contractDate: data.contractDate,
+      startDate: data.startDate,
+      duration: data.duration,
+      discount: data.discount,
+      ...(Object.keys(data.specialInstructions).length > 0
+        ? { specialInstructions: data.specialInstructions }
+        : {}),
+    };
     try {
-      await create(
-        {
-          name: data.name,
-          sex: data.sex,
-          dateOfBirth: data.dateOfBirth,
-          phoneNumber: data.phoneNumber,
-          address: data.address,
-          deliveryZone: data.deliveryZone,
-          delivery: data.delivery,
-          ...(data.nit ? { nit: data.nit } : {}),
-          ...(data.businessName ? { businessName: data.businessName } : {}),
-          underlyingDiseases: restrictions.underlyingDiseases,
-          restrictions: restrictions.restrictions,
-        },
-        {
-          planId: data.planId!,
-          contractDate: data.contractDate,
-          startDate: data.startDate,
-          duration: data.duration,
-          discount: data.discount,
-          ...(Object.keys(data.specialInstructions).length > 0
-            ? { specialInstructions: data.specialInstructions }
-            : {}),
-        },
-      );
-      navigate('/clientes');
+      if (origen === 'Cita' && appointmentId) {
+        await convert(appointmentId, client, { ...subscription, paid: paid! });
+        navigate('/evaluaciones');
+      } else {
+        await create(client, subscription);
+        navigate('/clientes');
+      }
     } catch {
       setSubmitError('Error al guardar el cliente. Intenta de nuevo.');
     }
   });
+
+  const backTarget = origen === 'Cita' ? '/evaluaciones' : '/clientes';
 
   return (
     <div>
@@ -109,7 +130,7 @@ export function NewClientPage() {
         <div className="flex items-center gap-2 font-mono text-[11px] tracking-[.1em] text-faint uppercase mb-3">
           <Button
             variant="bare"
-            onClick={() => navigate('/clientes')}
+            onClick={() => navigate(backTarget)}
             className="text-olive-600 hover:underline"
             style={{ padding: 0, fontSize: 'inherit' }}
           >
@@ -154,6 +175,9 @@ export function NewClientPage() {
               restrictions={restrictions}
               plans={plans}
               submitError={submitError}
+              origen={origen}
+              paid={paid}
+              onPaidChange={setPaid}
             />
           )}
         </div>
@@ -166,7 +190,7 @@ export function NewClientPage() {
               Atrás
             </Button>
           ) : (
-            <Button variant="secondary" onClick={() => navigate('/clientes')} leftIcon="arrow-left">
+            <Button variant="secondary" onClick={() => navigate(backTarget)} leftIcon="arrow-left">
               Cancelar
             </Button>
           )}
@@ -179,7 +203,12 @@ export function NewClientPage() {
                 Siguiente
               </Button>
             ) : (
-              <Button onClick={submit} loading={isCreating} rightIcon="check">
+              <Button
+                onClick={submit}
+                loading={isCreating || isConverting}
+                disabled={origen === 'Cita' && paid === null}
+                rightIcon="check"
+              >
                 Crear cliente
               </Button>
             )}
