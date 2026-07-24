@@ -27,7 +27,7 @@ Language: Spanish (Bolivia), same tone as the rest of the app. Currency `Bs`, da
 
 ## Navigation changes
 
-- Sidebar **Gestión** group gains **"Evaluaciones"** directly after "Clientes", before "Planes". Visible to Admin / Super admin. Icon: calendar-check glyph (or closest Feather/Lucide equivalent), same 17px treatment as other nav icons.
+- Sidebar **Gestión** group gains **"Evaluaciones"** as the last item in the group, after "Planes" (order: Panel, Clientes, Planes, Evaluaciones). Visible to Admin / Super admin. Icon: calendar-check glyph (or closest Feather/Lucide equivalent), same 17px treatment as other nav icons.
 - **Nutricionista** role: sidebar shows **only** "Evaluaciones" (no Panel, no other items). Footer role label reads "NUTRICIONISTA". This screen is her default route after login.
 - Both roles land on the same `Evaluaciones.dc.html` file — model it like `Produccion.dc.html`'s existing `rol` tweakable prop (`"Admin"` / `"Cocina"`) — here `rol`: `"Admin"` / `"Nutricionista"` toggles which layout renders.
 
@@ -44,7 +44,7 @@ Two clearly separated sections, stacked vertically, each with its own sub-headin
 A compact table (same row/hover/border treatment as `Clientes.dc.html`'s table), columns: **Nombre · Teléfono · Fecha · Hora · Acciones**.
 
 - Actions cell: two borderless ghost icon-buttons, gap 4px — pencil (olive `#6b9a3a`, opens edit modal, prefilled) and trash (warm-red `#c97b6a`, opens cancel-confirm modal) — same pair used on `Planes.dc.html` cards.
-- A cita whose date/time has already passed and is still unconverted shows a small muted mono tag "Vencida" in place of the action icons (no edit/cancel — the record is stale, waiting on the nutritionist or destined to be ignored). _(Flagging this as a reasonable default — see Open questions.)_
+- A cita whose date/time has already passed and is still unconverted is dropped from this list entirely (no "Vencida" tag, no stale row) — it simply stops appearing once its date passes.
 - Empty state: centered icon + "Sin citas pendientes" + "Nueva cita" CTA, same pattern as Clientes' empty state.
 
 ### Section 2 — "Pendientes de pago"
@@ -99,17 +99,18 @@ Submitting always creates the full client + subscription record (same as the adm
 ## Usuarios update
 
 - Role list grows from four to five: **Super admin, Admin, Cocina, Delivery, Nutricionista.**
-- Needs a new role color, distinct from the existing three (olive = Super admin/Admin, amber = Cocina, taupe = Delivery). Suggest a cool, calm tone to contrast the warm earthy palette — a muted slate-blue in the `#5c7d8a` family reads clinical/health-adjacent without clashing. Add it as a named token (per project convention, no inline hex) once Claude Design finalizes the exact value.
+- New role color, distinct from the existing three (olive = Super admin/Admin, amber = Cocina, taupe = Delivery): confirmed as slate-blue `#4d7a8a` on `#e0eaee` background. Add it as a named token (per project convention, no inline hex).
 - Role summary cards (count per role) gain a fifth card.
 - Create/Edit user modal's role segmented control gains a fifth option.
 - Row role-tag treatment for Nutricionista uses the new token, same shape as the other three tags.
 
 ---
 
-## Open questions (flag back before finalizing, don't guess further)
+## Resolved decisions
 
-1. **Past-due, unconverted citas**: this prompt assumes they stay visible in "Citas pendientes" with a muted "Vencida" tag and no actions, rather than disappearing. Confirm that's the intended visibility, or say if they should just vanish from the list once their date passes.
-2. **Nutricionista role color**: proposed slate-blue family above is a placeholder suggestion, not a decision — confirm or pick a different hue before it becomes a permanent token.
+1. **Past-due, unconverted citas**: they disappear from "Citas pendientes" once their date passes, rather than staying visible with a "Vencida" tag (superseding this prompt's original default assumption).
+2. **Nutricionista role color**: confirmed as `#4d7a8a` (slate-blue), on `#e0eaee` background — no longer a placeholder.
+3. **Evaluaciones nav position**: confirmed as the last item in the Gestión group, after Planes (superseding this prompt's original "before Planes" placement).
 
 ---
 
