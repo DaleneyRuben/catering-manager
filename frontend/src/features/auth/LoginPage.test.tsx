@@ -104,6 +104,26 @@ describe('LoginPage', () => {
     });
   });
 
+  it('navigates to /evaluaciones for nutritionist role', async () => {
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: true,
+      json: () =>
+        Promise.resolve({
+          token: 'tok',
+          user: { id: 'enc4', username: 'nutri', role: 'nutritionist' },
+        }),
+    }) as jest.Mock;
+
+    renderPage();
+    await userEvent.type(screen.getByLabelText(/usuario/i, { selector: 'input' }), 'nutri');
+    await userEvent.type(screen.getByLabelText(/contraseña/i, { selector: 'input' }), 'secret');
+    await userEvent.click(screen.getByRole('button', { name: 'Ingresar' }));
+
+    await waitFor(() => {
+      expect(mockNavigate).toHaveBeenCalledWith('/evaluaciones', { replace: true });
+    });
+  });
+
   it('shows error message on failed login', async () => {
     global.fetch = jest.fn().mockResolvedValue({
       ok: false,
