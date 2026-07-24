@@ -38,6 +38,7 @@ const ICON_NAMES = [
   'settings',
   'leaf',
   'chevron-down',
+  'dollar-sign',
 ];
 
 const meta: Meta<typeof Icon> = {

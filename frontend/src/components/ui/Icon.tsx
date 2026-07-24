@@ -432,6 +432,12 @@ export function Icon({ name, size = 16, stroke = 1.5, className }: IconProps) {
           <circle cx="19" cy="12" r="1" fill="currentColor" stroke="none" />
         </svg>
       );
+    case 'dollar-sign':
+      return (
+        <svg {...props}>
+          <path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+        </svg>
+      );
     case 'more-vertical':
       return (
         <svg {...props}>
