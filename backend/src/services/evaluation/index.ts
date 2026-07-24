@@ -4,3 +4,6 @@ export { cancelAppointment } from './cancel-appointment';
 export { findPendingForAdmin } from './find-pending-for-admin';
 export { findForNutritionist } from './find-for-nutritionist';
 export { convertAppointment } from './convert-appointment';
+export { markPaid } from './mark-paid';
+export { deletePendingClient } from './delete-pending-client';
+export { findPendingPayment } from './find-pending-payment';
