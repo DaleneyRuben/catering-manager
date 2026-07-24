@@ -18,6 +18,7 @@ export interface Subscription {
   finalizedAt: string | null;
   specialInstructions: Record<string, string>;
   plan: Plan;
+  paid: boolean;
 }
 
 export interface GroupMember {

@@ -1,9 +1,14 @@
-import { PageHeader } from '@ui/PageHeader';
+import { useAuth } from '@/features/auth/AuthContext';
+import { ROLES } from '@/constants/roles';
+import { AdminEvaluationsView } from '@/features/evaluations/components/AdminEvaluationsView';
+import { NutritionistEvaluationsView } from '@/features/evaluations/components/NutritionistEvaluationsView';
 
 export function EvaluacionesPage() {
-  return (
-    <div className="px-4 py-5 lg:px-[44px] lg:py-[34px]">
-      <PageHeader label="Evaluaciones · Nutrición" title="Evaluaciones" />
-    </div>
+  const { user } = useAuth();
+
+  return user?.role === ROLES.NUTRITIONIST ? (
+    <NutritionistEvaluationsView />
+  ) : (
+    <AdminEvaluationsView />
   );
 }

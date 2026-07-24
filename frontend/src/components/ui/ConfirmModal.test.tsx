@@ -93,6 +93,24 @@ describe('ConfirmModal', () => {
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
+  it('renders an olive icon badge and primary confirm button when variant is primary', async () => {
+    render(
+      <ConfirmModal
+        title="Confirmar pago"
+        message="¿Confirmás el pago?"
+        confirmLabel="Confirmar pago"
+        icon="check"
+        variant="primary"
+        onClose={noop}
+        onConfirm={noopAsync}
+      />,
+    );
+    const badge = screen.getByTestId('confirm-modal-icon-badge');
+    expect(badge.className).toContain('bg-ok-bg');
+    const confirmButton = screen.getByRole('button', { name: /confirmar pago/i });
+    expect(confirmButton.className).toContain('bg-olive-700');
+  });
+
   it('disables buttons while loading', async () => {
     const onConfirm = jest.fn(() => new Promise<void>(() => {}));
     render(
