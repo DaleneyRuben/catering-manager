@@ -21,6 +21,7 @@ const ICON_NAMES = [
   'pin',
   'calendar',
   'calendar-x',
+  'calendar-check',
   'cloche',
   'history',
   'info',
