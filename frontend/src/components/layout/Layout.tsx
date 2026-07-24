@@ -29,6 +29,12 @@ const NAV_SECTIONS: NavSection[] = [
       { to: '/', label: 'Panel', icon: 'dashboard', allowedRoles: ADMIN_ROLES },
       { to: '/clientes', label: 'Clientes', icon: 'users', allowedRoles: ADMIN_ROLES },
       { to: '/planes', label: 'Planes', icon: 'plan', allowedRoles: ADMIN_ROLES },
+      {
+        to: '/evaluaciones',
+        label: 'Evaluaciones',
+        icon: 'calendar-check',
+        allowedRoles: [...ADMIN_ROLES, ROLES.NUTRITIONIST],
+      },
     ],
   },
   {
