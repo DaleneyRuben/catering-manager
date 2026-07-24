@@ -20,6 +20,7 @@ describe('UserRoleStats', () => {
     expect(screen.getByText('Admin')).toBeInTheDocument();
     expect(screen.getByText('Cocina')).toBeInTheDocument();
     expect(screen.getByText('Delivery')).toBeInTheDocument();
+    expect(screen.getByText('Nutricionista')).toBeInTheDocument();
   });
 
   it('shows the count of users per role', () => {
@@ -36,5 +37,15 @@ describe('UserRoleStats', () => {
     expect(kitchenCard).toHaveTextContent('2');
     const adminCard = screen.getByText('Admin').closest('div');
     expect(adminCard).toHaveTextContent('1');
+  });
+
+  it('counts nutritionist users separately from other roles', () => {
+    render(
+      <UserRoleStats
+        users={[makeUser({ id: '1', role: 'nutritionist' }), makeUser({ id: '2', role: 'admin' })]}
+      />,
+    );
+    const nutritionistCard = screen.getByText('Nutricionista').closest('div');
+    expect(nutritionistCard).toHaveTextContent('1');
   });
 });
