@@ -47,7 +47,14 @@ UI labels are neutral Spanish. Each entry: term (code identifier) — definition
 
 - **Appointment** (`appointment`, UI: "Cita") — a placeholder record for a prospective client
   (name, phone number, date, time) created by an Admin, awaiting action from a Nutricionista.
-  It is not a client and carries no plan/subscription data until converted.
+  It is not a client and carries no plan/subscription data until converted. Carries a nullable
+  `subscriptionId`, set only at conversion — `null` means still pending. Fecha must be today or
+  later at creation/edit time, but an Appointment does not disappear once its date passes: an
+  unconverted Appointment stays visible (to both the Admin's "Citas pendientes" list and the
+  Nutricionista's queue) indefinitely, until someone actually converts or cancels it — there is
+  no auto-drop and no "Vencida" tag. If the Client/Subscription it produced is later deleted
+  (from "Pendientes de pago"), the Appointment is cascade-deleted with it rather than reverting
+  to pending.
 - **Evaluations** (`evaluations`, UI: "Evaluaciones") — the feature/screen covering the whole
   appointment-to-client workflow: Admins create and manage Appointments; the Nutricionista
   converts them into clients. _Avoid_: naming the module/folder "citas" — that's the entity,
@@ -64,7 +71,12 @@ UI labels are neutral Spanish. Each entry: term (code identifier) — definition
   shown in the Clientes UI — it never reaches that table or its filters at all. This exclusion
   is not just from lists: the client's own detail page is unreachable (404) until an Admin
   marks the subscription paid — there is exactly one place to act on an unpaid client
-  (the "Pendientes de pago" card) until that happens.
+  (the "Pendientes de pago" card) until that happens. Its `plan_assigned` history entry
+  (normally written unconditionally at subscription creation, see below) is deferred rather
+  than skipped: an unpaid conversion writes no history at creation, and "Marcar como pagado"
+  writes the `plan_assigned` entry at that moment instead, using the subscription's data as it
+  stands then. A paid-at-conversion client (whether created directly or via Evaluaciones)
+  still gets `plan_assigned` immediately, unchanged.
 - **Nutricionista** (role: `nutritionist`) — staff role whose only screen is Evaluaciones. Can
   convert an Appointment into a client and choose whether the subscription is paid, but has no
   access to Clientes, Planes, or any other admin screen. Appointments are not owned by a

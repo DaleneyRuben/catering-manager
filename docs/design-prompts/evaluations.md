@@ -44,7 +44,7 @@ Two clearly separated sections, stacked vertically, each with its own sub-headin
 A compact table (same row/hover/border treatment as `Clientes.dc.html`'s table), columns: **Nombre · Teléfono · Fecha · Hora · Acciones**.
 
 - Actions cell: two borderless ghost icon-buttons, gap 4px — pencil (olive `#6b9a3a`, opens edit modal, prefilled) and trash (warm-red `#c97b6a`, opens cancel-confirm modal) — same pair used on `Planes.dc.html` cards.
-- A cita whose date/time has already passed and is still unconverted is dropped from this list entirely (no "Vencida" tag, no stale row) — it simply stops appearing once its date passes.
+- A cita whose date/time has already passed and is still unconverted **stays visible** in this list (no auto-drop, no "Vencida" tag either) — it only leaves once an Admin or the Nutricionista acts on it (converts or cancels it). See "Resolved decisions" below — this supersedes the auto-drop behavior described in an earlier version of this prompt.
 - Empty state: centered icon + "Sin citas pendientes" + "Nueva cita" CTA, same pattern as Clientes' empty state.
 
 ### Section 2 — "Pendientes de pago"
@@ -62,7 +62,7 @@ A responsive card grid (`auto-fill, minmax(300px,1fr)`, gap 20 — same grid as 
 
 All follow the existing shared modal spec (backdrop `rgba(21,42,6,.42)` + 3px blur, card `#faf9f3`, border `#dcd9c8`, radius 16, shadow `0 24px 60px -18px rgba(21,42,6,.4)`).
 
-- **Nueva / Editar cita** — small modal (~420px). Fields: Nombre, Teléfono, Fecha (date), Hora (time). Footer: Cancelar + Crear cita / Guardar cambios.
+- **Nueva / Editar cita** — small modal (~420px). Fields: Nombre, Teléfono, Fecha (date), Hora (time). Fecha must be today or later — past dates are disabled on the picker, same validation spirit as renewal/reactivation start dates elsewhere in the app. Footer: Cancelar + Crear cita / Guardar cambios.
 - **Cancelar cita** — standard confirm modal, red primary "Cancelar cita" (same shape as existing Eliminar confirms).
 - **Marcar como pagado** — confirm modal, olive primary "Confirmar pago". Copy: "¿Confirmás que `<nombre>` pagó su suscripción? Pasará a aparecer en la tabla de Clientes."
 - **Eliminar cliente pendiente** — confirm modal, red primary "Eliminar" (identical shape to the existing client-delete confirm in `ClienteDetalle.dc.html`).
@@ -108,9 +108,13 @@ Submitting always creates the full client + subscription record (same as the adm
 
 ## Resolved decisions
 
-1. **Past-due, unconverted citas**: they disappear from "Citas pendientes" once their date passes, rather than staying visible with a "Vencida" tag (superseding this prompt's original default assumption).
+1. **Past-due, unconverted citas**: they stay visible — in both the Admin's "Citas pendientes" list and the Nutricionista's queue — with no "Vencida" tag, until someone actually acts on them (convert or cancel). Neither view auto-drops a stale row based on date; the Admin's list still only ever shows unconverted citas (that's what "pendientes" means there), while the Nutricionista's queue shows both converted and unconverted — but neither applies a date cutoff anymore. This supersedes an earlier version of this prompt, which had unconverted citas auto-drop once the date passed.
 2. **Nutricionista role color**: confirmed as `#4d7a8a` (slate-blue), on `#e0eaee` background — no longer a placeholder.
 3. **Evaluaciones nav position**: confirmed as the last item in the Gestión group, after Planes (superseding this prompt's original "before Planes" placement).
+4. **Cita/Client link on conversion**: the `Appointment` record persists after conversion, linked to the resulting subscription via a nullable `subscriptionId` (set only at conversion). The Nutricionista's Pendiente/Pagado/No pagado tag reads off this link. Deleting the linked client from "Pendientes de pago" cascade-deletes the Appointment row too — the cita disappears entirely, it does not revert to "Pendiente".
+5. **`plan_assigned` history event on conversion**: no new event type is added for "converted from appointment" — but `plan_assigned` itself becomes conditional on `paid`. A conversion marked paid immediately fires `plan_assigned` at creation, same as a direct client. A conversion marked unpaid fires nothing at creation; `plan_assigned` fires later, at the moment an Admin confirms payment via "Marcar como pagado," using the subscription's data as it stands then.
+6. **Fecha validation on Nueva/Editar cita**: must be today or later — no past dates at creation/edit time (see Modals section above).
+7. **Wizard entry-point routing**: the Nutricionista converts through the _existing_ `/clientes/nuevo` route (not a separate `/evaluaciones/...` route) — that route's allowed roles gain `nutritionist` as a one-off exception, while `/clientes` and `/clientes/:id` remain Admin/Super admin only. The page reads an `appointmentId` query param to switch into `origen: "Cita"` mode (prefill + Step 4 paid toggle); without it, behavior is unchanged for Admin's direct entry (`origen: "Directo"`).
 
 ---
 
