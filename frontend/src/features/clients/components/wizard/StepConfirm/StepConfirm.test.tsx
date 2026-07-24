@@ -1,4 +1,5 @@
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import type { NewClientFormValues, RestrictionsState, Plan } from '@/features/clients/types';
 import { StepConfirm } from './index';
 
@@ -70,4 +71,68 @@ it('does not show submit error when empty', () => {
     />,
   );
   expect(screen.queryByText('Error al guardar')).not.toBeInTheDocument();
+});
+
+it('does not show the payment toggle for the direct entry point', () => {
+  render(
+    <StepConfirm
+      formValues={formValues}
+      restrictions={restrictions}
+      plans={[plan]}
+      submitError=""
+      origen="Directo"
+    />,
+  );
+  expect(screen.queryByText('¿Pagó la suscripción?')).not.toBeInTheDocument();
+});
+
+it('shows the payment toggle when entering from a cita', () => {
+  render(
+    <StepConfirm
+      formValues={formValues}
+      restrictions={restrictions}
+      plans={[plan]}
+      submitError=""
+      origen="Cita"
+      paid={null}
+      onPaidChange={jest.fn()}
+    />,
+  );
+  expect(screen.getByText('¿Pagó la suscripción?')).toBeInTheDocument();
+  expect(screen.getByRole('button', { name: 'Sí' })).toBeInTheDocument();
+  expect(screen.getByRole('button', { name: 'No' })).toBeInTheDocument();
+});
+
+it('calls onPaidChange with true when Sí is clicked', async () => {
+  const onPaidChange = jest.fn();
+  render(
+    <StepConfirm
+      formValues={formValues}
+      restrictions={restrictions}
+      plans={[plan]}
+      submitError=""
+      origen="Cita"
+      paid={null}
+      onPaidChange={onPaidChange}
+    />,
+  );
+  await userEvent.click(screen.getByRole('button', { name: 'Sí' }));
+  expect(onPaidChange).toHaveBeenCalledWith(true);
+});
+
+it('calls onPaidChange with false when No is clicked', async () => {
+  const onPaidChange = jest.fn();
+  render(
+    <StepConfirm
+      formValues={formValues}
+      restrictions={restrictions}
+      plans={[plan]}
+      submitError=""
+      origen="Cita"
+      paid={null}
+      onPaidChange={onPaidChange}
+    />,
+  );
+  await userEvent.click(screen.getByRole('button', { name: 'No' }));
+  expect(onPaidChange).toHaveBeenCalledWith(false);
 });
