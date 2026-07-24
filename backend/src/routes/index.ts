@@ -1,8 +1,10 @@
 import { Router } from 'express';
+import appointmentRoutes from './appointment.routes';
 import authRoutes from './auth.routes';
 import clientRoutes from './client.routes';
 import dashboardRoutes from './dashboard.routes';
 import deliveryRoutes from './delivery.routes';
+import evaluationRoutes from './evaluation.routes';
 import healthRoutes from './health.routes';
 import menuRoutes from './menu.routes';
 import planRoutes from './plan.routes';
@@ -20,6 +22,18 @@ router.use('/health', requireAuth, requireRole(ROLES.SUPER_ADMIN), healthRoutes)
 router.use('/auth', authRoutes);
 
 router.use('/clients', requireAuth, requireRole(ROLES.SUPER_ADMIN, ROLES.ADMIN), clientRoutes);
+router.use(
+  '/appointments',
+  requireAuth,
+  requireRole(ROLES.SUPER_ADMIN, ROLES.ADMIN, ROLES.NUTRITIONIST),
+  appointmentRoutes,
+);
+router.use(
+  '/evaluations',
+  requireAuth,
+  requireRole(ROLES.SUPER_ADMIN, ROLES.ADMIN),
+  evaluationRoutes,
+);
 router.use('/dashboard', requireAuth, requireRole(ROLES.SUPER_ADMIN, ROLES.ADMIN), dashboardRoutes);
 router.use(
   '/delivery',
