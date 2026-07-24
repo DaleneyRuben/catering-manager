@@ -43,6 +43,29 @@ UI labels are neutral Spanish. Each entry: term (code identifier) — definition
   displayed in Spanish ("Móvil" / "Escritorio" / "Tableta"). `null` when the login request
   carried no User-Agent.
 
+## Evaluaciones (appointments → client conversion)
+
+- **Appointment** (`appointment`, UI: "Cita") — a placeholder record for a prospective client
+  (name, phone number, date, time) created by an Admin, awaiting action from a Nutricionista.
+  It is not a client and carries no plan/subscription data until converted.
+- **Evaluations** (`evaluations`, UI: "Evaluaciones") — the feature/screen covering the whole
+  appointment-to-client workflow: Admins create and manage Appointments; the Nutricionista
+  converts them into clients. _Avoid_: naming the module/folder "citas" — that's the entity,
+  not the feature.
+- **Conversion** — turning an Appointment into a full Client + Subscription record, via the
+  same wizard used for a direct client creation, with one addition: an explicit paid/unpaid
+  choice made by the Nutricionista.
+- **Pendiente de pago** (a `paid: false` subscription) — a client created through Evaluations
+  whose subscription was marked unpaid at conversion. Excluded from every active-subscription
+  query — dashboard, production, delivery route, chef reports, and the Clientes table — until
+  an Admin marks it paid from the Evaluaciones screen. See
+  [ADR-004](./docs/adr/004-unpaid-clients-as-full-records.md) for why this is a flag on a real
+  record rather than a separate draft entity. _Avoid_: treating this as a `ClientStatus` value
+  shown in the Clientes UI — it never reaches that table or its filters at all.
+- **Nutricionista** (role: `nutritionist`) — staff role whose only screen is Evaluaciones. Can
+  convert an Appointment into a client and choose whether the subscription is paid, but has no
+  access to Clientes, Planes, or any other admin screen.
+
 ## Existing core terms (referenced by production)
 
 - **Active subscription (for a date)** — a subscription whose `startDate`–`contractEndDate`
