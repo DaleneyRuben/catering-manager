@@ -49,6 +49,24 @@ describe('create', () => {
     expect(Subscription.create).toHaveBeenCalledWith(expect.objectContaining({ discount: 0 }));
   });
 
+  it('defaults paid to true when not provided', async () => {
+    (Client.findByPk as jest.Mock).mockResolvedValue({ id: 1 });
+    (Subscription.create as jest.Mock).mockResolvedValue(mockSubscription);
+
+    await create(1, { planId: 2, startDate, contractDate: today, duration: 20 });
+
+    expect(Subscription.create).toHaveBeenCalledWith(expect.objectContaining({ paid: true }));
+  });
+
+  it('passes paid false through when creating an unpaid subscription', async () => {
+    (Client.findByPk as jest.Mock).mockResolvedValue({ id: 1 });
+    (Subscription.create as jest.Mock).mockResolvedValue({ ...mockSubscription, paid: false });
+
+    await create(1, { planId: 2, startDate, contractDate: today, duration: 20, paid: false });
+
+    expect(Subscription.create).toHaveBeenCalledWith(expect.objectContaining({ paid: false }));
+  });
+
   it('returns null when client does not exist', async () => {
     (Client.findByPk as jest.Mock).mockResolvedValue(null);
 

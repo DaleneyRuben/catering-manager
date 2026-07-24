@@ -41,6 +41,9 @@ class Subscription extends Model {
 
   @Column({ type: DataType.JSONB, allowNull: false, defaultValue: {} })
   declare specialInstructions: Record<string, string>;
+
+  @Column({ type: DataType.BOOLEAN, allowNull: false, defaultValue: true })
+  declare paid: boolean;
 }
 
 export default Subscription;
