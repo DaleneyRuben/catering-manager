@@ -32,3 +32,33 @@ jobs:
       - run: yarn workspace catering-manager-backend lint
       - run: yarn workspace catering-manager-backend typecheck
       - run: yarn workspace catering-manager-backend test --no-coverage
+
+  validate-migrations:
+    name: Validate migrations
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: catering_migrate_check
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'yarn'
+      - run: yarn install --frozen-lockfile
+      - name: Apply migrations to a throwaway database
+        run: yarn workspace catering-manager-backend db:migrate
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/catering_migrate_check
