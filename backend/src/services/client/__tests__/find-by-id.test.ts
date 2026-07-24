@@ -64,4 +64,26 @@ describe('findById', () => {
     expect(findMembers).toHaveBeenCalledWith('tok-1');
     expect(result).toMatchObject({ groupMembers: [{ id: 2, name: 'Ana' }] });
   });
+
+  it('returns null when the latest subscription is unpaid', async () => {
+    (Client.findByPk as jest.Mock).mockResolvedValue({
+      ...mockClient,
+      subscriptions: [{ id: 5, paid: false }],
+    });
+
+    const result = await findById(1);
+
+    expect(result).toBeNull();
+  });
+
+  it('returns client when the latest subscription is paid', async () => {
+    (Client.findByPk as jest.Mock).mockResolvedValue({
+      ...mockClient,
+      subscriptions: [{ id: 5, paid: true }],
+    });
+
+    const result = await findById(1);
+
+    expect(result).toMatchObject({ id: 1, name: 'John Doe' });
+  });
 });
