@@ -3,6 +3,7 @@ export const ROLES = {
   ADMIN: 'admin',
   KITCHEN: 'kitchen',
   DELIVERY: 'delivery',
+  NUTRITIONIST: 'nutritionist',
 } as const;
 
 export type UserRole = (typeof ROLES)[keyof typeof ROLES];

@@ -58,6 +58,17 @@ describe('POST /api/users', () => {
     expect(mockCreate).toHaveBeenCalledWith(validPayload);
   });
 
+  it('creates a user with the nutritionist role and returns 201', async () => {
+    const payload = { username: 'nina', password: 'secret123', role: ROLES.NUTRITIONIST };
+    mockCreate.mockResolvedValue({ id: 3, username: 'nina', role: ROLES.NUTRITIONIST });
+
+    const res = await request(app).post('/api/users').send(payload);
+
+    expect(res.status).toBe(201);
+    expect(res.body.data).toMatchObject({ username: 'nina', role: ROLES.NUTRITIONIST });
+    expect(mockCreate).toHaveBeenCalledWith(payload);
+  });
+
   it('returns 400 when username is missing', async () => {
     const res = await request(app)
       .post('/api/users')
