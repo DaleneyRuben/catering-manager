@@ -48,7 +48,7 @@ describe('findActiveSubscriptionsForDate', () => {
     expect(rows.map((r) => (r.client as { name: string }).name)).toEqual(['Active']);
   });
 
-  it('queries with the date range, finalizedAt, and pausedSince conditions', async () => {
+  it('queries with the date range, finalizedAt, paid, and pausedSince conditions', async () => {
     (Subscription.findAll as jest.Mock).mockResolvedValue([]);
 
     await findActiveSubscriptionsForDate('2026-06-15');
@@ -57,6 +57,7 @@ describe('findActiveSubscriptionsForDate', () => {
     expect(call.where?.startDate).toBeDefined();
     expect(call.where?.contractEndDate).toBeDefined();
     expect(call.where?.finalizedAt).toEqual({ [Symbol.for('is')]: null });
+    expect(call.where?.paid).toBe(true);
     const clientInclude = call.include?.find((i: { model: typeof Client }) => i.model === Client);
     expect(clientInclude?.where).toMatchObject({ pausedSince: null });
   });
