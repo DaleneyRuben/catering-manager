@@ -1,3 +1,5 @@
+import Appointment from '../../models/Appointment';
+
 export type CreateAppointmentDto = {
   name: string;
   phone: string;
@@ -5,6 +7,4 @@ export type CreateAppointmentDto = {
   time: string;
 };
 
-export const createAppointment = async (_data: CreateAppointmentDto) => {
-  throw new Error('not implemented');
-};
+export const createAppointment = (data: CreateAppointmentDto) => Appointment.create(data as never);
