@@ -28,16 +28,17 @@ const makePlan = (overrides = {}) => ({
   ...overrides,
 });
 
-const renderPage = () => {
+const renderPage = (path = '/clientes/nuevo') => {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
   });
   return render(
     <QueryClientProvider client={queryClient}>
-      <MemoryRouter initialEntries={['/clientes/nuevo']}>
+      <MemoryRouter initialEntries={[path]}>
         <Routes>
           <Route path="/clientes/nuevo" element={<NewClientPage />} />
           <Route path="/clientes" element={<div>Clientes list</div>} />
+          <Route path="/evaluaciones" element={<div>Evaluaciones page</div>} />
         </Routes>
       </MemoryRouter>
     </QueryClientProvider>,
@@ -287,5 +288,88 @@ describe('NewClientPage', () => {
     await userEvent.click(screen.getByRole('button', { name: /siguiente/i }));
     await userEvent.click(screen.getByRole('button', { name: /crear/i }));
     await waitFor(() => expect(screen.getByText('Clientes list')).toBeInTheDocument());
+  });
+});
+
+describe('NewClientPage — cita entry point', () => {
+  const appointment = {
+    id: 'appt-1',
+    name: 'Lucía Paz',
+    phone: '77712345',
+    date: '2026-07-25',
+    time: '09:00',
+    subscriptionId: null,
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockGet.mockImplementation((url: string) => {
+      if (url === '/plans') return Promise.resolve([makePlan()]);
+      if (url === '/appointments/nutritionist') return Promise.resolve([appointment]);
+      return Promise.resolve([]);
+    });
+  });
+
+  const renderCitaPage = () => renderPage('/clientes/nuevo?appointmentId=appt-1');
+
+  const fillRestOfStep1 = async () => {
+    await userEvent.selectOptions(screen.getByLabelText(/sexo/i), 'female');
+    fireEvent.change(screen.getByLabelText(/fecha de nacimiento/i), {
+      target: { value: '1970-04-12' },
+    });
+    await userEvent.type(screen.getByLabelText(/dirección/i), 'Av. Centro 142');
+    await userEvent.click(screen.getByRole('button', { name: 'Centro' }));
+    await userEvent.click(screen.getByRole('button', { name: 'La Oliva' }));
+  };
+
+  const navigateCitaToStep4 = async () => {
+    renderCitaPage();
+    await waitFor(() => expect(screen.getByLabelText(/nombre/i)).toHaveValue('Lucía Paz'));
+    await fillRestOfStep1();
+    await userEvent.click(screen.getByRole('button', { name: /siguiente/i }));
+    await userEvent.click(screen.getByRole('button', { name: /siguiente/i }));
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: /completo/i })).toBeInTheDocument(),
+    );
+    await userEvent.click(screen.getByRole('button', { name: /completo/i }));
+    fireEvent.change(screen.getByLabelText(/fecha de inicio/i), {
+      target: { value: '2026-07-27' },
+    });
+    await userEvent.click(screen.getByRole('button', { name: /siguiente/i }));
+  };
+
+  it('prefills nombre and celular from the matching appointment', async () => {
+    renderCitaPage();
+    await waitFor(() => expect(screen.getByLabelText(/nombre/i)).toHaveValue('Lucía Paz'));
+    expect(screen.getByLabelText(/celular/i)).toHaveValue('77712345');
+  });
+
+  it('shows the payment toggle on step 4 and disables Crear cliente until a choice is made', async () => {
+    await navigateCitaToStep4();
+
+    expect(screen.getByText('¿Pagó la suscripción?')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /crear/i })).toBeDisabled();
+
+    await userEvent.click(screen.getByRole('button', { name: 'Sí' }));
+    expect(screen.getByRole('button', { name: /crear/i })).not.toBeDisabled();
+  });
+
+  it('submits via POST /appointments/:id/convert with the paid flag and navigates to /evaluaciones', async () => {
+    mockPost.mockResolvedValueOnce({ client: { id: 'client-9' }, subscription: {} });
+    await navigateCitaToStep4();
+
+    await userEvent.click(screen.getByRole('button', { name: 'No' }));
+    await userEvent.click(screen.getByRole('button', { name: /crear/i }));
+
+    await waitFor(() =>
+      expect(mockPost).toHaveBeenCalledWith(
+        '/appointments/appt-1/convert',
+        expect.objectContaining({
+          client: expect.objectContaining({ name: 'Lucía Paz' }),
+          subscription: expect.objectContaining({ planId: 1, paid: false }),
+        }),
+      ),
+    );
+    await waitFor(() => expect(screen.getByText('Evaluaciones page')).toBeInTheDocument());
   });
 });
