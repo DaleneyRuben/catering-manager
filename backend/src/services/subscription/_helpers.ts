@@ -13,6 +13,7 @@ export const findContractActiveSubscriptions = async (date: string): Promise<Sub
       startDate: { [Op.lte]: date },
       contractEndDate: { [Op.gte]: date },
       finalizedAt: { [Op.is]: null },
+      paid: true,
     },
     include: [{ model: Client, where: { pausedSince: null } }, { model: Plan }],
     order: [['createdAt', 'ASC']],
