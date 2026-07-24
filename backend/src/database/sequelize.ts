@@ -1,5 +1,6 @@
 import pg from 'pg';
 import { Sequelize } from 'sequelize-typescript';
+import Appointment from '../models/Appointment';
 import Client from '../models/Client';
 import ClientHistory from '../models/ClientHistory';
 import LoginEvent from '../models/LoginEvent';
@@ -14,7 +15,7 @@ const sequelize = new Sequelize(process.env.DATABASE_URL as string, {
   dialect: 'postgres',
   dialectModule: pg,
   ...(isProduction ? { dialectOptions: { ssl: { require: true, rejectUnauthorized: true } } } : {}),
-  models: [Client, ClientHistory, LoginEvent, Menu, Plan, Subscription, User],
+  models: [Appointment, Client, ClientHistory, LoginEvent, Menu, Plan, Subscription, User],
   logging: false,
 });
 
