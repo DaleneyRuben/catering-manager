@@ -9,11 +9,25 @@ interface Props {
   message: React.ReactNode;
   confirmLabel: string;
   icon?: string;
+  variant?: 'destructive' | 'primary';
   onClose: () => void;
   onConfirm: () => Promise<void>;
 }
 
-export function ConfirmModal({ title, message, confirmLabel, icon, onClose, onConfirm }: Props) {
+const BADGE_CLASSES = {
+  destructive: 'bg-danger-bg text-danger',
+  primary: 'bg-ok-bg text-ok',
+};
+
+export function ConfirmModal({
+  title,
+  message,
+  confirmLabel,
+  icon,
+  variant = 'destructive',
+  onClose,
+  onConfirm,
+}: Props) {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleConfirm = async () => {
@@ -33,7 +47,7 @@ export function ConfirmModal({ title, message, confirmLabel, icon, onClose, onCo
           <div className="flex items-center gap-3 mb-3.5">
             <span
               data-testid="confirm-modal-icon-badge"
-              className="w-10 h-10 rounded-[11px] bg-danger-bg text-danger flex items-center justify-center shrink-0"
+              className={`w-10 h-10 rounded-[11px] ${BADGE_CLASSES[variant]} flex items-center justify-center shrink-0`}
             >
               <Icon name={icon} size={20} stroke={1.9} />
             </span>
@@ -55,7 +69,7 @@ export function ConfirmModal({ title, message, confirmLabel, icon, onClose, onCo
             Cancelar
           </Button>
           <Button
-            variant="destructive"
+            variant={variant}
             onClick={handleConfirm}
             loading={isLoading}
             style={CONFIRM_DIALOG_STYLE}
