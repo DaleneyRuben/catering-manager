@@ -81,6 +81,14 @@ export const findAll = (filters: FindAllFilters = {}) => {
       break;
   }
 
+  // Unpaid clients (Evaluaciones conversions awaiting payment) must never surface here,
+  // regardless of status filter — only Evaluaciones' own "Pendientes de pago" query can see them.
+  andConditions.push(
+    literal(
+      `NOT EXISTS (SELECT 1 FROM subscriptions ps WHERE ps."clientId" = "Client"."id" AND ps."paid" = false AND ps.id = (SELECT MAX(id) FROM subscriptions ps2 WHERE ps2."clientId" = "Client"."id"))`,
+    ),
+  );
+
   if (filters.q) {
     const q = `%${filters.q}%`;
     andConditions.push({

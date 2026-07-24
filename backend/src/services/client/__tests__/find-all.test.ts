@@ -80,6 +80,34 @@ describe('findAll', () => {
     );
   });
 
+  it('excludes clients whose latest subscription is unpaid, with no status filter', async () => {
+    (Client.findAndCountAll as jest.Mock).mockResolvedValue({ rows: [], count: 0 });
+
+    await findAll();
+
+    const call = (Client.findAndCountAll as jest.Mock).mock.calls[0][0];
+    const andConditions = call.where?.[Symbol.for('and')];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const paidCondition = andConditions?.find((c: any) => c?.val?.includes?.('ps."paid" = false'));
+    expect(paidCondition).toBeDefined();
+  });
+
+  it.each(['active', 'expiring', 'paused', 'ended'])(
+    'excludes clients whose latest subscription is unpaid for status=%s',
+    async (status) => {
+      (Client.findAndCountAll as jest.Mock).mockResolvedValue({ rows: [], count: 0 });
+
+      await findAll({ status });
+
+      const call = (Client.findAndCountAll as jest.Mock).mock.calls[0][0];
+      const andConditions = call.where?.[Symbol.for('and')];
+      const paidCondition = andConditions?.find((c: { val?: string }) =>
+        c?.val?.includes?.('ps."paid" = false'),
+      );
+      expect(paidCondition).toBeDefined();
+    },
+  );
+
   it('orders results by createdAt ascending, oldest first', async () => {
     (Client.findAndCountAll as jest.Mock).mockResolvedValue({ rows: [], count: 0 });
 
