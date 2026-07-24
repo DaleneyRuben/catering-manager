@@ -53,7 +53,12 @@ router.use(
   requireRole(ROLES.SUPER_ADMIN, ROLES.ADMIN),
   subscriptionRoutes,
 );
-router.use('/plans', requireAuth, requireRole(ROLES.SUPER_ADMIN, ROLES.ADMIN), planRoutes);
+router.use(
+  '/plans',
+  requireAuth,
+  requireRole(ROLES.SUPER_ADMIN, ROLES.ADMIN, ROLES.NUTRITIONIST),
+  planRoutes,
+);
 router.use(
   '/production',
   requireAuth,
