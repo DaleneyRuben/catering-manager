@@ -127,6 +127,7 @@ This project uses **GitHub Flow**:
 3. Verify the change end-to-end via Playwright (see "Verify end-to-end before calling it done" below) — this is a hard stop before step 4, not an optional follow-up
 4. Open a PR — CI runs lint, typecheck, frontend tests, and backend tests
 5. Merge to `main` only after CI passes
+6. After merging, delete the feature branch on both local and remote (`git branch -d <branch>` and `git push origin --delete <branch>`) — `gh pr merge --delete-branch` does both in one step
 
 `main` is always production. Never commit directly to `main`.
 
