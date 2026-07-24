@@ -12,7 +12,13 @@ const ROLE_ICONS: Record<UserRole, string> = {
   nutritionist: 'calendar-check',
 };
 
-const ROLE_ORDER: UserRole[] = [ROLES.SUPER_ADMIN, ROLES.ADMIN, ROLES.KITCHEN, ROLES.DELIVERY];
+const ROLE_ORDER: UserRole[] = [
+  ROLES.SUPER_ADMIN,
+  ROLES.ADMIN,
+  ROLES.KITCHEN,
+  ROLES.DELIVERY,
+  ROLES.NUTRITIONIST,
+];
 
 interface Props {
   users: AppUser[];
@@ -20,7 +26,7 @@ interface Props {
 
 export function UserRoleStats({ users }: Props) {
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-[18px] mb-5">
+    <div className="grid grid-cols-[repeat(auto-fill,minmax(155px,1fr))] gap-[18px] mb-5">
       {ROLE_ORDER.map((role) => (
         <div
           key={role}
