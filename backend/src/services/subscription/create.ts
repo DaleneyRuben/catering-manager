@@ -35,21 +35,25 @@ export const create = async (clientId: number, data: CreateSubscriptionDto) => {
   } as const;
   const eventType = data.renewalType ? eventTypeByRenewal[data.renewalType] : 'plan_assigned';
 
-  const plan = await Plan.findByPk(data.planId);
-  await ClientHistory.create({
-    clientId,
-    eventType,
-    occurredAt: new Date(),
-    metadata: {
-      planId: data.planId,
-      planName: plan?.name ?? null,
-      planPrice: plan?.price ?? null,
-      startDate: data.startDate ?? null,
-      duration: data.duration,
-      contractEndDate,
-      discount: data.discount ?? 0,
-    },
-  });
+  // unpaid conversions defer plan_assigned until an admin marks the subscription paid
+  const shouldLogHistory = eventType !== 'plan_assigned' || (data.paid ?? true);
+  if (shouldLogHistory) {
+    const plan = await Plan.findByPk(data.planId);
+    await ClientHistory.create({
+      clientId,
+      eventType,
+      occurredAt: new Date(),
+      metadata: {
+        planId: data.planId,
+        planName: plan?.name ?? null,
+        planPrice: plan?.price ?? null,
+        startDate: data.startDate ?? null,
+        duration: data.duration,
+        contractEndDate,
+        discount: data.discount ?? 0,
+      },
+    });
+  }
 
   if (data.renewalType === 'reactivation') {
     await client.update({ pausedSince: null });
