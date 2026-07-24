@@ -91,6 +91,29 @@ describe('create', () => {
     );
   });
 
+  it('logs plan_assigned history event when creating a paid subscription with no renewalType', async () => {
+    (Client.findByPk as jest.Mock).mockResolvedValue({ id: 1 });
+    (Subscription.create as jest.Mock).mockResolvedValue(mockSubscription);
+    (ClientHistory.create as jest.Mock).mockResolvedValue({});
+    (Plan.findByPk as jest.Mock).mockResolvedValue({ id: 2, name: 'Completo', price: 5000 });
+
+    await create(1, { planId: 2, startDate, contractDate: today, duration: 20 });
+
+    expect(ClientHistory.create).toHaveBeenCalledWith(
+      expect.objectContaining({ clientId: 1, eventType: 'plan_assigned' }),
+    );
+  });
+
+  it('does not log a history event when creating an unpaid subscription with no renewalType', async () => {
+    (Client.findByPk as jest.Mock).mockResolvedValue({ id: 1 });
+    (Subscription.create as jest.Mock).mockResolvedValue({ ...mockSubscription, paid: false });
+    (Plan.findByPk as jest.Mock).mockResolvedValue({ id: 2, name: 'Completo', price: 5000 });
+
+    await create(1, { planId: 2, startDate, contractDate: today, duration: 20, paid: false });
+
+    expect(ClientHistory.create).not.toHaveBeenCalled();
+  });
+
   it('logs plan_renewed history event when renewalType is renewal', async () => {
     (Client.findByPk as jest.Mock).mockResolvedValue({ id: 1 });
     (Subscription.create as jest.Mock).mockResolvedValue(mockSubscription);
