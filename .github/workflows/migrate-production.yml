@@ -1,0 +1,21 @@
+name: Migrate Production Database
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  migrate:
+    name: Run production migrations
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'yarn'
+      - run: yarn install --frozen-lockfile
+      - run: yarn workspace catering-manager-backend db:migrate
+        env:
+          NODE_ENV: production
+          DATABASE_URL: ${{ secrets.PRODUCTION_DATABASE_URL }}
