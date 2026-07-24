@@ -48,6 +48,24 @@ describe('UserModal — create mode', () => {
     });
     await waitFor(() => expect(onClose).toHaveBeenCalled());
   });
+
+  it('calls onSave with nutritionist role when Nutricionista is selected', async () => {
+    const onSave = jest.fn().mockResolvedValue(undefined);
+    const onClose = jest.fn();
+    render(<UserModal mode="create" isSaving={false} onSave={onSave} onClose={onClose} />);
+
+    await userEvent.type(screen.getByLabelText(/^usuario/i, { selector: 'input' }), 'nueva');
+    await userEvent.type(screen.getByLabelText(/^contraseña/i, { selector: 'input' }), 'pass123');
+    await userEvent.click(screen.getByRole('button', { name: 'Nutricionista' }));
+    await userEvent.click(screen.getByRole('button', { name: /crear/i }));
+
+    expect(onSave).toHaveBeenCalledWith({
+      username: 'nueva',
+      password: 'pass123',
+      role: 'nutritionist',
+    });
+    await waitFor(() => expect(onClose).toHaveBeenCalled());
+  });
 });
 
 describe('UserModal — edit mode', () => {
