@@ -25,6 +25,7 @@ export const create = async (clientId: number, data: CreateSubscriptionDto) => {
     duration: data.duration,
     contractEndDate,
     clientId,
+    paid: data.paid ?? true,
     ...(data.specialInstructions ? { specialInstructions: data.specialInstructions } : {}),
   } as never);
 
