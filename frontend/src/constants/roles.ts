@@ -3,6 +3,7 @@ export const ROLES = {
   ADMIN: 'admin',
   KITCHEN: 'kitchen',
   DELIVERY: 'delivery',
+  NUTRITIONIST: 'nutritionist',
 } as const;
 
 export type UserRole = (typeof ROLES)[keyof typeof ROLES];
@@ -17,4 +18,5 @@ export const ROLE_LABELS: Record<UserRole, string> = {
   [ROLES.ADMIN]: 'Admin',
   [ROLES.KITCHEN]: 'Cocina',
   [ROLES.DELIVERY]: 'Delivery',
+  [ROLES.NUTRITIONIST]: 'Nutricionista',
 };

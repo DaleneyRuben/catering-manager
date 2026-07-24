@@ -5,6 +5,7 @@ export const ROLE_CLASSES: Record<UserRole, string> = {
   admin: 'bg-olive-100 text-olive-700',
   kitchen: 'bg-warn-bg text-warn',
   delivery: 'bg-taupe-bg text-taupe',
+  nutritionist: 'bg-nutritionist-bg text-nutritionist',
 };
 
 // Super admin's avatar/icon uses a darker olive than its badge text — every other role reuses ROLE_CLASSES as-is.
