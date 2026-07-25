@@ -46,4 +46,9 @@ describe('useNutritionistQueue', () => {
     const { result } = renderHook(() => useNutritionistQueue(), { wrapper: makeWrapper() });
     expect(result.current.isLoading).toBe(true);
   });
+
+  it('does not fetch when enabled is false', () => {
+    renderHook(() => useNutritionistQueue({ enabled: false }), { wrapper: makeWrapper() });
+    expect(mockGet).not.toHaveBeenCalled();
+  });
 });

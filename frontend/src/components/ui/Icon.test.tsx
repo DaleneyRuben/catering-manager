@@ -94,4 +94,9 @@ describe('Icon', () => {
     const { container } = render(<Icon name="truck" />);
     expect(container.querySelector('svg')).toBeInTheDocument();
   });
+
+  it('renders an svg for dollar-sign', () => {
+    const { container } = render(<Icon name="dollar-sign" />);
+    expect(container.querySelector('svg')).toBeInTheDocument();
+  });
 });
