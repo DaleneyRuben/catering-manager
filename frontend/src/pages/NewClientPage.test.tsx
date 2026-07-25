@@ -347,7 +347,7 @@ describe('NewClientPage — cita entry point', () => {
   it('shows the payment toggle on step 4 and disables Crear cliente until a choice is made', async () => {
     await navigateCitaToStep4();
 
-    expect(screen.getByText('¿Pagó la suscripción?')).toBeInTheDocument();
+    expect(screen.getByText('¿Pagó el servicio?')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /crear/i })).toBeDisabled();
 
     await userEvent.click(screen.getByRole('button', { name: 'Sí' }));
