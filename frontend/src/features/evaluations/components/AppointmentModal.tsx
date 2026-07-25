@@ -6,6 +6,7 @@ import { Modal } from '@ui/Modal';
 import { Button } from '@ui/Button';
 import { Field, inputCls } from '@ui/Field';
 import { DatePickerInput } from '@ui/DatePickerInput';
+import { TimePickerInput } from '@ui/TimePickerInput';
 import { MODAL_CANCEL_STYLE, MODAL_CONFIRM_STYLE } from '@ui/modalButtonStyles';
 import type { Appointment, AppointmentDraft } from '@/features/evaluations/types';
 
@@ -98,12 +99,10 @@ export function AppointmentModal(props: Props) {
         </Field>
 
         <Field label="Hora" htmlFor="am-time" required>
-          <input
+          <TimePickerInput
             id="am-time"
-            type="time"
             value={draft.time}
-            onChange={(e) => setDraft({ ...draft, time: e.target.value })}
-            className={inputCls()}
+            onChange={(time) => setDraft({ ...draft, time })}
           />
         </Field>
 
