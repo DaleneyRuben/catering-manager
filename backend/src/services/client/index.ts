@@ -5,3 +5,4 @@ export { create } from './create';
 export { update } from './update';
 export { finalize } from './finalize';
 export { softDelete } from './soft-delete';
+export { search } from './search';
