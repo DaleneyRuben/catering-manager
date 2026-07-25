@@ -31,6 +31,20 @@ const getAll = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
+const search = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { q } = req.query;
+    if (typeof q !== 'string' || !q) {
+      sendSuccess(res, []);
+      return;
+    }
+    const clients = await clientService.search(q);
+    sendSuccess(res, clients);
+  } catch (err) {
+    next(err);
+  }
+};
+
 const getById = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const client = await clientService.findById(decodeId(req.params.id));
@@ -99,4 +113,13 @@ const setGroupHandler = async (req: Request, res: Response, next: NextFunction) 
   }
 };
 
-export default { create, getAll, getById, update, finalize, remove, setGroup: setGroupHandler };
+export default {
+  create,
+  getAll,
+  getById,
+  update,
+  finalize,
+  remove,
+  setGroup: setGroupHandler,
+  search,
+};

@@ -59,6 +59,47 @@ describe('POST /api/appointments', () => {
 
     expect(res.status).toBe(500);
   });
+
+  it('decodes clientId and passes it to the service in existing-client mode', async () => {
+    (evaluationService.createAppointment as jest.Mock).mockResolvedValue({
+      id: 1,
+      clientId: 5,
+      name: 'Fernando Daleney',
+      phone: '76637732',
+      date: '2026-08-03',
+      time: '09:00',
+    });
+
+    const res = await request(app)
+      .post('/api/appointments')
+      .send({ clientId: encodeId(5), date: '2026-08-03', time: '09:00' });
+
+    expect(res.status).toBe(201);
+    expect(evaluationService.createAppointment).toHaveBeenCalledWith({
+      clientId: 5,
+      date: '2026-08-03',
+      time: '09:00',
+    });
+  });
+
+  it('returns 404 when the linked client does not exist', async () => {
+    (evaluationService.createAppointment as jest.Mock).mockResolvedValue(null);
+
+    const res = await request(app)
+      .post('/api/appointments')
+      .send({ clientId: encodeId(999), date: '2026-08-03', time: '09:00' });
+
+    expect(res.status).toBe(404);
+  });
+
+  it('returns 400 when both clientId and name/phone are provided', async () => {
+    const res = await request(app)
+      .post('/api/appointments')
+      .send({ clientId: encodeId(5), ...validPayload });
+
+    expect(res.status).toBe(400);
+    expect(evaluationService.createAppointment).not.toHaveBeenCalled();
+  });
 });
 
 describe('PATCH /api/appointments/:id', () => {

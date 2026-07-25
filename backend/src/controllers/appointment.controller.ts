@@ -5,7 +5,15 @@ import { decodeId } from '../utils/sqids';
 
 const create = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const appointment = await evaluationService.createAppointment(req.body);
+    const { clientId, ...rest } = req.body;
+    const appointment = await evaluationService.createAppointment({
+      ...rest,
+      ...(clientId !== undefined ? { clientId: decodeId(clientId) } : {}),
+    });
+    if (!appointment) {
+      sendError(res, 'Client not found', 404);
+      return;
+    }
     sendSuccess(res, appointment, 201);
   } catch (err) {
     next(err);

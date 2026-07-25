@@ -7,6 +7,7 @@ import { createClientSchema, updateClientSchema, setGroupSchema } from '../schem
 const router = Router();
 
 router.get('/', clientController.getAll);
+router.get('/search', clientController.search);
 router.get('/:id', clientController.getById);
 router.get('/:id/history', historyController.getByClient);
 router.post('/', validate(createClientSchema), clientController.create);
