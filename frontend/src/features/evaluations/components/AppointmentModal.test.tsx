@@ -12,6 +12,22 @@ const existingAppointment: Appointment = {
   subscriptionId: null,
 };
 
+beforeEach(() => {
+  jest.spyOn(Element.prototype, 'getBoundingClientRect').mockReturnValue({
+    left: 0,
+    right: 100,
+    bottom: 50,
+    top: 0,
+    width: 100,
+    height: 50,
+    x: 0,
+    y: 0,
+    toJSON: jest.fn(),
+  });
+});
+
+afterEach(() => jest.restoreAllMocks());
+
 describe('AppointmentModal — create mode', () => {
   it('renders "Nueva cita" heading', () => {
     render(
@@ -35,7 +51,9 @@ describe('AppointmentModal — create mode', () => {
 
     await userEvent.type(screen.getByLabelText(/nombre/i), 'Ana Pérez');
     await userEvent.type(screen.getByLabelText(/tel[eé]fono/i), '71234567');
-    await userEvent.type(screen.getByLabelText(/hora/i), '09:00');
+    await userEvent.click(screen.getByLabelText(/hora/i));
+    await userEvent.click(screen.getByRole('button', { name: '09' }));
+    await userEvent.click(screen.getByRole('button', { name: '00' }));
     await userEvent.click(screen.getByRole('button', { name: /crear cita/i }));
 
     expect(onSave).toHaveBeenCalledWith(
@@ -68,7 +86,7 @@ describe('AppointmentModal — edit mode', () => {
     expect(screen.getByText('Editar cita')).toBeInTheDocument();
     expect(screen.getByLabelText(/nombre/i)).toHaveValue('Ana Pérez');
     expect(screen.getByLabelText(/tel[eé]fono/i)).toHaveValue('71234567');
-    expect(screen.getByLabelText(/hora/i)).toHaveValue('09:00');
+    expect(screen.getByLabelText(/hora/i)).toHaveTextContent('09:00 AM');
   });
 
   it('calls onSave with the updated draft and then onClose when Guardar cambios is clicked', async () => {
