@@ -14,7 +14,7 @@ export function ConfirmFinalizeModal({
       title="Finalizar plan"
       message={
         <>
-          ¿Seguro que querés finalizar el plan de{' '}
+          ¿Seguro que quieres finalizar el plan de{' '}
           <span className="font-semibold">{clientName}</span>? Esto establece la fecha de fin al día
           de hoy y desactiva al cliente. Esta acción no se puede deshacer.
         </>
