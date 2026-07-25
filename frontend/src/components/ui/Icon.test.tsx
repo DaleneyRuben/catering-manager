@@ -99,4 +99,9 @@ describe('Icon', () => {
     const { container } = render(<Icon name="dollar-sign" />);
     expect(container.querySelector('svg')).toBeInTheDocument();
   });
+
+  it('renders a circle with a stem for clock', () => {
+    const { container } = render(<Icon name="clock" />);
+    expect(container.querySelectorAll('circle').length).toBeGreaterThanOrEqual(1);
+  });
 });

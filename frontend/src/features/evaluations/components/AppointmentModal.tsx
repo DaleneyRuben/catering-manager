@@ -6,6 +6,7 @@ import { Modal } from '@ui/Modal';
 import { Button } from '@ui/Button';
 import { Field, inputCls } from '@ui/Field';
 import { DatePickerInput } from '@ui/DatePickerInput';
+import { TimePickerInput } from '@ui/TimePickerInput';
 import { MODAL_CANCEL_STYLE, MODAL_CONFIRM_STYLE } from '@ui/modalButtonStyles';
 import type { Appointment, AppointmentDraft } from '@/features/evaluations/types';
 
@@ -88,24 +89,24 @@ export function AppointmentModal(props: Props) {
           />
         </Field>
 
-        <Field label="Fecha" htmlFor="am-date" required>
-          <DatePickerInput
-            id="am-date"
-            value={draft.date}
-            onChange={(date) => setDraft({ ...draft, date })}
-            disabled={{ before: startOfToday() }}
-          />
-        </Field>
+        <div className="grid grid-cols-2 gap-4">
+          <Field label="Fecha" htmlFor="am-date" required>
+            <DatePickerInput
+              id="am-date"
+              value={draft.date}
+              onChange={(date) => setDraft({ ...draft, date })}
+              disabled={{ before: startOfToday() }}
+            />
+          </Field>
 
-        <Field label="Hora" htmlFor="am-time" required>
-          <input
-            id="am-time"
-            type="time"
-            value={draft.time}
-            onChange={(e) => setDraft({ ...draft, time: e.target.value })}
-            className={inputCls()}
-          />
-        </Field>
+          <Field label="Hora" htmlFor="am-time" required>
+            <TimePickerInput
+              id="am-time"
+              value={draft.time}
+              onChange={(time) => setDraft({ ...draft, time })}
+            />
+          </Field>
+        </div>
 
         <div className="flex justify-end gap-2.5 mt-1">
           <Button
