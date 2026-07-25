@@ -164,6 +164,70 @@ describe('create', () => {
 
     expect(mockClient.update).toHaveBeenCalledWith({ pausedSince: today });
   });
+
+  it('persists renewalType on the subscription row when provided', async () => {
+    (Client.findByPk as jest.Mock).mockResolvedValue({ id: 1 });
+    (Subscription.create as jest.Mock).mockResolvedValue(mockSubscription);
+    (ClientHistory.create as jest.Mock).mockResolvedValue({});
+
+    await create(1, {
+      planId: 2,
+      startDate,
+      contractDate: today,
+      duration: 20,
+      renewalType: 'reactivation',
+    });
+
+    expect(Subscription.create).toHaveBeenCalledWith(
+      expect.objectContaining({ renewalType: 'reactivation' }),
+    );
+  });
+
+  it('persists renewalType as null when not provided', async () => {
+    (Client.findByPk as jest.Mock).mockResolvedValue({ id: 1 });
+    (Subscription.create as jest.Mock).mockResolvedValue(mockSubscription);
+    (ClientHistory.create as jest.Mock).mockResolvedValue({});
+
+    await create(1, { planId: 2, startDate, contractDate: today, duration: 20 });
+
+    expect(Subscription.create).toHaveBeenCalledWith(
+      expect.objectContaining({ renewalType: null }),
+    );
+  });
+
+  it('does not log a history event when creating an unpaid renewal', async () => {
+    (Client.findByPk as jest.Mock).mockResolvedValue({ id: 1 });
+    (Subscription.create as jest.Mock).mockResolvedValue({ ...mockSubscription, paid: false });
+    (Plan.findByPk as jest.Mock).mockResolvedValue({ id: 2, name: 'Completo', price: 5000 });
+
+    await create(1, {
+      planId: 2,
+      startDate,
+      contractDate: today,
+      duration: 20,
+      renewalType: 'renewal',
+      paid: false,
+    });
+
+    expect(ClientHistory.create).not.toHaveBeenCalled();
+  });
+
+  it('does not log a history event when creating an unpaid reactivation', async () => {
+    (Client.findByPk as jest.Mock).mockResolvedValue({ id: 1, update: jest.fn() });
+    (Subscription.create as jest.Mock).mockResolvedValue({ ...mockSubscription, paid: false });
+    (Plan.findByPk as jest.Mock).mockResolvedValue({ id: 2, name: 'Completo', price: 5000 });
+
+    await create(1, {
+      planId: 2,
+      startDate,
+      contractDate: today,
+      duration: 20,
+      renewalType: 'reactivation',
+      paid: false,
+    });
+
+    expect(ClientHistory.create).not.toHaveBeenCalled();
+  });
 });
 
 describe('create with overlapping prior subscriptions', () => {
