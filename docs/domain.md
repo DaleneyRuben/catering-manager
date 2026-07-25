@@ -199,6 +199,51 @@ Each client's displayed status is derived on read from their latest subscription
 
 ---
 
+## Evaluaciones (Appointments)
+
+An **Appointment** (_Cita_) is a placeholder record for a prospective or returning client — name, phone, date, time — created by an Admin and resolved by a Nutricionista. It carries a nullable `subscriptionId` (set only once resolved) and a nullable `clientId` linking it to a pre-existing client.
+
+### Scheduling an appointment (Admin)
+
+When scheduling, the Admin chooses one of two explicit modes:
+
+- **Cliente nuevo** — free-text name and phone, exactly as today. Resolving this appointment always creates a brand-new client + subscription (a **Conversion**).
+- **Cliente existente** — search an existing client by name or phone (single combined search) and select one. The appointment's `clientId` is set to that client, and its `name`/`phone` fields are copied from the client record and locked (read-only) — not independently editable. Resolving this appointment renews or reactivates that client's plan instead of creating a new one.
+
+As a safety net, if the Admin is in "Cliente nuevo" mode and types a phone number matching an existing client, a non-blocking inline warning appears ("Ya existe un cliente con este número — ¿quisiste buscarlo en su lugar?"). It never blocks submission — phone is not a unique field on Client.
+
+### Appointment visibility and pruning
+
+Both the Admin's "Citas pendientes" list and the Nutricionista's queue only ever show appointments dated today or later — a past appointment, resolved or not, drops out of both views. An unresolved appointment (no `subscriptionId`) whose date has passed is deleted outright the next time either list is read (lazy pruning, the same rolling-window approach already used for `menus` — see Daily Menu Processing — just triggered on read instead of write, since there is no scheduled-job infrastructure in this backend). A resolved appointment past its date is only hidden, never deleted.
+
+The Nutricionista's queue is ordered soonest-first (`date ASC, time ASC`).
+
+### Resolving an appointment (Nutricionista)
+
+The queue shows a distinguishing badge on any appointment linked to an existing client (`clientId` set), so the Nutricionista knows which flow she's entering before clicking:
+
+- **New-client appointment** (no `clientId`) — opens the existing new-client wizard, unchanged: she fills in the remaining details and confirms a plan, and the wizard asks whether the service was paid at this visit ("¿Pagó el servicio?"). Submitting creates the client + subscription and stamps the appointment's `subscriptionId` (a **Conversion**).
+- **Existing-client appointment** (`clientId` set) — opens a dedicated, read-only summary view (name, phone, current status, current plan, contract end date only — never the full client detail page, which the Nutricionista cannot otherwise reach) for that one client. From there she renews or reactivates the client's plan using the same rules an Admin uses from the Clientes screen (see Client Lifecycle), including the same "¿Pagó el servicio?" choice. An Admin-initiated renewal from the Clientes screen has no such choice and is always implicitly paid — the question only appears in this appointment-driven flow. Submitting stamps the appointment's `subscriptionId` with the new subscription, exactly as a Conversion does.
+
+Once an appointment is resolved (`subscriptionId` set) it cannot be resolved again — the only way a resolved appointment reverts to pending is the unpaid rollback below.
+
+### Unpaid resolutions ("Pendientes de pago")
+
+Whether from a Conversion or an appointment-driven renewal, marking the resolution unpaid defers the corresponding history entry (`plan_assigned`, `plan_renewed`, or `reactivated`) until an Admin later marks it paid from the Evaluaciones screen — see History.
+
+If a still-unpaid resolution is instead abandoned (the Admin's "Pendientes de pago" cleanup action):
+
+- **New-client appointment** — the whole client (and its one subscription) is soft-deleted, and the appointment is deleted with it. Nothing else exists to lose.
+- **Existing-client appointment** — only the subscription created by the renewal is soft-deleted; the client, their other subscriptions, and their history are untouched. The appointment reverts to pending (`subscriptionId` cleared) so it reappears in the Nutricionista's queue.
+
+An unpaid subscription normally makes its client's own detail page unreachable (404) until paid — but that block only fires when the unpaid subscription is the client's only one ever. An existing client with any prior subscription stays fully viewable and manageable (pause, renew, suspend) throughout a pending unpaid renewal.
+
+### Nutricionista access
+
+The Nutricionista role can view and resolve appointments in Evaluaciones, and view/act on the dedicated existing-client summary view for a client reached only via an existing-client appointment. She cannot browse the Clientes list, view any client's full detail page, edit client data, pause/finalize/delete a client, or manage delivery groups.
+
+---
+
 ## Client Lifecycle
 
 ### Reactivation
@@ -221,6 +266,8 @@ When an active plan reaches its end date, the client may renew. Renewal rules:
 - Duration is defined by the user in days (no default).
 - A discount may be applied at renewal time.
 - The new `contractEndDate` is calculated from the start date and duration.
+
+A Nutricionista can also perform a renewal or reactivation through Evaluaciones' appointment-driven renewal flow, subject to the same rules above, with one addition: a paid/unpaid choice not present in the Admin-initiated flow (see Evaluaciones (Appointments)).
 
 ### Pause / Resume
 
@@ -299,16 +346,19 @@ History entries are append-only — past records are never overwritten when a pl
 
 Not yet implemented: a dedicated plan-change event (`plan_changed` — date, previous plan, new plan, new cost). The event type is declared but never emitted; changing only the assigned plan on an existing subscription currently records no history entry.
 
+Every history event, regardless of type or who triggered it (Admin or Nutricionista), records the acting user's id and username. A `plan_assigned`, `plan_renewed`, or `reactivated` event originating from Evaluaciones additionally carries the originating appointment's id in its metadata, so provenance survives even if the appointment record itself is later pruned (see Evaluaciones (Appointments)).
+
 ---
 
 ## User Roles
 
-The system has four roles (`super_admin`, `admin`, `kitchen`, `delivery`). Role controls what a user can see and do:
+The system has five roles (`super_admin`, `admin`, `kitchen`, `delivery`, `nutritionist`). Role controls what a user can see and do:
 
 - **super_admin** — full access including user management (Usuarios) and the Health view; both are super_admin-only.
 - **admin** — full access to clients, plans, menus, production, deliveries, reports, and the dashboard; no user management or Health view.
 - **kitchen** — can view the kitchen report and menu; cannot access the kitchen report download on the Reports page (that card is hidden for this role).
 - **delivery** — delivery route view only.
+- **nutritionist** — Evaluaciones only: resolves appointments (conversions for new clients, and renewals/reactivations for existing clients — see Evaluaciones (Appointments)); no access to Clientes, Planes, menus, production, deliveries, reports, dashboard, user management, or Health.
 
 The dashboard's connections widget shows online/offline status for `kitchen` and `delivery` users based on last login time (online = within the last 8 hours, matching the login token's lifetime). The Usuarios table's "Estado" column (Activo/Inactivo) uses the same 8-hour rule, applied to all four roles.
 

@@ -43,45 +43,76 @@ UI labels are neutral Spanish. Each entry: term (code identifier) — definition
   displayed in Spanish ("Móvil" / "Escritorio" / "Tableta"). `null` when the login request
   carried no User-Agent.
 
-## Evaluaciones (appointments → client conversion)
+## Evaluaciones (appointments → client conversion or renewal)
 
-- **Appointment** (`appointment`, UI: "Cita") — a placeholder record for a prospective client
-  (name, phone number, date, time) created by an Admin, awaiting action from a Nutricionista.
-  It is not a client and carries no plan/subscription data until converted. Carries a nullable
-  `subscriptionId`, set only at conversion — `null` means still pending. Fecha must be today or
-  later at creation/edit time, but an Appointment does not disappear once its date passes: an
-  unconverted Appointment stays visible (to both the Admin's "Citas pendientes" list and the
-  Nutricionista's queue) indefinitely, until someone actually converts or cancels it — there is
-  no auto-drop and no "Vencida" tag. If the Client/Subscription it produced is later deleted
-  (from "Pendientes de pago"), the Appointment is cascade-deleted with it rather than reverting
-  to pending.
+- **Appointment** (`appointment`, UI: "Cita") — a placeholder record for a prospective or
+  returning client (name, phone number, date, time) created by an Admin, awaiting action from
+  a Nutricionista. Carries a nullable `subscriptionId`, set only once _resolved_ (see below) —
+  `null` means still pending. Fecha must be today or later at creation/edit time. _Changed_: an
+  Appointment is no longer indefinitely visible once its date passes — both the Admin's "Citas
+  pendientes" list and the Nutricionista's queue only ever show Appointments dated today or
+  later, regardless of resolution status. An unresolved (`pendiente`) Appointment whose date
+  has passed isn't just hidden — it's deleted outright, lazily, the next time either list is
+  read (mirroring how the `menus` table prunes its own rolling window on write instead of read
+  — see docs/domain.md's Daily Menu Processing). A _resolved_ (pagado/no_pagado) Appointment
+  past its date is only hidden, never deleted — its data lives on through the
+  Client/Subscription/history it produced.
+- **New-client appointment** — an Appointment with `clientId` unset. The caller is not yet a
+  Client. Resolving it always creates a brand-new Client + Subscription (see **Conversion**).
+- **Existing-client appointment** — an Appointment whose `clientId` links to a pre-existing
+  Client, set by the Admin at scheduling time via an explicit search-and-select step (never a
+  guess or automatic phone match — the Admin's own knowledge of who's calling is the source of
+  truth). `name`/`phone` on the Appointment are copied from the Client and locked (read-only) —
+  the Client record stays the one source of truth for that contact info. Resolving it renews or
+  reactivates that Client's plan (see **Appointment-driven renewal**) rather than creating a new
+  Client.
+- **Resolving an appointment** — the umbrella action that stamps `subscriptionId` on the
+  Appointment, whichever of the two paths below produced it. An Appointment can't be resolved
+  twice; the only way a resolved Appointment reverts to pending is the existing-client unpaid
+  rollback (see **Pendiente de pago**).
+- **Conversion** — resolving a **new-client appointment**: turning it into a full Client +
+  Subscription record, via the same wizard used for a direct client creation, with one
+  addition: an explicit paid/unpaid choice made by the Nutricionista.
+- **Appointment-driven renewal** — resolving an **existing-client appointment**: the
+  Nutricionista renews or reactivates that Client's plan (same renewal-vs-reactivation choice
+  and rules an Admin uses from the Clientes screen — see docs/domain.md's Client Lifecycle),
+  reached through a dedicated, read-only summary view (name, phone, status, current plan,
+  contract end date only — never the full Clientes detail page) that exists only as a landing
+  spot from this Appointment. Also includes the paid/unpaid choice, same as a Conversion; a
+  direct Admin-initiated renewal has no such choice and is always implicitly paid. See
+  [ADR-006](./docs/adr/006-nutritionist-renewal-view-reuses-full-client-read.md) for why that
+  view's data comes from the same full client-read endpoint an Admin uses, rather than a
+  narrower one.
 - **Evaluations** (`evaluations`, UI: "Evaluaciones") — the feature/screen covering the whole
-  appointment-to-client workflow: Admins create and manage Appointments; the Nutricionista
-  converts them into clients. _Avoid_: naming the module/folder "citas" — that's the entity,
+  appointment-resolution workflow: Admins create and manage Appointments (including linking one
+  to an existing Client); the Nutricionista resolves them, either by Conversion or by
+  Appointment-driven renewal. _Avoid_: naming the module/folder "citas" — that's the entity,
   not the feature.
-- **Conversion** — turning an Appointment into a full Client + Subscription record, via the
-  same wizard used for a direct client creation, with one addition: an explicit paid/unpaid
-  choice made by the Nutricionista.
-- **Pendiente de pago** (a `paid: false` subscription) — a client created through Evaluations
-  whose subscription was marked unpaid at conversion. Excluded from every active-subscription
-  query — dashboard, production, delivery route, chef reports, and the Clientes table — until
-  an Admin marks it paid from the Evaluaciones screen. See
-  [ADR-004](./docs/adr/004-unpaid-clients-as-full-records.md) for why this is a flag on a real
-  record rather than a separate draft entity. _Avoid_: treating this as a `ClientStatus` value
-  shown in the Clientes UI — it never reaches that table or its filters at all. This exclusion
-  is not just from lists: the client's own detail page is unreachable (404) until an Admin
-  marks the subscription paid — there is exactly one place to act on an unpaid client
-  (the "Pendientes de pago" card) until that happens. Its `plan_assigned` history entry
-  (normally written unconditionally at subscription creation, see below) is deferred rather
-  than skipped: an unpaid conversion writes no history at creation, and "Marcar como pagado"
-  writes the `plan_assigned` entry at that moment instead, using the subscription's data as it
-  stands then. A paid-at-conversion client (whether created directly or via Evaluaciones)
-  still gets `plan_assigned` immediately, unchanged.
-- **Nutricionista** (role: `nutritionist`) — staff role whose only screen is Evaluaciones. Can
-  convert an Appointment into a client and choose whether the subscription is paid, but has no
-  access to Clientes, Planes, or any other admin screen. Appointments are not owned by a
-  specific Nutricionista user — any user with this role sees and can act on the same shared
-  queue. There is currently no concept of "my appointments" vs. someone else's.
+- **Pendiente de pago** (a `paid: false` subscription) — a subscription created through
+  Evaluaciones (Conversion or Appointment-driven renewal alike) marked unpaid by the
+  Nutricionista at the moment of resolution. Excluded from every active-subscription query —
+  dashboard, production, delivery route, chef reports, and the Clientes table — until an Admin
+  marks it paid from the Evaluaciones screen. See
+  [ADR-004](./docs/adr/004-unpaid-clients-as-full-records.md) for the original new-client-only
+  design and [ADR-005](./docs/adr/005-unpaid-pattern-extended-to-renewals.md) for how it now
+  extends to renewals — in particular: its `plan_assigned`/`plan_renewed`/`reactivated` history
+  entry (normally written unconditionally at subscription creation) is deferred rather than
+  skipped regardless of which of the three it is; the single-record-lookup block (`GET
+/clients/:id` 404ing while unpaid) only fires when the unpaid subscription is the Client's
+  only one ever, so an existing Client stays fully reachable throughout a pending unpaid
+  renewal; and the "Pendientes de pago" cleanup action itself branches — a still-unpaid
+  **new-client appointment** deletes the whole Client (nothing else exists to lose), while a
+  still-unpaid **existing-client appointment**'s renewal instead only removes the Subscription
+  it created and resets the Appointment back to pending, leaving the Client and its history
+  untouched. _Avoid_: treating this as a `ClientStatus` value shown in the Clientes UI — it
+  never reaches that table or its filters at all.
+- **Nutricionista** (role: `nutritionist`) — staff role whose only screens are Evaluaciones and
+  (via Appointment-driven renewal) the read-only summary view for one specific existing Client,
+  reached only through that Appointment. Cannot browse Clientes, Planes, or any other admin
+  screen, and cannot reach a Client's full detail page. Can resolve an Appointment (Conversion
+  or renewal) and choose whether the resulting subscription is paid. Appointments are not owned
+  by a specific Nutricionista user — any user with this role sees and can act on the same
+  shared queue. There is currently no concept of "my appointments" vs. someone else's.
 
 ## Existing core terms (referenced by production)
 
