@@ -15,6 +15,7 @@ jest.mock('../../../utils/date', () => ({
 }));
 
 const mockClient = { id: 1, name: 'John Doe', pausedSince: null };
+const actor = { userId: 9, username: 'ada' };
 
 describe('update', () => {
   beforeEach(() => jest.clearAllMocks());
@@ -30,7 +31,7 @@ describe('update', () => {
     (Client.findByPk as jest.Mock).mockResolvedValue(mockInstance);
     (ClientHistory.create as jest.Mock).mockResolvedValue({});
 
-    await update(1, { pausedSince });
+    await update(1, { pausedSince }, actor);
 
     expect(ClientHistory.create).toHaveBeenCalledWith(
       expect.objectContaining({ clientId: 1, eventType: 'paused' }),
@@ -47,10 +48,27 @@ describe('update', () => {
     (Client.findByPk as jest.Mock).mockResolvedValue(mockInstance);
     (ClientHistory.create as jest.Mock).mockResolvedValue({});
 
-    await update(1, { pausedSince: null });
+    await update(1, { pausedSince: null }, actor);
 
     expect(ClientHistory.create).toHaveBeenCalledWith(
       expect.objectContaining({ clientId: 1, eventType: 'resumed' }),
+    );
+  });
+
+  it('records the acting user on the history event', async () => {
+    const mockInstance = {
+      id: 1,
+      pausedSince: null,
+      subscriptions: [],
+      update: jest.fn().mockResolvedValue({ ...mockClient, pausedSince: '2026-06-10T12:00:00Z' }),
+    };
+    (Client.findByPk as jest.Mock).mockResolvedValue(mockInstance);
+    (ClientHistory.create as jest.Mock).mockResolvedValue({});
+
+    await update(1, { pausedSince: '2026-06-10T12:00:00Z' }, actor);
+
+    expect(ClientHistory.create).toHaveBeenCalledWith(
+      expect.objectContaining({ userId: 9, username: 'ada' }),
     );
   });
 
@@ -70,7 +88,7 @@ describe('update', () => {
     (Client.findByPk as jest.Mock).mockResolvedValue(mockInstance);
     (ClientHistory.create as jest.Mock).mockResolvedValue({});
 
-    await update(1, { pausedSince: null });
+    await update(1, { pausedSince: null }, actor);
 
     expect(mockSub.update).toHaveBeenCalledWith({ contractEndDate: '2026-06-17' });
   });
@@ -84,7 +102,7 @@ describe('update', () => {
     };
     (Client.findByPk as jest.Mock).mockResolvedValue(mockInstance);
 
-    await update(1, { name: 'Jane Doe' });
+    await update(1, { name: 'Jane Doe' }, actor);
 
     expect(ClientHistory.create).not.toHaveBeenCalled();
   });
@@ -92,7 +110,7 @@ describe('update', () => {
   it('returns null when client not found', async () => {
     (Client.findByPk as jest.Mock).mockResolvedValue(null);
 
-    const result = await update(999, { pausedSince: null });
+    const result = await update(999, { pausedSince: null }, actor);
 
     expect(result).toBeNull();
   });
