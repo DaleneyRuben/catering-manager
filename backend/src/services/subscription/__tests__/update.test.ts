@@ -14,13 +14,15 @@ beforeEach(() => {
   jest.clearAllMocks();
 });
 
+const actor = { userId: 9, username: 'ada' };
+
 describe('update', () => {
   it('updates a subscription and returns the updated instance', async () => {
     const updated = { id: 1, clientId: 1, contractEndDate: '2026-06-30' };
     const mockInstance = { update: jest.fn().mockResolvedValue(updated) };
     (Subscription.findOne as jest.Mock).mockResolvedValue(mockInstance);
 
-    const result = await update(1, 1, { contractEndDate: '2026-06-30' });
+    const result = await update(1, 1, { contractEndDate: '2026-06-30' }, actor);
 
     expect(mockInstance.update).toHaveBeenCalledWith({ contractEndDate: '2026-06-30' });
     expect(result).toMatchObject({ contractEndDate: '2026-06-30' });
@@ -29,7 +31,7 @@ describe('update', () => {
   it('returns null when subscription not found', async () => {
     (Subscription.findOne as jest.Mock).mockResolvedValue(null);
 
-    const result = await update(1, 999, { contractEndDate: '2026-06-30' });
+    const result = await update(1, 999, { contractEndDate: '2026-06-30' }, actor);
 
     expect(result).toBeNull();
   });
@@ -46,7 +48,7 @@ describe('update', () => {
     (Subscription.findOne as jest.Mock).mockResolvedValue(mockInstance);
     (Client.findByPk as jest.Mock).mockResolvedValue({ id: 1, update: jest.fn() });
 
-    await update(1, 1, { startDate: '2026-06-01' });
+    await update(1, 1, { startDate: '2026-06-01' }, actor);
 
     expect(mockInstance.update).toHaveBeenCalledWith(
       expect.objectContaining({ contractEndDate: addDeliveryDays('2026-06-01', 19) }),
@@ -62,10 +64,30 @@ describe('update', () => {
     };
     (Subscription.findOne as jest.Mock).mockResolvedValue(mockInstance);
 
-    await update(1, 1, { suspendedDates: ['2026-06-10'] });
+    await update(1, 1, { suspendedDates: ['2026-06-10'] }, actor);
 
     expect(mockInstance.update).toHaveBeenCalledWith(
       expect.objectContaining({ contractEndDate: addDeliveryDays(baseEnd, 1) }),
+    );
+  });
+
+  it('records the acting user on the plan_assigned history event', async () => {
+    const mockInstance = {
+      clientId: 1,
+      startDate: '2026-05-26',
+      duration: 20,
+      contractEndDate: addDeliveryDays('2026-05-26', 19),
+      suspendedDates: [],
+      update: jest.fn().mockResolvedValue({}),
+    };
+    (Subscription.findOne as jest.Mock).mockResolvedValue(mockInstance);
+    (Client.findByPk as jest.Mock).mockResolvedValue({ id: 1, update: jest.fn() });
+    (ClientHistory.create as jest.Mock).mockResolvedValue({});
+
+    await update(1, 1, { startDate: '2026-06-01' }, actor);
+
+    expect(ClientHistory.create).toHaveBeenCalledWith(
+      expect.objectContaining({ userId: 9, username: 'ada' }),
     );
   });
 
@@ -80,10 +102,28 @@ describe('update', () => {
     (Subscription.findOne as jest.Mock).mockResolvedValue(mockInstance);
     (ClientHistory.create as jest.Mock).mockResolvedValue({});
 
-    await update(1, 1, { suspendedDates: ['2026-06-10'] });
+    await update(1, 1, { suspendedDates: ['2026-06-10'] }, actor);
 
     expect(ClientHistory.create).toHaveBeenCalledWith(
       expect.objectContaining({ clientId: 1, eventType: 'suspended' }),
+    );
+  });
+
+  it('records the acting user on the suspended history event', async () => {
+    const mockInstance = {
+      id: 1,
+      clientId: 1,
+      suspendedDates: [],
+      contractEndDate: '2026-06-22',
+      update: jest.fn().mockResolvedValue({}),
+    };
+    (Subscription.findOne as jest.Mock).mockResolvedValue(mockInstance);
+    (ClientHistory.create as jest.Mock).mockResolvedValue({});
+
+    await update(1, 1, { suspendedDates: ['2026-06-10'] }, actor);
+
+    expect(ClientHistory.create).toHaveBeenCalledWith(
+      expect.objectContaining({ userId: 9, username: 'ada' }),
     );
   });
 
@@ -99,7 +139,7 @@ describe('update', () => {
     (Subscription.findOne as jest.Mock).mockResolvedValue(mockInstance);
     (Client.findByPk as jest.Mock).mockResolvedValue({ id: 1, update: jest.fn() });
 
-    await update(1, 1, { duration: 15 });
+    await update(1, 1, { duration: 15 }, actor);
 
     // base end = 2026-06-04 + 14 delivery days; then +2 for the surviving suspensions
     const baseEnd = addDeliveryDays('2026-06-04', 14);
@@ -121,7 +161,7 @@ describe('update', () => {
     (Subscription.findOne as jest.Mock).mockResolvedValue(mockInstance);
     (Client.findByPk as jest.Mock).mockResolvedValue({ id: 1, update: jest.fn() });
 
-    await update(1, 1, { startDate: '2026-06-01' });
+    await update(1, 1, { startDate: '2026-06-01' }, actor);
 
     // surviving suspensions: ['2026-06-10', '2026-06-11'] (2026-05-27 < new startDate)
     const baseEnd = addDeliveryDays('2026-06-01', 19);
@@ -146,7 +186,7 @@ describe('update', () => {
     (Subscription.findAll as jest.Mock).mockResolvedValue([otherSub]);
     (Client.findByPk as jest.Mock).mockResolvedValue({ id: 1, update: jest.fn() });
 
-    await update(1, 3, { startDate: '2026-07-03' });
+    await update(1, 3, { startDate: '2026-07-03' }, actor);
 
     expect(Subscription.findAll).toHaveBeenCalledWith({
       where: expect.objectContaining({
@@ -175,7 +215,7 @@ describe('update', () => {
     (Subscription.findOne as jest.Mock).mockResolvedValue(mockInstance);
     (Client.findByPk as jest.Mock).mockResolvedValue({ id: 1, update: jest.fn() });
 
-    await update(1, 1, { duration: 30 });
+    await update(1, 1, { duration: 30 }, actor);
 
     expect(Subscription.findAll).not.toHaveBeenCalled();
   });
