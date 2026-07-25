@@ -35,7 +35,7 @@ export function StepConfirm({
           iconBg="bg-nutritionist-bg"
           iconColor="text-nutritionist"
           title="¿Pagó el servicio?"
-          description="Elegí una opción para poder confirmar el alta."
+          description="Elige una opción para poder confirmar el alta."
           className="mb-5"
         >
           <ToggleGroup

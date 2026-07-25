@@ -99,6 +99,7 @@ it('shows the payment toggle when entering from a cita', () => {
     />,
   );
   expect(screen.getByText('¿Pagó el servicio?')).toBeInTheDocument();
+  expect(screen.getByText('Elige una opción para poder confirmar el alta.')).toBeInTheDocument();
   expect(screen.getByRole('button', { name: 'Sí' })).toBeInTheDocument();
   expect(screen.getByRole('button', { name: 'No' })).toBeInTheDocument();
 });
