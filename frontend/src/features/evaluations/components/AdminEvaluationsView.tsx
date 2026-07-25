@@ -115,7 +115,7 @@ export function AdminEvaluationsView() {
           title="Cancelar cita"
           message={
             <>
-              ¿Seguro que querés cancelar la cita de{' '}
+              ¿Seguro que quieres cancelar la cita de{' '}
               <span className="font-semibold">{modal.appointment.name}</span>? Esta acción no se
               puede deshacer.
             </>
@@ -131,7 +131,7 @@ export function AdminEvaluationsView() {
           title="Marcar como pagado"
           message={
             <>
-              ¿Confirmás que <span className="font-semibold">{modal.client.name}</span> pagó su
+              ¿Confirmas que <span className="font-semibold">{modal.client.name}</span> pagó su
               suscripción? Pasará a aparecer en la tabla de Clientes.
             </>
           }
@@ -147,7 +147,7 @@ export function AdminEvaluationsView() {
           title="Eliminar cliente pendiente"
           message={
             <>
-              ¿Seguro que querés eliminar a{' '}
+              ¿Seguro que quieres eliminar a{' '}
               <span className="font-semibold">{modal.client.name}</span>? Se descartará la
               conversión y no aparecerá en Clientes. Esta acción no se puede deshacer.
             </>

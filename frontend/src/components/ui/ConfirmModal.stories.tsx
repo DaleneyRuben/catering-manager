@@ -37,7 +37,7 @@ export const PrimaryVariant: Story = {
   render: () => (
     <ConfirmModal
       title="Confirmar pago"
-      message="¿Confirmás que el cliente pagó su suscripción? Pasará a aparecer en la tabla de Clientes."
+      message="¿Confirmas que el cliente pagó su suscripción? Pasará a aparecer en la tabla de Clientes."
       confirmLabel="Confirmar pago"
       icon="check"
       variant="primary"
