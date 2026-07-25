@@ -1,4 +1,5 @@
 import { Table, Column, Model, DataType, ForeignKey, BelongsTo } from 'sequelize-typescript';
+import Client from './Client';
 import Subscription from './Subscription';
 
 @Table({ tableName: 'appointments', timestamps: true })
@@ -21,6 +22,13 @@ class Appointment extends Model {
 
   @BelongsTo(() => Subscription)
   declare subscription: Subscription;
+
+  @ForeignKey(() => Client)
+  @Column({ type: DataType.INTEGER, allowNull: true, defaultValue: null })
+  declare clientId: number | null;
+
+  @BelongsTo(() => Client)
+  declare client: Client;
 }
 
 export default Appointment;
