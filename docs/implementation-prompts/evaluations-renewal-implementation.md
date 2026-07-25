@@ -6,6 +6,17 @@ Implement the following in the catering-manager repo. Follow `.claude/skills/pro
 
 Business logic in this project may never be changed without asking the user first — everything below has already been explicitly approved, but if you find a case not covered here, stop and ask rather than guessing.
 
+## 0. Branch strategy for this epic
+
+This feature ships via an integration branch, not step-by-step directly onto `main`:
+
+1. Create `feat/evaluaciones-v2` off `main` before starting step 1. This is the integration branch for the whole epic.
+2. Each of the 10 steps below still gets its own branch and its own PR (per this project's usual GitHub Flow / TDD-per-slice convention) — but each step's branch is cut from `feat/evaluaciones-v2`, not from `main`, and each step's PR targets `feat/evaluaciones-v2`, not `main`. CI (lint, typecheck, frontend/backend tests) still runs and must pass on every one of these PRs before merging, with a real merge commit (`gh pr merge --merge --delete-branch`, never `--squash`).
+3. Only after all 10 steps have been merged into `feat/evaluaciones-v2` do the full end-to-end Playwright verification pass described below — run it against the app checked out at `feat/evaluaciones-v2`, exercising every slice together, not just each slice in isolation.
+4. Once that full end-to-end pass is clean, open one final PR from `feat/evaluaciones-v2` → `main`. Wait for CI to pass on that PR too, then merge it the same way (merge commit, never squash), and delete `feat/evaluaciones-v2` both locally and on the remote.
+
+This means nothing from this epic reaches production (`main`) until the entire set of 10 steps has been verified together on the integration branch.
+
 ## 1. Appointment date filtering + pendiente pruning
 
 - `backend/src/services/evaluation/find-for-nutritionist.ts` and `find-pending-for-admin.ts`: add a `date >= today` filter. Applies uniformly regardless of conversion status.
@@ -78,4 +89,6 @@ Every `ClientHistory`-writing call site (pause, resume, suspend, finalize, delet
 7. Step 8 (provenance metadata) — small addition once steps 4 and 7 both exist.
 8. Step 10 (branching unpaid cleanup) — last, since it depends on the existing-client renewal path (step 4) actually existing.
 
-Verify end-to-end via Playwright before opening any PR, per project convention: for the admin side, schedule an appointment in "Cliente existente" mode and confirm the search/lock/warning behavior; for the nutritionist side, open an existing-client appointment, confirm the badge, the dedicated view's content, the paid/unpaid toggle, and that the appointment disappears/updates correctly afterward; cross-check that a client mid-unpaid-renewal is still fully reachable on the admin's `ClientDetailPage` (step 6's fix). Each logical slice should get its own branch/PR per this project's GitHub Flow convention — don't bundle all 10 steps into one PR.
+Each logical slice (step) still gets its own branch/PR per this project's GitHub Flow convention — don't bundle all 10 steps into one PR — but per step 0 above, these PRs target the `feat/evaluaciones-v2` integration branch, not `main` directly.
+
+Verify end-to-end via Playwright on the integration branch before opening the final PR to `main`, per project convention: for the admin side, schedule an appointment in "Cliente existente" mode and confirm the search/lock/warning behavior; for the nutritionist side, open an existing-client appointment, confirm the badge, the dedicated view's content, the paid/unpaid toggle, and that the appointment disappears/updates correctly afterward; cross-check that a client mid-unpaid-renewal is still fully reachable on the admin's `ClientDetailPage` (step 6's fix). Only once all of this passes on `feat/evaluaciones-v2` should the final integration-branch → `main` PR be opened.
