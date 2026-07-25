@@ -1,10 +1,32 @@
 import Appointment from '../../models/Appointment';
+import Client from '../../models/Client';
 
 export type CreateAppointmentDto = {
-  name: string;
-  phone: string;
+  clientId?: number;
+  name?: string;
+  phone?: string;
   date: string;
   time: string;
 };
 
-export const createAppointment = (data: CreateAppointmentDto) => Appointment.create(data as never);
+export const createAppointment = async (data: CreateAppointmentDto) => {
+  if (data.clientId !== undefined) {
+    const client = await Client.findByPk(data.clientId);
+    if (!client) return null;
+
+    return Appointment.create({
+      name: client.name,
+      phone: client.phoneNumber,
+      date: data.date,
+      time: data.time,
+      clientId: data.clientId,
+    } as never);
+  }
+
+  return Appointment.create({
+    name: data.name,
+    phone: data.phone,
+    date: data.date,
+    time: data.time,
+  } as never);
+};
