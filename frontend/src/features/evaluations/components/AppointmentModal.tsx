@@ -89,22 +89,24 @@ export function AppointmentModal(props: Props) {
           />
         </Field>
 
-        <Field label="Fecha" htmlFor="am-date" required>
-          <DatePickerInput
-            id="am-date"
-            value={draft.date}
-            onChange={(date) => setDraft({ ...draft, date })}
-            disabled={{ before: startOfToday() }}
-          />
-        </Field>
+        <div className="grid grid-cols-2 gap-4">
+          <Field label="Fecha" htmlFor="am-date" required>
+            <DatePickerInput
+              id="am-date"
+              value={draft.date}
+              onChange={(date) => setDraft({ ...draft, date })}
+              disabled={{ before: startOfToday() }}
+            />
+          </Field>
 
-        <Field label="Hora" htmlFor="am-time" required>
-          <TimePickerInput
-            id="am-time"
-            value={draft.time}
-            onChange={(time) => setDraft({ ...draft, time })}
-          />
-        </Field>
+          <Field label="Hora" htmlFor="am-time" required>
+            <TimePickerInput
+              id="am-time"
+              value={draft.time}
+              onChange={(time) => setDraft({ ...draft, time })}
+            />
+          </Field>
+        </div>
 
         <div className="flex justify-end gap-2.5 mt-1">
           <Button
