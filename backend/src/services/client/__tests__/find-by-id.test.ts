@@ -86,4 +86,18 @@ describe('findById', () => {
 
     expect(result).toMatchObject({ id: 1, name: 'John Doe' });
   });
+
+  it('returns client when the latest subscription is unpaid but an older subscription exists', async () => {
+    (Client.findByPk as jest.Mock).mockResolvedValue({
+      ...mockClient,
+      subscriptions: [
+        { id: 5, paid: true },
+        { id: 8, paid: false },
+      ],
+    });
+
+    const result = await findById(1);
+
+    expect(result).toMatchObject({ id: 1, name: 'John Doe' });
+  });
 });
