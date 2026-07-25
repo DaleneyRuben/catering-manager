@@ -26,13 +26,15 @@ const subscriptionData = {
   paid: true,
 } as never;
 
+const actor = { userId: 9, username: 'ada' };
+
 describe('convertAppointment', () => {
   beforeEach(() => jest.resetAllMocks());
 
   it('returns null when the appointment does not exist', async () => {
     (Appointment.findByPk as jest.Mock).mockResolvedValue(null);
 
-    const result = await convertAppointment(99, clientData, subscriptionData);
+    const result = await convertAppointment(99, clientData, subscriptionData, actor);
 
     expect(result).toBeNull();
     expect(createClient).not.toHaveBeenCalled();
@@ -41,7 +43,7 @@ describe('convertAppointment', () => {
   it('refuses to convert an already-converted appointment', async () => {
     (Appointment.findByPk as jest.Mock).mockResolvedValue({ id: 1, subscriptionId: 5 });
 
-    const result = await convertAppointment(1, clientData, subscriptionData);
+    const result = await convertAppointment(1, clientData, subscriptionData, actor);
 
     expect(result).toBeNull();
     expect(createClient).not.toHaveBeenCalled();
@@ -53,10 +55,10 @@ describe('convertAppointment', () => {
     (createClient as jest.Mock).mockResolvedValue({ id: 7 });
     (createSubscription as jest.Mock).mockResolvedValue({ id: 3, clientId: 7 });
 
-    const result = await convertAppointment(1, clientData, subscriptionData);
+    const result = await convertAppointment(1, clientData, subscriptionData, actor);
 
     expect(createClient).toHaveBeenCalledWith(clientData);
-    expect(createSubscription).toHaveBeenCalledWith(7, subscriptionData);
+    expect(createSubscription).toHaveBeenCalledWith(7, subscriptionData, actor);
     expect(appointment.update).toHaveBeenCalledWith({ subscriptionId: 3 });
     expect(result).toMatchObject({ client: { id: 7 }, subscription: { id: 3, clientId: 7 } });
   });

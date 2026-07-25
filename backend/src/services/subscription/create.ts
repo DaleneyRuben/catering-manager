@@ -3,11 +3,12 @@ import ClientHistory from '../../models/ClientHistory';
 import Plan from '../../models/Plan';
 import Subscription from '../../models/Subscription';
 import { CreateSubscriptionDto } from '../../schemas/subscription.schema';
+import type { Actor } from '../../types/actor';
 import { appToday, calcContractEndDate } from '../../utils/date';
 import { finalizeOverlappingSubscriptions } from './_helpers';
 
 // TODO: restore contractDate === today validation once backfilling of existing clients is complete
-export const create = async (clientId: number, data: CreateSubscriptionDto) => {
+export const create = async (clientId: number, data: CreateSubscriptionDto, actor: Actor) => {
   const client = await Client.findByPk(clientId);
   if (!client) return null;
 
@@ -53,6 +54,8 @@ export const create = async (clientId: number, data: CreateSubscriptionDto) => {
         contractEndDate,
         discount: data.discount ?? 0,
       },
+      userId: actor.userId,
+      username: actor.username,
     });
   }
 

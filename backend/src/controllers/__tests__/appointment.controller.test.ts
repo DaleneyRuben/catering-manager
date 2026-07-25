@@ -1,3 +1,4 @@
+import type { Request } from 'express';
 import request from 'supertest';
 import app from '../../app';
 import * as evaluationService from '../../services/evaluation';
@@ -6,7 +7,10 @@ import { encodeId } from '../../utils/sqids';
 jest.mock('../../services/evaluation');
 jest.mock('../../database/sequelize', () => ({ __esModule: true, default: { query: jest.fn() } }));
 jest.mock('../../middleware/auth', () => ({
-  requireAuth: (_req: unknown, _res: unknown, next: () => void) => next(),
+  requireAuth: (req: Request, _res: unknown, next: () => void) => {
+    req.user = { userId: 9, username: 'ada', role: 'admin' };
+    next();
+  },
   requireRole: () => (_req: unknown, _res: unknown, next: () => void) => next(),
 }));
 
@@ -212,6 +216,24 @@ describe('POST /api/appointments/:id/convert', () => {
       .send({ client: clientData, subscription: subscriptionData });
 
     expect(res.status).toBe(404);
+  });
+
+  it('forwards the acting user to the service', async () => {
+    (evaluationService.convertAppointment as jest.Mock).mockResolvedValue({
+      client: { id: 7 },
+      subscription: { id: 3 },
+    });
+
+    await request(app)
+      .post(`/api/appointments/${id1}/convert`)
+      .send({ client: clientData, subscription: subscriptionData });
+
+    expect(evaluationService.convertAppointment).toHaveBeenCalledWith(
+      1,
+      expect.anything(),
+      expect.anything(),
+      { userId: 9, username: 'ada' },
+    );
   });
 
   it('returns 400 when client data is invalid', async () => {

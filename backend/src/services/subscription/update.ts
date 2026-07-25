@@ -2,10 +2,16 @@ import Client from '../../models/Client';
 import ClientHistory from '../../models/ClientHistory';
 import Subscription from '../../models/Subscription';
 import { UpdateSubscriptionDto } from '../../schemas/subscription.schema';
+import type { Actor } from '../../types/actor';
 import { addDeliveryDays, subtractDeliveryDays, calcContractEndDate } from '../../utils/date';
 import { finalizeOverlappingSubscriptions } from './_helpers';
 
-export const update = async (clientId: number, id: number, data: UpdateSubscriptionDto) => {
+export const update = async (
+  clientId: number,
+  id: number,
+  data: UpdateSubscriptionDto,
+  actor: Actor,
+) => {
   const subscription = await Subscription.findOne({ where: { id, clientId } });
   if (!subscription) return null;
 
@@ -49,6 +55,8 @@ export const update = async (clientId: number, id: number, data: UpdateSubscript
         duration: newDuration,
         contractEndDate: newContractEndDate,
       },
+      userId: actor.userId,
+      username: actor.username,
     });
 
     return subscription.update(base);
@@ -72,6 +80,8 @@ export const update = async (clientId: number, id: number, data: UpdateSubscript
         eventType: 'suspended',
         occurredAt: new Date(),
         metadata: { dates: added },
+        userId: actor.userId,
+        username: actor.username,
       });
     }
 

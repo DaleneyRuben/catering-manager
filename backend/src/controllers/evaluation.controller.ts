@@ -13,7 +13,10 @@ const getPendingPayment = async (_req: Request, res: Response, next: NextFunctio
 
 const markPaid = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const subscription = await evaluationService.markPaid(decodeId(req.params.id));
+    const subscription = await evaluationService.markPaid(decodeId(req.params.id), {
+      userId: req.user!.userId,
+      username: req.user!.username,
+    });
     if (!subscription) {
       sendError(res, 'Client has no pending payment', 404);
       return;
@@ -26,7 +29,10 @@ const markPaid = async (req: Request, res: Response, next: NextFunction) => {
 
 const remove = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const client = await evaluationService.deletePendingClient(decodeId(req.params.id));
+    const client = await evaluationService.deletePendingClient(decodeId(req.params.id), {
+      userId: req.user!.userId,
+      username: req.user!.username,
+    });
     if (!client) {
       sendError(res, 'Client not found', 404);
       return;
