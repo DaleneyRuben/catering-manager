@@ -8,10 +8,18 @@ export const markPaid = async (clientId: number) => {
 
   await subscription.update({ paid: true });
 
+  const eventTypeByRenewal = {
+    reactivation: 'reactivated',
+    renewal: 'plan_renewed',
+  } as const;
+  const eventType = subscription.renewalType
+    ? eventTypeByRenewal[subscription.renewalType as 'renewal' | 'reactivation']
+    : 'plan_assigned';
+
   const plan = await Plan.findByPk(subscription.planId);
   await ClientHistory.create({
     clientId,
-    eventType: 'plan_assigned',
+    eventType,
     occurredAt: new Date(),
     metadata: {
       planId: subscription.planId,
