@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
+import { format, isValid, parse } from 'date-fns';
 import { Icon } from '@ui/Icon';
 import { inputCls } from '@ui/Field';
 
@@ -13,6 +14,7 @@ interface Props {
 type Meridiem = 'AM' | 'PM';
 type TimeParts = { h12: number; min: number; mer: Meridiem };
 
+const DISPLAY_FORMAT = 'hh:mm a';
 const POPOVER_WIDTH = 232;
 const POPOVER_HEIGHT = 232;
 const HOURS = Array.from({ length: 12 }, (_, i) => i + 1);
@@ -33,6 +35,18 @@ function buildValue(parts: TimeParts): string {
   return `${String(hours).padStart(2, '0')}:${String(parts.min).padStart(2, '0')}`;
 }
 
+function toDisplay(value: string): string {
+  const parts = parseTime(value);
+  if (!parts) return '';
+  return `${String(parts.h12).padStart(2, '0')}:${String(parts.min).padStart(2, '0')} ${parts.mer}`;
+}
+
+// Accepts "hh:mm a" typed text (case-insensitive AM/PM) and returns the 24h "HH:mm" value, or null if invalid
+function parseTyped(text: string): string | null {
+  const parsed = parse(text.trim().toUpperCase(), DISPLAY_FORMAT, new Date());
+  return isValid(parsed) ? format(parsed, 'HH:mm') : null;
+}
+
 function cellCls(selected: boolean): string {
   const base =
     'w-full text-center font-mono text-[12.5px] tabular-nums py-1.5 rounded-[7px] transition-colors';
@@ -43,10 +57,16 @@ function cellCls(selected: boolean): string {
 
 export function TimePickerInput({ id, value, onChange, placeholder = '--:-- --' }: Props) {
   const [open, setOpen] = useState(false);
+  const [inputText, setInputText] = useState(() => toDisplay(value));
   const [popoverStyle, setPopoverStyle] = useState<React.CSSProperties>({});
   const containerRef = useRef<HTMLDivElement>(null);
   const selectedHourRef = useRef<HTMLButtonElement>(null);
   const selectedMinuteRef = useRef<HTMLButtonElement>(null);
+
+  // Sync display text when value is changed externally (e.g. popover selection)
+  useEffect(() => {
+    setInputText(toDisplay(value));
+  }, [value]);
 
   const parts = parseTime(value);
 
@@ -94,22 +114,57 @@ export function TimePickerInput({ id, value, onChange, placeholder = '--:-- --' 
     onChange(buildValue({ ...base, ...patch }));
   };
 
-  const display = parts
-    ? `${String(parts.h12).padStart(2, '0')}:${String(parts.min).padStart(2, '0')} ${parts.mer}`
-    : placeholder;
+  const handleTextChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let val = e.target.value;
+
+    // Auto-insert the colon and meridiem separator only when adding characters
+    if (val.length > inputText.length) {
+      if (val.length === 2 && !val.includes(':')) val += ':';
+      else if (val.length === 5 && val[2] === ':' && !val.slice(3).includes(' ')) val += ' ';
+    }
+
+    setInputText(val);
+
+    if (val === '') {
+      onChange('');
+      return;
+    }
+    if (val.length === 8) {
+      const parsed = parseTyped(val);
+      if (parsed) onChange(parsed);
+    }
+  };
+
+  const handleBlur = () => {
+    if (!inputText) return;
+    const parsed = parseTyped(inputText);
+    if (parsed) {
+      onChange(parsed);
+      setInputText(toDisplay(parsed));
+    } else {
+      // Reset to the last valid value
+      setInputText(toDisplay(value));
+    }
+  };
 
   return (
-    <div ref={containerRef} className="relative">
-      <button
+    <div ref={containerRef} className="relative flex items-center">
+      <input
         id={id}
+        type="text"
+        value={inputText}
+        onChange={handleTextChange}
+        onBlur={handleBlur}
+        placeholder={placeholder}
+        className={`${inputCls()} pr-9`}
+      />
+      <button
         type="button"
+        tabIndex={-1}
         onClick={() => setOpen((o) => !o)}
-        className={`${inputCls()} flex items-center justify-between gap-2 ${
-          parts ? '' : 'text-faint'
-        }`}
+        className="absolute right-2.5 flex items-center text-muted hover:text-ink transition-colors"
       >
-        <span>{display}</span>
-        <Icon name="clock" size={15} stroke={1.7} className="text-muted shrink-0" />
+        <Icon name="clock" size={15} stroke={1.7} />
       </button>
 
       {open &&
