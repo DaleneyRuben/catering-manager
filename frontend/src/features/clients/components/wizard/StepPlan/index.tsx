@@ -21,9 +21,10 @@ interface Props {
   plans: Plan[];
   setValue: UseFormSetValue<NewClientFormValues>;
   isLoading?: boolean;
+  origen?: 'Directo' | 'Cita';
 }
 
-export function StepPlan({ register, control, errors, plans, setValue, isLoading }: Props) {
+export function StepPlan({ register, control, errors, plans, setValue, isLoading, origen }: Props) {
   const startDate = useWatch({ control, name: 'startDate' });
   const duration = useWatch({ control, name: 'duration' });
   const planId = useWatch({ control, name: 'planId' });
@@ -64,6 +65,7 @@ export function StepPlan({ register, control, errors, plans, setValue, isLoading
         errors={errors}
         startDate={startDate}
         duration={duration}
+        origen={origen}
       />
 
       <BillingRow setValue={setValue} price={selectedPlan?.price} discount={discount} />

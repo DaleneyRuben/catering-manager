@@ -3,6 +3,28 @@ import { useForm } from 'react-hook-form';
 import type { NewClientFormValues, Plan } from '@/features/clients/types';
 import { StepPlan } from './index';
 
+jest.mock('@ui/DatePickerInput', () => ({
+  DatePickerInput: ({
+    id,
+    value,
+    onChange,
+    disabled,
+  }: {
+    id?: string;
+    value: string;
+    onChange: (v: string) => void;
+    disabled?: unknown;
+  }) => (
+    <input
+      id={id}
+      type="text"
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      data-disabled={disabled ? JSON.stringify(disabled) : ''}
+    />
+  ),
+}));
+
 const plans: Plan[] = [
   { id: '1', name: 'Completo', price: 1200, meals: ['breakfast', 'lunch'] },
   { id: '2', name: 'Ligero', price: 800, meals: ['lunch'] },
@@ -11,9 +33,11 @@ const plans: Plan[] = [
 function Wrapper({
   availablePlans = plans,
   isLoading = false,
+  origen,
 }: {
   availablePlans?: Plan[];
   isLoading?: boolean;
+  origen?: 'Directo' | 'Cita';
 }) {
   const {
     register,
@@ -38,6 +62,7 @@ function Wrapper({
       plans={availablePlans}
       setValue={setValue}
       isLoading={isLoading}
+      origen={origen}
     />
   );
 }
@@ -67,4 +92,14 @@ it('shows a loading skeleton instead of the plan list while plans are loading', 
   render(<Wrapper availablePlans={[]} isLoading />);
   expect(screen.queryByText('Completo')).not.toBeInTheDocument();
   expect(screen.getAllByTestId('plan-radio-skeleton-row')).toHaveLength(3);
+});
+
+it('does not restrict fecha de inicio when origen is not passed', () => {
+  render(<Wrapper />);
+  expect(screen.getByLabelText(/fecha de inicio/i)).toHaveAttribute('data-disabled', '');
+});
+
+it('forwards origen Cita to restrict fecha de inicio', () => {
+  render(<Wrapper origen="Cita" />);
+  expect(screen.getByLabelText(/fecha de inicio/i)).not.toHaveAttribute('data-disabled', '');
 });

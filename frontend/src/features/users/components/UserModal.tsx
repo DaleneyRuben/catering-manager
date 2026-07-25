@@ -73,7 +73,7 @@ export function UserModal(props: Props) {
         title="Eliminar usuario"
         message={
           <>
-            ¿Seguro que querés eliminar a{' '}
+            ¿Seguro que quieres eliminar a{' '}
             <span className="font-semibold">{(props as EditProps).user.username}</span>? Esta acción
             no se puede deshacer.
           </>

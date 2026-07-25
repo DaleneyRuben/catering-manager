@@ -83,7 +83,7 @@ it('does not show the payment toggle for the direct entry point', () => {
       origen="Directo"
     />,
   );
-  expect(screen.queryByText('¿Pagó la suscripción?')).not.toBeInTheDocument();
+  expect(screen.queryByText('¿Pagó el servicio?')).not.toBeInTheDocument();
 });
 
 it('shows the payment toggle when entering from a cita', () => {
@@ -98,7 +98,8 @@ it('shows the payment toggle when entering from a cita', () => {
       onPaidChange={jest.fn()}
     />,
   );
-  expect(screen.getByText('¿Pagó la suscripción?')).toBeInTheDocument();
+  expect(screen.getByText('¿Pagó el servicio?')).toBeInTheDocument();
+  expect(screen.getByText('Elige una opción para poder confirmar el alta.')).toBeInTheDocument();
   expect(screen.getByRole('button', { name: 'Sí' })).toBeInTheDocument();
   expect(screen.getByRole('button', { name: 'No' })).toBeInTheDocument();
 });

@@ -9,6 +9,13 @@ it('shows the client name in the message', () => {
   expect(screen.getByText(/Ana Torres/)).toBeInTheDocument();
 });
 
+it('shows the message in neutral spanish', () => {
+  render(
+    <ConfirmFinalizeModal clientName="Ana Torres" onClose={jest.fn()} onConfirm={jest.fn()} />,
+  );
+  expect(screen.getByText(/¿Seguro que quieres finalizar el plan de/)).toBeInTheDocument();
+});
+
 it('shows the Finalizar plan title', () => {
   render(
     <ConfirmFinalizeModal clientName="Ana Torres" onClose={jest.fn()} onConfirm={jest.fn()} />,

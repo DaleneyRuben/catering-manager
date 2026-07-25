@@ -167,6 +167,7 @@ export function NewClientPage() {
               plans={plans}
               setValue={setValue}
               isLoading={plansLoading}
+              origen={origen}
             />
           )}
           {step === 4 && (

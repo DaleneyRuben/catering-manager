@@ -106,7 +106,7 @@ export function PlansPage() {
           icon="trash"
           message={
             <>
-              ¿Seguro que querés eliminar el plan{' '}
+              ¿Seguro que quieres eliminar el plan{' '}
               <span className="font-semibold">{deletePlan.name}</span>? Los clientes asignados
               quedarán sin plan. Esta acción no se puede deshacer.
             </>

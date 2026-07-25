@@ -84,6 +84,9 @@ describe('AdminEvaluationsView', () => {
     renderView();
     expect(await screen.findByText('Sin citas pendientes')).toBeInTheDocument();
     expect(screen.getByText('Sin clientes pendientes de pago')).toBeInTheDocument();
+    expect(
+      screen.getByText('Los clientes convertidos aparecerán aquí hasta que confirmes su pago.'),
+    ).toBeInTheDocument();
   });
 
   it('Nueva cita opens a create modal and submits POST /appointments', async () => {
@@ -127,6 +130,7 @@ describe('AdminEvaluationsView', () => {
     await userEvent.click(screen.getByRole('button', { name: /cancelar cita/i }));
     const dialog = await screen.findByRole('dialog');
     expect(within(dialog).getByRole('button', { name: /^cancelar cita$/i })).toBeInTheDocument();
+    expect(within(dialog).getByText(/¿Seguro que quieres cancelar la cita de/)).toBeInTheDocument();
 
     await userEvent.click(within(dialog).getByRole('button', { name: /^cancelar cita$/i }));
 
@@ -142,6 +146,7 @@ describe('AdminEvaluationsView', () => {
     expect(await screen.findByText('Marcar como pagado')).toBeInTheDocument();
 
     const dialog = screen.getByRole('dialog');
+    expect(within(dialog).getByText(/¿Confirmas que/)).toBeInTheDocument();
     await userEvent.click(within(dialog).getByRole('button', { name: /confirmar pago/i }));
 
     await waitFor(() => expect(mockPost).toHaveBeenCalledWith('/evaluations/5/mark-paid'));
@@ -156,6 +161,7 @@ describe('AdminEvaluationsView', () => {
     expect(await screen.findByText('Eliminar cliente pendiente')).toBeInTheDocument();
 
     const dialog = screen.getByRole('dialog');
+    expect(within(dialog).getByText(/¿Seguro que quieres eliminar a/)).toBeInTheDocument();
     await userEvent.click(within(dialog).getByRole('button', { name: /^eliminar$/i }));
 
     await waitFor(() => expect(mockDelete).toHaveBeenCalledWith('/evaluations/5'));
