@@ -2,6 +2,7 @@ import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
+import { addDays, startOfToday } from 'date-fns';
 import api from '@/services/api';
 import { NewClientPage } from '@/pages/NewClientPage';
 
@@ -11,11 +12,21 @@ jest.mock('@ui/DatePickerInput', () => ({
     id,
     value,
     onChange,
+    disabled,
   }: {
     id?: string;
     value: string;
     onChange: (v: string) => void;
-  }) => <input id={id} type="date" value={value} onChange={(e) => onChange(e.target.value)} />,
+    disabled?: unknown;
+  }) => (
+    <input
+      id={id}
+      type="date"
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      data-disabled={disabled ? JSON.stringify(disabled) : ''}
+    />
+  ),
 }));
 const mockGet = api.get as jest.Mock;
 const mockPost = api.post as jest.Mock;
@@ -342,6 +353,23 @@ describe('NewClientPage — cita entry point', () => {
     renderCitaPage();
     await waitFor(() => expect(screen.getByLabelText(/nombre/i)).toHaveValue('Lucía Paz'));
     expect(screen.getByLabelText(/celular/i)).toHaveValue('77712345');
+  });
+
+  it('restricts fecha de inicio to at least 2 days from today on step 3', async () => {
+    renderCitaPage();
+    await waitFor(() => expect(screen.getByLabelText(/nombre/i)).toHaveValue('Lucía Paz'));
+    await fillRestOfStep1();
+    await userEvent.click(screen.getByRole('button', { name: /siguiente/i }));
+    await userEvent.click(screen.getByRole('button', { name: /siguiente/i }));
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: /completo/i })).toBeInTheDocument(),
+    );
+    await userEvent.click(screen.getByRole('button', { name: /completo/i }));
+    const disabled = JSON.parse(
+      screen.getByLabelText(/fecha de inicio/i).getAttribute('data-disabled')!,
+    );
+    const expectedMin = addDays(startOfToday(), 2);
+    expect(new Date(disabled.before).toDateString()).toBe(expectedMin.toDateString());
   });
 
   it('shows the payment toggle on step 4 and disables Crear cliente until a choice is made', async () => {
