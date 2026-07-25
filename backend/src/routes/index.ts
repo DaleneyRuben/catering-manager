@@ -21,7 +21,8 @@ router.use('/health', requireAuth, requireRole(ROLES.SUPER_ADMIN), healthRoutes)
 
 router.use('/auth', authRoutes);
 
-router.use('/clients', requireAuth, requireRole(ROLES.SUPER_ADMIN, ROLES.ADMIN), clientRoutes);
+// per-route role checks live in client.routes.ts: GET /:id also allows nutritionist
+router.use('/clients', requireAuth, clientRoutes);
 router.use(
   '/appointments',
   requireAuth,
@@ -47,12 +48,8 @@ router.use(
   requireRole(ROLES.SUPER_ADMIN, ROLES.ADMIN, ROLES.KITCHEN),
   menuRoutes,
 );
-router.use(
-  '/clients/:clientId/subscriptions',
-  requireAuth,
-  requireRole(ROLES.SUPER_ADMIN, ROLES.ADMIN),
-  subscriptionRoutes,
-);
+// per-route role checks live in subscription.routes.ts: POST / also allows nutritionist
+router.use('/clients/:clientId/subscriptions', requireAuth, subscriptionRoutes);
 router.use(
   '/plans',
   requireAuth,
