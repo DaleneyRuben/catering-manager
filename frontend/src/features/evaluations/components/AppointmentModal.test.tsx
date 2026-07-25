@@ -51,15 +51,23 @@ describe('AppointmentModal — create mode', () => {
 
     await userEvent.type(screen.getByLabelText(/nombre/i), 'Ana Pérez');
     await userEvent.type(screen.getByLabelText(/tel[eé]fono/i), '71234567');
-    await userEvent.click(screen.getByLabelText(/hora/i));
-    await userEvent.click(screen.getByRole('button', { name: '09' }));
-    await userEvent.click(screen.getByRole('button', { name: '00' }));
+    await userEvent.type(screen.getByLabelText(/hora/i), '0900AM');
     await userEvent.click(screen.getByRole('button', { name: /crear cita/i }));
 
     expect(onSave).toHaveBeenCalledWith(
       expect.objectContaining({ name: 'Ana Pérez', phone: '71234567', time: '09:00' }),
     );
     await waitFor(() => expect(onClose).toHaveBeenCalled());
+  });
+
+  it('reverts an invalid typed hora back to empty on blur', async () => {
+    render(
+      <AppointmentModal mode="create" isSaving={false} onSave={jest.fn()} onClose={jest.fn()} />,
+    );
+    const horaInput = screen.getByLabelText(/hora/i);
+    await userEvent.type(horaInput, 'zzzzzzzz');
+    await userEvent.tab();
+    expect(horaInput).toHaveValue('');
   });
 
   it('calls onClose when Cancelar is clicked', async () => {
@@ -86,7 +94,7 @@ describe('AppointmentModal — edit mode', () => {
     expect(screen.getByText('Editar cita')).toBeInTheDocument();
     expect(screen.getByLabelText(/nombre/i)).toHaveValue('Ana Pérez');
     expect(screen.getByLabelText(/tel[eé]fono/i)).toHaveValue('71234567');
-    expect(screen.getByLabelText(/hora/i)).toHaveTextContent('09:00 AM');
+    expect(screen.getByLabelText(/hora/i)).toHaveValue('09:00 AM');
   });
 
   it('calls onSave with the updated draft and then onClose when Guardar cambios is clicked', async () => {
