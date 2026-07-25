@@ -5,7 +5,10 @@ import { decodeId } from '../utils/sqids';
 
 const create = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const subscription = await subscriptionService.create(decodeId(req.params.clientId), req.body);
+    const subscription = await subscriptionService.create(decodeId(req.params.clientId), req.body, {
+      userId: req.user!.userId,
+      username: req.user!.username,
+    });
     if (!subscription) {
       sendError(res, 'Client not found', 404);
       return;
@@ -22,6 +25,7 @@ const update = async (req: Request, res: Response, next: NextFunction) => {
       decodeId(req.params.clientId),
       decodeId(req.params.id),
       req.body,
+      { userId: req.user!.userId, username: req.user!.username },
     );
     if (!subscription) {
       sendError(res, 'Subscription not found', 404);

@@ -63,6 +63,7 @@ const convert = async (req: Request, res: Response, next: NextFunction) => {
       decodeId(req.params.id),
       req.body.client,
       req.body.subscription,
+      { userId: req.user!.userId, username: req.user!.username },
     );
     if (!result) {
       sendError(res, 'Appointment not found or already converted', 404);

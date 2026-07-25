@@ -1,8 +1,9 @@
 import ClientHistory from '../../models/ClientHistory';
 import Plan from '../../models/Plan';
 import Subscription from '../../models/Subscription';
+import type { Actor } from '../../types/actor';
 
-export const markPaid = async (clientId: number) => {
+export const markPaid = async (clientId: number, actor: Actor) => {
   const subscription = await Subscription.findOne({ where: { clientId, paid: false } });
   if (!subscription) return null;
 
@@ -22,6 +23,8 @@ export const markPaid = async (clientId: number) => {
       contractEndDate: subscription.contractEndDate,
       discount: subscription.discount,
     },
+    userId: actor.userId,
+    username: actor.username,
   });
 
   return subscription;

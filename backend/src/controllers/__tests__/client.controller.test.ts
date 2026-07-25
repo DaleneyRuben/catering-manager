@@ -1,3 +1,4 @@
+import type { Request } from 'express';
 import request from 'supertest';
 import app from '../../app';
 import * as clientService from '../../services/client';
@@ -7,7 +8,10 @@ jest.mock('../../services/client');
 jest.mock('../../services/delivery');
 jest.mock('../../database/sequelize', () => ({ __esModule: true, default: { query: jest.fn() } }));
 jest.mock('../../middleware/auth', () => ({
-  requireAuth: (_req: unknown, _res: unknown, next: () => void) => next(),
+  requireAuth: (req: Request, _res: unknown, next: () => void) => {
+    req.user = { userId: 9, username: 'ada', role: 'admin' };
+    next();
+  },
   requireRole: () => (_req: unknown, _res: unknown, next: () => void) => next(),
 }));
 
@@ -162,6 +166,18 @@ describe('PATCH /api/clients/:id', () => {
     expect(res.body.data).toMatchObject({ pausedSince });
   });
 
+  it('forwards the acting user to the service', async () => {
+    const pausedSince = '2026-06-10T12:00:00Z';
+    (clientService.update as jest.Mock).mockResolvedValue({ ...mockClient, pausedSince });
+
+    await request(app).patch(`/api/clients/${id1}`).send({ pausedSince });
+
+    expect(clientService.update).toHaveBeenCalledWith(1, expect.objectContaining({ pausedSince }), {
+      userId: 9,
+      username: 'ada',
+    });
+  });
+
   it('returns 200 when updating identity fields', async () => {
     (clientService.update as jest.Mock).mockResolvedValue({
       ...mockClient,
@@ -280,6 +296,14 @@ describe('POST /api/clients/:id/finalize', () => {
     expect(res.status).toBe(200);
   });
 
+  it('forwards the acting user to the service', async () => {
+    (clientService.finalize as jest.Mock).mockResolvedValue({});
+
+    await request(app).post(`/api/clients/${id1}/finalize`);
+
+    expect(clientService.finalize).toHaveBeenCalledWith(1, { userId: 9, username: 'ada' });
+  });
+
   it('returns 404 when client not found', async () => {
     (clientService.finalize as jest.Mock).mockResolvedValue(null);
 
@@ -304,6 +328,14 @@ describe('DELETE /api/clients/:id', () => {
     const res = await request(app).delete(`/api/clients/${id1}`);
 
     expect(res.status).toBe(200);
+  });
+
+  it('forwards the acting user to the service', async () => {
+    (clientService.softDelete as jest.Mock).mockResolvedValue({});
+
+    await request(app).delete(`/api/clients/${id1}`);
+
+    expect(clientService.softDelete).toHaveBeenCalledWith(1, { userId: 9, username: 'ada' });
   });
 
   it('returns 404 when client not found', async () => {
