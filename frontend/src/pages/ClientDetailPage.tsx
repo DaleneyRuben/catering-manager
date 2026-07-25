@@ -162,7 +162,7 @@ export function ClientDetailPage() {
           title="Eliminar cliente"
           message={
             <>
-              ¿Seguro que querés eliminar a <span className="font-semibold">{client.name}</span>?
+              ¿Seguro que quieres eliminar a <span className="font-semibold">{client.name}</span>?
               Esta acción no se puede deshacer.
             </>
           }

@@ -313,6 +313,14 @@ describe('ClientDetailPage', () => {
     await waitFor(() => expect(mockPost).toHaveBeenCalledWith('/clients/1/finalize', {}));
   });
 
+  it('clicking Eliminar shows a delete confirmation dialog in neutral spanish', async () => {
+    renderPage();
+    fireEvent.click(await screen.findByRole('button', { name: /más acciones/i }));
+    fireEvent.click(screen.getByText('Eliminar'));
+    expect(screen.getByText('Eliminar cliente')).toBeInTheDocument();
+    expect(screen.getByText(/¿Seguro que quieres eliminar a/)).toBeInTheDocument();
+  });
+
   it('switching to Entregas tab shows suspended days count', async () => {
     jest.useFakeTimers().setSystemTime(new Date('2026-06-01T12:00:00'));
     renderPage({
