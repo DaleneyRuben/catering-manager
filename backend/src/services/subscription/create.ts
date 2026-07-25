@@ -26,6 +26,7 @@ export const create = async (clientId: number, data: CreateSubscriptionDto) => {
     contractEndDate,
     clientId,
     paid: data.paid ?? true,
+    renewalType: data.renewalType ?? null,
     ...(data.specialInstructions ? { specialInstructions: data.specialInstructions } : {}),
   } as never);
 
@@ -35,8 +36,8 @@ export const create = async (clientId: number, data: CreateSubscriptionDto) => {
   } as const;
   const eventType = data.renewalType ? eventTypeByRenewal[data.renewalType] : 'plan_assigned';
 
-  // unpaid conversions defer plan_assigned until an admin marks the subscription paid
-  const shouldLogHistory = eventType !== 'plan_assigned' || (data.paid ?? true);
+  // unpaid subscriptions of any kind defer their history write until an admin marks them paid
+  const shouldLogHistory = data.paid ?? true;
   if (shouldLogHistory) {
     const plan = await Plan.findByPk(data.planId);
     await ClientHistory.create({

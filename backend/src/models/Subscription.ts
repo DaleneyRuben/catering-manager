@@ -44,6 +44,9 @@ class Subscription extends Model {
 
   @Column({ type: DataType.BOOLEAN, allowNull: false, defaultValue: true })
   declare paid: boolean;
+
+  @Column({ type: DataType.ENUM('renewal', 'reactivation'), allowNull: true })
+  declare renewalType: 'renewal' | 'reactivation' | null;
 }
 
 export default Subscription;

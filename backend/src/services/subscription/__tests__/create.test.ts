@@ -166,7 +166,7 @@ describe('create', () => {
   });
 
   it('persists renewalType on the subscription row when provided', async () => {
-    (Client.findByPk as jest.Mock).mockResolvedValue({ id: 1 });
+    (Client.findByPk as jest.Mock).mockResolvedValue({ id: 1, update: jest.fn() });
     (Subscription.create as jest.Mock).mockResolvedValue(mockSubscription);
     (ClientHistory.create as jest.Mock).mockResolvedValue({});
 
