@@ -10,6 +10,7 @@ const appointment1: Appointment = {
   date: '2026-08-03',
   time: '09:00',
   subscriptionId: null,
+  clientId: null,
 };
 
 describe('CitasPendientesTable', () => {

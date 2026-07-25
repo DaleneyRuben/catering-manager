@@ -11,6 +11,7 @@ const pendingAppointment: Appointment = {
   time: '09:00',
   subscriptionId: null,
   subscription: null,
+  clientId: null,
 };
 
 const paidAppointment: Appointment = {
@@ -47,6 +48,18 @@ describe('NutritionistAppointmentCard', () => {
     expect(screen.getByText('Pendiente')).toBeInTheDocument();
     const link = screen.getByRole('link');
     expect(link).toHaveAttribute('href', '/clientes/nuevo?appointmentId=1');
+  });
+
+  it('does not show the Cliente existente badge when clientId is not set', () => {
+    renderCard(pendingAppointment);
+    expect(screen.queryByText('Cliente existente')).not.toBeInTheDocument();
+  });
+
+  it('shows a Cliente existente badge and links to the renewal view when clientId is set', () => {
+    renderCard({ ...pendingAppointment, clientId: '5' });
+    expect(screen.getByText('Cliente existente')).toBeInTheDocument();
+    const link = screen.getByRole('link');
+    expect(link).toHaveAttribute('href', '/evaluaciones/citas/1/renovar');
   });
 
   it('renders a static Pagado tag with no link when converted and paid', () => {
