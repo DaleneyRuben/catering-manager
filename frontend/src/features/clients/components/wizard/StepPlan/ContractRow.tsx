@@ -1,5 +1,5 @@
 import { type UseFormRegister, type FieldErrors, type Control, Controller } from 'react-hook-form';
-import { startOfToday, isWeekend, parseISO } from 'date-fns';
+import { startOfToday, isWeekend, parseISO, addDays } from 'date-fns';
 import { Field, inputCls } from '@ui/Field';
 import { DatePickerInput } from '@ui/DatePickerInput';
 import { WizardSectionCard } from '@ui/WizardSectionCard';
@@ -13,12 +13,22 @@ interface Props {
   errors: FieldErrors<NewClientFormValues>;
   startDate: string;
   duration: number;
+  origen?: 'Directo' | 'Cita';
 }
 
-export function ContractRow({ register, control, errors, startDate, duration }: Props) {
+export function ContractRow({
+  register,
+  control,
+  errors,
+  startDate,
+  duration,
+  origen = 'Directo',
+}: Props) {
   const contractEndDate =
     // duration - 1 because startDate counts as day 1
     startDate && duration > 0 ? formatDate(addBusinessDays(startDate, duration - 1)) : '—';
+  // Nutritionists convert citas in person; earliest start is 2 days out, never today or tomorrow
+  const minStartDate = origen === 'Cita' ? addDays(startOfToday(), 2) : undefined;
 
   return (
     <WizardSectionCard icon="calendar" iconBg="bg-cream-2" iconColor="text-muted" title="Contrato">
@@ -66,6 +76,7 @@ export function ContractRow({ register, control, errors, startDate, duration }: 
                 onChange={field.onChange}
                 hasError={!!errors.startDate}
                 endMonth={startOfToday()}
+                disabled={minStartDate ? { before: minStartDate } : undefined}
               />
             </Field>
           )}
