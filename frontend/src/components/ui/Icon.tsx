@@ -438,6 +438,13 @@ export function Icon({ name, size = 16, stroke = 1.5, className }: IconProps) {
           <path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
         </svg>
       );
+    case 'clock':
+      return (
+        <svg {...props}>
+          <circle cx="12" cy="12" r="9" />
+          <path d="M12 7v5l3.2 1.9" />
+        </svg>
+      );
     case 'more-vertical':
       return (
         <svg {...props}>
