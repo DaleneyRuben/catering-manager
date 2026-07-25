@@ -94,6 +94,7 @@ describe('UserModal — edit mode', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Eliminar' }));
     expect(screen.getByText('Eliminar usuario')).toBeInTheDocument();
     expect(screen.getByText(/no se puede deshacer/i)).toBeInTheDocument();
+    expect(screen.getByText(/¿Seguro que quieres eliminar a/)).toBeInTheDocument();
   });
 
   it('returns to the edit form when the confirmation dialog is cancelled', async () => {
