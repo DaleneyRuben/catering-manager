@@ -6,6 +6,7 @@ export interface Appointment {
   time: string;
   subscriptionId: string | null;
   subscription?: { paid: boolean } | null;
+  clientId: string | null;
 }
 
 export interface AppointmentDraft {
