@@ -33,7 +33,7 @@ export const login = async (
     lastBrowser: device.browser,
   });
 
-  const token = signToken({ userId: user.id as number, role: user.role });
+  const token = signToken({ userId: user.id as number, username: user.username, role: user.role });
   return {
     token,
     user: { id: encodeId(user.id as number), username: user.username, role: user.role },

@@ -5,6 +5,7 @@ import { getSecret } from './_helpers';
 
 export type TokenPayload = {
   userId: number;
+  username: string;
   role: UserRole;
 };
 
