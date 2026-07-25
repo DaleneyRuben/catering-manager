@@ -32,15 +32,25 @@ export function NutritionistAppointmentCard({ appointment }: Props) {
   );
 
   if (status === 'pendiente') {
+    const isExistingClient = !!appointment.clientId;
+    const to = isExistingClient
+      ? `/evaluaciones/citas/${appointment.id}/renovar`
+      : `/clientes/nuevo?appointmentId=${appointment.id}`;
+
     return (
       <Link
-        to={`/clientes/nuevo?appointmentId=${appointment.id}`}
+        to={to}
         className={`${CARD_BASE} block cursor-pointer hover:border-olive-200 hover:shadow-[var(--shadow-card-hover)] hover:-translate-y-0.5`}
       >
+        {isExistingClient && (
+          <span className="font-mono text-[9px] font-bold tracking-[.1em] uppercase text-white bg-olive-700 rounded-full px-2 py-0.5 inline-block mb-2">
+            Cliente existente
+          </span>
+        )}
         {header}
         <div className="flex items-center gap-[7px] mt-[18px] text-[12.5px] font-semibold text-ok">
           <Icon name="stethoscope" size={15} stroke={1.9} />
-          Convertir a cliente
+          {isExistingClient ? 'Renovar plan' : 'Convertir a cliente'}
           <Icon name="arrow-right" size={15} stroke={2} className="-ml-0.5" />
         </div>
       </Link>

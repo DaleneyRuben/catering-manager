@@ -16,6 +16,7 @@ const appointment1 = {
   date: '2026-06-25',
   time: '09:00',
   subscriptionId: null,
+  clientId: null,
   subscription: null,
 };
 

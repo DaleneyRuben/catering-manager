@@ -310,6 +310,7 @@ describe('NewClientPage — cita entry point', () => {
     date: '2026-07-25',
     time: '09:00',
     subscriptionId: null,
+    clientId: null,
   };
 
   beforeEach(() => {
