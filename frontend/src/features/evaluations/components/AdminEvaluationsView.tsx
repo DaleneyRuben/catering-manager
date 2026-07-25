@@ -80,7 +80,7 @@ export function AdminEvaluationsView() {
                 Sin clientes pendientes de pago
               </p>
               <p className="text-[13.5px] text-faint max-w-[340px] leading-[1.5]">
-                Los clientes convertidos aparecerán acá hasta que confirmes su pago.
+                Los clientes convertidos aparecerán aquí hasta que confirmes su pago.
               </p>
             </div>
           ) : (

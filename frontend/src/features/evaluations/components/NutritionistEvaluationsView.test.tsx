@@ -60,5 +60,8 @@ describe('NutritionistEvaluationsView', () => {
     setupMocks([]);
     renderView();
     expect(await screen.findByText('Sin citas asignadas')).toBeInTheDocument();
+    expect(
+      screen.getByText('Cuando se agenden evaluaciones aparecerán aquí, en orden cronológico.'),
+    ).toBeInTheDocument();
   });
 });

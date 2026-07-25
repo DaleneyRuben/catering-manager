@@ -84,6 +84,9 @@ describe('AdminEvaluationsView', () => {
     renderView();
     expect(await screen.findByText('Sin citas pendientes')).toBeInTheDocument();
     expect(screen.getByText('Sin clientes pendientes de pago')).toBeInTheDocument();
+    expect(
+      screen.getByText('Los clientes convertidos aparecerán aquí hasta que confirmes su pago.'),
+    ).toBeInTheDocument();
   });
 
   it('Nueva cita opens a create modal and submits POST /appointments', async () => {

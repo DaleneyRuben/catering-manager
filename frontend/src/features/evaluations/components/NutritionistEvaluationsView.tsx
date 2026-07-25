@@ -17,7 +17,7 @@ export function NutritionistEvaluationsView() {
           </span>
           <p className="font-serif font-semibold text-[22px] text-ink-2">Sin citas asignadas</p>
           <p className="text-[13.5px] text-faint max-w-[320px] leading-[1.5]">
-            Cuando se agenden evaluaciones aparecerán acá, en orden cronológico.
+            Cuando se agenden evaluaciones aparecerán aquí, en orden cronológico.
           </p>
         </div>
       ) : (
