@@ -2,7 +2,7 @@
 
 > Follow-up to [`evaluations.md`](./evaluations.md) — read that prompt first, it's still the base spec for the Evaluaciones screen, the new-client wizard entry point, and the Usuarios role update. This prompt only covers what's **new or changed** on top of it. Do not re-derive the base screen from scratch; treat this as a diff.
 >
-> See [`CONTEXT.md`](../../CONTEXT.md) for the updated glossary, and [`docs/adr/005-unpaid-pattern-extended-to-renewals.md`](../adr/005-unpaid-pattern-extended-to-renewals.md) / [`docs/adr/006-nutritionist-renewal-view-reuses-full-client-read.md`](../adr/006-nutritionist-renewal-view-reuses-full-client-read.md) for the data-model decisions behind this flow. Implementation work breakdown lives in [`evaluations-renewal-implementation.md`](./evaluations-renewal-implementation.md).
+> See [`CONTEXT.md`](../../CONTEXT.md) for the updated glossary, and [`docs/adr/005-unpaid-pattern-extended-to-renewals.md`](../adr/005-unpaid-pattern-extended-to-renewals.md) / [`docs/adr/006-nutritionist-renewal-view-reuses-full-client-read.md`](../adr/006-nutritionist-renewal-view-reuses-full-client-read.md) for the data-model decisions behind this flow. Implementation work breakdown lives in [`evaluations-renewal-implementation.md`](../implementation-prompts/evaluations-renewal-implementation.md).
 
 ## What's being added
 
