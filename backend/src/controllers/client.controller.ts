@@ -60,7 +60,10 @@ const getById = async (req: Request, res: Response, next: NextFunction) => {
 
 const update = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const client = await clientService.update(decodeId(req.params.id), req.body);
+    const client = await clientService.update(decodeId(req.params.id), req.body, {
+      userId: req.user!.userId,
+      username: req.user!.username,
+    });
     if (!client) {
       sendError(res, 'Client not found', 404);
       return;
@@ -73,7 +76,10 @@ const update = async (req: Request, res: Response, next: NextFunction) => {
 
 const finalize = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const client = await clientService.finalize(decodeId(req.params.id));
+    const client = await clientService.finalize(decodeId(req.params.id), {
+      userId: req.user!.userId,
+      username: req.user!.username,
+    });
     if (!client) {
       sendError(res, 'Client not found', 404);
       return;
@@ -86,7 +92,10 @@ const finalize = async (req: Request, res: Response, next: NextFunction) => {
 
 const remove = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const client = await clientService.softDelete(decodeId(req.params.id));
+    const client = await clientService.softDelete(decodeId(req.params.id), {
+      userId: req.user!.userId,
+      username: req.user!.username,
+    });
     if (!client) {
       sendError(res, 'Client not found', 404);
       return;

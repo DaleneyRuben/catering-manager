@@ -9,6 +9,8 @@ jest.mock('../../../database/sequelize', () => ({
   default: { query: jest.fn() },
 }));
 
+const actor = { userId: 9, username: 'ada' };
+
 describe('softDelete', () => {
   beforeEach(() => jest.clearAllMocks());
 
@@ -20,7 +22,7 @@ describe('softDelete', () => {
     (Client.findByPk as jest.Mock).mockResolvedValue(mockInstance);
     (ClientHistory.create as jest.Mock).mockResolvedValue({});
 
-    await softDelete(1);
+    await softDelete(1, actor);
 
     expect(mockInstance.destroy).toHaveBeenCalledTimes(1);
     expect(ClientHistory.create).toHaveBeenCalledWith(
@@ -28,10 +30,25 @@ describe('softDelete', () => {
     );
   });
 
+  it('records the acting user on the history event', async () => {
+    const mockInstance = {
+      id: 1,
+      destroy: jest.fn().mockResolvedValue({}),
+    };
+    (Client.findByPk as jest.Mock).mockResolvedValue(mockInstance);
+    (ClientHistory.create as jest.Mock).mockResolvedValue({});
+
+    await softDelete(1, actor);
+
+    expect(ClientHistory.create).toHaveBeenCalledWith(
+      expect.objectContaining({ userId: 9, username: 'ada' }),
+    );
+  });
+
   it('returns null when client not found', async () => {
     (Client.findByPk as jest.Mock).mockResolvedValue(null);
 
-    const result = await softDelete(999);
+    const result = await softDelete(999, actor);
 
     expect(result).toBeNull();
   });
@@ -39,6 +56,6 @@ describe('softDelete', () => {
   it('propagates db errors', async () => {
     (Client.findByPk as jest.Mock).mockRejectedValue(new Error('db error'));
 
-    await expect(softDelete(1)).rejects.toThrow('db error');
+    await expect(softDelete(1, actor)).rejects.toThrow('db error');
   });
 });

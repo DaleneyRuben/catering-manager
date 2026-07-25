@@ -2,6 +2,7 @@ import { differenceInBusinessDays, parseISO } from 'date-fns';
 import Client from '../../models/Client';
 import ClientHistory from '../../models/ClientHistory';
 import { UpdateClientDto } from '../../schemas/client.schema';
+import type { Actor } from '../../types/actor';
 import { appToday, addDeliveryDays, toAppDate } from '../../utils/date';
 import { withStatus, INCLUDE_SUBSCRIPTION_ORDERED } from './_helpers';
 
@@ -11,7 +12,7 @@ type SubLike = {
   update: (d: object) => Promise<void>;
 };
 
-export const update = async (id: number, data: UpdateClientDto) => {
+export const update = async (id: number, data: UpdateClientDto, actor: Actor) => {
   const client = await Client.findByPk(id, { include: INCLUDE_SUBSCRIPTION_ORDERED });
   if (!client) return null;
 
@@ -25,6 +26,8 @@ export const update = async (id: number, data: UpdateClientDto) => {
         eventType: isPausing ? 'paused' : 'resumed',
         occurredAt: new Date(),
         metadata: {},
+        userId: actor.userId,
+        username: actor.username,
       });
     }
 

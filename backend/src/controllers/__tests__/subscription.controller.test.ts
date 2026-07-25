@@ -1,3 +1,4 @@
+import type { Request } from 'express';
 import request from 'supertest';
 import app from '../../app';
 import * as subscriptionService from '../../services/subscription';
@@ -6,7 +7,10 @@ import { encodeId } from '../../utils/sqids';
 jest.mock('../../services/subscription');
 jest.mock('../../database/sequelize', () => ({ __esModule: true, default: { query: jest.fn() } }));
 jest.mock('../../middleware/auth', () => ({
-  requireAuth: (_req: unknown, _res: unknown, next: () => void) => next(),
+  requireAuth: (req: Request, _res: unknown, next: () => void) => {
+    req.user = { userId: 9, username: 'ada', role: 'admin' };
+    next();
+  },
   requireRole: () => (_req: unknown, _res: unknown, next: () => void) => next(),
 }));
 
@@ -38,6 +42,17 @@ describe('POST /api/clients/:clientId/subscriptions', () => {
 
     expect(res.status).toBe(201);
     expect(res.body.data).toMatchObject({ clientId: id1, planId: id2 });
+  });
+
+  it('forwards the acting user to the service', async () => {
+    (subscriptionService.create as jest.Mock).mockResolvedValue(mockSubscription);
+
+    await request(app).post(`/api/clients/${id1}/subscriptions`).send(validPayload);
+
+    expect(subscriptionService.create).toHaveBeenCalledWith(1, expect.anything(), {
+      userId: 9,
+      username: 'ada',
+    });
   });
 
   it('returns 404 when client does not exist', async () => {
@@ -181,6 +196,7 @@ describe('PATCH /api/clients/:clientId/subscriptions/:id with suspendedDates', (
       1,
       1,
       expect.objectContaining({ suspendedDates: ['2026-06-10'] }),
+      { userId: 9, username: 'ada' },
     );
   });
 
@@ -207,6 +223,7 @@ describe('PATCH /api/clients/:clientId/subscriptions/:id with specialInstruction
       1,
       1,
       expect.objectContaining({ specialInstructions: { salad: 'DAR GRANDES' } }),
+      { userId: 9, username: 'ada' },
     );
   });
 
@@ -223,6 +240,7 @@ describe('PATCH /api/clients/:clientId/subscriptions/:id with specialInstruction
       1,
       1,
       expect.objectContaining({ specialInstructions: {} }),
+      { userId: 9, username: 'ada' },
     );
   });
 

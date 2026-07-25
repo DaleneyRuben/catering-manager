@@ -3,11 +3,12 @@ import ClientHistory from '../../models/ClientHistory';
 import Plan from '../../models/Plan';
 import Subscription from '../../models/Subscription';
 import { CreateSubscriptionDto } from '../../schemas/subscription.schema';
+import type { Actor } from '../../types/actor';
 import { appToday, calcContractEndDate } from '../../utils/date';
 import { finalizeOverlappingSubscriptions } from './_helpers';
 
 // TODO: restore contractDate === today validation once backfilling of existing clients is complete
-export const create = async (clientId: number, data: CreateSubscriptionDto) => {
+export const create = async (clientId: number, data: CreateSubscriptionDto, actor: Actor) => {
   const client = await Client.findByPk(clientId);
   if (!client) return null;
 
@@ -26,6 +27,7 @@ export const create = async (clientId: number, data: CreateSubscriptionDto) => {
     contractEndDate,
     clientId,
     paid: data.paid ?? true,
+    renewalType: data.renewalType ?? null,
     ...(data.specialInstructions ? { specialInstructions: data.specialInstructions } : {}),
   } as never);
 
@@ -35,8 +37,8 @@ export const create = async (clientId: number, data: CreateSubscriptionDto) => {
   } as const;
   const eventType = data.renewalType ? eventTypeByRenewal[data.renewalType] : 'plan_assigned';
 
-  // unpaid conversions defer plan_assigned until an admin marks the subscription paid
-  const shouldLogHistory = eventType !== 'plan_assigned' || (data.paid ?? true);
+  // unpaid subscriptions of any kind defer their history write until an admin marks them paid
+  const shouldLogHistory = data.paid ?? true;
   if (shouldLogHistory) {
     const plan = await Plan.findByPk(data.planId);
     await ClientHistory.create({
@@ -52,6 +54,8 @@ export const create = async (clientId: number, data: CreateSubscriptionDto) => {
         contractEndDate,
         discount: data.discount ?? 0,
       },
+      userId: actor.userId,
+      username: actor.username,
     });
   }
 

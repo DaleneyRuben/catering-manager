@@ -7,13 +7,15 @@ jest.mock('../../../models/Subscription');
 jest.mock('../../../models/Plan');
 jest.mock('../../../models/ClientHistory');
 
+const actor = { userId: 9, username: 'ada' };
+
 describe('markPaid', () => {
   beforeEach(() => jest.resetAllMocks());
 
   it('returns null when the client has no unpaid subscription', async () => {
     (Subscription.findOne as jest.Mock).mockResolvedValue(null);
 
-    const result = await markPaid(1);
+    const result = await markPaid(1, actor);
 
     expect(result).toBeNull();
     expect(ClientHistory.create).not.toHaveBeenCalled();
@@ -33,7 +35,7 @@ describe('markPaid', () => {
     (Subscription.findOne as jest.Mock).mockResolvedValue(subscription);
     (Plan.findByPk as jest.Mock).mockResolvedValue({ id: 2, name: 'Completo', price: 5000 });
 
-    const result = await markPaid(1);
+    const result = await markPaid(1, actor);
 
     expect(Subscription.findOne).toHaveBeenCalledWith({ where: { clientId: 1, paid: false } });
     expect(subscription.update).toHaveBeenCalledWith({ paid: true });
@@ -50,7 +52,53 @@ describe('markPaid', () => {
         contractEndDate: '2026-08-21',
         discount: 500,
       },
+      userId: 9,
+      username: 'ada',
     });
     expect(result).toBe(subscription);
+  });
+
+  it('logs a plan_renewed history event when the subscription renewalType is renewal', async () => {
+    const subscription = {
+      id: 3,
+      clientId: 1,
+      planId: 2,
+      startDate: '2026-07-27',
+      duration: 20,
+      contractEndDate: '2026-08-21',
+      discount: 500,
+      renewalType: 'renewal',
+      update: jest.fn().mockResolvedValue({}),
+    };
+    (Subscription.findOne as jest.Mock).mockResolvedValue(subscription);
+    (Plan.findByPk as jest.Mock).mockResolvedValue({ id: 2, name: 'Completo', price: 5000 });
+
+    await markPaid(1, actor);
+
+    expect(ClientHistory.create).toHaveBeenCalledWith(
+      expect.objectContaining({ eventType: 'plan_renewed' }),
+    );
+  });
+
+  it('logs a reactivated history event when the subscription renewalType is reactivation', async () => {
+    const subscription = {
+      id: 3,
+      clientId: 1,
+      planId: 2,
+      startDate: '2026-07-27',
+      duration: 20,
+      contractEndDate: '2026-08-21',
+      discount: 500,
+      renewalType: 'reactivation',
+      update: jest.fn().mockResolvedValue({}),
+    };
+    (Subscription.findOne as jest.Mock).mockResolvedValue(subscription);
+    (Plan.findByPk as jest.Mock).mockResolvedValue({ id: 2, name: 'Completo', price: 5000 });
+
+    await markPaid(1, actor);
+
+    expect(ClientHistory.create).toHaveBeenCalledWith(
+      expect.objectContaining({ eventType: 'reactivated' }),
+    );
   });
 });
