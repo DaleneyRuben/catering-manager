@@ -26,13 +26,13 @@ beforeEach(() => {
 describe('POST /api/clients/:clientId/subscriptions role guard', () => {
   const validBody = { planId: encodeId(1), duration: 20, contractDate: '2026-07-25' };
 
-  it('allows nutritionist', async () => {
+  it('rejects nutritionist with 403 now that resolve-renewal creates subscriptions server-side', async () => {
     const res = await request(app)
       .post(`/api/clients/${clientId}/subscriptions`)
       .set(headersForRole(ROLES.NUTRITIONIST))
       .send(validBody);
 
-    expect(res.status).toBe(201);
+    expect(res.status).toBe(403);
   });
 
   it('allows admin', async () => {
