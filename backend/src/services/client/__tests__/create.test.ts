@@ -47,4 +47,13 @@ describe('create', () => {
 
     await expect(create(validPayload as never)).rejects.toThrow('db error');
   });
+
+  it('threads an optional transaction through to Client.create', async () => {
+    (Client.create as jest.Mock).mockResolvedValue(mockClient);
+    const transaction = { id: 'txn-1' } as never;
+
+    await create(validPayload as never, transaction);
+
+    expect(Client.create).toHaveBeenCalledWith(validPayload, { transaction });
+  });
 });
