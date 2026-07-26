@@ -15,7 +15,7 @@ export function EvaluationRenewalPage() {
   const { client, isLoading: isLoadingClient, renew } = useClient(appointment?.clientId ?? '');
 
   const handleRenew = async (data: RenewalPayload) => {
-    const subscription = await renew(data);
+    const subscription = await renew({ ...data, appointmentId: id });
     await linkSubscription(subscription.id);
     return subscription;
   };
