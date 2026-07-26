@@ -4,9 +4,11 @@ import ClientHistory from '../../models/ClientHistory';
 import { UpdateClientDto } from '../../schemas/client.schema';
 import type { Actor } from '../../types/actor';
 import { appToday, addDeliveryDays, toAppDate } from '../../utils/date';
-import { withStatus, INCLUDE_SUBSCRIPTION_ORDERED } from './_helpers';
+import { withStatus, INCLUDE_SUBSCRIPTION_ORDERED, getPrimarySubscription } from './_helpers';
 
 type SubLike = {
+  id: number;
+  paid?: boolean;
   startDate: string | null;
   duration: number;
   update: (d: object) => Promise<void>;
@@ -33,7 +35,7 @@ export const update = async (id: number, data: UpdateClientDto, actor: Actor) =>
 
     if (isResuming && client.pausedSince) {
       const subs = (client as never as { subscriptions: SubLike[] }).subscriptions ?? [];
-      const sub = subs[0];
+      const sub = getPrimarySubscription(subs);
       if (sub?.startDate) {
         const pausedDateStr = toAppDate(client.pausedSince);
         const elapsed = differenceInBusinessDays(
