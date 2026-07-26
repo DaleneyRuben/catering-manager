@@ -1,9 +1,9 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { PendingPaymentCard } from '@/features/evaluations/components/PendingPaymentCard';
-import type { Client } from '@/features/clients/types';
+import type { PendingPaymentClient } from '@/features/evaluations/types';
 
-const client: Client = {
+const client: PendingPaymentClient = {
   id: '1',
   name: 'Gabriel Antelo',
   sex: 'male',
@@ -19,6 +19,7 @@ const client: Client = {
   pausedSince: null,
   status: 'active',
   groupMembers: [],
+  isExistingClientRenewal: false,
   subscriptions: [
     {
       id: '9',

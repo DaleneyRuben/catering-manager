@@ -27,6 +27,19 @@ const markPaid = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
+const revertPendingRenewal = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const subscription = await evaluationService.revertPendingRenewal(decodeId(req.params.id));
+    if (!subscription) {
+      sendError(res, 'Client has no pending renewal', 404);
+      return;
+    }
+    sendSuccess(res, subscription);
+  } catch (err) {
+    next(err);
+  }
+};
+
 const remove = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const client = await evaluationService.deletePendingClient(decodeId(req.params.id), {
@@ -43,4 +56,4 @@ const remove = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
-export default { getPendingPayment, markPaid, remove };
+export default { getPendingPayment, markPaid, revertPendingRenewal, remove };

@@ -26,6 +26,7 @@ const pendingClient = {
   id: '5',
   name: 'Gabriel Antelo',
   phoneNumber: '74552201',
+  isExistingClientRenewal: false,
   subscriptions: [
     {
       id: '9',
@@ -37,6 +38,8 @@ const pendingClient = {
     },
   ],
 };
+
+const pendingRenewalClient = { ...pendingClient, id: '6', isExistingClientRenewal: true };
 
 function setupMocks({ appointments = [appointment1], pendingClients = [pendingClient] } = {}) {
   mockGet.mockImplementation((url: string) => {
@@ -166,6 +169,24 @@ describe('AdminEvaluationsView', () => {
     await userEvent.click(within(dialog).getByRole('button', { name: /^eliminar$/i }));
 
     await waitFor(() => expect(mockDelete).toHaveBeenCalledWith('/evaluations/5'));
+  });
+
+  it('discarding a pending existing-client renewal opens a distinct confirm modal and calls DELETE /evaluations/:id/pending-renewal', async () => {
+    setupMocks({ pendingClients: [pendingRenewalClient] });
+    mockDelete.mockResolvedValue({});
+    renderView();
+    await screen.findByText('Gabriel Antelo');
+
+    await userEvent.click(screen.getByRole('button', { name: 'Eliminar' }));
+    expect(await screen.findByText('Descartar renovación pendiente')).toBeInTheDocument();
+
+    const dialog = screen.getByRole('dialog');
+    expect(
+      within(dialog).getByText(/¿Seguro que quieres descartar la renovación de/),
+    ).toBeInTheDocument();
+    await userEvent.click(within(dialog).getByRole('button', { name: /^descartar$/i }));
+
+    await waitFor(() => expect(mockDelete).toHaveBeenCalledWith('/evaluations/6/pending-renewal'));
   });
 
   it('modal Cancelar closes the create modal without submitting', async () => {
