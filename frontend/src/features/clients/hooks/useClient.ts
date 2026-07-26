@@ -17,7 +17,11 @@ export function useClient(id: string | number) {
     qc.invalidateQueries({ queryKey: ['clients'], exact: true });
   };
 
-  const { data: client, isLoading } = useQuery({
+  const {
+    data: client,
+    isLoading,
+    isError,
+  } = useQuery({
     queryKey: ['clients', id],
     queryFn: (): Promise<Client> => api.get<Client>(`/clients/${id}`),
     enabled: !!id,
@@ -128,6 +132,7 @@ export function useClient(id: string | number) {
   return {
     client: client ?? null,
     isLoading,
+    isError,
     isUpdating: updateMutation.isPending,
     isFinalizing: finalizeMutation.isPending,
     isDeleting: deleteMutation.isPending,
