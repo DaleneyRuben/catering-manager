@@ -15,7 +15,11 @@ export const convertAppointment = async (
   if (!appointment || appointment.subscriptionId) return null;
 
   const client = await createClient(clientData);
-  const subscription = await createSubscription(client.id, subscriptionData, actor);
+  const subscription = await createSubscription(
+    client.id,
+    { ...subscriptionData, appointmentId },
+    actor,
+  );
   if (!subscription) return null;
   await appointment.update({ subscriptionId: subscription.id });
 
