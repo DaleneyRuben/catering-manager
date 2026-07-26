@@ -10,11 +10,19 @@ interface Options {
   plans: Plan[];
   sub: Subscription | undefined;
   isReactivation: boolean;
-  onRenew: (data: RenewalPayload) => Promise<void>;
+  onRenew: (data: RenewalPayload) => Promise<Subscription>;
   onClose: () => void;
+  showPaidToggle?: boolean;
 }
 
-export function useRenewalForm({ plans, sub, isReactivation, onRenew, onClose }: Options) {
+export function useRenewalForm({
+  plans,
+  sub,
+  isReactivation,
+  onRenew,
+  onClose,
+  showPaidToggle,
+}: Options) {
   const [newPlanId, setNewPlanId] = useState(sub?.planId ?? plans[0]?.id ?? '');
   const [durationStr, setDurationStr] = useState('20');
   // precio = what the client actually pays; discount = plan.price - precio (auto-calculated)
@@ -22,6 +30,8 @@ export function useRenewalForm({ plans, sub, isReactivation, onRenew, onClose }:
   const [startMode, setStartMode] = useState<StartMode>(isReactivation ? 'pick' : 'atEnd');
   const [pickedDate, setPickedDate] = useState('');
   const [isSaving, setIsSaving] = useState(false);
+  // no default selection: the Evaluaciones renewal flow requires an explicit choice
+  const [paid, setPaid] = useState<boolean | undefined>(undefined);
 
   const newPlan = plans.find((p) => p.id === newPlanId);
 
@@ -68,7 +78,8 @@ export function useRenewalForm({ plans, sub, isReactivation, onRenew, onClose }:
     !!validDuration &&
     precioNum !== undefined &&
     (willBePaused || !!newStart) &&
-    !pickedDateIsWeekend;
+    !pickedDateIsWeekend &&
+    (!showPaidToggle || paid !== undefined);
 
   const handleConfirm = async () => {
     if (!canConfirm) return;
@@ -81,6 +92,7 @@ export function useRenewalForm({ plans, sub, isReactivation, onRenew, onClose }:
         duration: validDuration!,
         discount,
         renewalType: isReactivation ? 'reactivation' : 'renewal',
+        ...(showPaidToggle ? { paid } : {}),
       });
       onClose();
     } finally {
@@ -128,5 +140,7 @@ export function useRenewalForm({ plans, sub, isReactivation, onRenew, onClose }:
     confirmLabel,
     newContractPreview,
     vigenciaText,
+    paid,
+    setPaid,
   };
 }
