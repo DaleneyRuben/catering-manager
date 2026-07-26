@@ -30,6 +30,7 @@ export const markPaid = async (clientId: number, actor: Actor) => {
       duration: subscription.duration,
       contractEndDate: subscription.contractEndDate,
       discount: subscription.discount,
+      ...(subscription.appointmentId ? { appointmentId: subscription.appointmentId } : {}),
     },
     userId: actor.userId,
     username: actor.username,

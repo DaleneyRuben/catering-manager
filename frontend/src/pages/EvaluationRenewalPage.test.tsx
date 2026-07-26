@@ -126,7 +126,7 @@ describe('EvaluationRenewalPage', () => {
     await waitFor(() =>
       expect(mockPost).toHaveBeenCalledWith(
         '/clients/client-5/subscriptions',
-        expect.objectContaining({ renewalType: 'renewal', paid: true }),
+        expect.objectContaining({ renewalType: 'renewal', paid: true, appointmentId: 'appt-1' }),
       ),
     );
     await waitFor(() =>

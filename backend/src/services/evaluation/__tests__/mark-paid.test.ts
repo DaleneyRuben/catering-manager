@@ -101,4 +101,47 @@ describe('markPaid', () => {
       expect.objectContaining({ eventType: 'reactivated' }),
     );
   });
+
+  it('includes the appointmentId in the history metadata when persisted on the subscription', async () => {
+    const subscription = {
+      id: 3,
+      clientId: 1,
+      planId: 2,
+      startDate: '2026-07-27',
+      duration: 20,
+      contractEndDate: '2026-08-21',
+      discount: 500,
+      appointmentId: 4,
+      update: jest.fn().mockResolvedValue({}),
+    };
+    (Subscription.findOne as jest.Mock).mockResolvedValue(subscription);
+    (Plan.findByPk as jest.Mock).mockResolvedValue({ id: 2, name: 'Completo', price: 5000 });
+
+    await markPaid(1, actor);
+
+    expect(ClientHistory.create).toHaveBeenCalledWith(
+      expect.objectContaining({ metadata: expect.objectContaining({ appointmentId: 4 }) }),
+    );
+  });
+
+  it('does not include appointmentId in the history metadata when not persisted on the subscription', async () => {
+    const subscription = {
+      id: 3,
+      clientId: 1,
+      planId: 2,
+      startDate: '2026-07-27',
+      duration: 20,
+      contractEndDate: '2026-08-21',
+      discount: 500,
+      appointmentId: null,
+      update: jest.fn().mockResolvedValue({}),
+    };
+    (Subscription.findOne as jest.Mock).mockResolvedValue(subscription);
+    (Plan.findByPk as jest.Mock).mockResolvedValue({ id: 2, name: 'Completo', price: 5000 });
+
+    await markPaid(1, actor);
+
+    const call = (ClientHistory.create as jest.Mock).mock.calls[0][0];
+    expect(call.metadata).not.toHaveProperty('appointmentId');
+  });
 });

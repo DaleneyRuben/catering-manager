@@ -58,8 +58,22 @@ describe('convertAppointment', () => {
     const result = await convertAppointment(1, clientData, subscriptionData, actor);
 
     expect(createClient).toHaveBeenCalledWith(clientData);
-    expect(createSubscription).toHaveBeenCalledWith(7, subscriptionData, actor);
     expect(appointment.update).toHaveBeenCalledWith({ subscriptionId: 3 });
     expect(result).toMatchObject({ client: { id: 7 }, subscription: { id: 3, clientId: 7 } });
+  });
+
+  it('passes the appointment id through to the subscription so provenance is recorded', async () => {
+    const appointment = { id: 1, subscriptionId: null, update: jest.fn().mockResolvedValue({}) };
+    (Appointment.findByPk as jest.Mock).mockResolvedValue(appointment);
+    (createClient as jest.Mock).mockResolvedValue({ id: 7 });
+    (createSubscription as jest.Mock).mockResolvedValue({ id: 3, clientId: 7 });
+
+    await convertAppointment(1, clientData, subscriptionData, actor);
+
+    expect(createSubscription).toHaveBeenCalledWith(
+      7,
+      { ...(subscriptionData as object), appointmentId: 1 },
+      actor,
+    );
   });
 });
