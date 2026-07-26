@@ -20,6 +20,7 @@ export function useClient(id: string | number) {
   const { data: client, isLoading } = useQuery({
     queryKey: ['clients', id],
     queryFn: (): Promise<Client> => api.get<Client>(`/clients/${id}`),
+    enabled: !!id,
   });
 
   const updateMutation = useMutation({
