@@ -7,17 +7,27 @@ export const INCLUDE_SUBSCRIPTION_ORDERED = [
   { model: Subscription, include: [Plan], separate: true, order: [['id', 'DESC']] as never },
 ];
 
+type SubscriptionPriorityLike = { id: number; paid?: boolean };
+
+// An unpaid subscription "isn't real yet" (see ADR-004/005) — the primary subscription is
+// the latest PAID one, not merely the newest by id.
+export function compareSubscriptionPriority(
+  a: SubscriptionPriorityLike,
+  b: SubscriptionPriorityLike,
+): number {
+  return Number(b.paid ?? true) - Number(a.paid ?? true) || b.id - a.id;
+}
+
+export function getPrimarySubscription<T extends SubscriptionPriorityLike>(subs: T[]): T | null {
+  return [...subs].sort(compareSubscriptionPriority)[0] ?? null;
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function withStatus(client: any): Record<string, unknown> {
   const today = appToday();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const subs: any[] = client.subscriptions ?? [];
-  // An unpaid subscription "isn't real yet" (see ADR-004/005) — while one is pending,
-  // display should reflect the latest PAID subscription, not the newer unpaid one.
-  subs.sort(
-    (a: { id: number; paid?: boolean }, b: { id: number; paid?: boolean }) =>
-      Number(b.paid ?? true) - Number(a.paid ?? true) || b.id - a.id,
-  );
+  subs.sort(compareSubscriptionPriority);
   const sub = subs[0] ?? null;
   const status = deriveClientStatus(
     {
