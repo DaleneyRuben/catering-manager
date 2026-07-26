@@ -81,11 +81,13 @@ export const findAll = (filters: FindAllFilters = {}) => {
       break;
   }
 
-  // Unpaid clients (Evaluaciones conversions awaiting payment) must never surface here,
-  // regardless of status filter — only Evaluaciones' own "Pendientes de pago" query can see them.
+  // A client whose ONLY subscription is unpaid (an Evaluaciones conversion awaiting payment)
+  // must never surface here — only Evaluaciones' own "Pendientes de pago" query can see them.
+  // A client with a real paid subscription plus a newer unpaid renewal must stay visible
+  // (see find-by-id.ts's matching sole-subscription rule).
   andConditions.push(
     literal(
-      `NOT EXISTS (SELECT 1 FROM subscriptions ps WHERE ps."clientId" = "Client"."id" AND ps."paid" = false AND ps.id = (SELECT MAX(id) FROM subscriptions ps2 WHERE ps2."clientId" = "Client"."id"))`,
+      `NOT EXISTS (SELECT 1 FROM subscriptions ps WHERE ps."clientId" = "Client"."id" AND ps."paid" = false AND (SELECT COUNT(*) FROM subscriptions ps2 WHERE ps2."clientId" = "Client"."id") = 1)`,
     ),
   );
 
