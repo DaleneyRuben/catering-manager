@@ -1,3 +1,9 @@
+import type { Client } from '@/features/clients/types';
+
+export interface PendingPaymentClient extends Client {
+  isExistingClientRenewal: boolean;
+}
+
 export interface Appointment {
   id: string;
   name: string;
