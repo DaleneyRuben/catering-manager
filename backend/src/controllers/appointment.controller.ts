@@ -49,6 +49,19 @@ const remove = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
+const getById = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const appointment = await evaluationService.findById(decodeId(req.params.id));
+    if (!appointment) {
+      sendError(res, 'Appointment not found', 404);
+      return;
+    }
+    sendSuccess(res, appointment);
+  } catch (err) {
+    next(err);
+  }
+};
+
 const getPending = async (_req: Request, res: Response, next: NextFunction) => {
   try {
     sendSuccess(res, await evaluationService.findPendingForAdmin());
@@ -83,4 +96,4 @@ const convert = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
-export default { create, update, remove, getPending, getForNutritionist, convert };
+export default { create, update, remove, getById, getPending, getForNutritionist, convert };
