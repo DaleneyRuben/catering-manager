@@ -22,10 +22,11 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
 
 const update = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const appointment = await evaluationService.updateAppointment(
-      decodeId(req.params.id),
-      req.body,
-    );
+    const { subscriptionId, ...rest } = req.body;
+    const appointment = await evaluationService.updateAppointment(decodeId(req.params.id), {
+      ...rest,
+      ...(subscriptionId !== undefined ? { subscriptionId: decodeId(subscriptionId) } : {}),
+    });
     if (!appointment) {
       sendError(res, 'Appointment not found', 404);
       return;
@@ -39,6 +40,19 @@ const update = async (req: Request, res: Response, next: NextFunction) => {
 const remove = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const appointment = await evaluationService.cancelAppointment(decodeId(req.params.id));
+    if (!appointment) {
+      sendError(res, 'Appointment not found', 404);
+      return;
+    }
+    sendSuccess(res, appointment);
+  } catch (err) {
+    next(err);
+  }
+};
+
+const getById = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const appointment = await evaluationService.findById(decodeId(req.params.id));
     if (!appointment) {
       sendError(res, 'Appointment not found', 404);
       return;
@@ -83,4 +97,4 @@ const convert = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
-export default { create, update, remove, getPending, getForNutritionist, convert };
+export default { create, update, remove, getById, getPending, getForNutritionist, convert };

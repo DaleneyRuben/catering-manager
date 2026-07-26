@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import api from '@/services/api';
 import { toVoid } from '@/utils/toVoid';
-import type { Client, RenewalPayload } from '@/features/clients/types';
+import type { Client, RenewalPayload, Subscription } from '@/features/clients/types';
 import type { ClientUpdateDraft } from '@/features/clients/hooks/useClientList';
 
 export function useClient(id: string | number) {
@@ -20,6 +20,7 @@ export function useClient(id: string | number) {
   const { data: client, isLoading } = useQuery({
     queryKey: ['clients', id],
     queryFn: (): Promise<Client> => api.get<Client>(`/clients/${id}`),
+    enabled: !!id,
   });
 
   const updateMutation = useMutation({
@@ -66,7 +67,8 @@ export function useClient(id: string | number) {
   });
 
   const renewMutation = useMutation({
-    mutationFn: (data: RenewalPayload) => api.post(`/clients/${id}/subscriptions`, data),
+    mutationFn: (data: RenewalPayload): Promise<Subscription> =>
+      api.post<Subscription>(`/clients/${id}/subscriptions`, data),
     onSuccess: (_data, variables) => {
       invalidateClient();
       invalidateClientList();
@@ -146,7 +148,7 @@ export function useClient(id: string | number) {
       specialInstructions: Record<string, string>,
     ): Promise<void> =>
       toVoid(updateInstructionsMutation.mutateAsync({ subscriptionId, specialInstructions })),
-    renew: (data: RenewalPayload): Promise<void> => toVoid(renewMutation.mutateAsync(data)),
+    renew: (data: RenewalPayload): Promise<Subscription> => renewMutation.mutateAsync(data),
     isRenewing: renewMutation.isPending,
   };
 }

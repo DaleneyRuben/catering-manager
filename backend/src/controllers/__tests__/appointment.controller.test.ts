@@ -134,6 +134,20 @@ describe('PATCH /api/appointments/:id', () => {
 
     expect(res.status).toBe(400);
   });
+
+  it('decodes subscriptionId and passes it to the service when stamping a renewal', async () => {
+    (evaluationService.updateAppointment as jest.Mock).mockResolvedValue({
+      id: 1,
+      subscriptionId: 3,
+    });
+
+    const res = await request(app)
+      .patch(`/api/appointments/${id1}`)
+      .send({ subscriptionId: encodeId(3) });
+
+    expect(res.status).toBe(200);
+    expect(evaluationService.updateAppointment).toHaveBeenCalledWith(1, { subscriptionId: 3 });
+  });
 });
 
 describe('DELETE /api/appointments/:id', () => {
@@ -162,6 +176,30 @@ describe('GET /api/appointments/pending', () => {
 
     expect(res.status).toBe(200);
     expect(res.body.data).toHaveLength(1);
+  });
+});
+
+describe('GET /api/appointments/:id', () => {
+  it('returns 200 with the appointment', async () => {
+    (evaluationService.findById as jest.Mock).mockResolvedValue({
+      id: 1,
+      clientId: 5,
+      name: 'Fernando Daleney',
+      phone: '76637732',
+    });
+
+    const res = await request(app).get(`/api/appointments/${id1}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body.data).toMatchObject({ name: 'Fernando Daleney' });
+  });
+
+  it('returns 404 when the appointment does not exist', async () => {
+    (evaluationService.findById as jest.Mock).mockResolvedValue(null);
+
+    const res = await request(app).get(`/api/appointments/${id999}`);
+
+    expect(res.status).toBe(404);
   });
 });
 

@@ -8,6 +8,7 @@ import { ClientDetailPage } from '@/pages/ClientDetailPage';
 import { NewClientPage } from '@/pages/NewClientPage';
 import { PlansPage } from '@/pages/PlansPage';
 import { EvaluacionesPage } from '@/pages/EvaluacionesPage';
+import { EvaluationRenewalPage } from '@/pages/EvaluationRenewalPage';
 import { MenuImportPage } from '@/pages/MenuImportPage';
 import { ProductionPage } from '@/pages/ProductionPage';
 import { ReportsPage } from '@/pages/ReportsPage';
@@ -76,6 +77,14 @@ export function AppRouter() {
                   element={
                     <ProtectedRoute allowedRoles={[...ADMIN_ROLES, ROLES.NUTRITIONIST]}>
                       <EvaluacionesPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/evaluaciones/citas/:id/renovar"
+                  element={
+                    <ProtectedRoute allowedRoles={[ROLES.NUTRITIONIST]}>
+                      <EvaluationRenewalPage />
                     </ProtectedRoute>
                   }
                 />

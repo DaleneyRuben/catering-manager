@@ -4,10 +4,11 @@ import api from '@/services/api';
 import { useClient } from '@/features/clients/hooks/useClient';
 
 jest.mock('@/services/api', () => ({
-  default: { get: jest.fn(), patch: jest.fn() },
+  default: { get: jest.fn(), patch: jest.fn(), post: jest.fn() },
 }));
 const mockGet = api.get as jest.Mock;
 const mockPatch = api.patch as jest.Mock;
+const mockPost = api.post as jest.Mock;
 
 const client1 = {
   id: 1,
@@ -53,6 +54,13 @@ describe('useClient', () => {
     expect(result.current.client).toEqual(client1);
   });
 
+  it('does not fetch when given an empty id', () => {
+    const { result } = renderHook(() => useClient(''), { wrapper: makeWrapper() });
+    expect(mockGet).not.toHaveBeenCalled();
+    expect(result.current.isLoading).toBe(false);
+    expect(result.current.client).toBeNull();
+  });
+
   it('returns null before data arrives', () => {
     mockGet.mockReturnValue(new Promise(() => {}));
     const { result } = renderHook(() => useClient('1'), { wrapper: makeWrapper() });
@@ -81,5 +89,24 @@ describe('useClient', () => {
     const returned = await result.current.update({ isActive: false });
 
     expect(returned).toEqual(updated);
+  });
+
+  it('renew resolves with the created subscription', async () => {
+    const createdSubscription = { id: 'sub-9', clientId: '1', planId: 'plan-1' };
+    mockGet.mockResolvedValue(client1);
+    mockPost.mockResolvedValue(createdSubscription);
+    const { result } = renderHook(() => useClient('1'), { wrapper: makeWrapper() });
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    const returned = await result.current.renew({
+      planId: 'plan-1',
+      contractDate: '2026-07-25',
+      startDate: '2026-07-27',
+      duration: 20,
+      discount: 0,
+      renewalType: 'renewal',
+    });
+
+    expect(returned).toEqual(createdSubscription);
   });
 });

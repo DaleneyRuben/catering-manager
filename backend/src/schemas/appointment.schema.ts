@@ -42,6 +42,7 @@ export const updateAppointmentSchema = z.object({
   phone: z.string().min(1).optional(),
   date: notPastDateField.optional(),
   time: timeField.optional(),
+  subscriptionId: z.string().min(1).optional(),
 });
 
 export const convertAppointmentSchema = z.object({

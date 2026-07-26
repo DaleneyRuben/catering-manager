@@ -90,12 +90,61 @@ describe('GET /api/appointments/nutritionist role guard', () => {
 describe('admin-only appointment mutation routes role guard', () => {
   const cases = [
     { method: 'post' as const, path: '/api/appointments' },
-    { method: 'patch' as const, path: '/api/appointments/abc123' },
     { method: 'delete' as const, path: '/api/appointments/abc123' },
   ];
 
   it.each(cases)('rejects nutritionist on $method $path with 403', async ({ method, path }) => {
     const res = await request(app)[method](path).set(headersForRole(ROLES.NUTRITIONIST));
+
+    expect(res.status).toBe(403);
+  });
+});
+
+describe('PATCH /api/appointments/:id role guard', () => {
+  it('allows nutritionist (stamping subscriptionId on an existing-client renewal)', async () => {
+    (evaluationService.updateAppointment as jest.Mock).mockResolvedValue({ id: 1 });
+
+    const res = await request(app)
+      .patch('/api/appointments/abc123')
+      .set(headersForRole(ROLES.NUTRITIONIST))
+      .send({});
+
+    expect(res.status).toBe(200);
+  });
+
+  it('rejects kitchen with 403', async () => {
+    const res = await request(app)
+      .patch('/api/appointments/abc123')
+      .set(headersForRole(ROLES.KITCHEN))
+      .send({});
+
+    expect(res.status).toBe(403);
+  });
+});
+
+describe('GET /api/appointments/:id role guard', () => {
+  it('allows nutritionist', async () => {
+    (evaluationService.findById as jest.Mock).mockResolvedValue({ id: 1 });
+
+    const res = await request(app)
+      .get('/api/appointments/abc123')
+      .set(headersForRole(ROLES.NUTRITIONIST));
+
+    expect(res.status).toBe(200);
+  });
+
+  it('allows admin', async () => {
+    (evaluationService.findById as jest.Mock).mockResolvedValue({ id: 1 });
+
+    const res = await request(app).get('/api/appointments/abc123').set(headersForRole(ROLES.ADMIN));
+
+    expect(res.status).toBe(200);
+  });
+
+  it('rejects kitchen with 403', async () => {
+    const res = await request(app)
+      .get('/api/appointments/abc123')
+      .set(headersForRole(ROLES.KITCHEN));
 
     expect(res.status).toBe(403);
   });
