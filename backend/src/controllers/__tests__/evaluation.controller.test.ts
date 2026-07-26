@@ -55,6 +55,32 @@ describe('POST /api/evaluations/:id/mark-paid', () => {
   });
 });
 
+describe('DELETE /api/evaluations/:id/pending-renewal', () => {
+  it('returns 200 when the pending renewal is reverted', async () => {
+    (evaluationService.revertPendingRenewal as jest.Mock).mockResolvedValue({ id: 5 });
+
+    const res = await request(app).delete(`/api/evaluations/${id1}/pending-renewal`);
+
+    expect(res.status).toBe(200);
+  });
+
+  it('returns 404 when the client has no pending renewal', async () => {
+    (evaluationService.revertPendingRenewal as jest.Mock).mockResolvedValue(null);
+
+    const res = await request(app).delete(`/api/evaluations/${id999}/pending-renewal`);
+
+    expect(res.status).toBe(404);
+  });
+
+  it('decodes the client id and forwards it to the service', async () => {
+    (evaluationService.revertPendingRenewal as jest.Mock).mockResolvedValue({ id: 5 });
+
+    await request(app).delete(`/api/evaluations/${id1}/pending-renewal`);
+
+    expect(evaluationService.revertPendingRenewal).toHaveBeenCalledWith(1);
+  });
+});
+
 describe('DELETE /api/evaluations/:id', () => {
   it('returns 200 when the pending client is deleted', async () => {
     (evaluationService.deletePendingClient as jest.Mock).mockResolvedValue({ id: 1 });
