@@ -1,3 +1,4 @@
+import { UniqueConstraintError } from 'sequelize';
 import Appointment from '../../../models/Appointment';
 import Subscription from '../../../models/Subscription';
 import sequelize from '../../../database/sequelize';
@@ -102,6 +103,25 @@ describe('resolveRenewal', () => {
     );
     expect(appointment.update).toHaveBeenCalledWith({ subscriptionId: 3 }, { transaction });
     expect(result).toEqual({ subscription: { id: 3, clientId: 7 } });
+  });
+
+  it('returns an already_pending reason when a concurrent request wins the race and violates the db constraint', async () => {
+    const appointment = {
+      id: 1,
+      clientId: 7,
+      subscriptionId: null,
+      update: jest.fn().mockResolvedValue({}),
+    };
+    (Appointment.findByPk as jest.Mock).mockResolvedValue(appointment);
+    // the up-front check passes because the concurrent request hasn't committed yet
+    (Subscription.findOne as jest.Mock).mockResolvedValue(null);
+    (sequelize.transaction as jest.Mock).mockRejectedValue(
+      new UniqueConstraintError({ message: 'duplicate key' }),
+    );
+
+    const result = await resolveRenewal(1, subscriptionData, actor);
+
+    expect(result).toEqual({ subscription: null, reason: 'already_pending' });
   });
 
   it('does not stamp the appointment when subscription creation fails inside the transaction', async () => {

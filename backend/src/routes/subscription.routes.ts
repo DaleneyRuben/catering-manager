@@ -7,10 +7,12 @@ import { ROLES } from '../constants/roles.constants';
 
 const router = Router({ mergeParams: true });
 
-// nutritionist needs this to renew/reactivate an existing client from Evaluaciones
+// nutritionist renews/reactivates an existing client through POST /appointments/:id/resolve-renewal
+// instead, which creates the subscription server-side inside a transaction — she has no need for
+// direct access to this route.
 router.post(
   '/',
-  requireRole(ROLES.SUPER_ADMIN, ROLES.ADMIN, ROLES.NUTRITIONIST),
+  requireRole(ROLES.SUPER_ADMIN, ROLES.ADMIN),
   validate(createSubscriptionSchema),
   subscriptionController.create,
 );
