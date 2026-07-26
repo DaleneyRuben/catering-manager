@@ -2,7 +2,7 @@ import { Table, Column, Model, DataType, ForeignKey, BelongsTo } from 'sequelize
 import Client from './Client';
 import Plan from './Plan';
 
-@Table({ tableName: 'subscriptions', timestamps: true })
+@Table({ tableName: 'subscriptions', timestamps: true, paranoid: true })
 class Subscription extends Model {
   @ForeignKey(() => Client)
   @Column({ type: DataType.INTEGER, allowNull: false })
