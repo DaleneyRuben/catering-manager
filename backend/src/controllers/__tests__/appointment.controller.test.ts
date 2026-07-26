@@ -282,3 +282,60 @@ describe('POST /api/appointments/:id/convert', () => {
     expect(res.status).toBe(400);
   });
 });
+
+describe('POST /api/appointments/:id/resolve-renewal', () => {
+  const subscriptionData = {
+    planId: encodeId(2),
+    contractDate: '2026-07-24',
+    duration: 20,
+  };
+
+  it('returns 201 with the created subscription', async () => {
+    (evaluationService.resolveRenewal as jest.Mock).mockResolvedValue({
+      subscription: { id: 3 },
+    });
+
+    const res = await request(app)
+      .post(`/api/appointments/${id1}/resolve-renewal`)
+      .send(subscriptionData);
+
+    expect(res.status).toBe(201);
+    expect(res.body.data).toMatchObject({ id: expect.any(String) });
+  });
+
+  it('forwards the acting user to the service', async () => {
+    (evaluationService.resolveRenewal as jest.Mock).mockResolvedValue({
+      subscription: { id: 3 },
+    });
+
+    await request(app).post(`/api/appointments/${id1}/resolve-renewal`).send(subscriptionData);
+
+    expect(evaluationService.resolveRenewal).toHaveBeenCalledWith(1, expect.anything(), {
+      userId: 9,
+      username: 'ada',
+    });
+  });
+
+  it('returns 404 when the appointment does not exist, has no linked client, or is already resolved', async () => {
+    (evaluationService.resolveRenewal as jest.Mock).mockResolvedValue(null);
+
+    const res = await request(app)
+      .post(`/api/appointments/${id999}/resolve-renewal`)
+      .send(subscriptionData);
+
+    expect(res.status).toBe(404);
+  });
+
+  it('returns 409 when the client already has a pending unpaid renewal', async () => {
+    (evaluationService.resolveRenewal as jest.Mock).mockResolvedValue({
+      subscription: null,
+      reason: 'already_pending',
+    });
+
+    const res = await request(app)
+      .post(`/api/appointments/${id1}/resolve-renewal`)
+      .send(subscriptionData);
+
+    expect(res.status).toBe(409);
+  });
+});

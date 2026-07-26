@@ -101,12 +101,21 @@ describe('admin-only appointment mutation routes role guard', () => {
 });
 
 describe('PATCH /api/appointments/:id role guard', () => {
-  it('allows nutritionist (stamping subscriptionId on an existing-client renewal)', async () => {
+  it('rejects nutritionist with 403 (stamping now happens via resolve-renewal)', async () => {
+    const res = await request(app)
+      .patch('/api/appointments/abc123')
+      .set(headersForRole(ROLES.NUTRITIONIST))
+      .send({});
+
+    expect(res.status).toBe(403);
+  });
+
+  it('allows admin', async () => {
     (evaluationService.updateAppointment as jest.Mock).mockResolvedValue({ id: 1 });
 
     const res = await request(app)
       .patch('/api/appointments/abc123')
-      .set(headersForRole(ROLES.NUTRITIONIST))
+      .set(headersForRole(ROLES.ADMIN))
       .send({});
 
     expect(res.status).toBe(200);
@@ -163,6 +172,37 @@ describe('nutritionist-only convert route role guard', () => {
     const res = await request(app)
       .post('/api/appointments/abc123/convert')
       .set(headersForRole(ROLES.SUPER_ADMIN));
+
+    expect(res.status).toBe(403);
+  });
+});
+
+describe('nutritionist-only resolve-renewal route role guard', () => {
+  it('allows nutritionist', async () => {
+    (evaluationService.resolveRenewal as jest.Mock).mockResolvedValue({ subscription: { id: 1 } });
+
+    const res = await request(app)
+      .post('/api/appointments/abc123/resolve-renewal')
+      .set(headersForRole(ROLES.NUTRITIONIST))
+      .send({ planId: 'abc', contractDate: '2026-07-24', duration: 20 });
+
+    expect(res.status).toBe(201);
+  });
+
+  it('rejects admin with 403', async () => {
+    const res = await request(app)
+      .post('/api/appointments/abc123/resolve-renewal')
+      .set(headersForRole(ROLES.ADMIN))
+      .send({ planId: 'abc', contractDate: '2026-07-24', duration: 20 });
+
+    expect(res.status).toBe(403);
+  });
+
+  it('rejects super_admin with 403', async () => {
+    const res = await request(app)
+      .post('/api/appointments/abc123/resolve-renewal')
+      .set(headersForRole(ROLES.SUPER_ADMIN))
+      .send({ planId: 'abc', contractDate: '2026-07-24', duration: 20 });
 
     expect(res.status).toBe(403);
   });
