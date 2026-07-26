@@ -67,6 +67,12 @@ describe('useClient', () => {
     expect(result.current.client).toBeNull();
   });
 
+  it('surfaces isError when the client fetch fails', async () => {
+    mockGet.mockRejectedValue(new Error('not found'));
+    const { result } = renderHook(() => useClient('1'), { wrapper: makeWrapper() });
+    await waitFor(() => expect(result.current.isError).toBe(true));
+  });
+
   it('update calls PATCH /clients/:id', async () => {
     const updated = { ...client1, name: 'Ana García' };
     mockGet.mockResolvedValue(client1);
