@@ -22,4 +22,18 @@ describe('updateAppointment', () => {
 
     expect(update).toHaveBeenCalledWith({ name: 'Nuevo nombre', time: '10:30' });
   });
+
+  it('strips name and phone from the update when the appointment has a linked client', async () => {
+    const update = jest.fn().mockResolvedValue({ id: 1 });
+    (Appointment.findByPk as jest.Mock).mockResolvedValue({ id: 1, clientId: 5, update });
+
+    await updateAppointment(1, {
+      name: 'Nombre hackeado',
+      phone: '99999999',
+      date: '2026-08-01',
+      time: '10:30',
+    });
+
+    expect(update).toHaveBeenCalledWith({ date: '2026-08-01', time: '10:30' });
+  });
 });
