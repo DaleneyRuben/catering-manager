@@ -47,6 +47,9 @@ class Subscription extends Model {
 
   @Column({ type: DataType.ENUM('renewal', 'reactivation'), allowNull: true })
   declare renewalType: 'renewal' | 'reactivation' | null;
+
+  @Column({ type: DataType.INTEGER, allowNull: true, defaultValue: null })
+  declare appointmentId: number | null;
 }
 
 export default Subscription;

@@ -28,6 +28,7 @@ export const create = async (clientId: number, data: CreateSubscriptionDto, acto
     clientId,
     paid: data.paid ?? true,
     renewalType: data.renewalType ?? null,
+    appointmentId: data.appointmentId ?? null,
     ...(data.specialInstructions ? { specialInstructions: data.specialInstructions } : {}),
   } as never);
 
@@ -53,6 +54,7 @@ export const create = async (clientId: number, data: CreateSubscriptionDto, acto
         duration: data.duration,
         contractEndDate,
         discount: data.discount ?? 0,
+        ...(data.appointmentId ? { appointmentId: data.appointmentId } : {}),
       },
       userId: actor.userId,
       username: actor.username,
