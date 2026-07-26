@@ -22,10 +22,11 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
 
 const update = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const appointment = await evaluationService.updateAppointment(
-      decodeId(req.params.id),
-      req.body,
-    );
+    const { subscriptionId, ...rest } = req.body;
+    const appointment = await evaluationService.updateAppointment(decodeId(req.params.id), {
+      ...rest,
+      ...(subscriptionId !== undefined ? { subscriptionId: decodeId(subscriptionId) } : {}),
+    });
     if (!appointment) {
       sendError(res, 'Appointment not found', 404);
       return;
