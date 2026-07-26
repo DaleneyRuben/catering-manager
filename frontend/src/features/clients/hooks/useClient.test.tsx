@@ -54,6 +54,13 @@ describe('useClient', () => {
     expect(result.current.client).toEqual(client1);
   });
 
+  it('does not fetch when given an empty id', () => {
+    const { result } = renderHook(() => useClient(''), { wrapper: makeWrapper() });
+    expect(mockGet).not.toHaveBeenCalled();
+    expect(result.current.isLoading).toBe(false);
+    expect(result.current.client).toBeNull();
+  });
+
   it('returns null before data arrives', () => {
     mockGet.mockReturnValue(new Promise(() => {}));
     const { result } = renderHook(() => useClient('1'), { wrapper: makeWrapper() });
