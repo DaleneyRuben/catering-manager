@@ -101,6 +101,34 @@ describe('admin-only appointment mutation routes role guard', () => {
   });
 });
 
+describe('GET /api/appointments/:id role guard', () => {
+  it('allows nutritionist', async () => {
+    (evaluationService.findById as jest.Mock).mockResolvedValue({ id: 1 });
+
+    const res = await request(app)
+      .get('/api/appointments/abc123')
+      .set(headersForRole(ROLES.NUTRITIONIST));
+
+    expect(res.status).toBe(200);
+  });
+
+  it('allows admin', async () => {
+    (evaluationService.findById as jest.Mock).mockResolvedValue({ id: 1 });
+
+    const res = await request(app).get('/api/appointments/abc123').set(headersForRole(ROLES.ADMIN));
+
+    expect(res.status).toBe(200);
+  });
+
+  it('rejects kitchen with 403', async () => {
+    const res = await request(app)
+      .get('/api/appointments/abc123')
+      .set(headersForRole(ROLES.KITCHEN));
+
+    expect(res.status).toBe(403);
+  });
+});
+
 describe('nutritionist-only convert route role guard', () => {
   it('rejects admin with 403', async () => {
     const res = await request(app)

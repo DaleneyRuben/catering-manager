@@ -165,6 +165,30 @@ describe('GET /api/appointments/pending', () => {
   });
 });
 
+describe('GET /api/appointments/:id', () => {
+  it('returns 200 with the appointment', async () => {
+    (evaluationService.findById as jest.Mock).mockResolvedValue({
+      id: 1,
+      clientId: 5,
+      name: 'Fernando Daleney',
+      phone: '76637732',
+    });
+
+    const res = await request(app).get(`/api/appointments/${id1}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body.data).toMatchObject({ name: 'Fernando Daleney' });
+  });
+
+  it('returns 404 when the appointment does not exist', async () => {
+    (evaluationService.findById as jest.Mock).mockResolvedValue(null);
+
+    const res = await request(app).get(`/api/appointments/${id999}`);
+
+    expect(res.status).toBe(404);
+  });
+});
+
 describe('GET /api/appointments/nutritionist', () => {
   it('returns 200 with all appointments', async () => {
     (evaluationService.findForNutritionist as jest.Mock).mockResolvedValue([{ id: 1 }]);
