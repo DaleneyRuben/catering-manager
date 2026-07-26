@@ -62,6 +62,7 @@ export function AppointmentModal(props: Props) {
 
   const isExistingClientMode = mode === 'create' && clientMode === 'Cliente existente';
   const isNewClientMode = mode === 'create' && clientMode === 'Cliente nuevo';
+  const isEditingExistingClient = mode === 'edit' && !!appointment?.clientId;
 
   let activeQuery = '';
   if (isExistingClientMode) activeQuery = debouncedSearch;
@@ -87,6 +88,8 @@ export function AppointmentModal(props: Props) {
   const handleSubmit = async () => {
     if (isExistingClientMode && selectedClient) {
       await onSave({ clientId: selectedClient.id, date: draft.date, time: draft.time });
+    } else if (isEditingExistingClient) {
+      await onSave({ date: draft.date, time: draft.time });
     } else {
       await onSave({ name: draft.name, phone: draft.phone, date: draft.date, time: draft.time });
     }
@@ -94,7 +97,14 @@ export function AppointmentModal(props: Props) {
   };
 
   let clientFieldsSection: React.ReactNode;
-  if (isExistingClientMode && selectedClient) {
+  if (isEditingExistingClient) {
+    clientFieldsSection = (
+      <div className="flex flex-col gap-1 px-3 py-2.5 bg-paper border border-rule rounded-md">
+        <span className="font-mono text-[13px] text-ink">{draft.name}</span>
+        <span className="font-mono text-[12px] text-muted">{draft.phone}</span>
+      </div>
+    );
+  } else if (isExistingClientMode && selectedClient) {
     clientFieldsSection = (
       <div className="flex flex-col gap-1 px-3 py-2.5 bg-paper border border-rule rounded-md">
         <span className="font-mono text-[13px] text-ink">{selectedClient.name}</span>
