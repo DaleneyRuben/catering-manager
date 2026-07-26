@@ -1,4 +1,5 @@
 import Appointment from '../../models/Appointment';
+import sequelize from '../../database/sequelize';
 import { CreateClientDto } from '../../schemas/client.schema';
 import { CreateSubscriptionDto } from '../../schemas/subscription.schema';
 import type { Actor } from '../../types/actor';
@@ -14,14 +15,17 @@ export const convertAppointment = async (
   const appointment = await Appointment.findByPk(appointmentId);
   if (!appointment || appointment.subscriptionId) return null;
 
-  const client = await createClient(clientData);
-  const subscription = await createSubscription(
-    client.id,
-    { ...subscriptionData, appointmentId },
-    actor,
-  );
-  if (!subscription) return null;
-  await appointment.update({ subscriptionId: subscription.id });
+  return sequelize.transaction(async (transaction) => {
+    const client = await createClient(clientData, transaction);
+    const subscription = await createSubscription(
+      client.id,
+      { ...subscriptionData, appointmentId },
+      actor,
+      transaction,
+    );
+    if (!subscription) return null;
 
-  return { client, subscription };
+    await appointment.update({ subscriptionId: subscription.id }, { transaction });
+    return { client, subscription };
+  });
 };
