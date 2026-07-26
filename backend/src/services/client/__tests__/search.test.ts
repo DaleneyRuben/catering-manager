@@ -21,4 +21,21 @@ describe('search', () => {
       limit: 10,
     });
   });
+
+  it('escapes %, _, and \\ in the query so they are matched literally, not as wildcards', async () => {
+    (Client.findAll as jest.Mock).mockResolvedValue([]);
+
+    await search('50%_off\\x');
+
+    expect(Client.findAll).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: {
+          [Op.or]: [
+            { name: { [Op.iLike]: '%50\\%\\_off\\\\x%' } },
+            { phoneNumber: { [Op.iLike]: '%50\\%\\_off\\\\x%' } },
+          ],
+        },
+      }),
+    );
+  });
 });

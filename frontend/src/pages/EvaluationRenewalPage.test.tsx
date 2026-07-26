@@ -59,8 +59,9 @@ const client = {
   ],
 };
 
-function renderPage() {
+function renderPage(overrides: Record<string, () => Promise<unknown>> = {}) {
   mockGet.mockImplementation((url: string) => {
+    if (url in overrides) return overrides[url]();
     if (url === '/appointments/appt-1') return Promise.resolve(appointment);
     if (url === '/clients/client-5') return Promise.resolve(client);
     if (url === '/plans') return Promise.resolve([plan]);
@@ -108,10 +109,9 @@ describe('EvaluationRenewalPage', () => {
     expect(await screen.findByText(/¿pagó el servicio\?/i)).toBeInTheDocument();
   });
 
-  it('creates the subscription then links it to the appointment on confirm', async () => {
+  it('resolves the renewal in a single atomic call on confirm', async () => {
     const createdSubscription = { id: 'sub-new', clientId: 'client-5' };
     mockPost.mockResolvedValueOnce(createdSubscription);
-    mockPatch.mockResolvedValueOnce({ ...appointment, subscriptionId: 'sub-new' });
     renderPage();
 
     await screen.findByRole('dialog');
@@ -125,14 +125,31 @@ describe('EvaluationRenewalPage', () => {
 
     await waitFor(() =>
       expect(mockPost).toHaveBeenCalledWith(
-        '/clients/client-5/subscriptions',
-        expect.objectContaining({ renewalType: 'renewal', paid: true, appointmentId: 'appt-1' }),
+        '/appointments/appt-1/resolve-renewal',
+        expect.objectContaining({ renewalType: 'renewal', paid: true }),
       ),
     );
-    await waitFor(() =>
-      expect(mockPatch).toHaveBeenCalledWith('/appointments/appt-1', {
-        subscriptionId: 'sub-new',
-      }),
-    );
+    expect(mockPatch).not.toHaveBeenCalled();
+  });
+
+  it('shows an error state when the appointment does not exist', async () => {
+    renderPage({ '/appointments/appt-1': () => Promise.reject(new Error('not found')) });
+
+    expect(await screen.findByText(/cita no encontrada/i)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /volver a evaluaciones/i })).toBeInTheDocument();
+  });
+
+  it('shows an error state when the appointment has no linked client', async () => {
+    renderPage({
+      '/appointments/appt-1': () => Promise.resolve({ ...appointment, clientId: null }),
+    });
+
+    expect(await screen.findByText(/cita no encontrada/i)).toBeInTheDocument();
+  });
+
+  it('shows an error state when the linked client fails to load', async () => {
+    renderPage({ '/clients/client-5': () => Promise.reject(new Error('not found')) });
+
+    expect(await screen.findByText(/cita no encontrada/i)).toBeInTheDocument();
   });
 });

@@ -211,4 +211,37 @@ describe('AppointmentModal — edit mode', () => {
     expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ name: 'Ana Pérez' }));
     await waitFor(() => expect(onClose).toHaveBeenCalled());
   });
+
+  it('locks name/phone as read-only when the appointment is linked to an existing client', () => {
+    render(
+      <AppointmentModal
+        mode="edit"
+        appointment={{ ...existingAppointment, clientId: '5' }}
+        isSaving={false}
+        onSave={jest.fn()}
+        onClose={jest.fn()}
+      />,
+    );
+
+    expect(screen.queryByLabelText(/^nombre/i)).not.toBeInTheDocument();
+    expect(screen.getByText('Ana Pérez')).toBeInTheDocument();
+    expect(screen.getByText('71234567')).toBeInTheDocument();
+  });
+
+  it('submits only date/time for an existing-client appointment, not name/phone', async () => {
+    const onSave = jest.fn().mockResolvedValue(undefined);
+    render(
+      <AppointmentModal
+        mode="edit"
+        appointment={{ ...existingAppointment, clientId: '5' }}
+        isSaving={false}
+        onSave={onSave}
+        onClose={jest.fn()}
+      />,
+    );
+
+    await userEvent.click(screen.getByRole('button', { name: /guardar cambios/i }));
+
+    expect(onSave).toHaveBeenCalledWith({ date: '2026-08-03', time: '09:00' });
+  });
 });

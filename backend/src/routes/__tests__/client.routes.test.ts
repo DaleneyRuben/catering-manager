@@ -3,10 +3,12 @@ import app from '../../app';
 import { verifyToken } from '../../services/auth';
 import { ROLES } from '../../constants/roles.constants';
 import * as clientService from '../../services/client';
+import Appointment from '../../models/Appointment';
 import { encodeId } from '../../utils/sqids';
 
 jest.mock('../../services/auth');
 jest.mock('../../services/client');
+jest.mock('../../models/Appointment');
 jest.mock('../../database/sequelize', () => ({ __esModule: true, default: { query: jest.fn() } }));
 
 const mockVerifyToken = verifyToken as jest.Mock;
@@ -21,10 +23,13 @@ const clientId = encodeId(1);
 beforeEach(() => {
   jest.clearAllMocks();
   (clientService.findById as jest.Mock).mockResolvedValue({ id: 1 });
+  (Appointment.count as jest.Mock).mockResolvedValue(0);
 });
 
 describe('GET /api/clients/:id role guard', () => {
-  it('allows nutritionist', async () => {
+  it('allows nutritionist when an appointment links her to this client', async () => {
+    (Appointment.count as jest.Mock).mockResolvedValue(1);
+
     const res = await request(app)
       .get(`/api/clients/${clientId}`)
       .set(headersForRole(ROLES.NUTRITIONIST));
@@ -32,10 +37,22 @@ describe('GET /api/clients/:id role guard', () => {
     expect(res.status).toBe(200);
   });
 
-  it('allows admin', async () => {
+  it('rejects nutritionist with 403 when no appointment links her to this client', async () => {
+    (Appointment.count as jest.Mock).mockResolvedValue(0);
+
+    const res = await request(app)
+      .get(`/api/clients/${clientId}`)
+      .set(headersForRole(ROLES.NUTRITIONIST));
+
+    expect(res.status).toBe(403);
+    expect(clientService.findById).not.toHaveBeenCalled();
+  });
+
+  it('allows admin regardless of any appointment link', async () => {
     const res = await request(app).get(`/api/clients/${clientId}`).set(headersForRole(ROLES.ADMIN));
 
     expect(res.status).toBe(200);
+    expect(Appointment.count).not.toHaveBeenCalled();
   });
 
   it('rejects kitchen with 403', async () => {

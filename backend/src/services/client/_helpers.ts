@@ -12,7 +12,12 @@ export function withStatus(client: any): Record<string, unknown> {
   const today = appToday();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const subs: any[] = client.subscriptions ?? [];
-  subs.sort((a: { id: number }, b: { id: number }) => b.id - a.id);
+  // An unpaid subscription "isn't real yet" (see ADR-004/005) — while one is pending,
+  // display should reflect the latest PAID subscription, not the newer unpaid one.
+  subs.sort(
+    (a: { id: number; paid?: boolean }, b: { id: number; paid?: boolean }) =>
+      Number(b.paid ?? true) - Number(a.paid ?? true) || b.id - a.id,
+  );
   const sub = subs[0] ?? null;
   const status = deriveClientStatus(
     {

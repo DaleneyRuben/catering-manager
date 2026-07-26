@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { toVoid } from '@/utils/toVoid';
 import api from '@/services/api';
 import type { Appointment } from '@/features/evaluations/types';
+import type { RenewalPayload, Subscription } from '@/features/clients/types';
 
 export function useAppointment(id: string) {
   const qc = useQueryClient();
@@ -11,8 +11,9 @@ export function useAppointment(id: string) {
     queryFn: () => api.get<Appointment>(`/appointments/${id}`),
   });
 
-  const linkSubscriptionMutation = useMutation({
-    mutationFn: (subscriptionId: string) => api.patch(`/appointments/${id}`, { subscriptionId }),
+  const resolveRenewalMutation = useMutation({
+    mutationFn: (data: RenewalPayload): Promise<Subscription> =>
+      api.post<Subscription>(`/appointments/${id}/resolve-renewal`, data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['appointments'] });
     },
@@ -21,8 +22,9 @@ export function useAppointment(id: string) {
   return {
     appointment: appointmentQuery.data ?? null,
     isLoading: appointmentQuery.isLoading,
-    linkSubscription: (subscriptionId: string): Promise<void> =>
-      toVoid(linkSubscriptionMutation.mutateAsync(subscriptionId)),
-    isLinkingSubscription: linkSubscriptionMutation.isPending,
+    isError: appointmentQuery.isError,
+    resolveRenewal: (data: RenewalPayload): Promise<Subscription> =>
+      resolveRenewalMutation.mutateAsync(data),
+    isResolvingRenewal: resolveRenewalMutation.isPending,
   };
 }
