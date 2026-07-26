@@ -2,14 +2,14 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { toVoid } from '@/utils/toVoid';
 import api from '@/services/api';
-import type { Client } from '@/features/clients/types';
+import type { PendingPaymentClient } from '@/features/evaluations/types';
 
 export function usePendingPayment() {
   const qc = useQueryClient();
 
   const clientsQuery = useQuery({
     queryKey: ['evaluations', 'pending-payment'],
-    queryFn: () => api.get<Client[]>('/evaluations/pending-payment'),
+    queryFn: () => api.get<PendingPaymentClient[]>('/evaluations/pending-payment'),
   });
 
   const invalidate = () => qc.invalidateQueries({ queryKey: ['evaluations', 'pending-payment'] });
@@ -23,10 +23,13 @@ export function usePendingPayment() {
   });
 
   const removeMutation = useMutation({
-    mutationFn: (id: string) => api.delete(`/evaluations/${id}`),
-    onSuccess: () => {
+    mutationFn: (client: PendingPaymentClient) =>
+      client.isExistingClientRenewal
+        ? api.delete(`/evaluations/${client.id}/pending-renewal`)
+        : api.delete(`/evaluations/${client.id}`),
+    onSuccess: (_data, client) => {
       invalidate();
-      toast.success('Cliente eliminado');
+      toast.success(client.isExistingClientRenewal ? 'Renovación descartada' : 'Cliente eliminado');
     },
   });
 
@@ -34,6 +37,7 @@ export function usePendingPayment() {
     clients: clientsQuery.data ?? [],
     isLoading: clientsQuery.isLoading,
     markPaid: (id: string): Promise<void> => toVoid(markPaidMutation.mutateAsync(id)),
-    remove: (id: string): Promise<void> => toVoid(removeMutation.mutateAsync(id)),
+    remove: (client: PendingPaymentClient): Promise<void> =>
+      toVoid(removeMutation.mutateAsync(client)),
   };
 }

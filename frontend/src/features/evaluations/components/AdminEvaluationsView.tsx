@@ -8,15 +8,14 @@ import { usePendingPayment } from '@/features/evaluations/hooks/usePendingPaymen
 import { AppointmentModal } from '@/features/evaluations/components/AppointmentModal';
 import { CitasPendientesTable } from '@/features/evaluations/components/CitasPendientesTable';
 import { PendingPaymentCard } from '@/features/evaluations/components/PendingPaymentCard';
-import type { Appointment } from '@/features/evaluations/types';
-import type { Client } from '@/features/clients/types';
+import type { Appointment, PendingPaymentClient } from '@/features/evaluations/types';
 
 type ModalState =
   | { type: 'appointment'; mode: 'create' }
   | { type: 'appointment'; mode: 'edit'; appointment: Appointment }
   | { type: 'cancel-appointment'; appointment: Appointment }
-  | { type: 'mark-paid'; client: Client }
-  | { type: 'delete-client'; client: Client }
+  | { type: 'mark-paid'; client: PendingPaymentClient }
+  | { type: 'delete-client'; client: PendingPaymentClient }
   | null;
 
 export function AdminEvaluationsView() {
@@ -142,7 +141,23 @@ export function AdminEvaluationsView() {
           onConfirm={() => markPaid(modal.client.id)}
         />
       )}
-      {modal?.type === 'delete-client' && (
+      {modal?.type === 'delete-client' && modal.client.isExistingClientRenewal && (
+        <ConfirmModal
+          title="Descartar renovación pendiente"
+          message={
+            <>
+              ¿Seguro que quieres descartar la renovación de{' '}
+              <span className="font-semibold">{modal.client.name}</span>? La cita volverá a la cola
+              de la nutricionista. Esta acción no se puede deshacer.
+            </>
+          }
+          confirmLabel="Descartar"
+          icon="trash"
+          onClose={closeModal}
+          onConfirm={() => remove(modal.client)}
+        />
+      )}
+      {modal?.type === 'delete-client' && !modal.client.isExistingClientRenewal && (
         <ConfirmModal
           title="Eliminar cliente pendiente"
           message={
@@ -155,7 +170,7 @@ export function AdminEvaluationsView() {
           confirmLabel="Eliminar"
           icon="trash"
           onClose={closeModal}
-          onConfirm={() => remove(modal.client.id)}
+          onConfirm={() => remove(modal.client)}
         />
       )}
     </div>
