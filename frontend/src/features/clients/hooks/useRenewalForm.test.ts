@@ -200,5 +200,58 @@ describe('useRenewalForm', () => {
       });
       expect(onRenew).not.toHaveBeenCalled();
     });
+
+    it('does not include paid in the payload when showPaidToggle is not set', async () => {
+      const onRenew = jest.fn().mockResolvedValue(undefined);
+      const { result } = renderHook(() => useRenewalForm(makeOptions({ onRenew })));
+      act(() => result.current.setPrecioStr('1200'));
+      await act(async () => {
+        await result.current.handleConfirm();
+      });
+      expect(onRenew.mock.calls[0][0]).not.toHaveProperty('paid');
+    });
+  });
+
+  describe('paid toggle (showPaidToggle)', () => {
+    it('paid is undefined initially (no default selection)', () => {
+      const { result } = renderHook(() => useRenewalForm(makeOptions({ showPaidToggle: true })));
+      expect(result.current.paid).toBeUndefined();
+    });
+
+    it('canConfirm is false while paid is unset, even with valid duration/precio', () => {
+      const { result } = renderHook(() => useRenewalForm(makeOptions({ showPaidToggle: true })));
+      act(() => result.current.setPrecioStr('1200'));
+      expect(result.current.canConfirm).toBe(false);
+    });
+
+    it('canConfirm is true once paid is set and other fields are valid', () => {
+      const { result } = renderHook(() => useRenewalForm(makeOptions({ showPaidToggle: true })));
+      act(() => {
+        result.current.setPrecioStr('1200');
+        result.current.setPaid(true);
+      });
+      expect(result.current.canConfirm).toBe(true);
+    });
+
+    it('does not affect canConfirm when showPaidToggle is not set', () => {
+      const { result } = renderHook(() => useRenewalForm(makeOptions()));
+      act(() => result.current.setPrecioStr('1200'));
+      expect(result.current.canConfirm).toBe(true);
+    });
+
+    it('includes paid in the onRenew payload when set', async () => {
+      const onRenew = jest.fn().mockResolvedValue(undefined);
+      const { result } = renderHook(() =>
+        useRenewalForm(makeOptions({ onRenew, showPaidToggle: true })),
+      );
+      act(() => {
+        result.current.setPrecioStr('1200');
+        result.current.setPaid(false);
+      });
+      await act(async () => {
+        await result.current.handleConfirm();
+      });
+      expect(onRenew).toHaveBeenCalledWith(expect.objectContaining({ paid: false }));
+    });
   });
 });
