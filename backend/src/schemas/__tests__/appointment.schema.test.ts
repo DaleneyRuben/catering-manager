@@ -1,4 +1,4 @@
-import { createAppointmentSchema } from '../appointment.schema';
+import { createAppointmentSchema, updateAppointmentSchema } from '../appointment.schema';
 
 describe('createAppointmentSchema', () => {
   it('accepts new-client mode with name and phone', () => {
@@ -51,5 +51,19 @@ describe('createAppointmentSchema', () => {
     });
 
     expect(result.success).toBe(false);
+  });
+});
+
+describe('updateAppointmentSchema', () => {
+  it('accepts an optional subscriptionId for stamping a renewal', () => {
+    const result = updateAppointmentSchema.safeParse({ subscriptionId: 'abc123' });
+
+    expect(result.success).toBe(true);
+  });
+
+  it('accepts an empty object (all fields optional)', () => {
+    const result = updateAppointmentSchema.safeParse({});
+
+    expect(result.success).toBe(true);
   });
 });

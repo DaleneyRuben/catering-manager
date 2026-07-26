@@ -134,6 +134,20 @@ describe('PATCH /api/appointments/:id', () => {
 
     expect(res.status).toBe(400);
   });
+
+  it('decodes subscriptionId and passes it to the service when stamping a renewal', async () => {
+    (evaluationService.updateAppointment as jest.Mock).mockResolvedValue({
+      id: 1,
+      subscriptionId: 3,
+    });
+
+    const res = await request(app)
+      .patch(`/api/appointments/${id1}`)
+      .send({ subscriptionId: encodeId(3) });
+
+    expect(res.status).toBe(200);
+    expect(evaluationService.updateAppointment).toHaveBeenCalledWith(1, { subscriptionId: 3 });
+  });
 });
 
 describe('DELETE /api/appointments/:id', () => {
