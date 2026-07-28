@@ -10,6 +10,7 @@ export type HistoryEventType =
   | 'suspended'
   | 'reactivated'
   | 'finalized'
+  | 'renewal_deleted'
   | 'deleted';
 
 @Table({ tableName: 'client_history', timestamps: false })
