@@ -10,8 +10,11 @@ import {
   STATUS_DOT_CLASSES,
 } from '@/features/clients/constants/clientStatus';
 import { SEX_LABELS } from '@/features/clients/constants/clientOptions';
+import { findQueuedRenewal } from '@/features/clients/utils/queuedRenewal';
 import { initials } from '@/utils/string';
 import type { Client } from '@/features/clients/types';
+
+const RENEWAL_TITLE = 'Este cliente ya tiene una renovación registrada';
 
 interface Props {
   clients: Client[];
@@ -70,6 +73,7 @@ export function ClientTable({
             <tbody className="stagger-list">
               {clients.map((c) => {
                 const sub = c.subscriptions[0];
+                const queuedRenewal = findQueuedRenewal(c.subscriptions);
                 const { status } = c;
                 const price = sub ? Number(sub.plan.price) - sub.discount : 0;
                 return (
@@ -112,10 +116,21 @@ export function ClientTable({
                     <td className="px-5 py-[13px] font-mono text-[12.5px] text-ink-2 tabular-nums">
                       {formatDate(c.dateOfBirth)}
                     </td>
-                    <td className="px-5 py-[13px] font-mono text-[11.5px] text-muted tabular-nums whitespace-nowrap">
+                    <td
+                      className="px-5 py-[13px] font-mono text-[11.5px] text-muted tabular-nums whitespace-nowrap"
+                      title={queuedRenewal ? RENEWAL_TITLE : undefined}
+                    >
                       {sub
                         ? `${formatDate(sub.startDate)} → ${formatDate(sub.contractEndDate)}`
                         : '—'}
+                      {queuedRenewal && (
+                        <span className="flex items-center gap-1 mt-1 text-[10.5px] text-success-text">
+                          <Icon name="refresh" size={11} className="text-olive-600 shrink-0" />
+                          {queuedRenewal.contractEndDate
+                            ? `renovado hasta ${formatDate(queuedRenewal.contractEndDate)}`
+                            : 'renovación sin fecha'}
+                        </span>
+                      )}
                     </td>
                     <td className="px-5 py-[13px]">
                       <span
