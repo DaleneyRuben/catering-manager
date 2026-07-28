@@ -26,6 +26,10 @@ const QUEUED_STYLES = {
   text: 'text-success-text',
 };
 
+// bare, not ghost: the ghost variant carries its own olive text colour, which competes with the
+// banner's register in the stylesheet and wins regardless of the order these classes are written in
+const ACTION_STYLE = { padding: '7px 10px', fontSize: '12.5px', gap: '7px' };
+
 const formatDate = (date: string) => format(parseISO(date), 'dd/MM/yyyy');
 
 export function QueuedRenewalNotice({ renewal, isPaused, onDelete, onAssignStartDate }: Props) {
@@ -63,21 +67,21 @@ export function QueuedRenewalNotice({ renewal, isPaused, onDelete, onAssignStart
       <div className="flex flex-col items-end gap-1 shrink-0">
         {!dates && (
           <Button
-            variant="ghost"
+            variant="bare"
             onClick={onAssignStartDate}
             leftIcon="calendar"
-            className={styles.title}
-            style={{ padding: '4px 6px', fontSize: '12.5px', gap: '7px' }}
+            className={`font-semibold rounded-lg ${styles.title}`}
+            style={ACTION_STYLE}
           >
             Asignar fecha de inicio
           </Button>
         )}
         <Button
-          variant="ghost"
+          variant="bare"
           onClick={onDelete}
           leftIcon="trash"
-          className="text-danger hover:bg-danger-bg"
-          style={{ padding: '4px 6px', fontSize: '12.5px', gap: '7px' }}
+          className="font-semibold rounded-lg text-danger hover:bg-danger-bg"
+          style={ACTION_STYLE}
         >
           Eliminar renovación
         </Button>
