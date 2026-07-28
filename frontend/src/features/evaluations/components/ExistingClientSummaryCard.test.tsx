@@ -64,4 +64,53 @@ describe('ExistingClientSummaryCard', () => {
     render(<ExistingClientSummaryCard client={client} sub={sub} />);
     expect(screen.queryByText('Calle Falsa 123')).not.toBeInTheDocument();
   });
+
+  it('announces a renewal that is already registered', () => {
+    const renewal: Subscription = {
+      ...sub,
+      id: '2',
+      startDate: '2026-08-17',
+      contractEndDate: '2026-09-11',
+      duration: 20,
+    };
+
+    render(<ExistingClientSummaryCard client={client} sub={sub} queuedRenewal={renewal} />);
+
+    expect(screen.getByText('Renovación ya registrada')).toBeInTheDocument();
+    expect(
+      screen.getByText('Completo · 17/08/2026 → 11/09/2026 · 20 días hábiles'),
+    ).toBeInTheDocument();
+  });
+
+  it('says a registered renewal is still waiting for a start date', () => {
+    const renewal: Subscription = {
+      ...sub,
+      id: '2',
+      startDate: null,
+      contractEndDate: null,
+      duration: 20,
+    };
+
+    render(<ExistingClientSummaryCard client={client} sub={sub} queuedRenewal={renewal} />);
+
+    expect(
+      screen.getByText('Renovación ya registrada · sin fecha de inicio'),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText('Completo · 20 días hábiles · sin fecha de inicio'),
+    ).toBeInTheDocument();
+  });
+
+  it('shows no renewal strip when nothing is queued', () => {
+    render(<ExistingClientSummaryCard client={client} sub={sub} />);
+    expect(screen.queryByText(/Renovación ya registrada/)).not.toBeInTheDocument();
+  });
+
+  it('offers no way to delete the renewal', () => {
+    const renewal: Subscription = { ...sub, id: '2', startDate: '2026-08-17' };
+
+    render(<ExistingClientSummaryCard client={client} sub={sub} queuedRenewal={renewal} />);
+
+    expect(screen.queryByRole('button', { name: /eliminar/i })).not.toBeInTheDocument();
+  });
 });

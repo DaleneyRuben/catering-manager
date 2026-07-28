@@ -153,3 +153,55 @@ describe('EvaluationRenewalPage', () => {
     expect(await screen.findByText(/cita no encontrada/i)).toBeInTheDocument();
   });
 });
+
+const queuedRenewal = {
+  ...client.subscriptions[0],
+  id: 'sub-queued',
+  startDate: '2026-08-17',
+  contractEndDate: '2026-09-11',
+  duration: 20,
+};
+
+const withQueuedRenewal = () =>
+  renderPage({
+    '/clients/client-5': () =>
+      Promise.resolve({ ...client, subscriptions: [...client.subscriptions, queuedRenewal] }),
+  });
+
+describe('EvaluationRenewalPage with a renewal already registered', () => {
+  beforeEach(() => jest.clearAllMocks());
+
+  it('does not auto-open the renewal modal', async () => {
+    withQueuedRenewal();
+
+    await screen.findByText('Renovación ya registrada');
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  });
+
+  it('names the renewal that is already in place', async () => {
+    withQueuedRenewal();
+
+    expect(
+      await screen.findByText('Completo · 17/08/2026 → 11/09/2026 · 20 días hábiles'),
+    ).toBeInTheDocument();
+  });
+
+  it('renders the renewal action dead instead of hiding it', async () => {
+    withQueuedRenewal();
+
+    expect(await screen.findByRole('button', { name: /renovar plan/i })).toBeDisabled();
+  });
+
+  it('tells her to escalate to an administrator', async () => {
+    withQueuedRenewal();
+
+    expect(await screen.findByText(/pide a administración que la elimine/i)).toBeInTheDocument();
+  });
+
+  it('gives her no way to delete the renewal herself', async () => {
+    withQueuedRenewal();
+
+    await screen.findByText('Renovación ya registrada');
+    expect(screen.queryByRole('button', { name: /eliminar/i })).not.toBeInTheDocument();
+  });
+});
