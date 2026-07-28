@@ -35,6 +35,29 @@ describe('findQueuedRenewal', () => {
     expect(findQueuedRenewal([programado], today)).toBeNull();
   });
 
+  it('returns null when the other subscription is already finalized', () => {
+    const finalized = sub({ id: 'finalized', contractEndDate: '2026-07-27', finalizedAt: today });
+    const upcoming = sub({
+      id: 'upcoming',
+      startDate: '2026-07-30',
+      contractEndDate: '2026-08-26',
+    });
+
+    // the client's only live plan has simply not started: they are Programado, not renewed
+    expect(findQueuedRenewal([finalized, upcoming], today)).toBeNull();
+  });
+
+  it('returns null when the other subscription ended before today', () => {
+    const ended = sub({ id: 'ended', startDate: '2026-05-01', contractEndDate: '2026-07-01' });
+    const upcoming = sub({
+      id: 'upcoming',
+      startDate: '2026-07-30',
+      contractEndDate: '2026-08-26',
+    });
+
+    expect(findQueuedRenewal([ended, upcoming], today)).toBeNull();
+  });
+
   it('returns null when every subscription has already started', () => {
     expect(findQueuedRenewal([sub({ id: 'running' }), sub({ id: 'past' })], today)).toBeNull();
   });
