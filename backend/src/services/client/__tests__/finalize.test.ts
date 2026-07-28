@@ -2,6 +2,8 @@ import Client from '../../../models/Client';
 import ClientHistory from '../../../models/ClientHistory';
 import { finalize } from '../finalize';
 
+const actor = { userId: 9, username: 'ada' };
+
 jest.mock('../../../models/Client');
 jest.mock('../../../models/ClientHistory');
 jest.mock('../../../models/Subscription');
@@ -28,7 +30,7 @@ describe('finalize', () => {
     (Client.findByPk as jest.Mock).mockResolvedValue(mockInstance);
     (ClientHistory.create as jest.Mock).mockResolvedValue({});
 
-    await finalize(1);
+    await finalize(1, actor);
 
     expect(mockSub.update).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -41,10 +43,28 @@ describe('finalize', () => {
     );
   });
 
+  it('records the acting user on the history event', async () => {
+    const mockSub = { update: jest.fn().mockResolvedValue({}) };
+    const mockInstance = {
+      id: 1,
+      pausedSince: null,
+      subscriptions: [mockSub],
+      update: jest.fn().mockResolvedValue({}),
+    };
+    (Client.findByPk as jest.Mock).mockResolvedValue(mockInstance);
+    (ClientHistory.create as jest.Mock).mockResolvedValue({});
+
+    await finalize(1, actor);
+
+    expect(ClientHistory.create).toHaveBeenCalledWith(
+      expect.objectContaining({ userId: 9, username: 'ada' }),
+    );
+  });
+
   it('returns null when client not found', async () => {
     (Client.findByPk as jest.Mock).mockResolvedValue(null);
 
-    const result = await finalize(999);
+    const result = await finalize(999, actor);
 
     expect(result).toBeNull();
   });
@@ -52,6 +72,6 @@ describe('finalize', () => {
   it('propagates db errors', async () => {
     (Client.findByPk as jest.Mock).mockRejectedValue(new Error('db error'));
 
-    await expect(finalize(1)).rejects.toThrow('db error');
+    await expect(finalize(1, actor)).rejects.toThrow('db error');
   });
 });

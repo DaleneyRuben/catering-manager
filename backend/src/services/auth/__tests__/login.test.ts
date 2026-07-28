@@ -47,6 +47,20 @@ describe('login', () => {
     expect(bcrypt.compare).toHaveBeenCalledWith('correct-password', mockUser.password);
   });
 
+  it('signs the token with the username alongside userId and role', async () => {
+    (User.findOne as jest.Mock).mockResolvedValue(mockUser);
+    (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+    (jwt.sign as jest.Mock).mockReturnValue('signed-token');
+
+    await login('ada', 'correct-password');
+
+    expect(jwt.sign).toHaveBeenCalledWith(
+      { userId: 1, username: 'ada', role: ROLES.ADMIN },
+      expect.any(String),
+      expect.any(Object),
+    );
+  });
+
   it('updates lastLoginAt and the device snapshot on successful login', async () => {
     (User.findOne as jest.Mock).mockResolvedValue(mockUser);
     (bcrypt.compare as jest.Mock).mockResolvedValue(true);
