@@ -105,6 +105,52 @@ describe('QueuedRenewalNotice', () => {
     ).toBeInTheDocument();
   });
 
+  it('renders the delete action in the destructive register', () => {
+    render(
+      <QueuedRenewalNotice
+        renewal={renewal()}
+        isPaused={false}
+        onDelete={noop}
+        onAssignStartDate={noop}
+      />,
+    );
+
+    const button = screen.getByRole('button', { name: /Eliminar renovación/ });
+
+    expect(button).toHaveClass('text-danger', 'hover:bg-danger-bg');
+    // a variant colour on the same button competes with text-danger in the stylesheet and wins
+    expect(button.className).not.toMatch(/text-olive/);
+  });
+
+  it('keeps the assign-date action in the register of the banner it sits in', () => {
+    const withoutDates = renewal({ startDate: null, contractEndDate: null });
+    const { rerender } = render(
+      <QueuedRenewalNotice
+        renewal={withoutDates}
+        isPaused={false}
+        onDelete={noop}
+        onAssignStartDate={noop}
+      />,
+    );
+
+    const olive = screen.getByRole('button', { name: /Asignar fecha de inicio/ });
+    expect(olive).toHaveClass('text-olive-800');
+    expect(olive.className).not.toMatch(/text-olive-600/);
+
+    rerender(
+      <QueuedRenewalNotice
+        renewal={withoutDates}
+        isPaused
+        onDelete={noop}
+        onAssignStartDate={noop}
+      />,
+    );
+
+    const amber = screen.getByRole('button', { name: /Asignar fecha de inicio/ });
+    expect(amber).toHaveClass('text-warn-text-strong');
+    expect(amber.className).not.toMatch(/text-olive/);
+  });
+
   it('merges the pause notice into a single banner for a paused client', () => {
     render(
       <QueuedRenewalNotice renewal={renewal()} isPaused onDelete={noop} onAssignStartDate={noop} />,
