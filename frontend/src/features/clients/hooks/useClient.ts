@@ -78,6 +78,26 @@ export function useClient(id: string | number) {
     },
   });
 
+  const deleteRenewalMutation = useMutation({
+    mutationFn: (subscriptionId: string) =>
+      api.delete(`/clients/${id}/subscriptions/${subscriptionId}`),
+    onSuccess: () => {
+      invalidateClient();
+      invalidateClientList();
+      toast.success('Renovación eliminada');
+    },
+  });
+
+  const assignStartDateMutation = useMutation({
+    mutationFn: ({ subscriptionId, startDate }: { subscriptionId: string; startDate: string }) =>
+      api.patch(`/clients/${id}/subscriptions/${subscriptionId}`, { startDate }),
+    onSuccess: () => {
+      invalidateClient();
+      invalidateClientList();
+      toast.success('Fecha de inicio asignada');
+    },
+  });
+
   const deleteMutation = useMutation({
     mutationFn: () => api.delete(`/clients/${id}`),
     onSuccess: () => {
@@ -148,8 +168,9 @@ export function useClient(id: string | number) {
       toVoid(updateInstructionsMutation.mutateAsync({ subscriptionId, specialInstructions })),
     renew: (data: RenewalPayload): Promise<void> => toVoid(renewMutation.mutateAsync(data)),
     isRenewing: renewMutation.isPending,
-    deleteRenewal: (_subscriptionId: string): Promise<void> => Promise.resolve(),
-    assignStartDate: (_subscriptionId: string, _startDate: string): Promise<void> =>
-      Promise.resolve(),
+    deleteRenewal: (subscriptionId: string): Promise<void> =>
+      toVoid(deleteRenewalMutation.mutateAsync(subscriptionId)),
+    assignStartDate: (subscriptionId: string, startDate: string): Promise<void> =>
+      toVoid(assignStartDateMutation.mutateAsync({ subscriptionId, startDate })),
   };
 }
