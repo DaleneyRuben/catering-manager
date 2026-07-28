@@ -7,6 +7,7 @@ import { MODAL_CANCEL_STYLE, CONFIRM_DIALOG_STYLE } from '@ui/modalButtonStyles'
 interface Props {
   title: string;
   message: React.ReactNode;
+  details?: React.ReactNode;
   confirmLabel: string;
   icon?: string;
   variant?: 'destructive' | 'primary';
@@ -22,6 +23,7 @@ const BADGE_CLASSES = {
 export function ConfirmModal({
   title,
   message,
+  details,
   confirmLabel,
   icon,
   variant = 'destructive',
@@ -59,6 +61,7 @@ export function ConfirmModal({
           </p>
         )}
         <p className="text-[13.5px] text-ink-2 leading-[1.55]">{message}</p>
+        {details ? <div className="mt-3.5">{details}</div> : null}
         <div className="flex justify-end gap-2.5 mt-[22px]">
           <Button
             variant="secondary"
