@@ -60,23 +60,50 @@ describe('ClientHistoryTab', () => {
     expect(screen.getByText('02/07/2026 → 29/07/2026')).toBeInTheDocument();
   });
 
-  it('names the user who triggered the event', () => {
+  it('names who deleted the renewal and when it had been registered', () => {
     mockUseClientHistory.mockReturnValue({
-      history: [entry({ username: 'daleney' })],
+      history: [
+        entry({
+          eventType: 'renewal_deleted',
+          username: 'Daleney',
+          metadata: {
+            planName: 'Hiperproteico',
+            startDate: '2026-07-02',
+            contractEndDate: '2026-07-29',
+            registeredAt: '2026-06-19T09:40:00',
+          },
+        }),
+      ],
       isLoading: false,
     });
 
     render(<ClientHistoryTab clientId="1" />);
 
-    expect(screen.getByText('por daleney')).toBeInTheDocument();
+    expect(
+      screen.getByText('Eliminada por Daleney · registrada el 19/06/2026 · 09:40'),
+    ).toBeInTheDocument();
   });
 
-  it('omits the actor line for an event recorded before users were tracked', () => {
-    mockUseClientHistory.mockReturnValue({ history: [entry()], isLoading: false });
+  it('names the deleter alone when the registration time is unknown', () => {
+    mockUseClientHistory.mockReturnValue({
+      history: [entry({ eventType: 'renewal_deleted', username: 'Daleney', metadata: {} })],
+      isLoading: false,
+    });
 
     render(<ClientHistoryTab clientId="1" />);
 
-    expect(screen.queryByText(/^por /)).not.toBeInTheDocument();
+    expect(screen.getByText('Eliminada por Daleney')).toBeInTheDocument();
+  });
+
+  it('omits the line entirely on a renewal deleted before users were tracked', () => {
+    mockUseClientHistory.mockReturnValue({
+      history: [entry({ eventType: 'renewal_deleted' })],
+      isLoading: false,
+    });
+
+    render(<ClientHistoryTab clientId="1" />);
+
+    expect(screen.queryByText(/^Eliminada por/)).not.toBeInTheDocument();
   });
 
   it('formats the plan price without a dollar sign and with dot thousands separator', () => {
