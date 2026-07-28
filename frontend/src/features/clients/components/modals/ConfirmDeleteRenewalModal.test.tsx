@@ -41,6 +41,28 @@ it('describes a renewal without a start date', () => {
   expect(screen.getByText(/sin fecha de inicio/i)).toBeInTheDocument();
 });
 
+it('recaps the renewal being removed in its own block', () => {
+  render(<ConfirmDeleteRenewalModal {...baseProps} />);
+
+  expect(screen.getByText(/Renovación por eliminar/i)).toBeInTheDocument();
+  expect(
+    screen.getByText('Hiperproteico · 02/07/2026 → 29/07/2026 · 20 días hábiles'),
+  ).toBeInTheDocument();
+});
+
+it('recaps a renewal without a start date', () => {
+  render(
+    <ConfirmDeleteRenewalModal
+      {...baseProps}
+      renewal={renewal({ startDate: null, contractEndDate: null })}
+    />,
+  );
+
+  expect(
+    screen.getByText('Hiperproteico · 20 días hábiles · sin fecha de inicio'),
+  ).toBeInTheDocument();
+});
+
 it('says the running plan is not affected', () => {
   render(<ConfirmDeleteRenewalModal {...baseProps} />);
 
