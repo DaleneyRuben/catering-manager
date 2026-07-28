@@ -1,17 +1,20 @@
+import { Icon } from '@ui/Icon';
 import {
   STATUS_LABELS,
   STATUS_CLASSES,
   STATUS_DOT_CLASSES,
 } from '@/features/clients/constants/clientStatus';
+import { formatRenewalMeta } from '@/features/clients/utils/queuedRenewal';
 import { formatDate } from '@/utils/format';
 import type { Client, Subscription } from '@/features/clients/types';
 
 interface Props {
   client: Client;
   sub: Subscription | undefined;
+  queuedRenewal?: Subscription | null;
 }
 
-export function ExistingClientSummaryCard({ client, sub }: Props) {
+export function ExistingClientSummaryCard({ client, sub, queuedRenewal }: Props) {
   return (
     <div className="bg-paper border border-rule rounded-[14px] p-5">
       <div className="flex items-start justify-between gap-3 mb-4">
@@ -41,6 +44,21 @@ export function ExistingClientSummaryCard({ client, sub }: Props) {
           <p className="font-mono text-[13.5px] text-ink-2">{formatDate(sub?.contractEndDate)}</p>
         </div>
       </div>
+
+      {queuedRenewal && (
+        <div className="flex items-start gap-[11px] mt-[18px] px-[15px] py-[13px] rounded-[11px] bg-success-soft-bg border border-olive-200">
+          <Icon name="refresh" size={15} className="text-success-text shrink-0 mt-[2px]" />
+          <div className="min-w-0 flex flex-col gap-1">
+            <p className="text-[12.5px] font-semibold text-olive-800">
+              Renovación ya registrada
+              {queuedRenewal.startDate ? '' : ' · sin fecha de inicio'}
+            </p>
+            <p className="font-mono text-[11px] tabular-nums text-success-text">
+              {formatRenewalMeta(queuedRenewal)}
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -5,7 +5,9 @@ import { useAppointment } from '@/features/evaluations/hooks/useAppointment';
 import { useClient } from '@/features/clients/hooks/useClient';
 import { CLIENT_STATUS } from '@/features/clients/constants/clientStatus';
 import { RenewalModal } from '@/features/clients/components/modals/RenewalModal';
+import { findQueuedRenewal } from '@/features/clients/utils/queuedRenewal';
 import { ExistingClientSummaryCard } from '@/features/evaluations/components/ExistingClientSummaryCard';
+import { RenewalBlockedNotice } from '@/features/evaluations/components/RenewalBlockedNotice';
 
 function BackToEvaluaciones({ onClick }: { onClick: () => void }) {
   return (
@@ -55,6 +57,9 @@ export function EvaluationRenewalPage() {
   }
 
   const sub = client.subscriptions[0];
+  // the backend rejects a second upcoming subscription, so she is told before filling the form
+  // rather than after submitting it
+  const queuedRenewal = findQueuedRenewal(client.subscriptions);
 
   return (
     <div className="px-4 py-5 lg:px-[44px] lg:py-[34px]">
@@ -62,16 +67,20 @@ export function EvaluationRenewalPage() {
 
       <PageHeader label="Evaluaciones · Renovación" title={client.name} />
 
-      <ExistingClientSummaryCard client={client} sub={sub} />
+      <ExistingClientSummaryCard client={client} sub={sub} queuedRenewal={queuedRenewal} />
 
-      <RenewalModal
-        client={client}
-        sub={sub}
-        isReactivation={client.status === CLIENT_STATUS.ENDED}
-        onClose={goBack}
-        onRenew={resolveRenewal}
-        showPaidToggle
-      />
+      {queuedRenewal ? (
+        <RenewalBlockedNotice hasStartDate={Boolean(queuedRenewal.startDate)} />
+      ) : (
+        <RenewalModal
+          client={client}
+          sub={sub}
+          isReactivation={client.status === CLIENT_STATUS.ENDED}
+          onClose={goBack}
+          onRenew={resolveRenewal}
+          showPaidToggle
+        />
+      )}
     </div>
   );
 }
