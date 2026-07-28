@@ -9,17 +9,52 @@ export const INCLUDE_SUBSCRIPTION_ORDERED = [
 
 type SubscriptionPriorityLike = { id: number; paid?: boolean };
 
-// An unpaid subscription "isn't real yet" (see ADR-004/005) — the primary subscription is
-// the latest PAID one, not merely the newest by id.
+type SubscriptionDatesLike = SubscriptionPriorityLike & {
+  startDate?: string | null;
+  contractEndDate?: string | null;
+  finalizedAt?: string | null;
+};
+
+// An unpaid subscription "isn't real yet" (see ADR-004/005), so it loses to any paid one no
+// matter how new it is or what dates it covers.
+const byPaidFirst = (a: SubscriptionPriorityLike, b: SubscriptionPriorityLike): number =>
+  Number(b.paid ?? true) - Number(a.paid ?? true);
+
+// The primary subscription is the latest PAID one, not merely the newest by id.
 export function compareSubscriptionPriority(
   a: SubscriptionPriorityLike,
   b: SubscriptionPriorityLike,
 ): number {
-  return Number(b.paid ?? true) - Number(a.paid ?? true) || b.id - a.id;
+  return byPaidFirst(a, b) || b.id - a.id;
 }
 
 export function getPrimarySubscription<T extends SubscriptionPriorityLike>(subs: T[]): T | null {
   return [...subs].sort(compareSubscriptionPriority)[0] ?? null;
+}
+
+function coversDate(sub: SubscriptionDatesLike, date: string): boolean {
+  return (
+    !sub.finalizedAt &&
+    !!sub.startDate &&
+    sub.startDate <= date &&
+    !!sub.contractEndDate &&
+    sub.contractEndDate >= date
+  );
+}
+
+// A renewal registered before the current plan ends leaves the client with two live
+// subscriptions. The one that describes the client today is the one whose contract covers
+// today — the newest one is still in the future and would report the client as "programado".
+// Payment ranks above coverage: a pending unpaid renewal never describes the client, even once
+// its own contract has started.
+export function compareCurrentSubscription(
+  a: SubscriptionDatesLike,
+  b: SubscriptionDatesLike,
+  today: string,
+): number {
+  return (
+    byPaidFirst(a, b) || Number(coversDate(b, today)) - Number(coversDate(a, today)) || b.id - a.id
+  );
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -27,7 +62,9 @@ export function withStatus(client: any): Record<string, unknown> {
   const today = appToday();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const subs: any[] = client.subscriptions ?? [];
-  subs.sort(compareSubscriptionPriority);
+  subs.sort((a: SubscriptionDatesLike, b: SubscriptionDatesLike) =>
+    compareCurrentSubscription(a, b, today),
+  );
   const sub = subs[0] ?? null;
   const status = deriveClientStatus(
     {

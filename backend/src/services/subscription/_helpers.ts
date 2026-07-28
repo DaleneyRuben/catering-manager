@@ -19,6 +19,20 @@ export const findContractActiveSubscriptions = async (date: string): Promise<Sub
     order: [['createdAt', 'ASC']],
   });
 
+// A client may hold at most one upcoming subscription: one not yet started (a renewal registered
+// ahead of time) or one still waiting for a start date (a "sin fecha" renewal).
+export const findUpcomingSubscription = async (
+  clientId: number,
+  today: string,
+): Promise<Subscription | null> =>
+  Subscription.findOne({
+    where: {
+      clientId,
+      finalizedAt: null,
+      [Op.or]: [{ startDate: null }, { startDate: { [Op.gt]: today } }],
+    },
+  });
+
 // A renewal/reactivation may start before the previous contract ends; the old
 // subscription must stop being "active" or the client is double-counted in
 // delivery routes and kitchen report portions for the overlap days.

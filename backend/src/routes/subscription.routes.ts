@@ -22,5 +22,10 @@ router.patch(
   validate(updateSubscriptionSchema),
   subscriptionController.update,
 );
+router.delete(
+  '/upcoming/:id',
+  requireRole(ROLES.SUPER_ADMIN, ROLES.ADMIN),
+  subscriptionController.deleteUpcomingSubscription,
+);
 
 export default router;

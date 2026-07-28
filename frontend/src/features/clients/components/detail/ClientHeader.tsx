@@ -9,8 +9,10 @@ import {
   CLIENT_STATUS,
 } from '@/features/clients/constants/clientStatus';
 import { SEX_LABELS } from '@/features/clients/constants/clientOptions';
+import { findQueuedRenewal } from '@/features/clients/utils/queuedRenewal';
 import { initials } from '@/utils/string';
 import type { Client, ClientStatus } from '@/features/clients/types';
+import { QueuedRenewalNotice } from './QueuedRenewalNotice';
 
 const OUTLINE_BTN_CLS = 'bg-paper border border-rule hover:border-rule-2';
 const OUTLINE_OLIVE_BTN_CLS = 'bg-paper border border-olive-200 text-olive-700 hover:bg-olive-100';
@@ -33,7 +35,12 @@ interface Props {
   onFinalize: () => void;
   onBack: () => void;
   onRenew: () => void;
+  onDeleteRenewal: () => void;
+  onAssignStartDate: () => void;
 }
+
+const RENEWAL_BLOCKED_REASON = 'Ya hay una renovación registrada. Elimínala para registrar otra.';
+const NOT_STARTED_REASON = 'Renovar está inactivo hasta que el plan esté en curso.';
 
 export function ClientHeader({
   client,
@@ -45,9 +52,15 @@ export function ClientHeader({
   onFinalize,
   onBack,
   onRenew,
+  onDeleteRenewal,
+  onAssignStartDate,
 }: Props) {
   const age = differenceInYears(startOfToday(), parseISO(client.dateOfBirth));
   const sub = client.subscriptions[0];
+  const queuedRenewal = findQueuedRenewal(client.subscriptions);
+  // a Programado client's own plan is already the one upcoming subscription they are allowed
+  const notStartedReason = status === CLIENT_STATUS.FUTURE ? NOT_STARTED_REASON : null;
+  const renewalBlockedReason = queuedRenewal ? RENEWAL_BLOCKED_REASON : notStartedReason;
 
   let toggleConfig: { label: string; icon: 'calendar' | 'check'; className?: string } | null = null;
   if (status === CLIENT_STATUS.ACTIVE || status === CLIENT_STATUS.EXPIRING) {
@@ -110,7 +123,9 @@ export function ClientHeader({
             variant="secondary"
             onClick={onRenew}
             leftIcon="refresh"
-            className={OUTLINE_OLIVE_BTN_CLS}
+            disabled={Boolean(renewalBlockedReason)}
+            title={renewalBlockedReason ?? undefined}
+            className={renewalBlockedReason ? OUTLINE_BTN_CLS : OUTLINE_OLIVE_BTN_CLS}
             style={RENEW_BTN_STYLE}
           >
             {status === CLIENT_STATUS.ENDED ? 'Reactivar' : 'Renovar'}
@@ -134,7 +149,15 @@ export function ClientHeader({
         </div>
       </div>
 
-      {status === CLIENT_STATUS.PAUSED && (
+      {queuedRenewal && (
+        <QueuedRenewalNotice
+          renewal={queuedRenewal}
+          isPaused={status === CLIENT_STATUS.PAUSED}
+          onDelete={onDeleteRenewal}
+          onAssignStartDate={onAssignStartDate}
+        />
+      )}
+      {!queuedRenewal && status === CLIENT_STATUS.PAUSED && (
         <div className="flex items-center gap-2.5 bg-warn-bg border border-warn-border rounded-md px-3.5 py-3 mb-5">
           <Icon name="calendar" size={14} className="text-warn shrink-0" />
           <div>
@@ -153,6 +176,7 @@ export function ClientHeader({
             <p className="font-mono text-[11px] text-warn-text">
               El plan inicia el {format(parseISO(sub.startDate), 'dd/MM/yyyy')}.
             </p>
+            <p className="text-[12.5px] text-warn-text mt-[5px]">{NOT_STARTED_REASON}</p>
           </div>
         </div>
       )}

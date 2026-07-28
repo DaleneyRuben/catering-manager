@@ -31,6 +31,8 @@ const baseProps = {
   onFinalize: jest.fn(),
   onBack: jest.fn(),
   onRenew: jest.fn(),
+  onDeleteRenewal: jest.fn(),
+  onAssignStartDate: jest.fn(),
 };
 
 beforeEach(() => jest.clearAllMocks());
@@ -71,4 +73,73 @@ it('shows a paused warning banner when status is paused', () => {
   render(<ClientHeader {...baseProps} status="paused" />);
   expect(screen.getByText(/plan en pausa/i)).toBeInTheDocument();
   expect(screen.getByText(/reanuda el plan cuando esté listo/i)).toBeInTheDocument();
+});
+
+const subscription = (over: Record<string, unknown>) =>
+  ({
+    id: 's1',
+    startDate: '2026-06-30',
+    contractEndDate: '2026-07-28',
+    finalizedAt: null,
+    duration: 20,
+    plan: { id: 'p1', name: 'Completo', meals: [], price: 1390 },
+    ...over,
+  }) as Client['subscriptions'][number];
+
+const withQueuedRenewal = (over: Partial<Client> = {}): Client => ({
+  ...client,
+  subscriptions: [
+    subscription({ id: 'running' }),
+    subscription({ id: 'renewal', startDate: '2026-07-29', contractEndDate: '2026-08-25' }),
+  ],
+  ...over,
+});
+
+it('disables Renovar when a renewal is already registered', () => {
+  render(<ClientHeader {...baseProps} client={withQueuedRenewal()} status="expiring" />);
+
+  expect(screen.getByRole('button', { name: /renovar/i })).toBeDisabled();
+});
+
+it('shows the queued renewal notice instead of the plain pause banner', () => {
+  render(<ClientHeader {...baseProps} client={withQueuedRenewal()} status="paused" />);
+
+  expect(screen.getByText(/plan en pausa · renovación registrada/i)).toBeInTheDocument();
+  expect(screen.queryByText(/reanuda el plan cuando esté listo/i)).not.toBeInTheDocument();
+});
+
+it('disables Renovar for a client whose only plan has not started yet', () => {
+  const programado = {
+    ...client,
+    subscriptions: [subscription({ id: 'future', startDate: '2026-08-03' })],
+  };
+
+  render(<ClientHeader {...baseProps} client={programado} status="future" />);
+
+  expect(screen.getByRole('button', { name: /renovar/i })).toBeDisabled();
+  expect(
+    screen.getByText(/renovar está inactivo hasta que el plan esté en curso/i),
+  ).toBeInTheDocument();
+});
+
+it('keeps Renovar available when there is no queued renewal', () => {
+  render(<ClientHeader {...baseProps} status="expiring" />);
+
+  expect(screen.getByRole('button', { name: /renovar/i })).toBeEnabled();
+});
+
+it('calls onDeleteRenewal from the queued renewal notice', async () => {
+  const onDeleteRenewal = jest.fn();
+  render(
+    <ClientHeader
+      {...baseProps}
+      client={withQueuedRenewal()}
+      status="expiring"
+      onDeleteRenewal={onDeleteRenewal}
+    />,
+  );
+
+  await userEvent.click(screen.getByRole('button', { name: /eliminar renovación/i }));
+
+  expect(onDeleteRenewal).toHaveBeenCalled();
 });

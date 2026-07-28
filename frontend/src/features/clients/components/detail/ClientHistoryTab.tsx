@@ -123,6 +123,11 @@ export function ClientHistoryTab({
                 planName;
 
               const suspendedDates = Array.isArray(meta?.dates) ? (meta.dates as string[]) : null;
+              // a deleted renewal keeps its contract on record, muted: it never delivered
+              const deletedRange =
+                entry.eventType === 'renewal_deleted' && typeof meta?.contractEndDate === 'string'
+                  ? `${formatDate(meta.startDate as string)} → ${formatDate(meta.contractEndDate)}`
+                  : null;
 
               return (
                 <div key={entry.id} className="relative">
@@ -146,6 +151,16 @@ export function ClientHistoryTab({
                         <span className="font-mono text-[11px] text-faint">
                           {(planPrice - discount).toLocaleString('es-BO')}/mes
                         </span>
+                      )}
+                    </div>
+                  )}
+                  {entry.eventType === 'renewal_deleted' && planName && (
+                    <div className="flex items-center gap-[9px] mt-[7px]">
+                      <span className="px-[9px] py-[3px] rounded-[6px] text-[11px] font-mono bg-muted text-olive-50">
+                        {planName}
+                      </span>
+                      {deletedRange && (
+                        <span className="font-mono text-[11px] text-faint">{deletedRange}</span>
                       )}
                     </div>
                   )}

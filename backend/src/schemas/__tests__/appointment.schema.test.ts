@@ -1,5 +1,11 @@
 import { createAppointmentSchema, updateAppointmentSchema } from '../appointment.schema';
 
+// pinned: the schema rejects past dates, so a hardcoded fixture date silently expires overnight
+jest.mock('../../utils/date', () => ({
+  ...jest.requireActual('../../utils/date'),
+  appToday: jest.fn(() => '2026-07-27'),
+}));
+
 describe('createAppointmentSchema', () => {
   it('accepts new-client mode with name and phone', () => {
     const result = createAppointmentSchema.safeParse({

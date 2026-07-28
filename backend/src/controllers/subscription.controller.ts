@@ -37,4 +37,22 @@ const update = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
-export default { create, update };
+// Deletes an upcoming subscription only: the service rejects one that has already started or that
+// is the client's only live plan, so this never ends a running contract (that is Finalizar).
+const deleteUpcomingSubscription = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const subscription = await subscriptionService.deleteUpcomingSubscription(
+      decodeId(req.params.clientId),
+      decodeId(req.params.id),
+    );
+    if (!subscription) {
+      sendError(res, 'Subscription not found', 404);
+      return;
+    }
+    sendSuccess(res, subscription);
+  } catch (err) {
+    next(err);
+  }
+};
+
+export default { create, update, deleteUpcomingSubscription };

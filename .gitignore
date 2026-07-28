@@ -17,3 +17,5 @@ package-lock.json
 .vscode/
 design-export/
 package-lock.json
+
+.playwright-mcp/

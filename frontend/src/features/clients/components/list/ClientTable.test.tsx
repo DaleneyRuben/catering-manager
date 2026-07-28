@@ -63,6 +63,40 @@ describe('ClientTable', () => {
     expect(screen.getByText('Sin resultados')).toBeInTheDocument();
   });
 
+  it('marks a row whose client already has a renewal registered', () => {
+    const client = makeClient({
+      status: 'expiring',
+      subscriptions: [
+        makeSub({ startDate: '2020-01-01', contractEndDate: '2049-12-31' }),
+        makeSub({ id: 2, startDate: '2050-01-03', contractEndDate: '2050-01-30' }),
+      ],
+    });
+
+    renderTable({ clients: [client], total: 1 });
+
+    expect(screen.getByText(/renovado hasta 30\/01\/2050/i)).toBeInTheDocument();
+  });
+
+  it('marks a renewal that has no start date yet', () => {
+    const client = makeClient({
+      status: 'paused',
+      subscriptions: [
+        makeSub({ startDate: '2020-01-01', contractEndDate: '2049-12-31' }),
+        makeSub({ id: 2, startDate: null, contractEndDate: null }),
+      ],
+    });
+
+    renderTable({ clients: [client], total: 1 });
+
+    expect(screen.getByText(/renovación sin fecha/i)).toBeInTheDocument();
+  });
+
+  it('does not mark a row without a queued renewal', () => {
+    renderTable({ clients: [makeClient()], total: 1 });
+
+    expect(screen.queryByText(/renovado hasta/i)).not.toBeInTheDocument();
+  });
+
   it('renders a row per client with plan and price', () => {
     renderTable({ clients: [makeClient()], total: 1 });
     expect(screen.getByText('María García')).toBeInTheDocument();

@@ -54,6 +54,7 @@ export type HistoryEventType =
   | 'suspended'
   | 'reactivated'
   | 'finalized'
+  | 'renewal_deleted'
   | 'deleted';
 
 export interface ClientHistoryEntry {
