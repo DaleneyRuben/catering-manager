@@ -142,6 +142,9 @@ export function ClientHistoryTab({
                   <p className="text-[14px] font-semibold text-ink mt-[3px]">
                     {EVENT_LABELS[entry.eventType]}
                   </p>
+                  {entry.username && (
+                    <p className="text-[12px] text-faint mt-[2px]">por {entry.username}</p>
+                  )}
                   {showPlanDetails && (
                     <div className="flex items-center gap-[9px] mt-[7px]">
                       <span className="px-[9px] py-[3px] rounded-[6px] text-[11px] font-mono bg-olive-800 text-olive-50">

@@ -63,6 +63,8 @@ export interface ClientHistoryEntry {
   eventType: HistoryEventType;
   occurredAt: string;
   metadata: Record<string, unknown>;
+  // null on entries recorded before the acting user was tracked
+  username: string | null;
 }
 
 export type ClientStatus = 'active' | 'paused' | 'expiring' | 'ended' | 'suspended' | 'future';
