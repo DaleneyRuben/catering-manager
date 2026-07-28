@@ -1,4 +1,5 @@
 import { Op } from 'sequelize';
+import Appointment from '../../../models/Appointment';
 import ClientHistory from '../../../models/ClientHistory';
 import Plan from '../../../models/Plan';
 import Subscription from '../../../models/Subscription';
@@ -8,10 +9,13 @@ import { appToday, addDeliveryDays } from '../../../utils/date';
 jest.mock('../../../models/Subscription');
 jest.mock('../../../models/ClientHistory');
 jest.mock('../../../models/Plan');
+jest.mock('../../../models/Appointment');
 
 beforeEach(() => {
   jest.clearAllMocks();
 });
+
+const actor = { userId: 7, username: 'daleney' };
 
 const today = appToday();
 const startDate = addDeliveryDays(today, 5);
@@ -32,7 +36,7 @@ describe('deleteUpcomingSubscription', () => {
   it('returns null when the subscription does not belong to the client', async () => {
     (Subscription.findOne as jest.Mock).mockResolvedValue(null);
 
-    expect(await deleteUpcomingSubscription(1, 9)).toBeNull();
+    expect(await deleteUpcomingSubscription(1, 9, actor)).toBeNull();
     expect(ClientHistory.create).not.toHaveBeenCalled();
   });
 
@@ -42,7 +46,7 @@ describe('deleteUpcomingSubscription', () => {
     (Subscription.count as jest.Mock).mockResolvedValue(1);
     (Plan.findByPk as jest.Mock).mockResolvedValue({ id: 2, name: 'Completo', price: 5000 });
 
-    const result = await deleteUpcomingSubscription(1, 9);
+    const result = await deleteUpcomingSubscription(1, 9, actor);
 
     expect(sub.destroy).toHaveBeenCalled();
     expect(result).toMatchObject({ id: 9 });
@@ -54,7 +58,7 @@ describe('deleteUpcomingSubscription', () => {
     (Subscription.count as jest.Mock).mockResolvedValue(1);
     (Plan.findByPk as jest.Mock).mockResolvedValue({ id: 2, name: 'Completo', price: 5000 });
 
-    await deleteUpcomingSubscription(1, 9);
+    await deleteUpcomingSubscription(1, 9, actor);
 
     expect(ClientHistory.create).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -71,12 +75,64 @@ describe('deleteUpcomingSubscription', () => {
     );
   });
 
+  it('stamps the acting user on the history event', async () => {
+    const sub = upcoming();
+    (Subscription.findOne as jest.Mock).mockResolvedValue(sub);
+    (Subscription.count as jest.Mock).mockResolvedValue(1);
+    (Plan.findByPk as jest.Mock).mockResolvedValue({ id: 2, name: 'Completo', price: 5000 });
+
+    await deleteUpcomingSubscription(1, 9, actor);
+
+    expect(ClientHistory.create).toHaveBeenCalledWith(
+      expect.objectContaining({ userId: 7, username: 'daleney' }),
+    );
+  });
+
+  it('unlinks an appointment that resolved into the deleted renewal', async () => {
+    const sub = upcoming();
+    const appointment = { id: 3, date: startDate, update: jest.fn().mockResolvedValue({}) };
+    (Subscription.findOne as jest.Mock).mockResolvedValue(sub);
+    (Subscription.count as jest.Mock).mockResolvedValue(1);
+    (Plan.findByPk as jest.Mock).mockResolvedValue({ id: 2, name: 'Completo', price: 5000 });
+    (Appointment.findOne as jest.Mock).mockResolvedValue(appointment);
+
+    await deleteUpcomingSubscription(1, 9, actor);
+
+    expect(Appointment.findOne).toHaveBeenCalledWith({ where: { subscriptionId: 9 } });
+    expect(appointment.update).toHaveBeenCalledWith({ subscriptionId: null });
+  });
+
+  it('leaves the appointment date untouched so a past one is pruned instead of re-queued', async () => {
+    const sub = upcoming();
+    const appointment = { id: 3, date: '2020-01-02', update: jest.fn().mockResolvedValue({}) };
+    (Subscription.findOne as jest.Mock).mockResolvedValue(sub);
+    (Subscription.count as jest.Mock).mockResolvedValue(1);
+    (Plan.findByPk as jest.Mock).mockResolvedValue({ id: 2, name: 'Completo', price: 5000 });
+    (Appointment.findOne as jest.Mock).mockResolvedValue(appointment);
+
+    await deleteUpcomingSubscription(1, 9, actor);
+
+    expect(appointment.update).toHaveBeenCalledWith({ subscriptionId: null });
+  });
+
+  it('deletes a renewal that no appointment resolved into', async () => {
+    const sub = upcoming();
+    (Subscription.findOne as jest.Mock).mockResolvedValue(sub);
+    (Subscription.count as jest.Mock).mockResolvedValue(1);
+    (Plan.findByPk as jest.Mock).mockResolvedValue({ id: 2, name: 'Completo', price: 5000 });
+    (Appointment.findOne as jest.Mock).mockResolvedValue(null);
+
+    await deleteUpcomingSubscription(1, 9, actor);
+
+    expect(sub.destroy).toHaveBeenCalled();
+  });
+
   it('rejects with a 409 conflict when the subscription has already started', async () => {
     const running = { ...upcoming(), startDate: today };
     (Subscription.findOne as jest.Mock).mockResolvedValue(running);
     (Subscription.count as jest.Mock).mockResolvedValue(1);
 
-    await expect(deleteUpcomingSubscription(1, 9)).rejects.toMatchObject({ statusCode: 409 });
+    await expect(deleteUpcomingSubscription(1, 9, actor)).rejects.toMatchObject({ statusCode: 409 });
     expect(running.destroy).not.toHaveBeenCalled();
   });
 
@@ -85,7 +141,7 @@ describe('deleteUpcomingSubscription', () => {
     (Subscription.findOne as jest.Mock).mockResolvedValue(sub);
     (Subscription.count as jest.Mock).mockResolvedValue(0);
 
-    await expect(deleteUpcomingSubscription(1, 9)).rejects.toMatchObject({ statusCode: 409 });
+    await expect(deleteUpcomingSubscription(1, 9, actor)).rejects.toMatchObject({ statusCode: 409 });
     expect(sub.destroy).not.toHaveBeenCalled();
   });
 
@@ -95,7 +151,7 @@ describe('deleteUpcomingSubscription', () => {
     (Subscription.count as jest.Mock).mockResolvedValue(1);
     (Plan.findByPk as jest.Mock).mockResolvedValue({ id: 2, name: 'Completo', price: 5000 });
 
-    await deleteUpcomingSubscription(1, 9);
+    await deleteUpcomingSubscription(1, 9, actor);
 
     expect(Subscription.count).toHaveBeenCalledWith({
       where: {
@@ -113,7 +169,7 @@ describe('deleteUpcomingSubscription', () => {
     (Subscription.count as jest.Mock).mockResolvedValue(1);
     (Plan.findByPk as jest.Mock).mockResolvedValue({ id: 2, name: 'Completo', price: 5000 });
 
-    await deleteUpcomingSubscription(1, 9);
+    await deleteUpcomingSubscription(1, 9, actor);
 
     expect(sinFecha.destroy).toHaveBeenCalled();
   });
