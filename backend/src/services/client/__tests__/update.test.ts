@@ -93,6 +93,38 @@ describe('update', () => {
     expect(mockSub.update).toHaveBeenCalledWith({ contractEndDate: '2026-06-17' });
   });
 
+  it('extends the subscription covering today, not a queued future renewal, when resuming', async () => {
+    const futureSub = {
+      id: 8,
+      startDate: '2026-07-01',
+      duration: 10,
+      contractEndDate: '2026-07-15',
+      finalizedAt: null,
+      update: jest.fn().mockResolvedValue({}),
+    };
+    const pausedSub = {
+      id: 5,
+      startDate: '2026-06-01',
+      duration: 10,
+      contractEndDate: '2026-06-12',
+      finalizedAt: null,
+      update: jest.fn().mockResolvedValue({}),
+    };
+    const mockInstance = {
+      id: 1,
+      pausedSince: new Date('2026-06-03T15:00:00Z'),
+      subscriptions: [futureSub, pausedSub],
+      update: jest.fn().mockResolvedValue({ ...mockClient, pausedSince: null }),
+    };
+    (Client.findByPk as jest.Mock).mockResolvedValue(mockInstance);
+    (ClientHistory.create as jest.Mock).mockResolvedValue({});
+
+    await update(1, { pausedSince: null }, actor);
+
+    expect(pausedSub.update).toHaveBeenCalledWith({ contractEndDate: '2026-06-17' });
+    expect(futureSub.update).not.toHaveBeenCalled();
+  });
+
   it('does not record history when non-pause fields are updated', async () => {
     const mockInstance = {
       id: 1,
