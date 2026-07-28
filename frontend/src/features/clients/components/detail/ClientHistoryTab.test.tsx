@@ -106,6 +106,25 @@ describe('ClientHistoryTab', () => {
     expect(screen.queryByText(/^Eliminada por/)).not.toBeInTheDocument();
   });
 
+  it('names the user who triggered the event', () => {
+    mockUseClientHistory.mockReturnValue({
+      history: [entry({ username: 'daleney' })],
+      isLoading: false,
+    });
+
+    render(<ClientHistoryTab clientId="1" />);
+
+    expect(screen.getByText('por daleney')).toBeInTheDocument();
+  });
+
+  it('omits the actor line for an event recorded before users were tracked', () => {
+    mockUseClientHistory.mockReturnValue({ history: [entry()], isLoading: false });
+
+    render(<ClientHistoryTab clientId="1" />);
+
+    expect(screen.queryByText(/^por /)).not.toBeInTheDocument();
+  });
+
   it('formats the plan price without a dollar sign and with dot thousands separator', () => {
     mockUseClientHistory.mockReturnValue({
       history: [entry({ metadata: { planName: 'Hiperproteico', planPrice: 1390, discount: 0 } })],

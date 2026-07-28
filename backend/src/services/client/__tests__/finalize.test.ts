@@ -84,6 +84,38 @@ describe('finalize', () => {
     expect(unpaidSub.update).not.toHaveBeenCalled();
   });
 
+  it('finalizes the subscription covering today, not a queued future renewal', async () => {
+    const futureSub = {
+      id: 8,
+      startDate: '2026-07-01',
+      contractEndDate: '2026-07-30',
+      finalizedAt: null,
+      update: jest.fn().mockResolvedValue({}),
+    };
+    const currentSub = {
+      id: 5,
+      startDate: '2026-05-01',
+      contractEndDate: '2026-06-20',
+      finalizedAt: null,
+      update: jest.fn().mockResolvedValue({}),
+    };
+    const mockInstance = {
+      id: 1,
+      pausedSince: null,
+      subscriptions: [futureSub, currentSub],
+      update: jest.fn().mockResolvedValue({}),
+    };
+    (Client.findByPk as jest.Mock).mockResolvedValue(mockInstance);
+    (ClientHistory.create as jest.Mock).mockResolvedValue({});
+
+    await finalize(1, actor);
+
+    expect(currentSub.update).toHaveBeenCalledWith(
+      expect.objectContaining({ contractEndDate: '2026-06-05', finalizedAt: '2026-06-05' }),
+    );
+    expect(futureSub.update).not.toHaveBeenCalled();
+  });
+
   it('returns null when client not found', async () => {
     (Client.findByPk as jest.Mock).mockResolvedValue(null);
 

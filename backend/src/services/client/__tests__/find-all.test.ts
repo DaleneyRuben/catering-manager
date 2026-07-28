@@ -70,6 +70,31 @@ describe('findAll', () => {
     expect(call.replacements).toEqual({ restrictionTerm: '%maní%' });
   });
 
+  it('escapes %, _, and \\ in the q filter so they are matched literally, not as wildcards', async () => {
+    (Client.findAndCountAll as jest.Mock).mockResolvedValue({ rows: [], count: 0 });
+
+    await findAll({ q: '50%_off\\x' });
+
+    const call = (Client.findAndCountAll as jest.Mock).mock.calls[0][0];
+    const andConditions = call.where?.[Symbol.for('and')];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const qCondition = andConditions.find((c: any) => c?.[Op.or]);
+    expect(qCondition[Op.or]).toEqual([
+      { name: { [Op.iLike]: '%50\\%\\_off\\\\x%' } },
+      { address: { [Op.iLike]: '%50\\%\\_off\\\\x%' } },
+      { nit: { [Op.iLike]: '%50\\%\\_off\\\\x%' } },
+    ]);
+  });
+
+  it('escapes %, _, and \\ in the restriction filter so they are matched literally', async () => {
+    (Client.findAndCountAll as jest.Mock).mockResolvedValue({ rows: [], count: 0 });
+
+    await findAll({ restriction: '50%_off\\x' });
+
+    const call = (Client.findAndCountAll as jest.Mock).mock.calls[0][0];
+    expect(call.replacements).toEqual({ restrictionTerm: '%50\\%\\_off\\\\x%' });
+  });
+
   it('applies limit and offset from page and limit params', async () => {
     (Client.findAndCountAll as jest.Mock).mockResolvedValue({ rows: [], count: 0 });
 

@@ -7,6 +7,10 @@ import { EXPIRY_THRESHOLD_DAYS } from '../../constants/subscription.constants';
 import { CLIENT_STATUS } from '../../constants/client.constants';
 import { withStatus } from './_helpers';
 
+// Escapes LIKE metacharacters so a query like "%" or "_" is matched literally
+// instead of acting as a wildcard.
+const escapeLikePattern = (value: string) => value.replace(/[\\%_]/g, '\\$&');
+
 export interface FindAllFilters {
   status?: string;
   q?: string;
@@ -96,7 +100,7 @@ export const findAll = (filters: FindAllFilters = {}) => {
   );
 
   if (filters.q) {
-    const q = `%${filters.q}%`;
+    const q = `%${escapeLikePattern(filters.q)}%`;
     andConditions.push({
       [Op.or]: [
         { name: { [Op.iLike]: q } },
@@ -109,7 +113,7 @@ export const findAll = (filters: FindAllFilters = {}) => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const replacements: Record<string, any> = {};
   if (filters.restriction) {
-    replacements.restrictionTerm = `%${filters.restriction}%`;
+    replacements.restrictionTerm = `%${escapeLikePattern(filters.restriction)}%`;
     andConditions.push(
       literal(
         `EXISTS (SELECT 1 FROM unnest("Client"."restrictions") r WHERE r ILIKE :restrictionTerm)`,

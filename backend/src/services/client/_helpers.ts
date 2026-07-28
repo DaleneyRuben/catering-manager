@@ -57,6 +57,15 @@ export function compareCurrentSubscription(
   );
 }
 
+// Same "covers today wins, else newest" rule as compareCurrentSubscription, used wherever a
+// single subscription must be acted on (finalize, resume) instead of just displayed.
+export function getCurrentSubscription<T extends SubscriptionDatesLike>(
+  subs: T[],
+  today: string,
+): T | null {
+  return [...subs].sort((a, b) => compareCurrentSubscription(a, b, today))[0] ?? null;
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function withStatus(client: any): Record<string, unknown> {
   const today = appToday();
