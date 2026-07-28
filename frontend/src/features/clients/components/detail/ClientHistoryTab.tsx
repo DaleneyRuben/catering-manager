@@ -128,6 +128,16 @@ export function ClientHistoryTab({
                 entry.eventType === 'renewal_deleted' && typeof meta?.contractEndDate === 'string'
                   ? `${formatDate(meta.startDate as string)} → ${formatDate(meta.contractEndDate)}`
                   : null;
+              // the deletion is credited to whoever triggered it and points back at the moment the
+              // renewal was registered, which is what ties this row to the plan_renewed one above
+              const deletionCredit =
+                entry.eventType === 'renewal_deleted' && entry.username
+                  ? `Eliminada por ${entry.username}${
+                      typeof meta?.registeredAt === 'string'
+                        ? ` · registrada el ${formatEventDateTime(meta.registeredAt)}`
+                        : ''
+                    }`
+                  : null;
 
               return (
                 <div key={entry.id} className="relative">
@@ -142,9 +152,6 @@ export function ClientHistoryTab({
                   <p className="text-[14px] font-semibold text-ink mt-[3px]">
                     {EVENT_LABELS[entry.eventType]}
                   </p>
-                  {entry.username && (
-                    <p className="text-[12px] text-faint mt-[2px]">por {entry.username}</p>
-                  )}
                   {showPlanDetails && (
                     <div className="flex items-center gap-[9px] mt-[7px]">
                       <span className="px-[9px] py-[3px] rounded-[6px] text-[11px] font-mono bg-olive-800 text-olive-50">
@@ -166,6 +173,11 @@ export function ClientHistoryTab({
                         <span className="font-mono text-[11px] text-faint">{deletedRange}</span>
                       )}
                     </div>
+                  )}
+                  {deletionCredit && (
+                    <p className="font-mono text-[10.5px] text-empty-text mt-[6px]">
+                      {deletionCredit}
+                    </p>
                   )}
                   {suspendedDates && suspendedDates.length > 0 && (
                     <div className="flex flex-wrap gap-[6px] mt-[7px]">
