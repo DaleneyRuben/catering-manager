@@ -1,9 +1,11 @@
 import { Op } from 'sequelize';
+import Appointment from '../../models/Appointment';
 import ClientHistory from '../../models/ClientHistory';
 import Plan from '../../models/Plan';
 import Subscription from '../../models/Subscription';
 import { appToday } from '../../utils/date';
 import { ConflictError } from '../../utils/errors';
+import { Actor } from '../../types/actor';
 
 // Only a renewal registered ahead of time can be removed: the running plan is ended with
 // Finalizar plan, and a client whose only live plan has not started yet keeps it — deleting it
@@ -11,6 +13,7 @@ import { ConflictError } from '../../utils/errors';
 export const deleteUpcomingSubscription = async (
   clientId: number,
   subscriptionId: number,
+  actor: Actor,
 ): Promise<Subscription | null> => {
   const subscription = await Subscription.findOne({ where: { id: subscriptionId, clientId } });
   if (!subscription) return null;
@@ -37,6 +40,13 @@ export const deleteUpcomingSubscription = async (
   }
 
   const plan = await Plan.findByPk(subscription.planId);
+
+  // An appointment that resolved into this renewal would otherwise point at a destroyed row.
+  // Only the link is cleared: the date stays as it was, so a past appointment is pruned on the
+  // next queue read rather than pushed back onto the nutritionist's list.
+  const appointment = await Appointment.findOne({ where: { subscriptionId } });
+  if (appointment) await appointment.update({ subscriptionId: null });
+
   await subscription.destroy();
 
   await ClientHistory.create({
@@ -51,6 +61,8 @@ export const deleteUpcomingSubscription = async (
       duration: subscription.duration,
       discount: subscription.discount,
     },
+    userId: actor.userId,
+    username: actor.username,
   });
 
   return subscription;
