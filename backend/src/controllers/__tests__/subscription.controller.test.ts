@@ -2,6 +2,7 @@ import request from 'supertest';
 import app from '../../app';
 import * as subscriptionService from '../../services/subscription';
 import { encodeId } from '../../utils/sqids';
+import { ConflictError } from '../../utils/errors';
 
 jest.mock('../../services/subscription');
 jest.mock('../../database/sequelize', () => ({ __esModule: true, default: { query: jest.fn() } }));
@@ -162,6 +163,44 @@ describe('PATCH /api/clients/:clientId/subscriptions/:id', () => {
     const res = await request(app)
       .patch(`/api/clients/${id1}/subscriptions/${id1}`)
       .send({ contractEndDate: '2026-06-30' });
+
+    expect(res.status).toBe(500);
+  });
+});
+
+describe('DELETE /api/clients/:clientId/subscriptions/:id', () => {
+  it('returns 200 with the deleted subscription', async () => {
+    (subscriptionService.deleteRenewal as jest.Mock).mockResolvedValue(mockSubscription);
+
+    const res = await request(app).delete(`/api/clients/${id1}/subscriptions/${id1}`);
+
+    expect(res.status).toBe(200);
+    expect(subscriptionService.deleteRenewal).toHaveBeenCalledWith(1, 1);
+  });
+
+  it('returns 404 when the subscription does not exist', async () => {
+    (subscriptionService.deleteRenewal as jest.Mock).mockResolvedValue(null);
+
+    const res = await request(app).delete(`/api/clients/${id1}/subscriptions/${id999}`);
+
+    expect(res.status).toBe(404);
+  });
+
+  it('returns 409 with the message when the subscription cannot be deleted', async () => {
+    (subscriptionService.deleteRenewal as jest.Mock).mockRejectedValue(
+      new ConflictError('Solo puedes eliminar una renovación que aún no ha empezado.'),
+    );
+
+    const res = await request(app).delete(`/api/clients/${id1}/subscriptions/${id1}`);
+
+    expect(res.status).toBe(409);
+    expect(res.body.message).toBe('Solo puedes eliminar una renovación que aún no ha empezado.');
+  });
+
+  it('returns 500 when service throws', async () => {
+    (subscriptionService.deleteRenewal as jest.Mock).mockRejectedValue(new Error('db error'));
+
+    const res = await request(app).delete(`/api/clients/${id1}/subscriptions/${id1}`);
 
     expect(res.status).toBe(500);
   });
