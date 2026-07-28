@@ -26,8 +26,9 @@ it('names the contract that will be removed', () => {
   render(<ConfirmDeleteRenewalModal {...baseProps} />);
 
   expect(screen.getByText(/Pablo Villarroel/)).toBeInTheDocument();
-  expect(screen.getByText(/02\/07\/2026 → 29\/07\/2026/)).toBeInTheDocument();
-  expect(screen.getByText(/Hiperproteico/)).toBeInTheDocument();
+  // once in the sentence, once in the recap block
+  expect(screen.getAllByText(/02\/07\/2026 → 29\/07\/2026/)).toHaveLength(2);
+  expect(screen.getAllByText(/Hiperproteico/)).toHaveLength(2);
 });
 
 it('describes a renewal without a start date', () => {
@@ -38,7 +39,7 @@ it('describes a renewal without a start date', () => {
     />,
   );
 
-  expect(screen.getByText(/sin fecha de inicio/i)).toBeInTheDocument();
+  expect(screen.getAllByText(/sin fecha de inicio/i)).toHaveLength(2);
 });
 
 it('recaps the renewal being removed in its own block', () => {

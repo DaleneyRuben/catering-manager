@@ -1,7 +1,21 @@
-import { format } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 import type { Subscription } from '@/features/clients/types';
 
 const isLive = (sub: Subscription) => !sub.finalizedAt;
+
+const formatDate = (date: string) => format(parseISO(date), 'dd/MM/yyyy');
+
+// One line, two readers: the header banner and the delete confirmation, which must recap exactly
+// the renewal the banner announces.
+export function formatRenewalMeta(renewal: Subscription): string {
+  const { startDate, contractEndDate, duration, plan } = renewal;
+  const contract =
+    startDate && contractEndDate
+      ? `${formatDate(startDate)} → ${formatDate(contractEndDate)} · ${duration} días hábiles`
+      : `${duration} días hábiles · sin fecha de inicio`;
+
+  return `${plan.name} · ${contract}`;
+}
 
 const coversToday = (sub: Subscription, today: string) =>
   isLive(sub) &&

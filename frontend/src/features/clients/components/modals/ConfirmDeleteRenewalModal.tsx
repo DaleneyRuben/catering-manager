@@ -1,5 +1,6 @@
 import { ConfirmModal } from '@ui/ConfirmModal';
 import { formatDate } from '@/utils/format';
+import { formatRenewalMeta } from '@/features/clients/utils/queuedRenewal';
 import type { Subscription } from '@/features/clients/types';
 
 interface Props {
@@ -25,6 +26,16 @@ export function ConfirmDeleteRenewalModal({ clientName, renewal, onClose, onConf
           <span className="font-mono">{contract}</span> del plan {renewal.plan.name}. El plan
           vigente no cambia y queda registrada en el historial.
         </>
+      }
+      details={
+        <div className="rounded-[10px] border border-hairline bg-empty-bg px-3.5 py-[11px]">
+          <p className="font-mono text-[9.5px] tracking-[0.12em] uppercase text-empty-text mb-1.5">
+            Renovación por eliminar
+          </p>
+          <p className="font-mono text-[11.5px] tabular-nums text-muted">
+            {formatRenewalMeta(renewal)}
+          </p>
+        </div>
       }
       confirmLabel="Eliminar renovación"
       onClose={onClose}

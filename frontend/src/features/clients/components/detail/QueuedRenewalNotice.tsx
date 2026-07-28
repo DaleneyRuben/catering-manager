@@ -1,6 +1,7 @@
 import { format, parseISO } from 'date-fns';
 import { Icon } from '@ui/Icon';
 import { Button } from '@ui/Button';
+import { formatRenewalMeta } from '@/features/clients/utils/queuedRenewal';
 import type { Subscription } from '@/features/clients/types';
 
 interface Props {
@@ -45,10 +46,6 @@ export function QueuedRenewalNotice({ renewal, isPaused, onDelete, onAssignStart
     : 'Renovación registrada · sin fecha de inicio';
   const title = isPaused ? pausedTitle : queuedTitle;
 
-  const contract = dates
-    ? `${formatDate(dates.startDate)} → ${formatDate(dates.contractEndDate)} · ${renewal.duration} días hábiles`
-    : `${renewal.duration} días hábiles · sin fecha de inicio`;
-
   const pausePrefix = isPaused ? 'El cliente no recibe entregas. ' : '';
   const body = dates
     ? `${pausePrefix}Renovar está inactivo: un cliente puede tener una sola renovación pendiente. Elimínala si necesitas registrarla de nuevo.`
@@ -60,7 +57,7 @@ export function QueuedRenewalNotice({ renewal, isPaused, onDelete, onAssignStart
       <div className="flex-1 min-w-0">
         <p className={`text-[13px] font-semibold ${styles.title}`}>{title}</p>
         <p className={`font-mono text-[11px] tabular-nums mt-[3px] ${styles.text}`}>
-          {renewal.plan.name} · {contract}
+          {formatRenewalMeta(renewal)}
         </p>
         <p className={`text-[12.5px] mt-[6px] ${styles.text}`}>{body}</p>
       </div>
