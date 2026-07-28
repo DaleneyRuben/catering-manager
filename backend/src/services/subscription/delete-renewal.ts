@@ -1,3 +1,4 @@
+import { Op } from 'sequelize';
 import ClientHistory from '../../models/ClientHistory';
 import Plan from '../../models/Plan';
 import Subscription from '../../models/Subscription';
@@ -5,8 +6,8 @@ import { appToday } from '../../utils/date';
 import { ConflictError } from '../../utils/errors';
 
 // Only a renewal registered ahead of time can be removed: the running plan is ended with
-// Finalizar plan, and a client whose single subscription is still upcoming keeps it — deleting
-// it would leave them with no plan at all instead of one that ended.
+// Finalizar plan, and a client whose only live plan has not started yet keeps it — deleting it
+// would leave them with no plan at all instead of one that ended.
 export const deleteRenewal = async (
   clientId: number,
   subscriptionId: number,
@@ -21,9 +22,17 @@ export const deleteRenewal = async (
     throw new ConflictError('Solo puedes eliminar una renovación que aún no ha empezado.');
   }
 
-  if ((await Subscription.count({ where: { clientId } })) < 2) {
+  const runningPlans = await Subscription.count({
+    where: {
+      clientId,
+      finalizedAt: null,
+      startDate: { [Op.lte]: today },
+      contractEndDate: { [Op.gte]: today },
+    },
+  });
+  if (runningPlans === 0) {
     throw new ConflictError(
-      'El cliente no tiene otro plan. Finaliza o elimina al cliente en lugar de eliminar su única suscripción.',
+      'El cliente no tiene un plan en curso. Finaliza o elimina al cliente en lugar de eliminar su única suscripción.',
     );
   }
 
