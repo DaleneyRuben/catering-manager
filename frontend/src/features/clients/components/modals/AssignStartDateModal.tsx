@@ -57,7 +57,7 @@ export function AssignStartDateModal({ clientName, planName, duration, onClose, 
               setError(null);
             }}
             hasError={Boolean(error)}
-            disabled={{ before: startOfTomorrow() }}
+            disabled={[{ before: startOfTomorrow() }, { dayOfWeek: [0, 6] }]}
           />
         </Field>
 

@@ -18,6 +18,7 @@ import { ClientDeliveryTab } from '@/features/clients/components/detail/ClientDe
 import { ClientHeader } from '@/features/clients/components/detail/ClientHeader';
 import { RenewalModal } from '@/features/clients/components/modals/RenewalModal';
 import { AssignStartDateModal } from '@/features/clients/components/modals/AssignStartDateModal';
+import { ConfirmDeleteRenewalModal } from '@/features/clients/components/modals/ConfirmDeleteRenewalModal';
 import { ClientDetailSkeleton } from '@/features/clients/components/detail/ClientDetailSkeleton';
 
 type TabId = 'overview' | 'plan' | 'entregas' | 'history';
@@ -192,17 +193,9 @@ export function ClientDetailPage() {
         />
       )}
       {deleteRenewalOpen && queuedRenewal && (
-        <ConfirmModal
-          title="Eliminar renovación"
-          message={
-            <>
-              ¿Seguro que quieres eliminar la renovación de{' '}
-              <span className="font-semibold">{client.name}</span>? Se elimina el contrato del plan{' '}
-              {queuedRenewal.plan.name}. El plan vigente no cambia y queda registrada en el
-              historial.
-            </>
-          }
-          confirmLabel="Eliminar renovación"
+        <ConfirmDeleteRenewalModal
+          clientName={client.name}
+          renewal={queuedRenewal}
           onClose={() => setDeleteRenewalOpen(false)}
           onConfirm={() => deleteRenewal(queuedRenewal.id)}
         />
