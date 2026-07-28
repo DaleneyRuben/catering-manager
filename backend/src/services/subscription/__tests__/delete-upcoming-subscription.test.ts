@@ -75,6 +75,21 @@ describe('deleteUpcomingSubscription', () => {
     );
   });
 
+  it('records when the deleted renewal had been registered', async () => {
+    const sub = { ...upcoming(), createdAt: new Date('2026-06-19T09:40:00Z') };
+    (Subscription.findOne as jest.Mock).mockResolvedValue(sub);
+    (Subscription.count as jest.Mock).mockResolvedValue(1);
+    (Plan.findByPk as jest.Mock).mockResolvedValue({ id: 2, name: 'Completo', price: 5000 });
+
+    await deleteUpcomingSubscription(1, 9, actor);
+
+    expect(ClientHistory.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        metadata: expect.objectContaining({ registeredAt: sub.createdAt }),
+      }),
+    );
+  });
+
   it('stamps the acting user on the history event', async () => {
     const sub = upcoming();
     (Subscription.findOne as jest.Mock).mockResolvedValue(sub);
