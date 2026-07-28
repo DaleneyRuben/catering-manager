@@ -47,9 +47,13 @@ export const findAll = (filters: FindAllFilters = {}) => {
       break;
     case CLIENT_STATUS.EXPIRING:
       clientWhere.pausedSince = { [Op.is]: null };
-      subscriptionWhere.contractEndDate = { [Op.between]: [todayStr, thresholdStr] };
       subscriptionWhere.finalizedAt = { [Op.is]: null };
       andConditions.push(
+        // filtered on the client, not on the join: a queued renewal ends beyond the expiry
+        // window and constraining the join would drop it from the payload
+        literal(
+          `EXISTS (SELECT 1 FROM subscriptions se WHERE se."clientId" = "Client"."id" AND se."contractEndDate" BETWEEN '${todayStr}' AND '${thresholdStr}' AND se."finalizedAt" IS NULL)`,
+        ),
         literal(
           `"Client"."id" NOT IN (SELECT s2."clientId" FROM subscriptions s2 WHERE '${todayStr}'::date = ANY(s2."suspendedDates") AND s2."contractEndDate" >= '${todayStr}')`,
         ),

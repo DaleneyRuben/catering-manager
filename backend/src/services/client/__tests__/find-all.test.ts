@@ -124,6 +124,21 @@ describe('findAll', () => {
     },
   );
 
+  it('status=expiring returns the queued renewal alongside the expiring subscription', async () => {
+    (Client.findAndCountAll as jest.Mock).mockResolvedValue({ rows: [], count: 0 });
+
+    await findAll({ status: 'expiring' });
+
+    const call = (Client.findAndCountAll as jest.Mock).mock.calls[0][0];
+    // the renewal ends beyond the expiry window, so constraining the join would drop it
+    expect(call.include[0].where?.contractEndDate).toBeUndefined();
+    const andConditions = call.where?.[Symbol.for('and')];
+    const expiringCondition = andConditions?.find((c: { val?: string }) =>
+      c?.val?.includes?.('"contractEndDate" BETWEEN'),
+    );
+    expect(expiringCondition).toBeDefined();
+  });
+
   it('status=paused does not catch a client whose running plan covers today', async () => {
     (Client.findAndCountAll as jest.Mock).mockResolvedValue({ rows: [], count: 0 });
 

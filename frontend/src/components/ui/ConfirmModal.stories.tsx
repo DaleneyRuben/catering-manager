@@ -33,6 +33,28 @@ export const WithoutIcon: Story = {
   ),
 };
 
+export const WithDetails: Story = {
+  render: () => (
+    <ConfirmModal
+      title="Eliminar renovación"
+      message="Se elimina el contrato del plan Hiperproteico. El plan vigente no cambia."
+      details={
+        <div className="rounded-[10px] border border-hairline bg-empty-bg px-3.5 py-[11px]">
+          <p className="font-mono text-[9.5px] tracking-[0.12em] uppercase text-empty-text mb-1.5">
+            Renovación por eliminar
+          </p>
+          <p className="font-mono text-[11.5px] tabular-nums text-muted">
+            Hiperproteico · 02/07/2026 → 29/07/2026 · 20 días hábiles
+          </p>
+        </div>
+      }
+      confirmLabel="Eliminar renovación"
+      onClose={() => {}}
+      onConfirm={async () => {}}
+    />
+  ),
+};
+
 export const PrimaryVariant: Story = {
   render: () => (
     <ConfirmModal

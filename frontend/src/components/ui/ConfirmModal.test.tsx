@@ -20,6 +20,24 @@ describe('ConfirmModal', () => {
     expect(screen.getByText('¿Seguro que querés eliminar este plan?')).toBeInTheDocument();
   });
 
+  it('renders a details block below the message when one is given', () => {
+    render(
+      <ConfirmModal
+        title="Eliminar plan"
+        message="¿Seguro?"
+        details={<span>Plan Ligero · 20 días</span>}
+        confirmLabel="Eliminar"
+        onClose={noop}
+        onConfirm={noopAsync}
+      />,
+    );
+
+    const details = screen.getByText('Plan Ligero · 20 días');
+    expect(details).toBeInTheDocument();
+    // a block inside the message paragraph would be invalid markup
+    expect(details.closest('p')).toBeNull();
+  });
+
   it('renders a danger icon badge when an icon is given', () => {
     render(
       <ConfirmModal

@@ -4,10 +4,11 @@ import api from '@/services/api';
 import { useClient } from '@/features/clients/hooks/useClient';
 
 jest.mock('@/services/api', () => ({
-  default: { get: jest.fn(), patch: jest.fn() },
+  default: { get: jest.fn(), patch: jest.fn(), delete: jest.fn() },
 }));
 const mockGet = api.get as jest.Mock;
 const mockPatch = api.patch as jest.Mock;
+const mockDelete = api.delete as jest.Mock;
 
 const client1 = {
   id: 1,
@@ -81,5 +82,29 @@ describe('useClient', () => {
     const returned = await result.current.update({ isActive: false });
 
     expect(returned).toEqual(updated);
+  });
+
+  it('deleteRenewal calls DELETE on the queued subscription', async () => {
+    mockGet.mockResolvedValue(client1);
+    mockDelete.mockResolvedValue({});
+    const { result } = renderHook(() => useClient('1'), { wrapper: makeWrapper() });
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    await result.current.deleteRenewal('sub9');
+
+    expect(mockDelete).toHaveBeenCalledWith('/clients/1/subscriptions/upcoming/sub9');
+  });
+
+  it('assignStartDate patches the subscription with the chosen start date', async () => {
+    mockGet.mockResolvedValue(client1);
+    mockPatch.mockResolvedValue({});
+    const { result } = renderHook(() => useClient('1'), { wrapper: makeWrapper() });
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    await result.current.assignStartDate('sub9', '2026-08-03');
+
+    expect(mockPatch).toHaveBeenCalledWith('/clients/1/subscriptions/sub9', {
+      startDate: '2026-08-03',
+    });
   });
 });

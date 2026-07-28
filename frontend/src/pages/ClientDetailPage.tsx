@@ -5,6 +5,7 @@ import { ConfirmModal } from '@ui/ConfirmModal';
 import { Tabs } from '@ui/Tabs';
 import { remainingDeliveryDays } from '@/utils/businessDays';
 import { useClient } from '@/features/clients/hooks/useClient';
+import { findQueuedRenewal } from '@/features/clients/utils/queuedRenewal';
 import { CLIENT_STATUS } from '@/features/clients/constants/clientStatus';
 import { ClientEditModal } from '@/features/clients/components/modals/ClientEditModal';
 import type { EditDraft } from '@/features/clients/components/modals/ClientEditModal';
@@ -16,6 +17,8 @@ import { ClientPlanTab } from '@/features/clients/components/detail/ClientPlanTa
 import { ClientDeliveryTab } from '@/features/clients/components/detail/ClientDeliveryTab';
 import { ClientHeader } from '@/features/clients/components/detail/ClientHeader';
 import { RenewalModal } from '@/features/clients/components/modals/RenewalModal';
+import { AssignStartDateModal } from '@/features/clients/components/modals/AssignStartDateModal';
+import { ConfirmDeleteRenewalModal } from '@/features/clients/components/modals/ConfirmDeleteRenewalModal';
 import { ClientDetailSkeleton } from '@/features/clients/components/detail/ClientDetailSkeleton';
 
 type TabId = 'overview' | 'plan' | 'entregas' | 'history';
@@ -42,6 +45,8 @@ export function ClientDetailPage() {
     updateBilling,
     updateInstructions,
     renew,
+    deleteRenewal,
+    assignStartDate,
   } = useClient(id!);
   const [tab, setTab] = useState<TabId>('overview');
   const [editOpen, setEditOpen] = useState(false);
@@ -49,6 +54,8 @@ export function ClientDetailPage() {
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [suspendOpen, setSuspendOpen] = useState(false);
   const [renewOpen, setRenewOpen] = useState(false);
+  const [deleteRenewalOpen, setDeleteRenewalOpen] = useState(false);
+  const [assignStartDateOpen, setAssignStartDateOpen] = useState(false);
 
   const handleToggleActive = async () => {
     if (!client) return;
@@ -84,6 +91,7 @@ export function ClientDetailPage() {
   }
 
   const sub = client.subscriptions[0];
+  const queuedRenewal = findQueuedRenewal(client.subscriptions);
   const { status } = client;
   const isEnded = status === CLIENT_STATUS.ENDED;
   const visibleTabs = isEnded ? TABS.filter((t) => t.id !== 'plan' && t.id !== 'entregas') : TABS;
@@ -105,6 +113,8 @@ export function ClientDetailPage() {
         onFinalize={() => setFinalizeOpen(true)}
         onBack={() => navigate(-1)}
         onRenew={() => setRenewOpen(true)}
+        onDeleteRenewal={() => setDeleteRenewalOpen(true)}
+        onAssignStartDate={() => setAssignStartDateOpen(true)}
       />
 
       <Tabs
@@ -180,6 +190,26 @@ export function ClientDetailPage() {
           clientName={client.name}
           onClose={() => setSuspendOpen(false)}
           onSave={(dates) => updateSuspensions(sub.id, dates)}
+        />
+      )}
+      {deleteRenewalOpen && queuedRenewal && (
+        <ConfirmDeleteRenewalModal
+          clientName={client.name}
+          renewal={queuedRenewal}
+          onClose={() => setDeleteRenewalOpen(false)}
+          onConfirm={() => deleteRenewal(queuedRenewal.id)}
+        />
+      )}
+      {assignStartDateOpen && queuedRenewal && (
+        <AssignStartDateModal
+          clientName={client.name}
+          planName={queuedRenewal.plan.name}
+          duration={queuedRenewal.duration}
+          onClose={() => setAssignStartDateOpen(false)}
+          onAssign={async (startDate) => {
+            await assignStartDate(queuedRenewal.id, startDate);
+            setAssignStartDateOpen(false);
+          }}
         />
       )}
       {renewOpen && (

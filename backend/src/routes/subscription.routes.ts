@@ -7,5 +7,6 @@ const router = Router({ mergeParams: true });
 
 router.post('/', validate(createSubscriptionSchema), subscriptionController.create);
 router.patch('/:id', validate(updateSubscriptionSchema), subscriptionController.update);
+router.delete('/upcoming/:id', subscriptionController.deleteUpcomingSubscription);
 
 export default router;

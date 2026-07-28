@@ -166,6 +166,60 @@ describe('create', () => {
   });
 });
 
+describe('create with an upcoming subscription already registered', () => {
+  it('rejects with a 409 conflict when the client already has a future subscription', async () => {
+    (Client.findByPk as jest.Mock).mockResolvedValue({ id: 1 });
+    (Subscription.findOne as jest.Mock).mockResolvedValue({ id: 5, startDate: '2026-08-03' });
+
+    await expect(
+      create(1, {
+        planId: 2,
+        startDate,
+        contractDate: today,
+        duration: 20,
+        renewalType: 'renewal',
+      }),
+    ).rejects.toMatchObject({ statusCode: 409 });
+  });
+
+  it('does not create a subscription when the client already has an upcoming one', async () => {
+    (Client.findByPk as jest.Mock).mockResolvedValue({ id: 1 });
+    (Subscription.findOne as jest.Mock).mockResolvedValue({ id: 5, startDate: null });
+
+    await expect(
+      create(1, { planId: 2, startDate, contractDate: today, duration: 20 }),
+    ).rejects.toThrow();
+
+    expect(Subscription.create).not.toHaveBeenCalled();
+  });
+
+  it('looks only for non-finalized subscriptions with no start date or a future one', async () => {
+    (Client.findByPk as jest.Mock).mockResolvedValue({ id: 1 });
+    (Subscription.findOne as jest.Mock).mockResolvedValue(null);
+    (Subscription.create as jest.Mock).mockResolvedValue(mockSubscription);
+
+    await create(1, { planId: 2, startDate, contractDate: today, duration: 20 });
+
+    expect(Subscription.findOne).toHaveBeenCalledWith({
+      where: {
+        clientId: 1,
+        finalizedAt: null,
+        [Op.or]: [{ startDate: null }, { startDate: { [Op.gt]: today } }],
+      },
+    });
+  });
+
+  it('creates the subscription when no upcoming one exists', async () => {
+    (Client.findByPk as jest.Mock).mockResolvedValue({ id: 1 });
+    (Subscription.findOne as jest.Mock).mockResolvedValue(null);
+    (Subscription.create as jest.Mock).mockResolvedValue(mockSubscription);
+
+    const result = await create(1, { planId: 2, startDate, contractDate: today, duration: 20 });
+
+    expect(result).toMatchObject({ clientId: 1 });
+  });
+});
+
 describe('create with overlapping prior subscriptions', () => {
   it('finalizes prior non-finalized subscriptions overlapping the new startDate', async () => {
     const oldSub = { id: 7, update: jest.fn().mockResolvedValue({}) };
