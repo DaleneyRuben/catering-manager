@@ -148,5 +148,8 @@ export function useClient(id: string | number) {
       toVoid(updateInstructionsMutation.mutateAsync({ subscriptionId, specialInstructions })),
     renew: (data: RenewalPayload): Promise<void> => toVoid(renewMutation.mutateAsync(data)),
     isRenewing: renewMutation.isPending,
+    deleteRenewal: (_subscriptionId: string): Promise<void> => Promise.resolve(),
+    assignStartDate: (_subscriptionId: string, _startDate: string): Promise<void> =>
+      Promise.resolve(),
   };
 }
