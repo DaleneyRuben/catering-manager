@@ -67,7 +67,7 @@ describe('ClientTable', () => {
     const client = makeClient({
       status: 'expiring',
       subscriptions: [
-        makeSub(),
+        makeSub({ startDate: '2020-01-01', contractEndDate: '2049-12-31' }),
         makeSub({ id: 2, startDate: '2050-01-03', contractEndDate: '2050-01-30' }),
       ],
     });
@@ -80,7 +80,10 @@ describe('ClientTable', () => {
   it('marks a renewal that has no start date yet', () => {
     const client = makeClient({
       status: 'paused',
-      subscriptions: [makeSub(), makeSub({ id: 2, startDate: null, contractEndDate: null })],
+      subscriptions: [
+        makeSub({ startDate: '2020-01-01', contractEndDate: '2049-12-31' }),
+        makeSub({ id: 2, startDate: null, contractEndDate: null }),
+      ],
     });
 
     renderTable({ clients: [client], total: 1 });
