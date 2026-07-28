@@ -2,7 +2,11 @@ import { Table, Column, Model, DataType, ForeignKey, BelongsTo } from 'sequelize
 import Client from './Client';
 import Plan from './Plan';
 
-@Table({ tableName: 'subscriptions', timestamps: true, paranoid: true })
+// not paranoid, unlike Client: a subscription is only ever deleted when it should never have
+// existed (an abandoned unpaid resolution, a renewal registered by mistake), and client_history
+// keeps the record. Leaving rows behind would also skew client/find-all.ts, which counts
+// subscriptions through raw subqueries that no deletedAt scope applies to.
+@Table({ tableName: 'subscriptions', timestamps: true })
 class Subscription extends Model {
   @ForeignKey(() => Client)
   @Column({ type: DataType.INTEGER, allowNull: false })

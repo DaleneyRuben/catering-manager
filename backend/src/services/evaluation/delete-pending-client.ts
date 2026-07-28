@@ -8,7 +8,7 @@ export const deletePendingClient = async (clientId: number, actor: Actor) => {
   const subscriptionIds = subscriptions.map((s) => s.id);
   if (subscriptionIds.length) {
     await Appointment.destroy({ where: { subscriptionId: subscriptionIds } });
-    await Subscription.destroy({ where: { id: subscriptionIds }, force: true });
+    await Subscription.destroy({ where: { id: subscriptionIds } });
   }
 
   return softDelete(clientId, actor);

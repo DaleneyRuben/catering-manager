@@ -22,7 +22,7 @@ export const revertPendingRenewal = async (clientId: number) => {
     });
   }
 
-  await subscription.destroy({ force: true });
+  await subscription.destroy();
 
   return subscription;
 };
