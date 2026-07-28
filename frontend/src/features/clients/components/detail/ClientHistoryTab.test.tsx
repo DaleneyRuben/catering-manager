@@ -37,6 +37,28 @@ describe('ClientHistoryTab', () => {
     expect(screen.getByText('19/06/2026 · 14:20')).toBeInTheDocument();
   });
 
+  it('shows a deleted renewal with the contract that was removed', () => {
+    mockUseClientHistory.mockReturnValue({
+      history: [
+        entry({
+          eventType: 'renewal_deleted',
+          metadata: {
+            planName: 'Hiperproteico',
+            startDate: '2026-07-02',
+            contractEndDate: '2026-07-29',
+          },
+        }),
+      ],
+      isLoading: false,
+    });
+
+    render(<ClientHistoryTab clientId="1" />);
+
+    expect(screen.getByText('Renovación eliminada')).toBeInTheDocument();
+    expect(screen.getByText('Hiperproteico')).toBeInTheDocument();
+    expect(screen.getByText('02/07/2026 → 29/07/2026')).toBeInTheDocument();
+  });
+
   it('formats the plan price without a dollar sign and with dot thousands separator', () => {
     mockUseClientHistory.mockReturnValue({
       history: [entry({ metadata: { planName: 'Hiperproteico', planPrice: 1390, discount: 0 } })],

@@ -9,5 +9,6 @@ export const EVENT_LABELS: Record<HistoryEventType, string> = {
   suspended: 'Días suspendidos',
   reactivated: 'Cliente reactivado',
   finalized: 'Plan finalizado',
+  renewal_deleted: 'Renovación eliminada',
   deleted: 'Cliente eliminado',
 };
