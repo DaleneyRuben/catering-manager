@@ -33,4 +33,20 @@ const update = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
-export default { create, update };
+const remove = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const subscription = await subscriptionService.deleteRenewal(
+      decodeId(req.params.clientId),
+      decodeId(req.params.id),
+    );
+    if (!subscription) {
+      sendError(res, 'Subscription not found', 404);
+      return;
+    }
+    sendSuccess(res, subscription);
+  } catch (err) {
+    next(err);
+  }
+};
+
+export default { create, update, remove };
