@@ -4,7 +4,8 @@ import Plan from '../../models/Plan';
 import Subscription from '../../models/Subscription';
 import { CreateSubscriptionDto } from '../../schemas/subscription.schema';
 import { appToday, calcContractEndDate } from '../../utils/date';
-import { finalizeOverlappingSubscriptions } from './_helpers';
+import { ConflictError } from '../../utils/errors';
+import { finalizeOverlappingSubscriptions, findUpcomingSubscription } from './_helpers';
 
 // TODO: restore contractDate === today validation once backfilling of existing clients is complete
 export const create = async (clientId: number, data: CreateSubscriptionDto) => {
@@ -12,6 +13,12 @@ export const create = async (clientId: number, data: CreateSubscriptionDto) => {
   if (!client) return null;
 
   const today = appToday();
+
+  if (await findUpcomingSubscription(clientId, today)) {
+    throw new ConflictError(
+      'El cliente ya tiene una renovación registrada. Elimínala para registrar otra.',
+    );
+  }
 
   const contractEndDate = calcContractEndDate(data.startDate ?? null, data.duration);
 
