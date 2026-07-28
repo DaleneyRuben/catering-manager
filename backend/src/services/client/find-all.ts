@@ -27,6 +27,12 @@ export const findAll = (filters: FindAllFilters = {}) => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const andConditions: any[] = [];
 
+  // A client whose plan is still running is described by that plan, even once a renewal has
+  // been registered for a later start date — mirrors withStatus's subscription selection.
+  const hasRunningSubscription = `EXISTS (SELECT 1 FROM subscriptions sr WHERE sr."clientId" = "Client"."id" AND sr."startDate" <= '${todayStr}' AND sr."contractEndDate" >= '${todayStr}' AND sr."finalizedAt" IS NULL)`;
+  const onlyFutureSubscription = (endComparator: '>=' | '>') =>
+    `("Client"."id" IN (SELECT s2."clientId" FROM subscriptions s2 WHERE s2."startDate" > '${todayStr}' AND s2."contractEndDate" ${endComparator} '${todayStr}') AND NOT ${hasRunningSubscription})`;
+
   switch (filters.status) {
     case CLIENT_STATUS.ACTIVE:
       clientWhere.pausedSince = { [Op.is]: null };
@@ -36,9 +42,7 @@ export const findAll = (filters: FindAllFilters = {}) => {
         literal(
           `"Client"."id" NOT IN (SELECT s2."clientId" FROM subscriptions s2 WHERE '${todayStr}'::date = ANY(s2."suspendedDates") AND s2."contractEndDate" >= '${todayStr}')`,
         ),
-        literal(
-          `"Client"."id" NOT IN (SELECT s2."clientId" FROM subscriptions s2 WHERE s2."startDate" > '${todayStr}' AND s2."contractEndDate" >= '${todayStr}')`,
-        ),
+        literal(`NOT ${onlyFutureSubscription('>=')}`),
       );
       break;
     case CLIENT_STATUS.EXPIRING:
@@ -49,9 +53,7 @@ export const findAll = (filters: FindAllFilters = {}) => {
         literal(
           `"Client"."id" NOT IN (SELECT s2."clientId" FROM subscriptions s2 WHERE '${todayStr}'::date = ANY(s2."suspendedDates") AND s2."contractEndDate" >= '${todayStr}')`,
         ),
-        literal(
-          `"Client"."id" NOT IN (SELECT s2."clientId" FROM subscriptions s2 WHERE s2."startDate" > '${todayStr}' AND s2."contractEndDate" > '${todayStr}')`,
-        ),
+        literal(`NOT ${onlyFutureSubscription('>')}`),
       );
       break;
     case CLIENT_STATUS.PAUSED:
@@ -63,9 +65,7 @@ export const findAll = (filters: FindAllFilters = {}) => {
           literal(
             `"Client"."id" IN (SELECT s2."clientId" FROM subscriptions s2 WHERE '${todayStr}'::date = ANY(s2."suspendedDates") AND s2."contractEndDate" >= '${todayStr}')`,
           ),
-          literal(
-            `"Client"."id" IN (SELECT s2."clientId" FROM subscriptions s2 WHERE s2."startDate" > '${todayStr}' AND s2."contractEndDate" >= '${todayStr}')`,
-          ),
+          literal(onlyFutureSubscription('>=')),
         ],
       });
       break;
