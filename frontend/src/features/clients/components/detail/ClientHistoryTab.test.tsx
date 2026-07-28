@@ -12,6 +12,7 @@ const entry = (overrides: Partial<ClientHistoryEntry> = {}): ClientHistoryEntry 
   eventType: 'plan_assigned',
   occurredAt: '2026-06-19T14:20:00',
   metadata: {},
+  username: null,
   ...overrides,
 });
 
@@ -57,6 +58,25 @@ describe('ClientHistoryTab', () => {
     expect(screen.getByText('Renovación eliminada')).toBeInTheDocument();
     expect(screen.getByText('Hiperproteico')).toBeInTheDocument();
     expect(screen.getByText('02/07/2026 → 29/07/2026')).toBeInTheDocument();
+  });
+
+  it('names the user who triggered the event', () => {
+    mockUseClientHistory.mockReturnValue({
+      history: [entry({ username: 'daleney' })],
+      isLoading: false,
+    });
+
+    render(<ClientHistoryTab clientId="1" />);
+
+    expect(screen.getByText('por daleney')).toBeInTheDocument();
+  });
+
+  it('omits the actor line for an event recorded before users were tracked', () => {
+    mockUseClientHistory.mockReturnValue({ history: [entry()], isLoading: false });
+
+    render(<ClientHistoryTab clientId="1" />);
+
+    expect(screen.queryByText(/^por /)).not.toBeInTheDocument();
   });
 
   it('formats the plan price without a dollar sign and with dot thousands separator', () => {
