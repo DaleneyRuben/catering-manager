@@ -2,7 +2,7 @@ import { Op } from 'sequelize';
 import ClientHistory from '../../../models/ClientHistory';
 import Plan from '../../../models/Plan';
 import Subscription from '../../../models/Subscription';
-import { deleteRenewal } from '../delete-renewal';
+import { deleteUpcomingSubscription } from '../delete-upcoming-subscription';
 import { appToday, addDeliveryDays } from '../../../utils/date';
 
 jest.mock('../../../models/Subscription');
@@ -28,11 +28,11 @@ const upcoming = () => ({
   destroy: jest.fn().mockResolvedValue({}),
 });
 
-describe('deleteRenewal', () => {
+describe('deleteUpcomingSubscription', () => {
   it('returns null when the subscription does not belong to the client', async () => {
     (Subscription.findOne as jest.Mock).mockResolvedValue(null);
 
-    expect(await deleteRenewal(1, 9)).toBeNull();
+    expect(await deleteUpcomingSubscription(1, 9)).toBeNull();
     expect(ClientHistory.create).not.toHaveBeenCalled();
   });
 
@@ -42,7 +42,7 @@ describe('deleteRenewal', () => {
     (Subscription.count as jest.Mock).mockResolvedValue(1);
     (Plan.findByPk as jest.Mock).mockResolvedValue({ id: 2, name: 'Completo', price: 5000 });
 
-    const result = await deleteRenewal(1, 9);
+    const result = await deleteUpcomingSubscription(1, 9);
 
     expect(sub.destroy).toHaveBeenCalled();
     expect(result).toMatchObject({ id: 9 });
@@ -54,7 +54,7 @@ describe('deleteRenewal', () => {
     (Subscription.count as jest.Mock).mockResolvedValue(1);
     (Plan.findByPk as jest.Mock).mockResolvedValue({ id: 2, name: 'Completo', price: 5000 });
 
-    await deleteRenewal(1, 9);
+    await deleteUpcomingSubscription(1, 9);
 
     expect(ClientHistory.create).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -76,7 +76,7 @@ describe('deleteRenewal', () => {
     (Subscription.findOne as jest.Mock).mockResolvedValue(running);
     (Subscription.count as jest.Mock).mockResolvedValue(1);
 
-    await expect(deleteRenewal(1, 9)).rejects.toMatchObject({ statusCode: 409 });
+    await expect(deleteUpcomingSubscription(1, 9)).rejects.toMatchObject({ statusCode: 409 });
     expect(running.destroy).not.toHaveBeenCalled();
   });
 
@@ -85,7 +85,7 @@ describe('deleteRenewal', () => {
     (Subscription.findOne as jest.Mock).mockResolvedValue(sub);
     (Subscription.count as jest.Mock).mockResolvedValue(0);
 
-    await expect(deleteRenewal(1, 9)).rejects.toMatchObject({ statusCode: 409 });
+    await expect(deleteUpcomingSubscription(1, 9)).rejects.toMatchObject({ statusCode: 409 });
     expect(sub.destroy).not.toHaveBeenCalled();
   });
 
@@ -95,7 +95,7 @@ describe('deleteRenewal', () => {
     (Subscription.count as jest.Mock).mockResolvedValue(1);
     (Plan.findByPk as jest.Mock).mockResolvedValue({ id: 2, name: 'Completo', price: 5000 });
 
-    await deleteRenewal(1, 9);
+    await deleteUpcomingSubscription(1, 9);
 
     expect(Subscription.count).toHaveBeenCalledWith({
       where: {
@@ -113,7 +113,7 @@ describe('deleteRenewal', () => {
     (Subscription.count as jest.Mock).mockResolvedValue(1);
     (Plan.findByPk as jest.Mock).mockResolvedValue({ id: 2, name: 'Completo', price: 5000 });
 
-    await deleteRenewal(1, 9);
+    await deleteUpcomingSubscription(1, 9);
 
     expect(sinFecha.destroy).toHaveBeenCalled();
   });

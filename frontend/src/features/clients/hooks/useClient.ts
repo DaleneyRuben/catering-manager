@@ -80,7 +80,7 @@ export function useClient(id: string | number) {
 
   const deleteRenewalMutation = useMutation({
     mutationFn: (subscriptionId: string) =>
-      api.delete(`/clients/${id}/subscriptions/${subscriptionId}`),
+      api.delete(`/clients/${id}/subscriptions/upcoming/${subscriptionId}`),
     onSuccess: () => {
       invalidateClient();
       invalidateClientList();

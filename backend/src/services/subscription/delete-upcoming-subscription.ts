@@ -8,7 +8,7 @@ import { ConflictError } from '../../utils/errors';
 // Only a renewal registered ahead of time can be removed: the running plan is ended with
 // Finalizar plan, and a client whose only live plan has not started yet keeps it — deleting it
 // would leave them with no plan at all instead of one that ended.
-export const deleteRenewal = async (
+export const deleteUpcomingSubscription = async (
   clientId: number,
   subscriptionId: number,
 ): Promise<Subscription | null> => {

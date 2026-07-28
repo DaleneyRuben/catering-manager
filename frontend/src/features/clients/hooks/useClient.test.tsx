@@ -92,7 +92,7 @@ describe('useClient', () => {
 
     await result.current.deleteRenewal('sub9');
 
-    expect(mockDelete).toHaveBeenCalledWith('/clients/1/subscriptions/sub9');
+    expect(mockDelete).toHaveBeenCalledWith('/clients/1/subscriptions/upcoming/sub9');
   });
 
   it('assignStartDate patches the subscription with the chosen start date', async () => {
