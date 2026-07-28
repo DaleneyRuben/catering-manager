@@ -23,7 +23,7 @@ describe('revertPendingRenewal', () => {
     });
     expect(Appointment.findOne).toHaveBeenCalledWith({ where: { subscriptionId: 5 } });
     expect(appointment.update).toHaveBeenCalledWith({ subscriptionId: null });
-    expect(subscription.destroy).toHaveBeenCalledWith({ force: true });
+    expect(subscription.destroy).toHaveBeenCalledWith();
     expect(result).toBe(subscription);
   });
 
@@ -78,7 +78,7 @@ describe('revertPendingRenewal', () => {
 
     const result = await revertPendingRenewal(1);
 
-    expect(subscription.destroy).toHaveBeenCalledWith({ force: true });
+    expect(subscription.destroy).toHaveBeenCalledWith();
     expect(result).toBe(subscription);
   });
 });

@@ -52,9 +52,7 @@ describe('deleteUpcomingSubscription', () => {
     expect(result).toMatchObject({ id: 9 });
   });
 
-  // Subscription is paranoid, but the raw subqueries in client/find-all.ts count rows directly and
-  // never filter deletedAt — a soft-deleted renewal would keep counting as an upcoming plan there.
-  it('removes the row outright rather than soft-deleting it', async () => {
+  it('removes the row outright rather than leaving a deleted one behind', async () => {
     const sub = upcoming();
     (Subscription.findOne as jest.Mock).mockResolvedValue(sub);
     (Subscription.count as jest.Mock).mockResolvedValue(1);
@@ -62,7 +60,7 @@ describe('deleteUpcomingSubscription', () => {
 
     await deleteUpcomingSubscription(1, 9, actor);
 
-    expect(sub.destroy).toHaveBeenCalledWith({ force: true });
+    expect(sub.destroy).toHaveBeenCalledWith();
   });
 
   it('records a renewal_deleted history event with the deleted contract', async () => {

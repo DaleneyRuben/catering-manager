@@ -22,10 +22,7 @@ describe('deletePendingClient', () => {
 
     expect(Subscription.findAll).toHaveBeenCalledWith({ where: { clientId: 1 } });
     expect(Appointment.destroy).toHaveBeenCalledWith({ where: { subscriptionId: [3, 4] } });
-    expect(Subscription.destroy).toHaveBeenCalledWith({
-      where: { id: [3, 4] },
-      force: true,
-    });
+    expect(Subscription.destroy).toHaveBeenCalledWith({ where: { id: [3, 4] } });
     expect(softDelete).toHaveBeenCalledWith(1, actor);
     expect(result).toEqual({ id: 1 });
   });
