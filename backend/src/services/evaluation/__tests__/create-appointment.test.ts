@@ -62,4 +62,19 @@ describe('createAppointment', () => {
     expect(result).toBeNull();
     expect(Appointment.create).not.toHaveBeenCalled();
   });
+
+  it('rejects creating an appointment at the same date and time as an existing pending one', async () => {
+    (Appointment.findOne as jest.Mock).mockResolvedValue({ id: 3 });
+
+    await expect(
+      createAppointment({
+        name: 'Ana Pérez',
+        phone: '71234567',
+        date: '2026-07-30',
+        time: '15:00',
+      }),
+    ).rejects.toThrow('Ya existe una cita pendiente en esa fecha y hora.');
+
+    expect(Appointment.create).not.toHaveBeenCalled();
+  });
 });
