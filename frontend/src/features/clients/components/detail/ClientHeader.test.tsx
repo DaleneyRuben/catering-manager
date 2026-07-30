@@ -135,6 +135,48 @@ describe('with a queued renewal', () => {
   });
 });
 
+describe('with an unpaid queued renewal', () => {
+  beforeEach(() => {
+    jest.useFakeTimers().setSystemTime(new Date('2026-07-15T12:00:00'));
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  const withUnpaidQueuedRenewal = (): Client => ({
+    ...client,
+    subscriptions: [
+      subscription({ id: 'running' }),
+      subscription({
+        id: 'renewal',
+        startDate: '2026-07-29',
+        contractEndDate: '2026-08-25',
+        paid: false,
+      }),
+    ],
+  });
+
+  it('still disables Renovar — payment does not lift the one-renewal-at-a-time block', () => {
+    render(<ClientHeader {...baseProps} client={withUnpaidQueuedRenewal()} status="expiring" />);
+
+    expect(screen.getByRole('button', { name: /renovar/i })).toBeDisabled();
+  });
+
+  it('does not show the confirmed queued renewal banner or its delete action', () => {
+    render(<ClientHeader {...baseProps} client={withUnpaidQueuedRenewal()} status="expiring" />);
+
+    expect(screen.queryByText(/renovación registrada · inicia el/i)).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /eliminar renovación/i })).not.toBeInTheDocument();
+  });
+
+  it('shows a pending-payment notice instead of the confirmed banner', () => {
+    render(<ClientHeader {...baseProps} client={withUnpaidQueuedRenewal()} status="expiring" />);
+
+    expect(screen.getByText(/renovación pendiente de pago/i)).toBeInTheDocument();
+  });
+});
+
 it('disables Renovar for a client whose only plan has not started yet', () => {
   const programado = {
     ...client,

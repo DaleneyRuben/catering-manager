@@ -1,5 +1,9 @@
 import type { Subscription } from '@/features/clients/types';
-import { findQueuedRenewal } from './queuedRenewal';
+import {
+  findQueuedRenewal,
+  findUpcomingSubscription,
+  hasUpcomingSubscription,
+} from './queuedRenewal';
 
 const today = '2026-07-28';
 
@@ -78,5 +82,64 @@ describe('findQueuedRenewal', () => {
 
   it('returns null when there are no subscriptions', () => {
     expect(findQueuedRenewal([], today)).toBeNull();
+  });
+
+  it('does not surface an unpaid renewal as a confirmed queued renewal', () => {
+    const running = sub({ id: 'running' });
+    const unpaid = sub({
+      id: 'unpaid',
+      startDate: '2026-07-29',
+      contractEndDate: '2026-08-25',
+      paid: false,
+    });
+
+    expect(findQueuedRenewal([running, unpaid], today)).toBeNull();
+  });
+});
+
+describe('findUpcomingSubscription', () => {
+  it('returns an unpaid upcoming renewal, unlike findQueuedRenewal', () => {
+    const running = sub({ id: 'running' });
+    const unpaid = sub({
+      id: 'unpaid',
+      startDate: '2026-07-29',
+      contractEndDate: '2026-08-25',
+      paid: false,
+    });
+
+    expect(findUpcomingSubscription([running, unpaid], today)?.id).toBe('unpaid');
+  });
+
+  it('returns null when there is no upcoming subscription', () => {
+    expect(findUpcomingSubscription([sub({ id: 'running' })], today)).toBeNull();
+  });
+});
+
+describe('hasUpcomingSubscription', () => {
+  it('returns true for a paid upcoming renewal', () => {
+    const running = sub({ id: 'running' });
+    const renewal = sub({ id: 'renewal', startDate: '2026-07-29', contractEndDate: '2026-08-25' });
+
+    expect(hasUpcomingSubscription([running, renewal], today)).toBe(true);
+  });
+
+  it('returns true for an unpaid upcoming renewal — payment does not affect the one-renewal-at-a-time block', () => {
+    const running = sub({ id: 'running' });
+    const unpaid = sub({
+      id: 'unpaid',
+      startDate: '2026-07-29',
+      contractEndDate: '2026-08-25',
+      paid: false,
+    });
+
+    expect(hasUpcomingSubscription([running, unpaid], today)).toBe(true);
+  });
+
+  it('returns false when there is no upcoming subscription', () => {
+    expect(hasUpcomingSubscription([sub({ id: 'running' })], today)).toBe(false);
+  });
+
+  it('returns false when there are no subscriptions', () => {
+    expect(hasUpcomingSubscription([], today)).toBe(false);
   });
 });

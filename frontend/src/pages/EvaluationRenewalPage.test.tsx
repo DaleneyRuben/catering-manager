@@ -205,3 +205,38 @@ describe('EvaluationRenewalPage with a renewal already registered', () => {
     expect(screen.queryByRole('button', { name: /eliminar/i })).not.toBeInTheDocument();
   });
 });
+
+const unpaidQueuedRenewal = { ...queuedRenewal, id: 'sub-unpaid', paid: false };
+
+const withUnpaidQueuedRenewal = () =>
+  renderPage({
+    '/clients/client-5': () =>
+      Promise.resolve({ ...client, subscriptions: [...client.subscriptions, unpaidQueuedRenewal] }),
+  });
+
+describe('EvaluationRenewalPage with an unpaid renewal already registered', () => {
+  beforeEach(() => jest.clearAllMocks());
+
+  it('does not auto-open the renewal modal — payment does not lift the one-renewal block', async () => {
+    withUnpaidQueuedRenewal();
+
+    await screen.findByRole('button', { name: /renovar plan/i });
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  });
+
+  it('still renders the renewal action dead', async () => {
+    withUnpaidQueuedRenewal();
+
+    expect(await screen.findByRole('button', { name: /renovar plan/i })).toBeDisabled();
+  });
+
+  it('does not announce it as an already-registered renewal or show its plan details', async () => {
+    withUnpaidQueuedRenewal();
+
+    await screen.findByRole('button', { name: /renovar plan/i });
+    expect(screen.queryByText('Renovación ya registrada')).not.toBeInTheDocument();
+    expect(
+      screen.queryByText('Completo · 17/08/2026 → 11/09/2026 · 20 días hábiles'),
+    ).not.toBeInTheDocument();
+  });
+});
