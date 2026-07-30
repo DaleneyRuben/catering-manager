@@ -96,3 +96,56 @@ it('calls onClose when close button is clicked', async () => {
   await userEvent.click(screen.getByRole('button', { name: /cerrar/i }));
   expect(onClose).toHaveBeenCalledTimes(1);
 });
+
+it('does not show the paid toggle by default', () => {
+  render(
+    <RenewalModal
+      client={client}
+      sub={sub}
+      isReactivation={false}
+      onClose={jest.fn()}
+      onRenew={jest.fn()}
+    />,
+  );
+  expect(screen.queryByText(/¿pagó el servicio\?/i)).not.toBeInTheDocument();
+});
+
+it('shows the paid toggle when showPaidToggle is set, with no default selection', () => {
+  render(
+    <RenewalModal
+      client={client}
+      sub={sub}
+      isReactivation={false}
+      onClose={jest.fn()}
+      onRenew={jest.fn()}
+      showPaidToggle
+    />,
+  );
+  expect(screen.getByText(/¿pagó el servicio\?/i)).toBeInTheDocument();
+  const si = screen.getByRole('button', { name: /^sí$/i });
+  const no = screen.getByRole('button', { name: /^no$/i });
+  expect(si).toHaveAttribute('aria-pressed', 'false');
+  expect(no).toHaveAttribute('aria-pressed', 'false');
+});
+
+it('disables confirm until a paid selection is made, then enables it', async () => {
+  render(
+    <RenewalModal
+      client={client}
+      sub={sub}
+      isReactivation={false}
+      onClose={jest.fn()}
+      onRenew={jest.fn()}
+      showPaidToggle
+    />,
+  );
+  const precio = screen.getByLabelText(/precio/i);
+  await userEvent.clear(precio);
+  await userEvent.type(precio, '1200');
+
+  expect(screen.getByRole('button', { name: /^renovar$/i })).toBeDisabled();
+
+  await userEvent.click(screen.getByRole('button', { name: /^sí$/i }));
+
+  expect(screen.getByRole('button', { name: /^renovar$/i })).not.toBeDisabled();
+});

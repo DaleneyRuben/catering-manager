@@ -44,6 +44,7 @@ const deleteUpcomingSubscription = async (req: Request, res: Response, next: Nex
     const subscription = await subscriptionService.deleteUpcomingSubscription(
       decodeId(req.params.clientId),
       decodeId(req.params.id),
+      { userId: req.user!.userId, username: req.user!.username },
     );
     if (!subscription) {
       sendError(res, 'Subscription not found', 404);

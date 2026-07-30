@@ -15,16 +15,24 @@ interface Props {
   sub: Subscription | undefined;
   isReactivation: boolean;
   onClose: () => void;
-  onRenew: (data: RenewalPayload) => Promise<void>;
+  onRenew: (data: RenewalPayload) => Promise<Subscription>;
+  showPaidToggle?: boolean;
 }
 
 const inputCls =
   'w-full py-[9px] px-[12px] text-[13.5px] font-mono border border-rule rounded-[9px] bg-white focus:outline-none focus:border-olive-600';
 const plainLabelCls = 'block text-[11px] text-faint mb-[6px]';
 
-export function RenewalModal({ client, sub, isReactivation, onClose, onRenew }: Props) {
+export function RenewalModal({
+  client,
+  sub,
+  isReactivation,
+  onClose,
+  onRenew,
+  showPaidToggle,
+}: Props) {
   const { plans } = usePlans();
-  const form = useRenewalForm({ plans, sub, isReactivation, onRenew, onClose });
+  const form = useRenewalForm({ plans, sub, isReactivation, onRenew, onClose, showPaidToggle });
 
   let vigenciaSummary = '— completar los campos —';
   if (form.willBePaused) vigenciaSummary = 'pausado (sin fecha)';
@@ -246,6 +254,41 @@ export function RenewalModal({ client, sub, isReactivation, onClose, onRenew }: 
             </p>
           </div>
         </div>
+
+        {/* ¿Pagó el servicio? */}
+        {showPaidToggle && (
+          <div className="mb-[18px]">
+            <p className={plainLabelCls}>¿Pagó el servicio?</p>
+            <div className="flex gap-[7px]">
+              {(
+                [
+                  { v: true, l: 'Sí' },
+                  { v: false, l: 'No' },
+                ] as { v: boolean; l: string }[]
+              ).map((o) => (
+                <Button
+                  key={o.l}
+                  variant="bare"
+                  aria-pressed={form.paid === o.v}
+                  onClick={() => form.setPaid(o.v)}
+                  className={`flex-1 border-[1.5px] transition-colors ${
+                    form.paid === o.v
+                      ? 'font-semibold bg-olive-100 text-olive-700 border-olive-200'
+                      : 'bg-white text-muted border-rule'
+                  }`}
+                  style={{
+                    padding: '8px',
+                    fontSize: '12px',
+                    borderRadius: '8px',
+                    lineHeight: 'normal',
+                  }}
+                >
+                  {o.l}
+                </Button>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Resumen */}
         <div className="border border-dashed border-empty-border rounded-[11px] py-[14px] px-[16px] text-[12.5px] text-ink-2 leading-[1.7]">

@@ -18,6 +18,10 @@ export const createSubscriptionSchema = z.object({
   renewalType: z.enum(['renewal', 'reactivation']).optional(),
   specialInstructions: z.record(z.string(), z.string()).optional(),
   paid: z.boolean().optional(),
+  appointmentId: z
+    .string()
+    .transform((v) => decodeId(v))
+    .optional(),
 });
 
 export const updateSubscriptionSchema = z.object({

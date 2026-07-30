@@ -117,6 +117,22 @@ describe('findAll', () => {
     expect(paidCondition).toBeDefined();
   });
 
+  it('only excludes a client when the unpaid subscription is their sole subscription', async () => {
+    (Client.findAndCountAll as jest.Mock).mockResolvedValue({ rows: [], count: 0 });
+
+    await findAll();
+
+    const call = (Client.findAndCountAll as jest.Mock).mock.calls[0][0];
+    const andConditions = call.where?.[Symbol.for('and')];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const paidCondition = andConditions?.find((c: any) => c?.val?.includes?.('ps."paid" = false'));
+    // The old (buggy) guard picked the row with MAX(id) regardless of how many subscriptions
+    // the client has, so a client with a paid active subscription plus a newer unpaid
+    // renewal was excluded too. The fix must scope the exclusion to sole-subscription clients.
+    expect(paidCondition.val).not.toMatch(/MAX\(id\)/);
+    expect(paidCondition.val).toMatch(/COUNT\(\*\)/);
+  });
+
   it.each(['active', 'expiring', 'paused', 'ended'])(
     'excludes clients whose latest subscription is unpaid for status=%s',
     async (status) => {

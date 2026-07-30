@@ -192,7 +192,10 @@ describe('DELETE /api/clients/:clientId/subscriptions/:id', () => {
     const res = await request(app).delete(`/api/clients/${id1}/subscriptions/upcoming/${id1}`);
 
     expect(res.status).toBe(200);
-    expect(subscriptionService.deleteUpcomingSubscription).toHaveBeenCalledWith(1, 1);
+    expect(subscriptionService.deleteUpcomingSubscription).toHaveBeenCalledWith(1, 1, {
+      userId: 9,
+      username: 'ada',
+    });
   });
 
   it('returns 404 when the subscription does not exist', async () => {

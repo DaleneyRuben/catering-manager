@@ -45,6 +45,15 @@ describe('findContractEnding', () => {
     expect(call.where.finalizedAt).toEqual({ [Symbol.for('is')]: null });
   });
 
+  it('queries with paid true, so an unpaid pending renewal never appears here', async () => {
+    (Subscription.findAll as jest.Mock).mockResolvedValue([]);
+
+    await findContractEnding();
+
+    const call = (Subscription.findAll as jest.Mock).mock.calls[0][0];
+    expect(call.where.paid).toBe(true);
+  });
+
   it('sorts results alphabetically by name', async () => {
     (Subscription.findAll as jest.Mock).mockImplementation(({ where }) =>
       where.contractEndDate === '2026-06-25'

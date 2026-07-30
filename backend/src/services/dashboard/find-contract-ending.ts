@@ -16,7 +16,7 @@ const byName = (a: ContractEndingPerson, b: ContractEndingPerson) =>
 
 const findContractEndingForDate = async (date: string): Promise<ContractEndingPerson[]> => {
   const subscriptions = await Subscription.findAll({
-    where: { contractEndDate: date, finalizedAt: { [Op.is]: null } },
+    where: { contractEndDate: date, finalizedAt: { [Op.is]: null }, paid: true },
     include: [Client, Plan],
   });
 

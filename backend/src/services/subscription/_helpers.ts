@@ -1,4 +1,4 @@
-import { Op } from 'sequelize';
+import { Op, Transaction } from 'sequelize';
 import Client from '../../models/Client';
 import Plan from '../../models/Plan';
 import Subscription from '../../models/Subscription';
@@ -40,6 +40,7 @@ export const finalizeOverlappingSubscriptions = async (
   clientId: number,
   newStartDate: string,
   excludeId?: number,
+  transaction?: Transaction,
 ) => {
   const overlapping =
     (await Subscription.findAll({
@@ -49,15 +50,19 @@ export const finalizeOverlappingSubscriptions = async (
         contractEndDate: { [Op.gte]: newStartDate },
         ...(excludeId !== undefined ? { id: { [Op.ne]: excludeId } } : {}),
       },
+      ...(transaction ? { transaction } : {}),
     })) ?? [];
 
   const today = appToday();
   await Promise.all(
     overlapping.map((sub) =>
-      sub.update({
-        contractEndDate: subtractDeliveryDays(newStartDate, 1),
-        finalizedAt: today,
-      }),
+      sub.update(
+        {
+          contractEndDate: subtractDeliveryDays(newStartDate, 1),
+          finalizedAt: today,
+        },
+        ...(transaction ? [{ transaction }] : []),
+      ),
     ),
   );
 };

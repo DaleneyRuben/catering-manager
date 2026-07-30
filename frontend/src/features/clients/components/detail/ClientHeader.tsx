@@ -9,7 +9,7 @@ import {
   CLIENT_STATUS,
 } from '@/features/clients/constants/clientStatus';
 import { SEX_LABELS } from '@/features/clients/constants/clientOptions';
-import { findQueuedRenewal } from '@/features/clients/utils/queuedRenewal';
+import { findQueuedRenewal, hasUpcomingSubscription } from '@/features/clients/utils/queuedRenewal';
 import { initials } from '@/utils/string';
 import type { Client, ClientStatus } from '@/features/clients/types';
 import { QueuedRenewalNotice } from './QueuedRenewalNotice';
@@ -41,6 +41,8 @@ interface Props {
 
 const RENEWAL_BLOCKED_REASON = 'Ya hay una renovación registrada. Elimínala para registrar otra.';
 const NOT_STARTED_REASON = 'Renovar está inactivo hasta que el plan esté en curso.';
+const UNPAID_RENEWAL_BLOCKED_REASON =
+  'Ya hay una renovación registrada pendiente de pago. Gestiónala desde Evaluaciones → Pendientes de pago.';
 
 export function ClientHeader({
   client,
@@ -58,9 +60,16 @@ export function ClientHeader({
   const age = differenceInYears(startOfToday(), parseISO(client.dateOfBirth));
   const sub = client.subscriptions[0];
   const queuedRenewal = findQueuedRenewal(client.subscriptions);
+  // Payment-agnostic on purpose: a client can only have one upcoming subscription registered at
+  // a time, paid or not — an unpaid one still occupies the slot, it just isn't shown in detail
+  // (see queuedRenewal.ts).
+  const upcomingRenewalBlocked = hasUpcomingSubscription(client.subscriptions);
+  const unpaidRenewalPending = upcomingRenewalBlocked && !queuedRenewal;
   // a Programado client's own plan is already the one upcoming subscription they are allowed
   const notStartedReason = status === CLIENT_STATUS.FUTURE ? NOT_STARTED_REASON : null;
-  const renewalBlockedReason = queuedRenewal ? RENEWAL_BLOCKED_REASON : notStartedReason;
+  let renewalBlockedReason = notStartedReason;
+  if (queuedRenewal) renewalBlockedReason = RENEWAL_BLOCKED_REASON;
+  else if (unpaidRenewalPending) renewalBlockedReason = UNPAID_RENEWAL_BLOCKED_REASON;
 
   let toggleConfig: { label: string; icon: 'calendar' | 'check'; className?: string } | null = null;
   if (status === CLIENT_STATUS.ACTIVE || status === CLIENT_STATUS.EXPIRING) {
@@ -157,7 +166,21 @@ export function ClientHeader({
           onAssignStartDate={onAssignStartDate}
         />
       )}
-      {!queuedRenewal && status === CLIENT_STATUS.PAUSED && (
+      {!queuedRenewal && unpaidRenewalPending && (
+        <div className="flex items-center gap-2.5 bg-warn-bg border border-warn-border rounded-md px-3.5 py-3 mb-5">
+          <Icon name="refresh" size={14} className="text-warn shrink-0" />
+          <div>
+            <p className="text-[13px] font-semibold text-warn-text-strong">
+              Renovación pendiente de pago
+            </p>
+            <p className="font-mono text-[11px] text-warn-text">
+              Este cliente tiene una renovación registrada sin confirmar el pago. Gestiónala desde
+              Evaluaciones → Pendientes de pago.
+            </p>
+          </div>
+        </div>
+      )}
+      {!queuedRenewal && !unpaidRenewalPending && status === CLIENT_STATUS.PAUSED && (
         <div className="flex items-center gap-2.5 bg-warn-bg border border-warn-border rounded-md px-3.5 py-3 mb-5">
           <Icon name="calendar" size={14} className="text-warn shrink-0" />
           <div>

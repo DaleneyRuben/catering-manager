@@ -86,4 +86,49 @@ describe('findById', () => {
 
     expect(result).toMatchObject({ id: 1, name: 'John Doe' });
   });
+
+  it('returns client when the latest subscription is unpaid but an older subscription exists', async () => {
+    (Client.findByPk as jest.Mock).mockResolvedValue({
+      ...mockClient,
+      subscriptions: [
+        { id: 5, paid: true },
+        { id: 8, paid: false },
+      ],
+    });
+
+    const result = await findById(1);
+
+    expect(result).toMatchObject({ id: 1, name: 'John Doe' });
+  });
+
+  it('surfaces the latest paid subscription for display when a newer unpaid renewal is pending', async () => {
+    (Client.findByPk as jest.Mock).mockResolvedValue({
+      ...mockClient,
+      subscriptions: [
+        {
+          id: 8,
+          paid: false,
+          startDate: null,
+          contractEndDate: null,
+          suspendedDates: [],
+          finalizedAt: null,
+        },
+        {
+          id: 5,
+          paid: true,
+          startDate: '2026-05-01',
+          contractEndDate: '2026-12-01',
+          suspendedDates: [],
+          finalizedAt: null,
+        },
+      ],
+    });
+
+    const result = await findById(1);
+
+    const subs = (result as unknown as { subscriptions: { id: number; paid: boolean }[] })
+      .subscriptions;
+    expect(subs[0]).toMatchObject({ id: 5, paid: true });
+    expect(result).toMatchObject({ status: 'active' });
+  });
 });

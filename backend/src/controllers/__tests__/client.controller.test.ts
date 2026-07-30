@@ -128,6 +128,47 @@ describe('GET /api/clients', () => {
   });
 });
 
+describe('GET /api/clients/search', () => {
+  it('returns 200 with matching clients when q is provided', async () => {
+    (clientService.search as jest.Mock).mockResolvedValue([
+      { id: 1, name: 'Fernando Daleney', phoneNumber: '76637732' },
+    ]);
+
+    const res = await request(app).get('/api/clients/search?q=fernando');
+
+    expect(clientService.search).toHaveBeenCalledWith('fernando');
+    expect(res.status).toBe(200);
+    expect(res.body.data).toEqual([{ id: id1, name: 'Fernando Daleney', phoneNumber: '76637732' }]);
+  });
+
+  it('returns an empty list without querying when q is missing', async () => {
+    (clientService.search as jest.Mock).mockClear();
+
+    const res = await request(app).get('/api/clients/search');
+
+    expect(clientService.search).not.toHaveBeenCalled();
+    expect(res.status).toBe(200);
+    expect(res.body.data).toEqual([]);
+  });
+
+  it('does not get shadowed by the /:id route', async () => {
+    (clientService.search as jest.Mock).mockResolvedValue([]);
+    (clientService.findById as jest.Mock).mockClear();
+
+    await request(app).get('/api/clients/search?q=x');
+
+    expect(clientService.findById).not.toHaveBeenCalled();
+  });
+
+  it('returns 500 when service throws', async () => {
+    (clientService.search as jest.Mock).mockRejectedValue(new Error('db error'));
+
+    const res = await request(app).get('/api/clients/search?q=x');
+
+    expect(res.status).toBe(500);
+  });
+});
+
 describe('GET /api/clients/:id', () => {
   it('returns 200 with client when found', async () => {
     (clientService.findById as jest.Mock).mockResolvedValue(mockClient);

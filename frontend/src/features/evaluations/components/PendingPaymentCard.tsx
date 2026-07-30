@@ -1,16 +1,16 @@
 import { IconButton } from '@ui/IconButton';
 import { formatDate } from '@/utils/format';
-import type { Client } from '@/features/clients/types';
+import type { PendingPaymentClient } from '@/features/evaluations/types';
 
 interface Props {
-  client: Client;
-  onMarkPaid: (client: Client) => void;
-  onDelete: (client: Client) => void;
+  client: PendingPaymentClient;
+  onMarkPaid: (client: PendingPaymentClient) => void;
+  onDelete: (client: PendingPaymentClient) => void;
 }
 
 export function PendingPaymentCard({ client, onMarkPaid, onDelete }: Props) {
   const subscription = client.subscriptions[0];
-  const {plan} = subscription;
+  const { plan } = subscription;
   const total = plan.price - subscription.discount;
 
   return (

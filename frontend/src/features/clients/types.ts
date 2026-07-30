@@ -76,6 +76,7 @@ export interface RenewalPayload {
   duration: number;
   discount: number;
   renewalType: 'renewal' | 'reactivation';
+  paid?: boolean;
 }
 
 export interface NewClientFormValues {

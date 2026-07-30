@@ -90,12 +90,70 @@ describe('GET /api/appointments/nutritionist role guard', () => {
 describe('admin-only appointment mutation routes role guard', () => {
   const cases = [
     { method: 'post' as const, path: '/api/appointments' },
-    { method: 'patch' as const, path: '/api/appointments/abc123' },
     { method: 'delete' as const, path: '/api/appointments/abc123' },
   ];
 
   it.each(cases)('rejects nutritionist on $method $path with 403', async ({ method, path }) => {
     const res = await request(app)[method](path).set(headersForRole(ROLES.NUTRITIONIST));
+
+    expect(res.status).toBe(403);
+  });
+});
+
+describe('PATCH /api/appointments/:id role guard', () => {
+  it('rejects nutritionist with 403 (stamping now happens via resolve-renewal)', async () => {
+    const res = await request(app)
+      .patch('/api/appointments/abc123')
+      .set(headersForRole(ROLES.NUTRITIONIST))
+      .send({});
+
+    expect(res.status).toBe(403);
+  });
+
+  it('allows admin', async () => {
+    (evaluationService.updateAppointment as jest.Mock).mockResolvedValue({ id: 1 });
+
+    const res = await request(app)
+      .patch('/api/appointments/abc123')
+      .set(headersForRole(ROLES.ADMIN))
+      .send({});
+
+    expect(res.status).toBe(200);
+  });
+
+  it('rejects kitchen with 403', async () => {
+    const res = await request(app)
+      .patch('/api/appointments/abc123')
+      .set(headersForRole(ROLES.KITCHEN))
+      .send({});
+
+    expect(res.status).toBe(403);
+  });
+});
+
+describe('GET /api/appointments/:id role guard', () => {
+  it('allows nutritionist', async () => {
+    (evaluationService.findById as jest.Mock).mockResolvedValue({ id: 1 });
+
+    const res = await request(app)
+      .get('/api/appointments/abc123')
+      .set(headersForRole(ROLES.NUTRITIONIST));
+
+    expect(res.status).toBe(200);
+  });
+
+  it('allows admin', async () => {
+    (evaluationService.findById as jest.Mock).mockResolvedValue({ id: 1 });
+
+    const res = await request(app).get('/api/appointments/abc123').set(headersForRole(ROLES.ADMIN));
+
+    expect(res.status).toBe(200);
+  });
+
+  it('rejects kitchen with 403', async () => {
+    const res = await request(app)
+      .get('/api/appointments/abc123')
+      .set(headersForRole(ROLES.KITCHEN));
 
     expect(res.status).toBe(403);
   });
@@ -114,6 +172,37 @@ describe('nutritionist-only convert route role guard', () => {
     const res = await request(app)
       .post('/api/appointments/abc123/convert')
       .set(headersForRole(ROLES.SUPER_ADMIN));
+
+    expect(res.status).toBe(403);
+  });
+});
+
+describe('nutritionist-only resolve-renewal route role guard', () => {
+  it('allows nutritionist', async () => {
+    (evaluationService.resolveRenewal as jest.Mock).mockResolvedValue({ subscription: { id: 1 } });
+
+    const res = await request(app)
+      .post('/api/appointments/abc123/resolve-renewal')
+      .set(headersForRole(ROLES.NUTRITIONIST))
+      .send({ planId: 'abc', contractDate: '2026-07-24', duration: 20 });
+
+    expect(res.status).toBe(201);
+  });
+
+  it('rejects admin with 403', async () => {
+    const res = await request(app)
+      .post('/api/appointments/abc123/resolve-renewal')
+      .set(headersForRole(ROLES.ADMIN))
+      .send({ planId: 'abc', contractDate: '2026-07-24', duration: 20 });
+
+    expect(res.status).toBe(403);
+  });
+
+  it('rejects super_admin with 403', async () => {
+    const res = await request(app)
+      .post('/api/appointments/abc123/resolve-renewal')
+      .set(headersForRole(ROLES.SUPER_ADMIN))
+      .send({ planId: 'abc', contractDate: '2026-07-24', duration: 20 });
 
     expect(res.status).toBe(403);
   });

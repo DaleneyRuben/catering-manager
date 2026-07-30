@@ -61,6 +61,29 @@ describe('finalize', () => {
     );
   });
 
+  it('finalizes the paid subscription, not a newer pending unpaid renewal', async () => {
+    const paidSub = { id: 60, paid: true, update: jest.fn().mockResolvedValue({}) };
+    const unpaidSub = { id: 66, paid: false, update: jest.fn().mockResolvedValue({}) };
+    const mockInstance = {
+      id: 1,
+      pausedSince: null,
+      subscriptions: [unpaidSub, paidSub],
+      update: jest.fn().mockResolvedValue({}),
+    };
+    (Client.findByPk as jest.Mock).mockResolvedValue(mockInstance);
+    (ClientHistory.create as jest.Mock).mockResolvedValue({});
+
+    await finalize(1, actor);
+
+    expect(paidSub.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        contractEndDate: expect.any(String),
+        finalizedAt: expect.any(String),
+      }),
+    );
+    expect(unpaidSub.update).not.toHaveBeenCalled();
+  });
+
   it('finalizes the subscription covering today, not a queued future renewal', async () => {
     const futureSub = {
       id: 8,

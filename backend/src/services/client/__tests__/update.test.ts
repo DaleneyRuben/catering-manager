@@ -93,6 +93,38 @@ describe('update', () => {
     expect(mockSub.update).toHaveBeenCalledWith({ contractEndDate: '2026-06-17' });
   });
 
+  it('extends the paid subscription, not a newer pending unpaid renewal, when resuming', async () => {
+    const paidSub = {
+      id: 60,
+      paid: true,
+      startDate: '2026-06-01',
+      duration: 10,
+      contractEndDate: '2026-06-12',
+      update: jest.fn().mockResolvedValue({}),
+    };
+    const unpaidSub = {
+      id: 66,
+      paid: false,
+      startDate: null,
+      duration: 20,
+      contractEndDate: null,
+      update: jest.fn().mockResolvedValue({}),
+    };
+    const mockInstance = {
+      id: 1,
+      pausedSince: new Date('2026-06-03T15:00:00Z'),
+      subscriptions: [unpaidSub, paidSub],
+      update: jest.fn().mockResolvedValue({ ...mockClient, pausedSince: null }),
+    };
+    (Client.findByPk as jest.Mock).mockResolvedValue(mockInstance);
+    (ClientHistory.create as jest.Mock).mockResolvedValue({});
+
+    await update(1, { pausedSince: null }, actor);
+
+    expect(paidSub.update).toHaveBeenCalledWith({ contractEndDate: '2026-06-17' });
+    expect(unpaidSub.update).not.toHaveBeenCalled();
+  });
+
   it('extends the subscription covering today, not a queued future renewal, when resuming', async () => {
     const futureSub = {
       id: 8,

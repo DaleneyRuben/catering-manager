@@ -97,6 +97,26 @@ describe('ClientTable', () => {
     expect(screen.queryByText(/renovado hasta/i)).not.toBeInTheDocument();
   });
 
+  it('does not mark a row whose registered renewal is unpaid', () => {
+    const client = makeClient({
+      status: 'expiring',
+      subscriptions: [
+        makeSub({ startDate: '2020-01-01', contractEndDate: '2049-12-31' }),
+        makeSub({
+          id: 2,
+          startDate: '2050-01-03',
+          contractEndDate: '2050-01-30',
+          paid: false,
+        }),
+      ],
+    });
+
+    renderTable({ clients: [client], total: 1 });
+
+    expect(screen.queryByText(/renovado hasta/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/renovación sin fecha/i)).not.toBeInTheDocument();
+  });
+
   it('renders a row per client with plan and price', () => {
     renderTable({ clients: [makeClient()], total: 1 });
     expect(screen.getByText('María García')).toBeInTheDocument();

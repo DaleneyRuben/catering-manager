@@ -50,6 +50,15 @@ describe('getClientCounts', () => {
     expect(sql).toContain('"startDate" <= :today');
   });
 
+  it('excludes unpaid subscriptions, so a pending renewal is never counted once its start date arrives', async () => {
+    (sequelize.query as jest.Mock).mockResolvedValue([]);
+
+    await getClientCounts();
+
+    const sql: string = (sequelize.query as jest.Mock).mock.calls[0][0];
+    expect(sql).toContain('"paid" = true');
+  });
+
   it('propagates db errors', async () => {
     (sequelize.query as jest.Mock).mockRejectedValue(new Error('db error'));
 

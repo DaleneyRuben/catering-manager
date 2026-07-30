@@ -233,8 +233,10 @@ Whether from a Conversion or an appointment-driven renewal, marking the resoluti
 
 If a still-unpaid resolution is instead abandoned (the Admin's "Pendientes de pago" cleanup action):
 
-- **New-client appointment** — the whole client (and its one subscription) is soft-deleted, and the appointment is deleted with it. Nothing else exists to lose.
-- **Existing-client appointment** — only the subscription created by the renewal is soft-deleted; the client, their other subscriptions, and their history are untouched. The appointment reverts to pending (`subscriptionId` cleared) so it reappears in the Nutricionista's queue.
+- **New-client appointment** — the client is soft-deleted, their one subscription is deleted permanently, and the appointment is deleted with it. Nothing else exists to lose.
+- **Existing-client appointment** — only the subscription created by the renewal is deleted, permanently; the client, their other subscriptions, and their history are untouched. The appointment reverts to pending (`subscriptionId` cleared) so it reappears in the Nutricionista's queue.
+
+Subscriptions are never soft-deleted (the model is not paranoid, unlike Client): a subscription is only ever removed when it should not have existed at all, and `client_history` keeps the record of what happened.
 
 An unpaid subscription normally makes its client's own detail page unreachable (404) until paid — but that block only fires when the unpaid subscription is the client's only one ever. An existing client with any prior subscription stays fully viewable and manageable (pause, renew, suspend) throughout a pending unpaid renewal.
 

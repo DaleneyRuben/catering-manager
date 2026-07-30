@@ -31,6 +31,11 @@ same paid/unpaid choice). This breaks three of ADR-004's assumptions:
    an existing client's unpaid renewal, that same action would destroy a real client's history
    over an unconfirmed renewal payment. The cleanup action now branches: a still-unpaid
    **new-client appointment** keeps ADR-004's delete-the-client behavior unchanged; a
-   still-unpaid **existing-client appointment**'s renewal instead soft-deletes only the
+   still-unpaid **existing-client appointment**'s renewal instead deletes only the
    `Subscription` row it created and resets the Appointment back to pending — the Client and its
    other records are untouched.
+
+   That subscription delete is **permanent**: `Subscription` is not paranoid. A row is only ever
+   deleted when it should never have existed, so keeping a tombstone buys nothing, and
+   `client/find-all.ts` counts subscriptions through raw subqueries that no `deletedAt` scope
+   would apply to — a soft-deleted row would keep being counted as a live plan there.

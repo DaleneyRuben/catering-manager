@@ -207,6 +207,184 @@ describe('create', () => {
 
     expect(mockClient.update).toHaveBeenCalledWith({ pausedSince: today });
   });
+
+  it('persists renewalType on the subscription row when provided', async () => {
+    (Client.findByPk as jest.Mock).mockResolvedValue({ id: 1, update: jest.fn() });
+    (Subscription.create as jest.Mock).mockResolvedValue(mockSubscription);
+    (ClientHistory.create as jest.Mock).mockResolvedValue({});
+
+    await create(
+      1,
+      {
+        planId: 2,
+        startDate,
+        contractDate: today,
+        duration: 20,
+        renewalType: 'reactivation',
+      },
+      actor,
+    );
+
+    expect(Subscription.create).toHaveBeenCalledWith(
+      expect.objectContaining({ renewalType: 'reactivation' }),
+    );
+  });
+
+  it('persists renewalType as null when not provided', async () => {
+    (Client.findByPk as jest.Mock).mockResolvedValue({ id: 1 });
+    (Subscription.create as jest.Mock).mockResolvedValue(mockSubscription);
+    (ClientHistory.create as jest.Mock).mockResolvedValue({});
+
+    await create(1, { planId: 2, startDate, contractDate: today, duration: 20 }, actor);
+
+    expect(Subscription.create).toHaveBeenCalledWith(
+      expect.objectContaining({ renewalType: null }),
+    );
+  });
+
+  it('persists appointmentId on the subscription row when provided', async () => {
+    (Client.findByPk as jest.Mock).mockResolvedValue({ id: 1 });
+    (Subscription.create as jest.Mock).mockResolvedValue(mockSubscription);
+    (ClientHistory.create as jest.Mock).mockResolvedValue({});
+    (Plan.findByPk as jest.Mock).mockResolvedValue({ id: 2, name: 'Completo', price: 5000 });
+
+    await create(
+      1,
+      { planId: 2, startDate, contractDate: today, duration: 20, appointmentId: 4 },
+      actor,
+    );
+
+    expect(Subscription.create).toHaveBeenCalledWith(expect.objectContaining({ appointmentId: 4 }));
+  });
+
+  it('persists appointmentId as null when not provided', async () => {
+    (Client.findByPk as jest.Mock).mockResolvedValue({ id: 1 });
+    (Subscription.create as jest.Mock).mockResolvedValue(mockSubscription);
+    (ClientHistory.create as jest.Mock).mockResolvedValue({});
+
+    await create(1, { planId: 2, startDate, contractDate: today, duration: 20 }, actor);
+
+    expect(Subscription.create).toHaveBeenCalledWith(
+      expect.objectContaining({ appointmentId: null }),
+    );
+  });
+
+  it('includes the appointmentId in the history metadata when provided', async () => {
+    (Client.findByPk as jest.Mock).mockResolvedValue({ id: 1 });
+    (Subscription.create as jest.Mock).mockResolvedValue(mockSubscription);
+    (ClientHistory.create as jest.Mock).mockResolvedValue({});
+    (Plan.findByPk as jest.Mock).mockResolvedValue({ id: 2, name: 'Completo', price: 5000 });
+
+    await create(
+      1,
+      { planId: 2, startDate, contractDate: today, duration: 20, appointmentId: 4 },
+      actor,
+    );
+
+    expect(ClientHistory.create).toHaveBeenCalledWith(
+      expect.objectContaining({ metadata: expect.objectContaining({ appointmentId: 4 }) }),
+    );
+  });
+
+  it('does not include appointmentId in the history metadata when not provided', async () => {
+    (Client.findByPk as jest.Mock).mockResolvedValue({ id: 1 });
+    (Subscription.create as jest.Mock).mockResolvedValue(mockSubscription);
+    (ClientHistory.create as jest.Mock).mockResolvedValue({});
+    (Plan.findByPk as jest.Mock).mockResolvedValue({ id: 2, name: 'Completo', price: 5000 });
+
+    await create(1, { planId: 2, startDate, contractDate: today, duration: 20 }, actor);
+
+    const call = (ClientHistory.create as jest.Mock).mock.calls[0][0];
+    expect(call.metadata).not.toHaveProperty('appointmentId');
+  });
+
+  it('does not log a history event when creating an unpaid renewal', async () => {
+    (Client.findByPk as jest.Mock).mockResolvedValue({ id: 1 });
+    (Subscription.create as jest.Mock).mockResolvedValue({ ...mockSubscription, paid: false });
+    (Plan.findByPk as jest.Mock).mockResolvedValue({ id: 2, name: 'Completo', price: 5000 });
+
+    await create(
+      1,
+      {
+        planId: 2,
+        startDate,
+        contractDate: today,
+        duration: 20,
+        renewalType: 'renewal',
+        paid: false,
+      },
+      actor,
+    );
+
+    expect(ClientHistory.create).not.toHaveBeenCalled();
+  });
+
+  it('does not log a history event when creating an unpaid reactivation', async () => {
+    (Client.findByPk as jest.Mock).mockResolvedValue({ id: 1, update: jest.fn() });
+    (Subscription.create as jest.Mock).mockResolvedValue({ ...mockSubscription, paid: false });
+    (Plan.findByPk as jest.Mock).mockResolvedValue({ id: 2, name: 'Completo', price: 5000 });
+
+    await create(
+      1,
+      {
+        planId: 2,
+        startDate,
+        contractDate: today,
+        duration: 20,
+        renewalType: 'reactivation',
+        paid: false,
+      },
+      actor,
+    );
+
+    expect(ClientHistory.create).not.toHaveBeenCalled();
+  });
+
+  it('does not set pausedSince when creating an unpaid sin-fecha renewal', async () => {
+    const mockClient = { id: 1, update: jest.fn().mockResolvedValue({}) };
+    (Client.findByPk as jest.Mock).mockResolvedValue(mockClient);
+    (Subscription.create as jest.Mock).mockResolvedValue({
+      ...mockSubscription,
+      startDate: null,
+      contractEndDate: null,
+      paid: false,
+    });
+
+    await create(
+      1,
+      {
+        planId: 2,
+        contractDate: today,
+        duration: 20,
+        renewalType: 'renewal',
+        paid: false,
+      },
+      actor,
+    );
+
+    expect(mockClient.update).not.toHaveBeenCalled();
+  });
+
+  it('does not clear pausedSince when creating an unpaid reactivation', async () => {
+    const mockClient = { id: 1, update: jest.fn().mockResolvedValue({}) };
+    (Client.findByPk as jest.Mock).mockResolvedValue(mockClient);
+    (Subscription.create as jest.Mock).mockResolvedValue({ ...mockSubscription, paid: false });
+
+    await create(
+      1,
+      {
+        planId: 2,
+        startDate,
+        contractDate: today,
+        duration: 20,
+        renewalType: 'reactivation',
+        paid: false,
+      },
+      actor,
+    );
+
+    expect(mockClient.update).not.toHaveBeenCalled();
+  });
 });
 
 describe('create with an upcoming subscription already registered', () => {
@@ -331,5 +509,57 @@ describe('create with overlapping prior subscriptions', () => {
     );
 
     expect(Subscription.findAll).not.toHaveBeenCalled();
+  });
+
+  it('does not finalize prior subscriptions when creating an unpaid renewal', async () => {
+    (Client.findByPk as jest.Mock).mockResolvedValue({ id: 1 });
+    (Subscription.create as jest.Mock).mockResolvedValue({ ...mockSubscription, paid: false });
+
+    await create(
+      1,
+      {
+        planId: 2,
+        startDate: '2026-07-03',
+        contractDate: today,
+        duration: 20,
+        renewalType: 'renewal',
+        paid: false,
+      },
+      actor,
+    );
+
+    expect(Subscription.findAll).not.toHaveBeenCalled();
+  });
+});
+
+describe('create with a transaction', () => {
+  it('threads the transaction through every model call', async () => {
+    const transaction = { id: 'txn-1' };
+    const oldSub = { id: 7, update: jest.fn().mockResolvedValue({}) };
+    (Client.findByPk as jest.Mock).mockResolvedValue({ id: 1, update: jest.fn() });
+    (Subscription.findAll as jest.Mock).mockResolvedValue([oldSub]);
+    (Subscription.create as jest.Mock).mockResolvedValue(mockSubscription);
+    (ClientHistory.create as jest.Mock).mockResolvedValue({});
+    (Plan.findByPk as jest.Mock).mockResolvedValue({ id: 2, name: 'Completo', price: 5000 });
+
+    await create(
+      1,
+      {
+        planId: 2,
+        startDate: '2026-07-03',
+        contractDate: today,
+        duration: 20,
+        renewalType: 'renewal',
+      },
+      actor,
+      transaction as never,
+    );
+
+    expect(Client.findByPk).toHaveBeenCalledWith(1, { transaction });
+    expect(Subscription.findAll).toHaveBeenCalledWith(expect.objectContaining({ transaction }));
+    expect(oldSub.update).toHaveBeenCalledWith(expect.anything(), { transaction });
+    expect(Subscription.create).toHaveBeenCalledWith(expect.anything(), { transaction });
+    expect(Plan.findByPk).toHaveBeenCalledWith(2, { transaction });
+    expect(ClientHistory.create).toHaveBeenCalledWith(expect.anything(), { transaction });
   });
 });

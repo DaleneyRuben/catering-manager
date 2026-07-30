@@ -14,6 +14,7 @@ const client1 = {
   id: '1',
   name: 'Ana Pérez',
   phoneNumber: '71234567',
+  isExistingClientRenewal: false,
   subscriptions: [
     {
       id: '9',
@@ -25,6 +26,8 @@ const client1 = {
     },
   ],
 };
+
+const client2 = { ...client1, id: '2', isExistingClientRenewal: true };
 
 function makeWrapper() {
   const queryClient = new QueryClient({
@@ -65,13 +68,23 @@ describe('usePendingPayment', () => {
     expect(mockPost).toHaveBeenCalledWith('/evaluations/1/mark-paid');
   });
 
-  it('remove calls DELETE /evaluations/:id', async () => {
+  it('remove calls DELETE /evaluations/:id for a new-client conversion', async () => {
     mockDelete.mockResolvedValue({});
     const { result } = renderHook(() => usePendingPayment(), { wrapper: makeWrapper() });
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
-    await result.current.remove('1');
+    await result.current.remove(client1);
 
     expect(mockDelete).toHaveBeenCalledWith('/evaluations/1');
+  });
+
+  it('remove calls DELETE /evaluations/:id/pending-renewal for an existing-client renewal', async () => {
+    mockDelete.mockResolvedValue({});
+    const { result } = renderHook(() => usePendingPayment(), { wrapper: makeWrapper() });
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    await result.current.remove(client2);
+
+    expect(mockDelete).toHaveBeenCalledWith('/evaluations/2/pending-renewal');
   });
 });

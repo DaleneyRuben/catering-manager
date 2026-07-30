@@ -8,6 +8,7 @@ import {
   updateAppointmentSchema,
   convertAppointmentSchema,
 } from '../schemas/appointment.schema';
+import { createSubscriptionSchema } from '../schemas/subscription.schema';
 
 const router = Router();
 
@@ -32,17 +33,31 @@ router.patch(
 );
 router.delete('/:id', requireRole(ROLES.SUPER_ADMIN, ROLES.ADMIN), appointmentController.remove);
 
-// Nutritionist-only: her conversion queue and the convert action itself.
+// Nutritionist-only: her conversion queue, the convert/resolve-renewal actions, and
+// reading a single appointment to render the existing-client renewal view.
 router.get(
   '/nutritionist',
   requireRole(ROLES.NUTRITIONIST),
   appointmentController.getForNutritionist,
+);
+router.get(
+  '/:id',
+  requireRole(ROLES.SUPER_ADMIN, ROLES.ADMIN, ROLES.NUTRITIONIST),
+  appointmentController.getById,
 );
 router.post(
   '/:id/convert',
   requireRole(ROLES.NUTRITIONIST),
   validate(convertAppointmentSchema),
   appointmentController.convert,
+);
+// Atomically creates the subscription and stamps the appointment in one request/transaction —
+// replaces the old client-side create-then-PATCH sequence that could partially fail.
+router.post(
+  '/:id/resolve-renewal',
+  requireRole(ROLES.NUTRITIONIST),
+  validate(createSubscriptionSchema),
+  appointmentController.resolveRenewal,
 );
 
 export default router;

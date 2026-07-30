@@ -1,6 +1,8 @@
 import { NextFunction, Request, Response } from 'express';
 import * as clientService from '../services/client';
 import * as deliveryService from '../services/delivery';
+import Appointment from '../models/Appointment';
+import { ROLES } from '../constants/roles.constants';
 import { sendSuccess, sendPaginated, sendError } from '../utils/response';
 import { decodeId } from '../utils/sqids';
 
@@ -31,9 +33,35 @@ const getAll = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
+const search = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { q } = req.query;
+    if (typeof q !== 'string' || !q) {
+      sendSuccess(res, []);
+      return;
+    }
+    const clients = await clientService.search(q);
+    sendSuccess(res, clients);
+  } catch (err) {
+    next(err);
+  }
+};
+
 const getById = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const client = await clientService.findById(decodeId(req.params.id));
+    const id = decodeId(req.params.id);
+
+    // Nutritionist has no client list — she can only reach a client she has an
+    // appointment linking her to (see ADR-006), not any arbitrary client id.
+    if (req.user!.role === ROLES.NUTRITIONIST) {
+      const hasAppointment = await Appointment.count({ where: { clientId: id } });
+      if (!hasAppointment) {
+        sendError(res, 'Acceso denegado', 403);
+        return;
+      }
+    }
+
+    const client = await clientService.findById(id);
     if (!client) {
       sendError(res, 'Client not found', 404);
       return;
@@ -108,4 +136,13 @@ const setGroupHandler = async (req: Request, res: Response, next: NextFunction) 
   }
 };
 
-export default { create, getAll, getById, update, finalize, remove, setGroup: setGroupHandler };
+export default {
+  create,
+  getAll,
+  getById,
+  update,
+  finalize,
+  remove,
+  setGroup: setGroupHandler,
+  search,
+};

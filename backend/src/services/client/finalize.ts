@@ -6,6 +6,7 @@ import { withStatus, getCurrentSubscription, INCLUDE_SUBSCRIPTION_ORDERED } from
 
 type SubLike = {
   id: number;
+  paid?: boolean;
   startDate?: string | null;
   contractEndDate?: string | null;
   finalizedAt?: string | null;
