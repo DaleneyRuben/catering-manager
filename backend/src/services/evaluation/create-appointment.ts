@@ -1,5 +1,6 @@
 import Appointment from '../../models/Appointment';
 import Client from '../../models/Client';
+import { assertSlotAvailable } from './_helpers';
 
 export type CreateAppointmentDto = {
   clientId?: number;
@@ -10,6 +11,8 @@ export type CreateAppointmentDto = {
 };
 
 export const createAppointment = async (data: CreateAppointmentDto) => {
+  await assertSlotAvailable(data.date, data.time);
+
   if (data.clientId !== undefined) {
     const client = await Client.findByPk(data.clientId);
     if (!client) return null;
