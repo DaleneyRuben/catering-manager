@@ -84,6 +84,28 @@ describe('ClientHistoryTab', () => {
     ).toBeInTheDocument();
   });
 
+  it('does not also show the generic actor line on a deleted renewal', () => {
+    mockUseClientHistory.mockReturnValue({
+      history: [
+        entry({
+          eventType: 'renewal_deleted',
+          username: 'Daleney',
+          metadata: {
+            planName: 'Hiperproteico',
+            startDate: '2026-07-02',
+            contractEndDate: '2026-07-29',
+            registeredAt: '2026-06-19T09:40:00',
+          },
+        }),
+      ],
+      isLoading: false,
+    });
+
+    render(<ClientHistoryTab clientId="1" />);
+
+    expect(screen.queryByText('por Daleney')).not.toBeInTheDocument();
+  });
+
   it('names the deleter alone when the registration time is unknown', () => {
     mockUseClientHistory.mockReturnValue({
       history: [entry({ eventType: 'renewal_deleted', username: 'Daleney', metadata: {} })],
