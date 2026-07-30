@@ -9,11 +9,13 @@ jest.mock('@ui/DatePickerInput', () => ({
     value,
     onChange,
     disabled,
+    endMonth,
   }: {
     id?: string;
     value: string;
     onChange: (v: string) => void;
     disabled?: unknown;
+    endMonth?: Date;
   }) => (
     <input
       id={id}
@@ -21,6 +23,7 @@ jest.mock('@ui/DatePickerInput', () => ({
       value={value}
       onChange={(e) => onChange(e.target.value)}
       data-disabled={disabled ? JSON.stringify(disabled) : ''}
+      data-end-month={endMonth ? endMonth.toISOString() : ''}
     />
   ),
 }));
@@ -91,5 +94,13 @@ describe('fecha de inicio restriction for nutritionist-created clients', () => {
     const input = screen.getByLabelText(/fecha de inicio/i);
     const disabled = JSON.parse(input.getAttribute('data-disabled')!);
     expect(new Date(disabled.before).toISOString().slice(0, 10)).toBe('2026-02-12');
+  });
+
+  it('does not cap fecha de inicio calendar navigation to the current month', () => {
+    // Regression: near month-end, today+2 falls in the next month while the
+    // calendar was locked to the current month, leaving no selectable day.
+    render(<Wrapper origen="Cita" />);
+    const input = screen.getByLabelText(/fecha de inicio/i);
+    expect(input).toHaveAttribute('data-end-month', '');
   });
 });

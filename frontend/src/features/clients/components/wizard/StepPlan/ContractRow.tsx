@@ -75,7 +75,6 @@ export function ContractRow({
                 value={field.value ?? ''}
                 onChange={field.onChange}
                 hasError={!!errors.startDate}
-                endMonth={startOfToday()}
                 disabled={minStartDate ? { before: minStartDate } : undefined}
               />
             </Field>
