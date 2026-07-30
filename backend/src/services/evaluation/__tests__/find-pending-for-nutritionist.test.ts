@@ -1,14 +1,12 @@
 import { Op } from 'sequelize';
 import Appointment from '../../../models/Appointment';
-import Subscription from '../../../models/Subscription';
 import { appToday } from '../../../utils/date';
-import { findForNutritionist } from '../find-for-nutritionist';
+import { findPendingForNutritionist } from '../find-pending-for-nutritionist';
 
 jest.mock('../../../models/Appointment');
-jest.mock('../../../models/Subscription');
 jest.mock('../../../utils/date');
 
-describe('findForNutritionist', () => {
+describe('findPendingForNutritionist', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     (appToday as jest.Mock).mockReturnValue('2026-07-25');
@@ -17,7 +15,7 @@ describe('findForNutritionist', () => {
   });
 
   it('prunes stale pendiente appointments before querying', async () => {
-    await findForNutritionist();
+    await findPendingForNutritionist();
 
     expect(Appointment.destroy).toHaveBeenCalledWith({
       where: {
@@ -27,12 +25,14 @@ describe('findForNutritionist', () => {
     });
   });
 
-  it('queries appointments dated today or later, including subscription paid status, ordered chronologically', async () => {
-    await findForNutritionist();
+  it('queries pending appointments dated today or later, ordered chronologically', async () => {
+    await findPendingForNutritionist();
 
     expect(Appointment.findAll).toHaveBeenCalledWith({
-      where: { date: { [Op.gte]: '2026-07-25' } },
-      include: [{ model: Subscription, attributes: ['paid'] }],
+      where: {
+        date: { [Op.gte]: '2026-07-25' },
+        subscriptionId: { [Op.is]: null },
+      },
       order: [
         ['date', 'ASC'],
         ['time', 'ASC'],

@@ -9,7 +9,7 @@ interface Options {
 export function useNutritionistQueue({ enabled = true }: Options = {}) {
   const queueQuery = useQuery({
     queryKey: ['appointments', 'nutritionist'],
-    queryFn: () => api.get<Appointment[]>('/appointments/nutritionist'),
+    queryFn: () => api.get<Appointment[]>('/appointments/nutritionist/pending'),
     enabled,
   });
 

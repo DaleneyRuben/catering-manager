@@ -18,7 +18,11 @@ const headersForRole = (role: string) => {
 beforeEach(() => {
   jest.clearAllMocks();
   (evaluationService.findPendingForAdmin as jest.Mock).mockResolvedValue([]);
-  (evaluationService.findForNutritionist as jest.Mock).mockResolvedValue([]);
+  (evaluationService.findPendingForNutritionist as jest.Mock).mockResolvedValue([]);
+  (evaluationService.findHistoryForNutritionist as jest.Mock).mockResolvedValue({
+    rows: [],
+    total: 0,
+  });
 });
 
 describe('GET /api/appointments/pending role guard', () => {
@@ -61,10 +65,10 @@ describe('GET /api/appointments/pending role guard', () => {
   });
 });
 
-describe('GET /api/appointments/nutritionist role guard', () => {
+describe('GET /api/appointments/nutritionist/pending role guard', () => {
   it('allows nutritionist', async () => {
     const res = await request(app)
-      .get('/api/appointments/nutritionist')
+      .get('/api/appointments/nutritionist/pending')
       .set(headersForRole(ROLES.NUTRITIONIST));
 
     expect(res.status).toBe(200);
@@ -72,7 +76,7 @@ describe('GET /api/appointments/nutritionist role guard', () => {
 
   it('rejects admin with 403', async () => {
     const res = await request(app)
-      .get('/api/appointments/nutritionist')
+      .get('/api/appointments/nutritionist/pending')
       .set(headersForRole(ROLES.ADMIN));
 
     expect(res.status).toBe(403);
@@ -80,7 +84,33 @@ describe('GET /api/appointments/nutritionist role guard', () => {
 
   it('rejects super_admin with 403', async () => {
     const res = await request(app)
-      .get('/api/appointments/nutritionist')
+      .get('/api/appointments/nutritionist/pending')
+      .set(headersForRole(ROLES.SUPER_ADMIN));
+
+    expect(res.status).toBe(403);
+  });
+});
+
+describe('GET /api/appointments/nutritionist/history role guard', () => {
+  it('allows nutritionist', async () => {
+    const res = await request(app)
+      .get('/api/appointments/nutritionist/history')
+      .set(headersForRole(ROLES.NUTRITIONIST));
+
+    expect(res.status).toBe(200);
+  });
+
+  it('rejects admin with 403', async () => {
+    const res = await request(app)
+      .get('/api/appointments/nutritionist/history')
+      .set(headersForRole(ROLES.ADMIN));
+
+    expect(res.status).toBe(403);
+  });
+
+  it('rejects super_admin with 403', async () => {
+    const res = await request(app)
+      .get('/api/appointments/nutritionist/history')
       .set(headersForRole(ROLES.SUPER_ADMIN));
 
     expect(res.status).toBe(403);

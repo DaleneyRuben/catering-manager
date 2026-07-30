@@ -2,23 +2,15 @@ import { PageHeader } from '@ui/PageHeader';
 import { Icon } from '@ui/Icon';
 import { useNutritionistQueue } from '@/features/evaluations/hooks/useNutritionistQueue';
 import { NutritionistAppointmentCard } from '@/features/evaluations/components/NutritionistAppointmentCard';
-import { EvaluationHistoryTable } from '@/features/evaluations/components/EvaluationHistoryTable';
-import { deriveAppointmentStatus } from '@/features/evaluations/deriveAppointmentStatus';
+import { EvaluationHistorySection } from '@/features/evaluations/components/EvaluationHistorySection';
 
 export function NutritionistEvaluationsView() {
-  const { appointments } = useNutritionistQueue();
-
-  const pendientes = appointments.filter((a) => deriveAppointmentStatus(a) === 'pendiente');
-  const historial = appointments.filter((a) => deriveAppointmentStatus(a) !== 'pendiente');
-  const nPagados = historial.filter((a) => deriveAppointmentStatus(a) === 'pagado').length;
+  const { appointments: pendientes } = useNutritionistQueue();
 
   const pendSubtitle =
     pendientes.length === 0
       ? 'Nada por resolver'
       : `${pendientes.length} ${pendientes.length === 1 ? 'cita por resolver' : 'citas por resolver'}`;
-  const histSubtitle = `${historial.length} ${
-    historial.length === 1 ? 'cita resuelta' : 'citas resueltas'
-  } · ${nPagados} con pago confirmado`;
 
   return (
     <div className="px-4 py-5 lg:px-[44px] lg:py-[34px]">
@@ -57,18 +49,7 @@ export function NutritionistEvaluationsView() {
           )}
         </section>
 
-        <section>
-          <div className="mb-4">
-            <h2 className="font-serif font-semibold text-[24px] leading-none text-ink">
-              Historial
-            </h2>
-            <p className="font-mono text-[11px] uppercase tracking-[.06em] text-faint mt-2">
-              {histSubtitle}
-            </p>
-          </div>
-
-          <EvaluationHistoryTable appointments={historial} />
-        </section>
+        <EvaluationHistorySection />
       </div>
     </div>
   );

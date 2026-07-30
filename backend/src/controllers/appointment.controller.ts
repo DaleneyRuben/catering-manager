@@ -1,7 +1,9 @@
 import { NextFunction, Request, Response } from 'express';
 import * as evaluationService from '../services/evaluation';
-import { sendSuccess, sendError } from '../utils/response';
+import { sendSuccess, sendPaginated, sendError } from '../utils/response';
 import { decodeId } from '../utils/sqids';
+
+const VALID_HISTORY_STATUS = ['pagado', 'no_pagado'];
 
 const create = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -71,9 +73,31 @@ const getPending = async (_req: Request, res: Response, next: NextFunction) => {
   }
 };
 
-const getForNutritionist = async (_req: Request, res: Response, next: NextFunction) => {
+const getPendingForNutritionist = async (_req: Request, res: Response, next: NextFunction) => {
   try {
-    sendSuccess(res, await evaluationService.findForNutritionist());
+    sendSuccess(res, await evaluationService.findPendingForNutritionist());
+  } catch (err) {
+    next(err);
+  }
+};
+
+const getHistoryForNutritionist = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { status, q, dateFrom, dateTo, page, limit } = req.query;
+    const resolvedPage = Math.max(1, page ? Number(page) : 1);
+    const resolvedLimit = Math.min(100, Math.max(1, limit ? Number(limit) : 25));
+    const resolvedStatus = VALID_HISTORY_STATUS.includes(status as string)
+      ? (status as 'pagado' | 'no_pagado')
+      : undefined;
+    const { rows, total } = await evaluationService.findHistoryForNutritionist({
+      status: resolvedStatus,
+      q: typeof q === 'string' && q ? q : undefined,
+      dateFrom: typeof dateFrom === 'string' && dateFrom ? dateFrom : undefined,
+      dateTo: typeof dateTo === 'string' && dateTo ? dateTo : undefined,
+      page: resolvedPage,
+      limit: resolvedLimit,
+    });
+    sendPaginated(res, rows, total, resolvedPage, resolvedLimit);
   } catch (err) {
     next(err);
   }
@@ -123,7 +147,8 @@ export default {
   remove,
   getById,
   getPending,
-  getForNutritionist,
+  getPendingForNutritionist,
+  getHistoryForNutritionist,
   convert,
   resolveRenewal,
 };

@@ -1,4 +1,5 @@
 import { Icon } from '@ui/Icon';
+import { Pagination } from '@ui/Pagination';
 import { formatDate } from '@/utils/format';
 import { initials } from '@/utils/string';
 import { deriveAppointmentStatus } from '@/features/evaluations/deriveAppointmentStatus';
@@ -7,9 +8,21 @@ import type { Appointment } from '@/features/evaluations/types';
 
 interface Props {
   appointments: Appointment[];
+  total: number;
+  page: number;
+  limit: number;
+  onChangePage: (page: number) => void;
+  onChangeLimit: (limit: number) => void;
 }
 
-export function EvaluationHistoryTable({ appointments }: Props) {
+export function EvaluationHistoryTable({
+  appointments,
+  total,
+  page,
+  limit,
+  onChangePage,
+  onChangeLimit,
+}: Props) {
   if (appointments.length === 0) {
     return (
       <div className="py-12 px-6 text-center bg-paper border border-rule rounded-[13px] flex flex-col items-center gap-3">
@@ -76,6 +89,13 @@ export function EvaluationHistoryTable({ appointments }: Props) {
           </tbody>
         </table>
       </div>
+      <Pagination
+        page={page}
+        total={total}
+        limit={limit}
+        onChange={onChangePage}
+        onLimitChange={onChangeLimit}
+      />
     </div>
   );
 }
