@@ -14,6 +14,7 @@ export const getClientCounts = async (): Promise<{ planId: number; count: number
        AND s."startDate" <= :today
        AND s."contractEndDate" >= :today
        AND s."finalizedAt" IS NULL
+       AND s."paid" = true
      GROUP BY s."planId"`,
     { replacements: { today }, type: QueryTypes.SELECT },
   );
