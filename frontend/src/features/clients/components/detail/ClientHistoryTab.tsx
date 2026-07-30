@@ -152,7 +152,7 @@ export function ClientHistoryTab({
                   <p className="text-[14px] font-semibold text-ink mt-[3px]">
                     {EVENT_LABELS[entry.eventType]}
                   </p>
-                  {entry.username && (
+                  {entry.username && entry.eventType !== 'renewal_deleted' && (
                     <p className="text-[12px] text-faint mt-[2px]">por {entry.username}</p>
                   )}
                   {showPlanDetails && (
