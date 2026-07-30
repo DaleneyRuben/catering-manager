@@ -2,6 +2,7 @@ import { differenceInYears, format, parseISO, startOfToday } from 'date-fns';
 import { Icon } from '@ui/Icon';
 import { Button } from '@ui/Button';
 import { OverflowMenu } from '@ui/OverflowMenu';
+import { Tooltip } from '@ui/Tooltip';
 import {
   STATUS_LABELS,
   STATUS_CLASSES,
@@ -39,7 +40,8 @@ interface Props {
   onAssignStartDate: () => void;
 }
 
-const RENEWAL_BLOCKED_REASON = 'Ya hay una renovación registrada. Elimínala para registrar otra.';
+const RENEWAL_BLOCKED_REASON =
+  'Renovar está inactivo: un cliente puede tener una sola renovación pendiente. Elimina la renovación registrada si necesitas registrarla de nuevo.';
 const NOT_STARTED_REASON = 'Renovar está inactivo hasta que el plan esté en curso.';
 const UNPAID_RENEWAL_BLOCKED_REASON =
   'Ya hay una renovación registrada pendiente de pago. Gestiónala desde Evaluaciones → Pendientes de pago.';
@@ -128,17 +130,30 @@ export function ClientHeader({
               {toggleConfig.label}
             </Button>
           )}
-          <Button
-            variant="secondary"
-            onClick={onRenew}
-            leftIcon="refresh"
-            disabled={Boolean(renewalBlockedReason)}
-            title={renewalBlockedReason ?? undefined}
-            className={renewalBlockedReason ? OUTLINE_BTN_CLS : OUTLINE_OLIVE_BTN_CLS}
-            style={RENEW_BTN_STYLE}
-          >
-            {status === CLIENT_STATUS.ENDED ? 'Reactivar' : 'Renovar'}
-          </Button>
+          {renewalBlockedReason ? (
+            <Tooltip content={renewalBlockedReason} align="end">
+              <Button
+                variant="secondary"
+                onClick={onRenew}
+                leftIcon="refresh"
+                disabled
+                className={OUTLINE_BTN_CLS}
+                style={RENEW_BTN_STYLE}
+              >
+                {status === CLIENT_STATUS.ENDED ? 'Reactivar' : 'Renovar'}
+              </Button>
+            </Tooltip>
+          ) : (
+            <Button
+              variant="secondary"
+              onClick={onRenew}
+              leftIcon="refresh"
+              className={OUTLINE_OLIVE_BTN_CLS}
+              style={RENEW_BTN_STYLE}
+            >
+              {status === CLIENT_STATUS.ENDED ? 'Reactivar' : 'Renovar'}
+            </Button>
+          )}
           <OverflowMenu
             items={[
               { label: 'Editar datos', icon: 'pencil', onClick: onEdit },
