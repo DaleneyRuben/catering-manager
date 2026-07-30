@@ -5,7 +5,10 @@ import { useAppointment } from '@/features/evaluations/hooks/useAppointment';
 import { useClient } from '@/features/clients/hooks/useClient';
 import { CLIENT_STATUS } from '@/features/clients/constants/clientStatus';
 import { RenewalModal } from '@/features/clients/components/modals/RenewalModal';
-import { findQueuedRenewal } from '@/features/clients/utils/queuedRenewal';
+import {
+  findQueuedRenewal,
+  findUpcomingSubscription,
+} from '@/features/clients/utils/queuedRenewal';
 import { ExistingClientSummaryCard } from '@/features/evaluations/components/ExistingClientSummaryCard';
 import { RenewalBlockedNotice } from '@/features/evaluations/components/RenewalBlockedNotice';
 
@@ -58,7 +61,10 @@ export function EvaluationRenewalPage() {
 
   const sub = client.subscriptions[0];
   // the backend rejects a second upcoming subscription, so she is told before filling the form
-  // rather than after submitting it
+  // rather than after submitting it. Payment-agnostic: an unpaid pending renewal still occupies
+  // the one-renewal slot, it just isn't shown as if it were confirmed (see queuedRenewal.ts).
+  const upcomingRenewal = findUpcomingSubscription(client.subscriptions);
+  // Payment-aware — only a confirmed (paid) renewal is announced with its plan/date details.
   const queuedRenewal = findQueuedRenewal(client.subscriptions);
 
   return (
@@ -69,8 +75,8 @@ export function EvaluationRenewalPage() {
 
       <ExistingClientSummaryCard client={client} sub={sub} queuedRenewal={queuedRenewal} />
 
-      {queuedRenewal ? (
-        <RenewalBlockedNotice hasStartDate={Boolean(queuedRenewal.startDate)} />
+      {upcomingRenewal ? (
+        <RenewalBlockedNotice hasStartDate={Boolean(upcomingRenewal.startDate)} />
       ) : (
         <RenewalModal
           client={client}
