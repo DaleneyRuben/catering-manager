@@ -122,6 +122,40 @@ double-booked at the same date and time before this fix.)_
       because they already had a prior subscription; contrast with Test 4 where a sole unpaid
       subscription blocks the page.
 
+### 6b. An unpaid renewal must not look confirmed anywhere
+
+_(Fix: `c84710f`/`5f64435`/`0901ec3`/`fc88f1f` — found by manual testing on 2026-07-29: an
+unpaid renewal from Test 6 was showing up as if it were an already-registered, confirmed renewal
+in places that should only reflect paid/confirmed state.)_
+
+While the Test 6 client still has its **unpaid** queued renewal (before marking it paid):
+
+- [ ] Open the **Clientes** table/list → find this client's row → confirm the "Contrato" column
+      does **not** show a green "renovado hasta …" tag. (It should look exactly like a client with
+      no queued renewal at all.)
+- [ ] Open the client's own detail page → confirm you do **not** see the green "Renovación
+      registrada · inicia el …" banner with plan/date details. Instead, confirm you see a
+      distinct, non-confirmatory notice — **"Renovación pendiente de pago"** — that does not
+      reveal the plan name, price, or dates, and has no "Eliminar renovación" action on it.
+- [ ] On that same client page, confirm the **Renovar** button is still **disabled** (hover it —
+      the tooltip should mention it's pending payment) — payment status must not lift the
+      one-renewal-at-a-time block; you still can't register a second one until this one is paid
+      or discarded via Pendientes de pago.
+- [ ] Open the **Planes** page → find the plan this unpaid renewal is for → confirm its client
+      count does **not** include this client on account of the unpaid renewal (only matters once
+      the renewal's start date has arrived — if it's still in the future this check is moot, but
+      worth confirming once/if it does).
+- [ ] If the unpaid renewal's `contractEndDate` happens to land on today or tomorrow, confirm it
+      does **not** appear in the dashboard's "Contratos por vencer hoy/mañana" widget (edge case,
+      only testable by picking dates that line up — otherwise just confirm the widget behaves
+      normally with other, paid, ending contracts).
+- [ ] Now **mark it paid** (Test 6) → reload the Clientes table and the client page → confirm the
+      tag and the full green banner **now appear correctly**, since it's confirmed.
+- [ ] As a control, confirm **reports, Entregas, Producción, and kitchen-report** were never
+      affected by this bug in the first place — pick a date within the unpaid renewal's future
+      contract window (once it's paid) and confirm the client is counted correctly starting from
+      its actual start date, not before.
+
 ### 7. Existing-client renewal (unpaid) → abandoned
 
 - [ ] Repeat Test 6's unpaid renewal, then from **Pendientes de pago**, click delete on that row.
