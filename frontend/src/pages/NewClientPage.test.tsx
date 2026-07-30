@@ -317,7 +317,7 @@ describe('NewClientPage — cita entry point', () => {
     jest.clearAllMocks();
     mockGet.mockImplementation((url: string) => {
       if (url === '/plans') return Promise.resolve([makePlan()]);
-      if (url === '/appointments/nutritionist') return Promise.resolve([appointment]);
+      if (url === '/appointments/nutritionist/pending') return Promise.resolve([appointment]);
       return Promise.resolve([]);
     });
   });

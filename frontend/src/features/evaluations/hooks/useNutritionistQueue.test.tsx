@@ -31,7 +31,7 @@ function makeWrapper() {
 beforeEach(() => {
   jest.clearAllMocks();
   mockGet.mockImplementation((url: string) => {
-    if (url === '/appointments/nutritionist') return Promise.resolve([appointment1]);
+    if (url === '/appointments/nutritionist/pending') return Promise.resolve([appointment1]);
     return Promise.reject(new Error(`Unknown URL: ${url}`));
   });
 });
