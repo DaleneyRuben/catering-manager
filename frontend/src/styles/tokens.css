@@ -62,6 +62,10 @@
   /* Modal */
   --color-modal-backdrop: rgba(21, 42, 6, 0.42);
 
+  /* Tooltip */
+  --color-tooltip-bg: #26301a;
+  --color-tooltip-text: #e9efdc;
+
   /* Login history modals */
   --color-device-chip-bg: #eef1e6;
   --color-history-row-border: #e8e5d6;
@@ -79,6 +83,7 @@
   --shadow-glow-online: 0 0 0 3px rgba(108, 193, 24, 0.18);
   --shadow-glow-offline: 0 0 0 3px rgba(205, 160, 26, 0.16);
   --shadow-dot-today: 0 0 0 4px rgba(108, 193, 24, 0.22);
+  --shadow-tooltip: 0 10px 26px rgba(20, 40, 6, 0.28);
 
   /* Toast */
   --color-toast-error-border: #f0b8a0;
