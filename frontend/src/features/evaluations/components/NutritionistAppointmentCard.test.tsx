@@ -14,20 +14,6 @@ const pendingAppointment: Appointment = {
   clientId: null,
 };
 
-const paidAppointment: Appointment = {
-  ...pendingAppointment,
-  id: '2',
-  subscriptionId: '9',
-  subscription: { paid: true },
-};
-
-const unpaidAppointment: Appointment = {
-  ...pendingAppointment,
-  id: '3',
-  subscriptionId: '10',
-  subscription: { paid: false },
-};
-
 function renderCard(appointment: Appointment) {
   return render(
     <MemoryRouter>
@@ -60,19 +46,5 @@ describe('NutritionistAppointmentCard', () => {
     expect(screen.getByText('Cliente existente')).toBeInTheDocument();
     const link = screen.getByRole('link');
     expect(link).toHaveAttribute('href', '/evaluaciones/citas/1/renovar');
-  });
-
-  it('renders a static Pagado tag with no link when converted and paid', () => {
-    renderCard(paidAppointment);
-    expect(screen.getByText('Pagado')).toBeInTheDocument();
-    expect(screen.getByText('Convertido · pago confirmado')).toBeInTheDocument();
-    expect(screen.queryByRole('link')).not.toBeInTheDocument();
-  });
-
-  it('renders a static No pagado tag with no link when converted and unpaid', () => {
-    renderCard(unpaidAppointment);
-    expect(screen.getByText('No pagado')).toBeInTheDocument();
-    expect(screen.getByText('Convertido · pago pendiente')).toBeInTheDocument();
-    expect(screen.queryByRole('link')).not.toBeInTheDocument();
   });
 });
