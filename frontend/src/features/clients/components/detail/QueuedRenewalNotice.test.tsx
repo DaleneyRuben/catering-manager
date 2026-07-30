@@ -33,7 +33,7 @@ describe('QueuedRenewalNotice', () => {
     ).toBeInTheDocument();
   });
 
-  it('explains that Renovar is inactive', () => {
+  it('stays to two lines — the "why Renovar is disabled" explanation lives in the header tooltip now', () => {
     render(
       <QueuedRenewalNotice
         renewal={renewal()}
@@ -43,7 +43,7 @@ describe('QueuedRenewalNotice', () => {
       />,
     );
 
-    expect(screen.getByText(/Renovar está inactivo/)).toBeInTheDocument();
+    expect(screen.queryByText(/Renovar está inactivo/)).not.toBeInTheDocument();
   });
 
   it('calls onDelete when the renewal is deleted', async () => {
@@ -105,7 +105,7 @@ describe('QueuedRenewalNotice', () => {
     ).toBeInTheDocument();
   });
 
-  it('renders the delete action in the destructive register', () => {
+  it("renders the delete action in the banner's own palette, not the destructive one", () => {
     render(
       <QueuedRenewalNotice
         renewal={renewal()}
@@ -117,9 +117,20 @@ describe('QueuedRenewalNotice', () => {
 
     const button = screen.getByRole('button', { name: /Eliminar renovación/ });
 
-    expect(button).toHaveClass('text-danger', 'hover:bg-danger-bg');
-    // a variant colour on the same button competes with text-danger in the stylesheet and wins
-    expect(button.className).not.toMatch(/text-olive/);
+    // red is reserved for the confirmation modal that follows this click, not the banner itself
+    expect(button.className).not.toMatch(/text-danger/);
+    expect(button).toHaveClass('text-success-text');
+  });
+
+  it('gives the delete action the amber register when the banner is paused', () => {
+    render(
+      <QueuedRenewalNotice renewal={renewal()} isPaused onDelete={noop} onAssignStartDate={noop} />,
+    );
+
+    const button = screen.getByRole('button', { name: /Eliminar renovación/ });
+
+    expect(button.className).not.toMatch(/text-danger/);
+    expect(button).toHaveClass('text-warn-text');
   });
 
   it('keeps the assign-date action in the register of the banner it sits in', () => {
@@ -156,7 +167,9 @@ describe('QueuedRenewalNotice', () => {
       <QueuedRenewalNotice renewal={renewal()} isPaused onDelete={noop} onAssignStartDate={noop} />,
     );
 
+    // the paused-client reminder is already carried by the status pill next to the client's name —
+    // repeating it here would push this banner past the two-line cap
     expect(screen.getByText(/Plan en pausa · renovación registrada/)).toBeInTheDocument();
-    expect(screen.getByText(/El cliente no recibe entregas/)).toBeInTheDocument();
+    expect(screen.queryByText(/El cliente no recibe entregas/)).not.toBeInTheDocument();
   });
 });

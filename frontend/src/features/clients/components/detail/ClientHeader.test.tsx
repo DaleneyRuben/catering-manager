@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { Client } from '@/features/clients/types';
 import { ClientHeader } from './ClientHeader';
@@ -108,6 +108,15 @@ describe('with a queued renewal', () => {
     render(<ClientHeader {...baseProps} client={withQueuedRenewal()} status="expiring" />);
 
     expect(screen.getByRole('button', { name: /renovar/i })).toBeDisabled();
+  });
+
+  it('shows a tooltip explaining why Renovar is disabled', () => {
+    render(<ClientHeader {...baseProps} client={withQueuedRenewal()} status="expiring" />);
+
+    const trigger = screen.getByRole('button', { name: /renovar/i }).parentElement as HTMLElement;
+    fireEvent.focusIn(trigger);
+
+    expect(screen.getByRole('tooltip')).toHaveTextContent(/una sola renovación pendiente/i);
   });
 
   it('shows the queued renewal notice instead of the plain pause banner', () => {

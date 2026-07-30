@@ -19,12 +19,14 @@ const PAUSED_STYLES = {
   icon: 'text-warn',
   title: 'text-warn-text-strong',
   text: 'text-warn-text',
+  deleteHoverBg: 'hover:bg-warn-border',
 };
 const QUEUED_STYLES = {
   box: 'bg-success-soft-bg border-olive-200',
   icon: 'text-success-text',
   title: 'text-olive-800',
   text: 'text-success-text',
+  deleteHoverBg: 'hover:bg-ok-bg',
 };
 
 // bare, not ghost: the ghost variant carries its own olive text colour, which competes with the
@@ -46,11 +48,6 @@ export function QueuedRenewalNotice({ renewal, isPaused, onDelete, onAssignStart
     : 'Renovación registrada · sin fecha de inicio';
   const title = isPaused ? pausedTitle : queuedTitle;
 
-  const pausePrefix = isPaused ? 'El cliente no recibe entregas. ' : '';
-  const body = dates
-    ? `${pausePrefix}Renovar está inactivo: un cliente puede tener una sola renovación pendiente. Elimínala si necesitas registrarla de nuevo.`
-    : `${pausePrefix}La renovación empieza cuando le asignes una fecha de inicio.`;
-
   return (
     <div className={`flex items-start gap-3 border rounded-md px-[18px] py-3.5 mb-5 ${styles.box}`}>
       <Icon name="refresh" size={16} className={`${styles.icon} shrink-0 mt-[2px]`} />
@@ -59,7 +56,6 @@ export function QueuedRenewalNotice({ renewal, isPaused, onDelete, onAssignStart
         <p className={`font-mono text-[11px] tabular-nums mt-[3px] ${styles.text}`}>
           {formatRenewalMeta(renewal)}
         </p>
-        <p className={`text-[12.5px] mt-[6px] ${styles.text}`}>{body}</p>
       </div>
       <div className="flex flex-col items-end gap-1 shrink-0">
         {!dates && (
@@ -77,7 +73,7 @@ export function QueuedRenewalNotice({ renewal, isPaused, onDelete, onAssignStart
           variant="bare"
           onClick={onDelete}
           leftIcon="trash"
-          className="font-semibold rounded-lg text-danger hover:bg-danger-bg"
+          className={`font-semibold rounded-lg ${styles.text} ${styles.deleteHoverBg}`}
           style={ACTION_STYLE}
         >
           Eliminar renovación
