@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from 'react';
+import { isValidElement, useState, type ReactNode } from 'react';
 
 interface Props {
   content: string;
@@ -11,20 +11,36 @@ const ALIGN_CLS: Record<NonNullable<Props['align']>, string> = {
   end: 'right-0',
 };
 
-// Hover/focus listeners live on the wrapper, not the trigger itself, so the tooltip still shows
-// when the trigger is a native disabled <button> (which stops receiving its own DOM events).
+// A real disabled <button> never dispatches mouse events — not even to ancestors — so hover
+// listeners on the wrapper alone never fire for it. There's nothing to lose by capturing the
+// hover in front of it instead: a disabled control isn't clickable either way.
+function isDisabledTrigger(children: ReactNode): boolean {
+  return isValidElement<{ disabled?: boolean }>(children) && Boolean(children.props.disabled);
+}
+
 export function Tooltip({ content, children, align = 'end' }: Props) {
   const [visible, setVisible] = useState(false);
+  const show = () => setVisible(true);
+  const hide = () => setVisible(false);
+  const disabledTrigger = isDisabledTrigger(children);
 
   return (
     <span
       className="relative inline-flex"
-      onMouseEnter={() => setVisible(true)}
-      onMouseLeave={() => setVisible(false)}
-      onFocus={() => setVisible(true)}
-      onBlur={() => setVisible(false)}
+      onMouseEnter={show}
+      onMouseLeave={hide}
+      onFocus={show}
+      onBlur={hide}
     >
       {children}
+      {disabledTrigger && (
+        <span
+          data-testid="tooltip-disabled-overlay"
+          className="absolute inset-0"
+          onMouseEnter={show}
+          onMouseLeave={hide}
+        />
+      )}
       {visible && (
         <span
           role="tooltip"
