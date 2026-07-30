@@ -36,9 +36,14 @@ router.delete('/:id', requireRole(ROLES.SUPER_ADMIN, ROLES.ADMIN), appointmentCo
 // Nutritionist-only: her conversion queue, the convert/resolve-renewal actions, and
 // reading a single appointment to render the existing-client renewal view.
 router.get(
-  '/nutritionist',
+  '/nutritionist/pending',
   requireRole(ROLES.NUTRITIONIST),
-  appointmentController.getForNutritionist,
+  appointmentController.getPendingForNutritionist,
+);
+router.get(
+  '/nutritionist/history',
+  requireRole(ROLES.NUTRITIONIST),
+  appointmentController.getHistoryForNutritionist,
 );
 router.get(
   '/:id',

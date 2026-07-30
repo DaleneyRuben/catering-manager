@@ -203,14 +203,77 @@ describe('GET /api/appointments/:id', () => {
   });
 });
 
-describe('GET /api/appointments/nutritionist', () => {
-  it('returns 200 with all appointments', async () => {
-    (evaluationService.findForNutritionist as jest.Mock).mockResolvedValue([{ id: 1 }]);
+describe('GET /api/appointments/nutritionist/pending', () => {
+  it('returns 200 with the pending appointments', async () => {
+    (evaluationService.findPendingForNutritionist as jest.Mock).mockResolvedValue([{ id: 1 }]);
 
-    const res = await request(app).get('/api/appointments/nutritionist');
+    const res = await request(app).get('/api/appointments/nutritionist/pending');
 
     expect(res.status).toBe(200);
     expect(res.body.data).toHaveLength(1);
+  });
+});
+
+describe('GET /api/appointments/nutritionist/history', () => {
+  it('returns 200 with paginated history', async () => {
+    (evaluationService.findHistoryForNutritionist as jest.Mock).mockResolvedValue({
+      rows: [{ id: 1 }],
+      total: 1,
+    });
+
+    const res = await request(app).get('/api/appointments/nutritionist/history');
+
+    expect(res.status).toBe(200);
+    expect(res.body.data).toHaveLength(1);
+    expect(res.body.total).toBe(1);
+    expect(res.body.page).toBe(1);
+    expect(res.body.limit).toBe(25);
+  });
+
+  it('forwards status, q, dateFrom, dateTo, page, and limit to the service', async () => {
+    (evaluationService.findHistoryForNutritionist as jest.Mock).mockResolvedValue({
+      rows: [],
+      total: 0,
+    });
+
+    await request(app).get(
+      '/api/appointments/nutritionist/history?status=pagado&q=Julia&dateFrom=2026-08-01&dateTo=2026-08-10&page=2&limit=10',
+    );
+
+    expect(evaluationService.findHistoryForNutritionist).toHaveBeenCalledWith({
+      status: 'pagado',
+      q: 'Julia',
+      dateFrom: '2026-08-01',
+      dateTo: '2026-08-10',
+      page: 2,
+      limit: 10,
+    });
+  });
+
+  it('ignores an invalid status value', async () => {
+    (evaluationService.findHistoryForNutritionist as jest.Mock).mockResolvedValue({
+      rows: [],
+      total: 0,
+    });
+
+    await request(app).get('/api/appointments/nutritionist/history?status=bogus');
+
+    expect(evaluationService.findHistoryForNutritionist).toHaveBeenCalledWith(
+      expect.objectContaining({ status: undefined }),
+    );
+  });
+
+  it('defaults to page 1 and limit 25', async () => {
+    (evaluationService.findHistoryForNutritionist as jest.Mock).mockResolvedValue({
+      rows: [],
+      total: 0,
+    });
+
+    await request(app).get('/api/appointments/nutritionist/history');
+
+    expect(evaluationService.findHistoryForNutritionist).toHaveBeenCalledWith(
+      expect.objectContaining({ page: 1, limit: 25 }),
+    );
   });
 });
 
