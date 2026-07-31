@@ -4,7 +4,7 @@ import Subscription from '../../models/Subscription';
 import { UpdateSubscriptionDto } from '../../schemas/subscription.schema';
 import type { Actor } from '../../types/actor';
 import { addDeliveryDays, subtractDeliveryDays, calcContractEndDate } from '../../utils/date';
-import { finalizeOverlappingSubscriptions } from './_helpers';
+import { finalizeOverlappingSubscriptions } from './finalize-overlapping';
 
 export const update = async (
   clientId: number,
