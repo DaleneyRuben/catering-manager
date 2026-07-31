@@ -12,21 +12,27 @@ This document describes the **target**. The code does not fully match it yet —
 work, in dependency order, is tracked in [backlog.md](./backlog.md). Where the two disagree,
 this document is the intent and the backlog says what is left to do about it.
 
+Two naming notes, so nothing reads as a contradiction against the repo as it stands today:
+
+- Paths here are written as `domains/…`. On disk the folder is still `services/` until
+  backlog item 1 renames it.
+- The `client-history` domain is still called `history/` until backlog item 6.1.
+
 ---
 
 ## Vocabulary
 
-| Term                 | Meaning                                                                                                                                                  |
-| -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Domain**           | A unit of ownership. Today, one `backend/src/services/<name>/` folder.                                                                                   |
-| **Domain API**       | The domain's `index.ts`. The only legal entry point from outside.                                                                                        |
-| **Domain internals** | Everything else in the folder — function files, `_helpers.ts`. Invisible from outside.                                                                   |
-| **Owner**            | The single domain permitted to **write** a given table.                                                                                                  |
-| **Read access**      | Any query, joins included. Unrestricted — every domain may read every table.                                                                             |
-| **Write access**     | `create` / `update` / `destroy`. Owner only.                                                                                                             |
-| **Shared kernel**    | Deliberately shared, domain-free code: `utils/date`, `utils/errors`, `utils/logger`, `utils/response`, `utils/sqids`, `types/actor`. Depends on nothing. |
+| Term                 | Meaning                                                                                                                                                                                       |
+| -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Domain**           | A unit of ownership. One `backend/src/domains/<name>/` folder.                                                                                                                                |
+| **Domain API**       | The domain's `index.ts`. The only legal entry point from outside.                                                                                                                             |
+| **Domain internals** | Everything else in the folder — function files, `_helpers.ts`. Invisible from outside.                                                                                                        |
+| **Owner**            | The single domain permitted to **write** a given table.                                                                                                                                       |
+| **Read access**      | Any query, joins included. Unrestricted — every domain may read every table.                                                                                                                  |
+| **Write access**     | `create` / `update` / `destroy`. Owner only.                                                                                                                                                  |
+| **Shared kernel**    | Deliberately shared, domain-free code: `utils/` (`date`, `errors`, `logger`, `response`, `sqids`, `sentry`, `devFlags`, `whatsappIcon`), `constants/`, `types/actor`. Holds no business rule. |
 
-**"Domain" always means a folder under `services/`.** It never means the catering business
+**"Domain" always means a folder under `domains/`.** It never means the catering business
 knowledge — that is `docs/business-rules.md`, and it is never called "the domain" in code or
 in these documents.
 
@@ -94,7 +100,7 @@ A domain that owns no table earns its existence by holding a business rule. If d
 would only cost you a `Promise.all`, it was never a domain — it was screen assembly, and
 screen assembly belongs in the controller, which already maps one-to-one to a route.
 
-This is the test that keeps `services/reports-page/` from appearing in six months.
+This is the test that keeps `domains/reports-page/` from appearing in six months.
 
 ---
 
@@ -154,10 +160,15 @@ They own no table and write nothing. Each holds a real rule.
 | `delivery`   | Route grouping — zone, then delivery group (one stop per `groupToken`), then individuals                                                       |
 | `report`     | Kitchen report structure — pastelería / producción / hiperproteico / "no dar", portion counts, special-instruction grouping                    |
 
-`report`'s rules currently live in `utils/kitchenReportBuilder.ts` and
-`utils/kitchenReportData.ts`, which import _backwards_ into `services/report`. They belong
-inside the domain and move there. Until then, `report` is a 39-line shell that would fail
-rule 4.
+`report`'s rules currently live in `utils/` — `kitchenReportBuilder.ts` and
+`kitchenReportData.ts` (both importing _backwards_ into `domains/report`) and
+`menuBuilder.ts` (which reads `models/Menu` and is imported straight into
+`report.controller.ts`). All three belong inside the domain and move there. Until then,
+`report` is a 39-line shell that would fail rule 4.
+
+`utils/clientStatus.ts` is the same mistake in the `client` domain: `deriveClientStatus`
+holds the entire derived-status rule and has exactly one consumer,
+`domains/client/_helpers.ts`. It moves too — see backlog item 4.
 
 `delivery` currently writes `Client.groupToken` (`set-group.ts`). Under rule 1 it calls
 `client.setDeliveryGroup(...)` instead, making it a pure view domain.
@@ -207,42 +218,58 @@ Each query moves to the domain that owns its data. The screen-shaped assembly mo
 
 What `backend/src/` looks like once the [backlog](./backlog.md) is finished.
 
+Existing filenames are kept as they are — `+` marks a file that is new or moved in, so the
+tree can be checked against the repo today.
+
 ```
 backend/src/
-  services/                     ← 13 domains. A domain is a folder here, nothing else
-    client/                     ← owning
+  domains/                                    ← renamed from services/ (backlog item 1)
+    client/                                   ← owning: clients
       _helpers.ts
-      client-status.ts          ← moved in from utils/clientStatus.ts
-      create.ts  find-all.ts  find-by-id.ts  search.ts  update.ts
-      find-birthdays.ts         ← moved in from dashboard/
-      pause.ts  resume.ts  set-delivery-group.ts  finalize.ts  soft-delete.ts
+      create.ts  update.ts  find-all.ts  find-by-id.ts  search.ts
+      finalize.ts  soft-delete.ts
+    + client-status.ts                        ← from utils/clientStatus.ts
+    + find-birthdays.ts                       ← from dashboard/
+    + pause.ts  resume.ts  set-delivery-group.ts
       __tests__/  index.ts
-    subscription/               ← owning; the largest domain, correctly so
-      create.ts  update.ts  finalize.ts  mark-paid.ts  remove.ts
-      finalize-overlapping.ts   ← promoted out of _helpers.ts
-      find-active-for-date.ts  find-suspended-for-date.ts
-      find-contract-ending.ts  count-active.ts        ← moved in from dashboard/
-    client-history/             ← owning; renamed from history/
-      record.ts                 ← the ONLY writer of client_history
-      find-by-client.ts
-    plan/  menu/  evaluation/  user/  login-event/        ← owning
-    production/  delivery/  report/                        ← view: read, never write
-    auth/  health/                                         ← capability
 
-  models/                       ← stays a shared layer. See below
-  controllers/                  ← thin; may compose several domains
+    subscription/                             ← owning: subscriptions. Largest domain
+      _helpers.ts                             ← keeps findUpcomingSubscription etc.
+      create.ts  update.ts
+      delete-upcoming-subscription.ts
+      find-active-subscriptions-for-date.ts
+      find-suspended-subscriptions-for-date.ts
+    + finalize-overlapping.ts                 ← promoted out of _helpers.ts
+    + finalize.ts  mark-paid.ts  remove.ts  extend-after-pause.ts
+    + find-contract-ending.ts  count-active.ts  count-suspended.ts   ← from dashboard/
+
+    client-history/                           ← owning: client_history. Was history/
+      find-by-client.ts
+    + record.ts                               ← the ONLY writer of client_history
+
+    plan/  menu/  evaluation/  user/  login-event/     ← owning
+    production/  delivery/  report/                     ← view: read, never write
+    auth/  health/                                      ← capability
+
+  models/          ← stays a shared layer. See below
+  controllers/     ← thin; may compose several domains
   routes/  schemas/  middleware/  constants/
-  utils/                        ← shared kernel only: date, errors, logger,
-                                  response, sqids, sentry, devFlags, whatsappIcon
+  utils/           ← shared kernel only: date, errors, logger, response,
+                     sqids, sentry, devFlags, whatsappIcon
 ```
+
+`client.finalize()` and `client.resume()` stay in `client` because they are the client-facing
+operations the controller calls — but they no longer write `subscriptions` themselves. They
+delegate to `subscription.finalize()` and `subscription.extendAfterPause()`. Two functions
+named `finalize` is deliberate: one is the client-level action, the other the table-level rule.
 
 ### Why models stay in `models/`
 
-The obvious move — put `Client.ts` inside `services/client/` so ownership is visible in the
+The obvious move — put `Client.ts` inside `domains/client/` so ownership is visible in the
 tree — is **wrong for this architecture**, and it is worth writing down so nobody attempts it.
 
 Reads are free (rule 1). `report`, `production` and `dashboard`'s successors all legitimately
-read `clients` and `subscriptions`. If the model lived in `services/client/`, every one of
+read `clients` and `subscriptions`. If the model lived in `domains/client/`, every one of
 those legal reads would be a deep import into another domain's folder — indistinguishable from
 the violation the lint rules exist to catch.
 
@@ -254,16 +281,16 @@ folders: they are either shared leaf values or HTTP concerns that map to routes,
 
 ### What changes in the tree, and what does not
 
-|                                | Before                              | After                                                        |
-| ------------------------------ | ----------------------------------- | ------------------------------------------------------------ |
-| Domains                        | 14, incl. `dashboard` and `history` | **13** — `dashboard` dissolved, `history` → `client-history` |
-| Writers of `client_history`    | 8 sites, 3 domains                  | **1** — `client-history.record()`                            |
-| Writers of `subscriptions`     | 4 domains                           | **1** — `subscription`                                       |
-| Writers of `clients`           | 4 domains                           | **1** — `client`                                             |
-| Business rules in `utils/`     | 4 files                             | **0**                                                        |
-| `utils/` → `services/` imports | 2                                   | **0**                                                        |
-| Deep cross-domain imports      | 0                                   | 0 — unchanged, and now lint-enforced                         |
-| HTTP contracts                 | —                                   | **unchanged**; this refactor is invisible from outside       |
+|                               | Before                              | After                                                        |
+| ----------------------------- | ----------------------------------- | ------------------------------------------------------------ |
+| Domains                       | 14, incl. `dashboard` and `history` | **13** — `dashboard` dissolved, `history` → `client-history` |
+| Writers of `client_history`   | 8 sites, 3 domains                  | **1** — `client-history.record()`                            |
+| Writers of `subscriptions`    | 4 domains                           | **1** — `subscription`                                       |
+| Writers of `clients`          | 4 domains                           | **1** — `client`                                             |
+| Business rules in `utils/`    | 4 files                             | **0**                                                        |
+| `utils/` → `domains/` imports | 2                                   | **0**                                                        |
+| Deep cross-domain imports     | 0                                   | 0 — unchanged, and now lint-enforced                         |
+| HTTP contracts                | —                                   | **unchanged**; this refactor is invisible from outside       |
 
 ---
 
@@ -298,10 +325,10 @@ of the surface, not all of it.
 
 **Structural rules** — `no-restricted-imports`:
 
-- no deep imports into a domain (`services/*/` anything but `index`)
+- no deep imports into a domain (`domains/*/` anything but `index`)
 - no `_helpers` imports across domains
 - no model imports in `controllers/`
-- no `services/` imports in `utils/`
+- no `domains/` imports in `utils/`
 
 **Static writes** — `no-restricted-syntax` with per-folder `overrides`, one per owning
 domain, rejecting `Model.create` / `.update` / `.destroy` / `.bulkCreate` outside the owner.
