@@ -8,6 +8,10 @@ The decision behind it — and the alternative we rejected — is recorded in
 [ADR-007](../adr/007-domain-ownership.md). The catering business rules live in
 [business-rules.md](../business-rules.md); this document is about code structure only.
 
+This document describes the **target**. The code does not fully match it yet — the outstanding
+work, in dependency order, is tracked in [backlog.md](./backlog.md). Where the two disagree,
+this document is the intent and the backlog says what is left to do about it.
+
 ---
 
 ## Vocabulary
