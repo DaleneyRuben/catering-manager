@@ -7,7 +7,7 @@ import {
 } from '../subscription';
 import { findBirthdays, type BirthdayPerson } from '../client';
 import { findConnections, type Connection } from '../user';
-import { findMenus, type MenuStatus } from './find-menus';
+import { findMenuStatus, type MenuStatus } from '../menu';
 
 export type DashboardSummary = SubscriptionCounts & {
   deliveriesToday: number;
@@ -25,7 +25,7 @@ export const findSummary = async (): Promise<DashboardSummary> => {
       findContractEnding(),
       findBirthdays(),
       findConnections(),
-      findMenus(),
+      findMenuStatus(),
     ]);
 
   return { ...counts, deliveriesToday, contractEnding, birthdays, connections, menus };

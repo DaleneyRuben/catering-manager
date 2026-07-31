@@ -1,7 +1,7 @@
-import { findByDate } from '../../menu/find-by-date';
-import { findMenus } from '../find-menus';
+import { findByDate } from '../find-by-date';
+import { findMenuStatus } from '../find-menu-status';
 
-jest.mock('../../menu/find-by-date', () => ({
+jest.mock('../find-by-date', () => ({
   findByDate: jest.fn(),
 }));
 
@@ -21,13 +21,13 @@ const fullMenu = {
   juice: 'Limonada',
 };
 
-describe('findMenus', () => {
+describe('findMenuStatus', () => {
   beforeEach(() => jest.clearAllMocks());
 
   it('marks loaded true when all 7 meal fields are filled', async () => {
     (findByDate as jest.Mock).mockResolvedValue(fullMenu);
 
-    const result = await findMenus();
+    const result = await findMenuStatus();
 
     expect(result.today.loaded).toBe(true);
   });
@@ -35,7 +35,7 @@ describe('findMenus', () => {
   it('marks loaded false when any meal field is missing', async () => {
     (findByDate as jest.Mock).mockResolvedValue({ ...fullMenu, dinner: null });
 
-    const result = await findMenus();
+    const result = await findMenuStatus();
 
     expect(result.today.loaded).toBe(false);
   });
@@ -43,7 +43,7 @@ describe('findMenus', () => {
   it('marks loaded false when no menu exists for the date', async () => {
     (findByDate as jest.Mock).mockResolvedValue(null);
 
-    const result = await findMenus();
+    const result = await findMenuStatus();
 
     expect(result.today.loaded).toBe(false);
     expect(result.tomorrow.loaded).toBe(false);
@@ -52,7 +52,7 @@ describe('findMenus', () => {
   it('includes the date for each day', async () => {
     (findByDate as jest.Mock).mockResolvedValue(null);
 
-    const result = await findMenus();
+    const result = await findMenuStatus();
 
     expect(result.today.date).toBe('2026-06-25');
     expect(result.tomorrow.date).toBe('2026-06-26');
@@ -62,7 +62,7 @@ describe('findMenus', () => {
     mockAppToday.mockReturnValueOnce('2026-06-27');
     (findByDate as jest.Mock).mockResolvedValue(null);
 
-    const result = await findMenus();
+    const result = await findMenuStatus();
 
     expect(result.today.date).toBe('2026-06-29');
     expect(result.tomorrow.date).toBe('2026-06-30');
