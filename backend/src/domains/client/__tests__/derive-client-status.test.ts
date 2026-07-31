@@ -1,4 +1,4 @@
-import { deriveClientStatus } from '../clientStatus';
+import { deriveClientStatus } from '../derive-client-status';
 
 const TODAY = '2026-06-10';
 
