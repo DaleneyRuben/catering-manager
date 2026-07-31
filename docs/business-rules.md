@@ -1,6 +1,11 @@
-# Catering Manager — Domain Knowledge
+# Catering Manager — Business Rules
 
-## Domain Overview
+The catering business itself: what the terms mean, how plans and deliveries work, and the
+rules the system must honour. For how the code is organised, see
+[docs/architecture/domains.md](./architecture/domains.md) — there, "domain" means a folder
+under `services/`, never the business.
+
+## Overview
 
 Home and office meal delivery service. Clients subscribe to a meal plan. Daily menus are entered to generate chef preparation reports.
 

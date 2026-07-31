@@ -7,8 +7,8 @@ flow, plus supporting fixes (actor tracking on history, correct "current subscri
 role-guard tightening, permanent subscription deletion). It has never shipped as smaller PRs —
 everything below needs a real click-through pass before merging to `main`.
 
-Cross-reference: `docs/domain.md` → "Evaluaciones (Appointments)" and "Client Lifecycle" sections
-are the spec this plan verifies against. Where the two disagree, trust `domain.md` and flag it.
+Cross-reference: `docs/business-rules.md` → "Evaluaciones (Appointments)" and "Client Lifecycle" sections
+are the spec this plan verifies against. Where the two disagree, trust `business-rules.md` and flag it.
 
 ## 0. How to use this document
 

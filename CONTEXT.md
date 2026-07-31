@@ -54,7 +54,7 @@ UI labels are neutral Spanish. Each entry: term (code identifier) — definition
   later, regardless of resolution status. An unresolved (`pendiente`) Appointment whose date
   has passed isn't just hidden — it's deleted outright, lazily, the next time either list is
   read (mirroring how the `menus` table prunes its own rolling window on write instead of read
-  — see docs/domain.md's Daily Menu Processing). A _resolved_ (pagado/no_pagado) Appointment
+  — see docs/business-rules.md's Daily Menu Processing). A _resolved_ (pagado/no_pagado) Appointment
   past its date is only hidden, never deleted — its data lives on through the
   Client/Subscription/history it produced.
 - **New-client appointment** — an Appointment with `clientId` unset. The caller is not yet a
@@ -75,7 +75,7 @@ UI labels are neutral Spanish. Each entry: term (code identifier) — definition
   addition: an explicit paid/unpaid choice made by the Nutricionista.
 - **Appointment-driven renewal** — resolving an **existing-client appointment**: the
   Nutricionista renews or reactivates that Client's plan (same renewal-vs-reactivation choice
-  and rules an Admin uses from the Clientes screen — see docs/domain.md's Client Lifecycle),
+  and rules an Admin uses from the Clientes screen — see docs/business-rules.md's Client Lifecycle),
   reached through a dedicated, read-only summary view (name, phone, status, current plan,
   contract end date only — never the full Clientes detail page) that exists only as a landing
   spot from this Appointment. Also includes the paid/unpaid choice, same as a Conversion; a
