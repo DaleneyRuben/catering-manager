@@ -1,5 +1,3 @@
-export { findCounts } from './find-counts';
-export type { DashboardCounts } from './find-counts';
 export { findContractEnding } from './find-contract-ending';
 export type { ContractEndingPerson } from './find-contract-ending';
 export { findBirthdays } from './find-birthdays';

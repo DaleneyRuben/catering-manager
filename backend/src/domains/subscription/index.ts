@@ -4,3 +4,5 @@ export { deleteUpcomingSubscription } from './delete-upcoming-subscription';
 export { finalizeOverlappingSubscriptions } from './finalize-overlapping';
 export { findActiveSubscriptionsForDate } from './find-active-subscriptions-for-date';
 export { findSuspendedSubscriptionsForDate } from './find-suspended-subscriptions-for-date';
+export { findSubscriptionCounts } from './find-subscription-counts';
+export type { SubscriptionCounts } from './find-subscription-counts';
