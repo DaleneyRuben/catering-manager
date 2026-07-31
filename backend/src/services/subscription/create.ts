@@ -92,8 +92,10 @@ export const create = async (
     if (data.renewalType === 'reactivation') {
       if (transaction) await client.update({ pausedSince: null }, { transaction });
       else await client.update({ pausedSince: null });
-    } else if (data.renewalType === 'renewal' && !data.startDate) {
-      // sin fecha renewal: pause the client until a start date is manually assigned
+    } else if (data.renewalType === 'renewal' && !data.startDate && !client.pausedSince) {
+      // sin fecha renewal: pause the client until a start date is manually assigned.
+      // Skipped when already paused: resume counts the days still owed from pausedSince, so
+      // restamping it to today would silently shorten a mid-plan pause.
       if (transaction) await client.update({ pausedSince: today }, { transaction });
       else await client.update({ pausedSince: today });
     }
