@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import * as clientService from '../domains/client';
 import * as deliveryService from '../domains/delivery';
-import Appointment from '../models/Appointment';
+import * as evaluationService from '../domains/evaluation';
 import { ROLES } from '../constants/roles.constants';
 import { sendSuccess, sendPaginated, sendError } from '../utils/response';
 import { decodeId } from '../utils/sqids';
@@ -54,7 +54,7 @@ const getById = async (req: Request, res: Response, next: NextFunction) => {
     // Nutritionist has no client list — she can only reach a client she has an
     // appointment linking her to (see ADR-006), not any arbitrary client id.
     if (req.user!.role === ROLES.NUTRITIONIST) {
-      const hasAppointment = await Appointment.count({ where: { clientId: id } });
+      const hasAppointment = await evaluationService.clientHasAppointment(id);
       if (!hasAppointment) {
         sendError(res, 'Acceso denegado', 403);
         return;
