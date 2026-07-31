@@ -3,12 +3,12 @@ import app from '../../app';
 import { verifyToken } from '../../domains/auth';
 import { ROLES } from '../../constants/roles.constants';
 import * as clientService from '../../domains/client';
-import Appointment from '../../models/Appointment';
+import * as evaluationService from '../../domains/evaluation';
 import { encodeId } from '../../utils/sqids';
 
 jest.mock('../../domains/auth');
 jest.mock('../../domains/client');
-jest.mock('../../models/Appointment');
+jest.mock('../../domains/evaluation');
 jest.mock('../../database/sequelize', () => ({ __esModule: true, default: { query: jest.fn() } }));
 
 const mockVerifyToken = verifyToken as jest.Mock;
@@ -23,12 +23,12 @@ const clientId = encodeId(1);
 beforeEach(() => {
   jest.clearAllMocks();
   (clientService.findById as jest.Mock).mockResolvedValue({ id: 1 });
-  (Appointment.count as jest.Mock).mockResolvedValue(0);
+  (evaluationService.clientHasAppointment as jest.Mock).mockResolvedValue(false);
 });
 
 describe('GET /api/clients/:id role guard', () => {
   it('allows nutritionist when an appointment links her to this client', async () => {
-    (Appointment.count as jest.Mock).mockResolvedValue(1);
+    (evaluationService.clientHasAppointment as jest.Mock).mockResolvedValue(true);
 
     const res = await request(app)
       .get(`/api/clients/${clientId}`)
@@ -38,7 +38,7 @@ describe('GET /api/clients/:id role guard', () => {
   });
 
   it('rejects nutritionist with 403 when no appointment links her to this client', async () => {
-    (Appointment.count as jest.Mock).mockResolvedValue(0);
+    (evaluationService.clientHasAppointment as jest.Mock).mockResolvedValue(false);
 
     const res = await request(app)
       .get(`/api/clients/${clientId}`)
@@ -52,7 +52,7 @@ describe('GET /api/clients/:id role guard', () => {
     const res = await request(app).get(`/api/clients/${clientId}`).set(headersForRole(ROLES.ADMIN));
 
     expect(res.status).toBe(200);
-    expect(Appointment.count).not.toHaveBeenCalled();
+    expect(evaluationService.clientHasAppointment).not.toHaveBeenCalled();
   });
 
   it('rejects kitchen with 403', async () => {
