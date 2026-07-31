@@ -41,5 +41,44 @@ module.exports = {
       files: ['src/models/*.ts'],
       rules: { 'import/no-cycle': 'off' },
     },
+    // ADR-007: a domain is reached through its index, and controllers compose domains, not models.
+    {
+      files: ['src/domains/**/*.ts'],
+      rules: {
+        'no-restricted-imports': [
+          'error',
+          {
+            patterns: [
+              {
+                group: ['../*/_helpers'],
+                message:
+                  "_helpers is private to its domain. Promote the function to its own file and export it from the domain's index.",
+              },
+              {
+                group: ['../*/*', '!../../**', '!../*/index', '!../*/_helpers'],
+                message:
+                  'Import another domain through its index only, never a function file directly.',
+              },
+            ],
+          },
+        ],
+      },
+    },
+    {
+      files: ['src/controllers/*.ts'],
+      rules: {
+        'no-restricted-imports': [
+          'error',
+          {
+            patterns: [
+              {
+                group: ['**/models/*'],
+                message: 'Controllers never import models. Call the owning domain instead.',
+              },
+            ],
+          },
+        ],
+      },
+    },
   ],
 };
