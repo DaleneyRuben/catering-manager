@@ -1,4 +1,4 @@
-@docs/domain.md
+@docs/business-rules.md
 
 ---
 

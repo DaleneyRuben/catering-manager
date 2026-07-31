@@ -46,6 +46,41 @@ See `docs/adr/003-backend-service-architecture.md` for the full rationale and do
 
 ---
 
+## Domain ownership (backend)
+
+**Any domain may read any table. Exactly one domain may write it.**
+
+Reading is unrestricted — queries and joins across other domains' tables are fine, and are
+the reason this is a monolith. Writing (`create` / `update` / `destroy`) belongs to the
+owning domain alone.
+
+```ts
+// ❌ evaluation does not own client_history
+await ClientHistory.create({ clientId, eventType: 'plan_renewed', ... });
+
+// ✅ call the owner
+import { record } from '../client-history';
+await record(actor, { type: 'plan_renewed', clientId, ... });
+```
+
+**Rules:**
+
+- Before writing to a model, check the ownership table in `docs/architecture/domains.md`. If
+  your domain is not the owner, call the owner's public function instead
+- **Domain APIs expose intentions, not fields** — add `subscription.finalize(clientId, actor)`,
+  never make callers pass `{ contractEndDate, finalizedAt }`. The rule belongs to the owner
+- **Every write function takes an optional `transaction`** as its last parameter, so
+  multi-domain workflows commit or fail together
+- A domain that owns no table (`production`, `report`, `delivery`) **never writes anything**,
+  and must own a business rule — not just a query. Screen-shaped composition belongs in the
+  controller, not in a new domain
+- Controllers never import models
+
+See `docs/adr/007-domain-ownership.md` for the rationale and `docs/architecture/domains.md`
+for the per-table ownership map.
+
+---
+
 ## Architecture (frontend)
 
 The frontend uses **feature-folder colocation** under `src/features/<feature>/`. Each feature owns its hooks, components, and types.
