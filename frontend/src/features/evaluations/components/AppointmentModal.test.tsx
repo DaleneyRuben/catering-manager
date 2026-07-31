@@ -1,13 +1,13 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { AppointmentModal } from '@/features/evaluations/components/AppointmentModal';
-import * as useClientSearchModule from '@/features/evaluations/hooks/useClientSearch';
+import { useClientSearch } from '@/features/evaluations/hooks/useClientSearch';
 import type { Appointment } from '@/features/evaluations/types';
 
 jest.mock('@/features/evaluations/hooks/useClientSearch');
 jest.mock('@/hooks/useDebounce', () => ({ useDebounce: (v: unknown) => v }));
 
-const mockUseClientSearch = useClientSearchModule.useClientSearch as jest.Mock;
+const mockUseClientSearch = useClientSearch as jest.Mock;
 
 const existingAppointment: Appointment = {
   id: '1',

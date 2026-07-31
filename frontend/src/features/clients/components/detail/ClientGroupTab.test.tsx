@@ -1,14 +1,14 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { ClientGroupTab } from '@/features/clients/components/detail/ClientGroupTab';
-import * as useClientGroupModule from '@/features/clients/hooks/useClientGroup';
-import * as useClientListModule from '@/features/clients/hooks/useClientList';
+import { useClientGroup } from '@/features/clients/hooks/useClientGroup';
+import { useClientList } from '@/features/clients/hooks/useClientList';
 
 jest.mock('@/features/clients/hooks/useClientGroup');
 jest.mock('@/features/clients/hooks/useClientList');
 jest.mock('@/hooks/useDebounce', () => ({ useDebounce: (v: unknown) => v }));
 
-const mockUseClientGroup = useClientGroupModule.useClientGroup as jest.Mock;
-const mockUseClientList = useClientListModule.useClientList as jest.Mock;
+const mockUseClientGroup = useClientGroup as jest.Mock;
+const mockUseClientList = useClientList as jest.Mock;
 
 const mockHook = (overrides = {}) => ({
   members: [],
