@@ -47,6 +47,10 @@ The full ownership table and domain list live in
 [docs/architecture/domains.md](../architecture/domains.md), which is maintained as the code
 changes. This ADR records only the decision and its rationale.
 
+**This supersedes ADR-003's `services/<domain>/` path convention.** The folder is renamed to
+`domains/`: these are no longer a service layer over shared data, they are owners of it, and
+the name should say so. ADR-003 is left unedited as the historical record it is.
+
 ## Alternatives Considered
 
 **Full isolation — each domain owns its tables and no other domain may read them either.**
