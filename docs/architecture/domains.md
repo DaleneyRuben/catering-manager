@@ -182,7 +182,7 @@ holds the entire derived-status rule and has exactly one consumer,
 | `auth`   | Authenticate; sign and verify tokens. Used by middleware |
 | `health` | System health reporting. Not business data               |
 
-`auth` currently writes the device snapshot to `users` (`login.ts:31-36`); under rule 1 it
+`auth` currently writes the device snapshot to `users` (`login.ts:29-34`); under rule 1 it
 calls `user.recordLogin(...)`. Its `createUser` export is dead code duplicating `user.create`
 and is deleted.
 

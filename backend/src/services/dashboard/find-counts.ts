@@ -9,7 +9,7 @@ export type DashboardCounts = {
   deliveriesToday: number;
 };
 
-// A group counts as one delivery stop regardless of member count (see docs/domain.md).
+// A group counts as one delivery stop regardless of member count (see docs/business-rules.md).
 const countDeliveries = (subscriptions: Subscription[]): number => {
   const groupTokens = new Set<string>();
   let singles = 0;
