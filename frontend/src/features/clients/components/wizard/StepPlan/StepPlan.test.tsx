@@ -1,6 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import { useForm } from 'react-hook-form';
-import type { NewClientFormValues, Plan } from '@/features/clients/types';
+import type { NewClientFormValues } from '@/features/clients/types';
+import type { Plan } from '@/features/plans/types';
 import { StepPlan } from './index';
 
 jest.mock('@ui/DatePickerInput', () => ({

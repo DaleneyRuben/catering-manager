@@ -1,7 +1,8 @@
 import { Icon } from '@ui/Icon';
 import { ToggleGroup } from '@ui/ToggleGroup';
 import { WizardSectionCard } from '@ui/WizardSectionCard';
-import type { Plan, NewClientFormValues, RestrictionsState } from '@/features/clients/types';
+import type { NewClientFormValues, RestrictionsState } from '@/features/clients/types';
+import type { Plan } from '@/features/plans/types';
 import { ClientPreviewCard } from '@/features/clients/components/wizard/StepConfirm/ClientPreviewCard';
 
 const PAID_OPTIONS = ['Sí', 'No'] as const;

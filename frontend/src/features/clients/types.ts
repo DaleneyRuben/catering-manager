@@ -1,9 +1,4 @@
-export interface Plan {
-  id: string;
-  name: string;
-  meals: string[];
-  price: number;
-}
+import type { Plan } from '@/features/plans/types';
 
 export interface Subscription {
   id: string;

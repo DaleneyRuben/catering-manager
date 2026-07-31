@@ -2,8 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { toVoid } from '@/utils/toVoid';
 import api from '@/services/api';
-import type { Plan } from '@/features/clients/types';
-import type { PlanDraft } from '@/features/plans/types';
+import type { Plan, PlanDraft } from '@/features/plans/types';
 
 export function usePlans() {
   const qc = useQueryClient();

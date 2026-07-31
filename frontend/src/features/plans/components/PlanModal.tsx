@@ -4,9 +4,8 @@ import { IconButton } from '@ui/IconButton';
 import { Modal } from '@ui/Modal';
 import { Button } from '@ui/Button';
 import { MODAL_CANCEL_STYLE, MODAL_CONFIRM_STYLE } from '@ui/modalButtonStyles';
-import type { Plan } from '@/features/clients/types';
 import { PlanEditorForm } from '@/features/plans/components/PlanEditorForm';
-import type { MealKey, PlanDraft } from '@/features/plans/types';
+import type { MealKey, Plan, PlanDraft } from '@/features/plans/types';
 
 const EMPTY_DRAFT: PlanDraft = { name: '', meals: [], price: '0' };
 

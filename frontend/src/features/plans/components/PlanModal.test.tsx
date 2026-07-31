@@ -1,7 +1,7 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { PlanModal } from '@/features/plans/components/PlanModal';
-import type { Plan } from '@/features/clients/types';
+import type { Plan } from '@/features/plans/types';
 
 const existingPlan: Plan = {
   id: '1',

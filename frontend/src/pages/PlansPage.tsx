@@ -4,7 +4,7 @@ import { Icon } from '@ui/Icon';
 import { PageHeader } from '@ui/PageHeader';
 import { ConfirmModal } from '@ui/ConfirmModal';
 import { usePlans } from '@/features/plans/hooks/usePlans';
-import type { Plan } from '@/features/clients/types';
+import type { Plan } from '@/features/plans/types';
 import { PlanCard } from '@/features/plans/components/PlanCard';
 import { PlanCardSkeleton } from '@/features/plans/components/PlanCardSkeleton';
 import { PlanModal } from '@/features/plans/components/PlanModal';

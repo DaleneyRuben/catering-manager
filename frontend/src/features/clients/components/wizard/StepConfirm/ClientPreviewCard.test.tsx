@@ -1,5 +1,6 @@
 import { render, screen } from '@testing-library/react';
-import type { NewClientFormValues, RestrictionsState, Plan } from '@/features/clients/types';
+import type { NewClientFormValues, RestrictionsState } from '@/features/clients/types';
+import type { Plan } from '@/features/plans/types';
 import { ClientPreviewCard } from './ClientPreviewCard';
 
 const plan: Plan = { id: '1', name: 'Completo', price: 1200, meals: ['breakfast'] };
