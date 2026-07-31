@@ -21,6 +21,8 @@ module.exports = {
   rules: {
     '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
     'import/prefer-default-export': 'off',
+    // Named imports only — `import * as x` hides what a module is actually used for.
+    'import/no-namespace': 'error',
     'import/no-extraneous-dependencies': [
       'error',
       { devDependencies: ['**/*.test.ts', '**/jest.config.ts'] },
