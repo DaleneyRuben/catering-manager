@@ -1,43 +1,79 @@
 import request from 'supertest';
 import app from '../../app';
-import { findSummary } from '../../domains/dashboard';
+import { findBirthdays } from '../../domains/client';
+import { countDeliveriesToday } from '../../domains/delivery';
 import { findRecent } from '../../domains/login-event';
+import { findMenuStatus } from '../../domains/menu';
+import { findContractEnding, findSubscriptionCounts } from '../../domains/subscription';
+import { findConnections } from '../../domains/user';
 
-jest.mock('../../domains/dashboard');
+jest.mock('../../domains/client');
+jest.mock('../../domains/delivery');
 jest.mock('../../domains/login-event');
+jest.mock('../../domains/menu');
+jest.mock('../../domains/subscription');
+jest.mock('../../domains/user');
 jest.mock('../../database/sequelize', () => ({ __esModule: true, default: { query: jest.fn() } }));
 jest.mock('../../middleware/auth', () => ({
   requireAuth: (_req: unknown, _res: unknown, next: () => void) => next(),
   requireRole: () => (_req: unknown, _res: unknown, next: () => void) => next(),
 }));
 
-const mockSummary = {
-  active: { today: 12, tomorrow: 15 },
-  suspended: { today: 4, tomorrow: 3 },
-  deliveriesToday: 9,
-  contractEnding: { today: [], tomorrow: [] },
-  birthdays: [],
-  connections: [],
-  menus: {
-    today: { date: '2026-06-25', loaded: true },
-    tomorrow: { date: '2026-06-26', loaded: false },
-  },
+const menus = {
+  today: { date: '2026-06-25', loaded: true },
+  tomorrow: { date: '2026-06-26', loaded: false },
+};
+
+const mockSections = () => {
+  (findSubscriptionCounts as jest.Mock).mockResolvedValue({
+    active: { today: 12, tomorrow: 15 },
+    suspended: { today: 4, tomorrow: 3 },
+  });
+  (countDeliveriesToday as jest.Mock).mockResolvedValue(9);
+  (findContractEnding as jest.Mock).mockResolvedValue({ today: [], tomorrow: [] });
+  (findBirthdays as jest.Mock).mockResolvedValue([]);
+  (findConnections as jest.Mock).mockResolvedValue([]);
+  (findMenuStatus as jest.Mock).mockResolvedValue(menus);
 };
 
 describe('GET /api/dashboard', () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockSections();
+  });
 
-  it('returns 200 with the dashboard summary', async () => {
-    (findSummary as jest.Mock).mockResolvedValue(mockSummary);
-
+  it('returns 200 with every section composed into one summary', async () => {
     const res = await request(app).get('/api/dashboard');
 
     expect(res.status).toBe(200);
-    expect(res.body.data).toEqual(mockSummary);
+    expect(res.body.data).toEqual({
+      active: { today: 12, tomorrow: 15 },
+      suspended: { today: 4, tomorrow: 3 },
+      deliveriesToday: 9,
+      contractEnding: { today: [], tomorrow: [] },
+      birthdays: [],
+      connections: [],
+      menus,
+    });
   });
 
-  it('returns 500 when the service throws', async () => {
-    (findSummary as jest.Mock).mockRejectedValue(new Error('db error'));
+  // The frontend reads this payload key by key, so the shape is part of the contract.
+  it('keeps the counts spread ahead of the remaining sections', async () => {
+    const res = await request(app).get('/api/dashboard');
+
+    expect(Object.keys(res.body.data)).toEqual([
+      'active',
+      'suspended',
+      'deliveriesToday',
+      'contractEnding',
+      'birthdays',
+      'connections',
+      'menus',
+    ]);
+  });
+
+  it('returns 500 when a section throws', async () => {
+    (findBirthdays as jest.Mock).mockRejectedValue(new Error('db error'));
 
     const res = await request(app).get('/api/dashboard');
 
