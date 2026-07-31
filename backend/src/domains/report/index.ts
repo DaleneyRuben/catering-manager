@@ -5,3 +5,5 @@ export { computeKitchenReportData } from './compute-kitchen-report-data';
 export type { MenuData, MealSection, KitchenReportData } from './compute-kitchen-report-data';
 export { buildKitchenReport } from './build-kitchen-report';
 export { kitchenReportFileName } from './kitchen-report-file-name';
+export { buildMenu } from './build-menu';
+export { menuFileName } from './menu-file-name';

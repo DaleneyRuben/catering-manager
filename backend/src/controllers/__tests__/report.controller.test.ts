@@ -3,9 +3,11 @@ import app from '../../app';
 import { findByDate } from '../../domains/menu';
 import {
   buildKitchenReport,
+  buildMenu,
   findActiveClientsWithPlansForDate,
   findDeliveryClientsForDate,
   kitchenReportFileName,
+  menuFileName,
 } from '../../domains/report';
 
 jest.mock('../../domains/menu');
@@ -83,7 +85,11 @@ describe('GET /api/reports/active-clients/download', () => {
 });
 
 describe('GET /api/reports/menu-card/download', () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (buildMenu as jest.Mock).mockResolvedValue(Buffer.from('docx'));
+    (menuFileName as jest.Mock).mockReturnValue('Menu completo 05-06.docx');
+  });
 
   it('returns a docx file with correct headers when menu exists', async () => {
     (findByDate as jest.Mock).mockResolvedValue(mockMenu);

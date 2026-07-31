@@ -6,11 +6,12 @@ import { isIsoDate, spanishWeekdayFileName } from '../utils/date';
 import { findByDate } from '../domains/menu';
 import {
   buildKitchenReport,
+  buildMenu,
   findActiveClientsWithPlansForDate,
   findDeliveryClientsForDate,
   kitchenReportFileName,
+  menuFileName,
 } from '../domains/report';
-import { buildMenu, menuFileName } from '../utils/menuBuilder';
 
 const parseDMY = (value: string): string | null => {
   const parsed = parse(value, 'dd/MM/yyyy', new Date());
