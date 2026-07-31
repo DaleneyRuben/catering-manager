@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
-import * as healthService from '../services/health';
+import * as healthService from '../domains/health';
 import { sendSuccess } from '../utils/response';
 
 const getStatus = async (_req: Request, res: Response, next: NextFunction) => {

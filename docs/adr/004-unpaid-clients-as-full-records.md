@@ -25,7 +25,7 @@ The trade-off this creates: every place that lists "active clients" — the dash
 Entregas, chef reports, and the Clientes table itself — must filter on `paid = true`, not just
 on the existing `deriveClientStatus` rules. This is a single predicate added at the query level
 (alongside the existing active-subscription rule in
-`services/subscription/find-active-subscriptions-for-date.ts` and equivalent Clientes queries),
+`domains/subscription/find-active-subscriptions-for-date.ts` and equivalent Clientes queries),
 not a new `ClientStatus` value threaded through `deriveClientStatus`, `find-all.ts`, and the
 status UI constants. An unpaid client should never reach `deriveClientStatus` at all — it's
 excluded upstream of it, and only ever surfaced through the Evaluaciones screen's own

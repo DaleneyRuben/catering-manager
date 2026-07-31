@@ -3,7 +3,7 @@
 The catering business itself: what the terms mean, how plans and deliveries work, and the
 rules the system must honour. For how the code is organised, see
 [docs/architecture/domains.md](./architecture/domains.md) — there, "domain" means a folder
-under `services/`, never the business.
+under `domains/`, never the business.
 
 ## Overview
 
@@ -77,7 +77,7 @@ A plan can include any combination of meal types.
 
 Plan duration is **dynamic** — defined by the user at subscription time (new client, renewal, or reactivation) as a number of days. The API requires an explicit value (no UI default); the DB column has a fallback of 20 that never fires in practice. The system calculates `contractEndDate` automatically by adding the specified number of client-facing business days (Mon–Fri) to the start date.
 
-- Contract date is always set to **today** at creation. (API validation of this rule is temporarily relaxed while existing clients are backfilled — see the TODO in `services/subscription/create.ts`.)
+- Contract date is always set to **today** at creation. (API validation of this rule is temporarily relaxed while existing clients are backfilled — see the TODO in `domains/subscription/create.ts`.)
 - Start date is set by the user and may be the same as the contract date or a future date.
 - Contract end date is calculated automatically: add the specified duration (in business days) to the start date.
 - The end date is stored and may later be extended by suspensions (see below).

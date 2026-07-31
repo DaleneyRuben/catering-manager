@@ -119,7 +119,12 @@ describe('withStatus', () => {
   });
 
   it('ignores an unpaid renewal even on a day its contract covers', () => {
-    const paid = sub({ id: 10, startDate: '2026-04-01', contractEndDate: '2026-05-01', paid: true });
+    const paid = sub({
+      id: 10,
+      startDate: '2026-04-01',
+      contractEndDate: '2026-05-01',
+      paid: true,
+    });
     const unpaid = sub({
       id: 11,
       startDate: '2026-06-01',

@@ -1,11 +1,11 @@
 import type { Request } from 'express';
 import request from 'supertest';
 import app from '../../app';
-import * as subscriptionService from '../../services/subscription';
+import * as subscriptionService from '../../domains/subscription';
 import { encodeId } from '../../utils/sqids';
 import { ConflictError } from '../../utils/errors';
 
-jest.mock('../../services/subscription');
+jest.mock('../../domains/subscription');
 jest.mock('../../database/sequelize', () => ({ __esModule: true, default: { query: jest.fn() } }));
 jest.mock('../../middleware/auth', () => ({
   requireAuth: (req: Request, _res: unknown, next: () => void) => {

@@ -1,13 +1,13 @@
 import request from 'supertest';
 import app from '../../app';
-import { verifyToken } from '../../services/auth';
+import { verifyToken } from '../../domains/auth';
 import { ROLES } from '../../constants/roles.constants';
-import * as clientService from '../../services/client';
+import * as clientService from '../../domains/client';
 import Appointment from '../../models/Appointment';
 import { encodeId } from '../../utils/sqids';
 
-jest.mock('../../services/auth');
-jest.mock('../../services/client');
+jest.mock('../../domains/auth');
+jest.mock('../../domains/client');
 jest.mock('../../models/Appointment');
 jest.mock('../../database/sequelize', () => ({ __esModule: true, default: { query: jest.fn() } }));
 

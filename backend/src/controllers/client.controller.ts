@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
-import * as clientService from '../services/client';
-import * as deliveryService from '../services/delivery';
+import * as clientService from '../domains/client';
+import * as deliveryService from '../domains/delivery';
 import Appointment from '../models/Appointment';
 import { ROLES } from '../constants/roles.constants';
 import { sendSuccess, sendPaginated, sendError } from '../utils/response';

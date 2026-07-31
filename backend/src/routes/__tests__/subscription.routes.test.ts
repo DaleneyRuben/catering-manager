@@ -1,12 +1,12 @@
 import request from 'supertest';
 import app from '../../app';
-import { verifyToken } from '../../services/auth';
+import { verifyToken } from '../../domains/auth';
 import { ROLES } from '../../constants/roles.constants';
-import * as subscriptionService from '../../services/subscription';
+import * as subscriptionService from '../../domains/subscription';
 import { encodeId } from '../../utils/sqids';
 
-jest.mock('../../services/auth');
-jest.mock('../../services/subscription');
+jest.mock('../../domains/auth');
+jest.mock('../../domains/subscription');
 jest.mock('../../database/sequelize', () => ({ __esModule: true, default: { query: jest.fn() } }));
 
 const mockVerifyToken = verifyToken as jest.Mock;

@@ -158,7 +158,9 @@ describe('deleteUpcomingSubscription', () => {
     (Subscription.findOne as jest.Mock).mockResolvedValue(running);
     (Subscription.count as jest.Mock).mockResolvedValue(1);
 
-    await expect(deleteUpcomingSubscription(1, 9, actor)).rejects.toMatchObject({ statusCode: 409 });
+    await expect(deleteUpcomingSubscription(1, 9, actor)).rejects.toMatchObject({
+      statusCode: 409,
+    });
     expect(running.destroy).not.toHaveBeenCalled();
   });
 
@@ -167,7 +169,9 @@ describe('deleteUpcomingSubscription', () => {
     (Subscription.findOne as jest.Mock).mockResolvedValue(sub);
     (Subscription.count as jest.Mock).mockResolvedValue(0);
 
-    await expect(deleteUpcomingSubscription(1, 9, actor)).rejects.toMatchObject({ statusCode: 409 });
+    await expect(deleteUpcomingSubscription(1, 9, actor)).rejects.toMatchObject({
+      statusCode: 409,
+    });
     expect(sub.destroy).not.toHaveBeenCalled();
   });
 

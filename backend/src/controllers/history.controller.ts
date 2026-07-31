@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
-import { findByClient } from '../services/history';
+import { findByClient } from '../domains/history';
 import { sendSuccess, sendError } from '../utils/response';
 import { decodeId } from '../utils/sqids';
 

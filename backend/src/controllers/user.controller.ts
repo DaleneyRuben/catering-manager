@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
-import * as userService from '../services/user';
-import { findForUser } from '../services/login-event';
+import * as userService from '../domains/user';
+import { findForUser } from '../domains/login-event';
 import { sendSuccess, sendError } from '../utils/response';
 import { decodeId } from '../utils/sqids';
 

@@ -1,10 +1,10 @@
 import type { Request } from 'express';
 import request from 'supertest';
 import app from '../../app';
-import * as evaluationService from '../../services/evaluation';
+import * as evaluationService from '../../domains/evaluation';
 import { encodeId } from '../../utils/sqids';
 
-jest.mock('../../services/evaluation');
+jest.mock('../../domains/evaluation');
 jest.mock('../../database/sequelize', () => ({ __esModule: true, default: { query: jest.fn() } }));
 jest.mock('../../middleware/auth', () => ({
   requireAuth: (req: Request, _res: unknown, next: () => void) => {

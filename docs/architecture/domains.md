@@ -12,10 +12,8 @@ This document describes the **target**. The code does not fully match it yet —
 work, in dependency order, is tracked in [backlog.md](./backlog.md). Where the two disagree,
 this document is the intent and the backlog says what is left to do about it.
 
-Two naming notes, so nothing reads as a contradiction against the repo as it stands today:
+One naming note, so nothing reads as a contradiction against the repo as it stands today:
 
-- Paths here are written as `domains/…`. On disk the folder is still `services/` until
-  backlog item 1 renames it.
 - The `client-history` domain is still called `history/` until backlog item 6.1.
 
 ---
@@ -223,7 +221,7 @@ tree can be checked against the repo today.
 
 ```
 backend/src/
-  domains/                                    ← renamed from services/ (backlog item 1)
+  domains/
     client/                                   ← owning: clients
       _helpers.ts
       create.ts  update.ts  find-all.ts  find-by-id.ts  search.ts

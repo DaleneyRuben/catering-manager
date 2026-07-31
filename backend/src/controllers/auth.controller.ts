@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
-import * as authService from '../services/auth';
-import { InvalidCredentialsError } from '../services/auth';
+import * as authService from '../domains/auth';
+import { InvalidCredentialsError } from '../domains/auth';
 
 const login = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {

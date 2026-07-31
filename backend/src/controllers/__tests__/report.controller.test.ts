@@ -1,11 +1,11 @@
 import request from 'supertest';
 import app from '../../app';
-import * as menuService from '../../services/menu';
-import * as reportService from '../../services/report';
+import * as menuService from '../../domains/menu';
+import * as reportService from '../../domains/report';
 import * as kitchenReportBuilder from '../../utils/kitchenReportBuilder';
 
-jest.mock('../../services/menu');
-jest.mock('../../services/report');
+jest.mock('../../domains/menu');
+jest.mock('../../domains/report');
 jest.mock('../../utils/kitchenReportBuilder');
 jest.mock('../../database/sequelize', () => ({ __esModule: true, default: { query: jest.fn() } }));
 jest.mock('../../middleware/auth', () => ({
