@@ -1,5 +1,3 @@
-export { findContractEnding } from './find-contract-ending';
-export type { ContractEndingPerson } from './find-contract-ending';
 export { findBirthdays } from './find-birthdays';
 export type { BirthdayPerson } from './find-birthdays';
 export { findConnections } from './find-connections';

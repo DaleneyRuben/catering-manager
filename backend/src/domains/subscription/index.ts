@@ -6,3 +6,5 @@ export { findActiveSubscriptionsForDate } from './find-active-subscriptions-for-
 export { findSuspendedSubscriptionsForDate } from './find-suspended-subscriptions-for-date';
 export { findSubscriptionCounts } from './find-subscription-counts';
 export type { SubscriptionCounts } from './find-subscription-counts';
+export { findContractEnding } from './find-contract-ending';
+export type { ContractEndingPerson } from './find-contract-ending';
