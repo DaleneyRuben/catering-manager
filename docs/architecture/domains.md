@@ -203,6 +203,70 @@ Each query moves to the domain that owns its data. The screen-shaped assembly mo
 
 ---
 
+## Target structure
+
+What `backend/src/` looks like once the [backlog](./backlog.md) is finished.
+
+```
+backend/src/
+  services/                     ← 13 domains. A domain is a folder here, nothing else
+    client/                     ← owning
+      _helpers.ts
+      client-status.ts          ← moved in from utils/clientStatus.ts
+      create.ts  find-all.ts  find-by-id.ts  search.ts  update.ts
+      find-birthdays.ts         ← moved in from dashboard/
+      pause.ts  resume.ts  set-delivery-group.ts  finalize.ts  soft-delete.ts
+      __tests__/  index.ts
+    subscription/               ← owning; the largest domain, correctly so
+      create.ts  update.ts  finalize.ts  mark-paid.ts  remove.ts
+      finalize-overlapping.ts   ← promoted out of _helpers.ts
+      find-active-for-date.ts  find-suspended-for-date.ts
+      find-contract-ending.ts  count-active.ts        ← moved in from dashboard/
+    client-history/             ← owning; renamed from history/
+      record.ts                 ← the ONLY writer of client_history
+      find-by-client.ts
+    plan/  menu/  evaluation/  user/  login-event/        ← owning
+    production/  delivery/  report/                        ← view: read, never write
+    auth/  health/                                         ← capability
+
+  models/                       ← stays a shared layer. See below
+  controllers/                  ← thin; may compose several domains
+  routes/  schemas/  middleware/  constants/
+  utils/                        ← shared kernel only: date, errors, logger,
+                                  response, sqids, sentry, devFlags, whatsappIcon
+```
+
+### Why models stay in `models/`
+
+The obvious move — put `Client.ts` inside `services/client/` so ownership is visible in the
+tree — is **wrong for this architecture**, and it is worth writing down so nobody attempts it.
+
+Reads are free (rule 1). `report`, `production` and `dashboard`'s successors all legitimately
+read `clients` and `subscriptions`. If the model lived in `services/client/`, every one of
+those legal reads would be a deep import into another domain's folder — indistinguishable from
+the violation the lint rules exist to catch.
+
+A shared `models/` folder is the honest expression of "any domain may read any table". What
+makes ownership real is the write rule and the lint that enforces it, not the folder layout.
+
+The same reasoning keeps `controllers/`, `routes/`, `schemas/` and `constants/` as layer
+folders: they are either shared leaf values or HTTP concerns that map to routes, not to domains.
+
+### What changes in the tree, and what does not
+
+|                                | Before                              | After                                                        |
+| ------------------------------ | ----------------------------------- | ------------------------------------------------------------ |
+| Domains                        | 14, incl. `dashboard` and `history` | **13** — `dashboard` dissolved, `history` → `client-history` |
+| Writers of `client_history`    | 8 sites, 3 domains                  | **1** — `client-history.record()`                            |
+| Writers of `subscriptions`     | 4 domains                           | **1** — `subscription`                                       |
+| Writers of `clients`           | 4 domains                           | **1** — `client`                                             |
+| Business rules in `utils/`     | 4 files                             | **0**                                                        |
+| `utils/` → `services/` imports | 2                                   | **0**                                                        |
+| Deep cross-domain imports      | 0                                   | 0 — unchanged, and now lint-enforced                         |
+| HTTP contracts                 | —                                   | **unchanged**; this refactor is invisible from outside       |
+
+---
+
 ## Frontend
 
 The same instinct, adapted: the frontend has no database, so its shared mutable state is the
