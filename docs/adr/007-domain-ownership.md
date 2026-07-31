@@ -9,7 +9,9 @@
 ## Context
 
 ADR-003 split the backend into domain folders with a public `index.ts` each. That discipline
-has held — an audit found **zero** deep cross-domain imports across all 14 domains.
+has largely held — an audit found **zero** imports of another domain's function files across
+all 14 domains. The one exception is `_helpers`: `evaluation/mark-paid.ts` imports
+`subscription/_helpers`, which ADR-003 rule 6 forbids outright.
 
 But the domain API was never the only way in. Every domain imports models directly, so the
 front door is bypassable for free:
@@ -62,10 +64,10 @@ full isolation each becomes N API calls stitched together in JavaScript, losing 
 and the shared transaction. That is a permanent tax paid to enable an extraction this
 project has no plans to perform: one Postgres, one deployment, one team, one business.
 
-**Keep convention-only boundaries.** Rejected. The discipline held for deep imports but had
-already slipped twice where nothing checked — `evaluation/mark-paid.ts` importing
-`subscription/_helpers` (forbidden by ADR-003 rule 6), and `client.controller.ts` querying
-the `Appointment` model directly. Honor systems degrade silently as a codebase grows.
+**Keep convention-only boundaries.** Rejected. The discipline held for function-file imports
+but had already slipped twice where nothing checked — the `subscription/_helpers` import
+above, and `client.controller.ts` querying the `Appointment` model directly. Honor systems
+degrade silently as a codebase grows.
 
 ## Consequences
 
@@ -81,8 +83,9 @@ the `Appointment` model directly. Honor systems degrade silently as a codebase g
 
 - Domains are no longer extractable into separate services without further work. Accepted
   deliberately — see the rejected alternative.
-- `subscription` becomes the largest domain (~11 public functions). Correct, since
-  subscriptions are the heart of the business, but worth expecting.
+- `subscription` becomes the largest domain — 13 public functions once the `dashboard` count
+  and contract-ending queries move in. Correct, since subscriptions are the heart of the
+  business, but worth expecting.
 - Enforcement is partial. Lint catches structural violations and static writes
   (`Model.create`), but **not** instance writes (`sub.update({ ... })`), where ESLint has no
   type information. This gap is narrowed by returning data rather than live Sequelize

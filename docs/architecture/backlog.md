@@ -20,6 +20,7 @@ its work becomes fiction.
       client. Live bug: cost six delivery days in the reproduced case. Symptom only — see D1.
 - [x] **#116** — ADR-007, `domains.md`, the standards-skill rules, and the
       `domain.md` → `business-rules.md` rename.
+- [x] **#117** — this backlog, and the target structure section in `domains.md`.
 
 ---
 
@@ -33,11 +34,13 @@ of stateless functions over shared data — after, owners of tables with exclusi
 `services/` describes the old thing. The rename encodes the decision. It also removes the
 collision with `frontend/src/services/api.ts`, a genuinely different meaning of the word.
 
-**Measured cost:** 56 import lines across 41 files (36 controllers, 14 routes, 3 utils,
-2 middleware, 1 types) plus 33 in tests, and 10 markdown files — including
-`.claude/skills/project-standards/skill.md`, which must change in the same PR or it will keep
-directing new code to the old path. **No** coupling in `jest.config`, `tsconfig`,
-`.eslintrc.cjs` or `package.json`. Typecheck and the full suite prove it completely.
+**Measured cost:** 56 import lines across 41 source files (36 controllers, 14 routes, 3 utils,
+2 middleware, 1 types), 65 lines across 23 test files, and 10 markdown files — 74 files in
+all. The test figure is **33 imports plus 32 `jest.mock('…/services/…')` calls**; the mock
+paths are strings, so typecheck will not catch them and only a full test run will. Markdown
+includes `.claude/skills/project-standards/skill.md`, which must change in the same PR or it
+will keep directing new code to the old path. **No** coupling in `jest.config`, `tsconfig`,
+`.eslintrc.cjs` or `package.json`.
 
 Supersedes ADR-003's `services/<domain>/` path convention — record that in ADR-007 rather than
 editing ADR-003, which is a historical record.
@@ -85,9 +88,13 @@ Once 2.1–2.3 land, add to `backend/.eslintrc.cjs` at `error`:
 
 | Rule                                                               | Violations after 2.1–2.3 |
 | ------------------------------------------------------------------ | ------------------------ |
-| no deep imports into a domain (`services/*/` anything but `index`) | 0 — already clean today  |
+| no deep imports into a domain (`services/*/` anything but `index`) | 0 after 2.2              |
 | no `_helpers` imports across domains                               | 0 after 2.2              |
 | no model imports in `controllers/`                                 | 0 after 2.3              |
+
+The first two rules overlap: `evaluation/mark-paid.ts:7` is the only violation of either, and
+2.2 clears both. The narrower `_helpers` rule is still worth stating separately — it is the
+one deep import that a future reader would be tempted to excuse.
 
 The fourth rule — no `services/` imports in `utils/` — waits for item 4.
 
@@ -95,12 +102,13 @@ The fourth rule — no `services/` imports in `utils/` — waits for item 4.
 
 ## 3. `Plan` type ownership (frontend) 🟢
 
-`Plan` is declared in `features/clients/types.ts` and imported by four files in
+`Plan` is declared in `features/clients/types.ts` and imported by seven files in
 `features/plans`, while `clients` imports components and hooks from `plans` — a circular
 dependency between features caused by one misplaced type.
 
-Move `Plan` to `features/plans/types.ts` and update the imports
-(`PlanCard.tsx`, `PlanModal.tsx`, `PlanRadioList.tsx`, `usePlans.ts`, plus the `clients` side).
+Move `Plan` to `features/plans/types.ts` and update the imports: `PlanCard.tsx`,
+`PlanModal.tsx`, `PlanRadioList.tsx`, `usePlans.ts`, the three matching test files
+(`PlanCard.test.tsx`, `PlanModal.test.tsx`, `PlanRadioList.test.tsx`), plus the `clients` side.
 
 Type-only; `yarn typecheck` proves it.
 
@@ -201,20 +209,26 @@ updater, and it moves with this item.
 
 ### 6.3 `client` owns `clients`
 
-Seven writes live outside the domain:
+Twelve write statements live outside the domain, across four files:
 
 ```
-subscription/create.ts:93-98, subscription/update.ts:46   (pausedSince)
+subscription/create.ts:93-94, :99-100                     (pausedSince — each an if/else
+subscription/update.ts:46                                  transaction pair, so 2 decisions)
 evaluation/mark-paid.ts:25, :28                           (pausedSince)
-delivery/set-group.ts:13, :24                             (groupToken)
+delivery/set-group.ts:13, :16, :24, :29, :35              (groupToken)
 ```
+
+`set-group.ts` is the bulk of it and the least obvious: only `:13` and `:24` are instance
+writes on the client being edited. `:16`, `:29` and `:35` are `Client.update(…, { where })`
+statements rewriting _other_ clients' tokens — evicting old members and stamping new ones.
+Any `client.setDeliveryGroup()` API has to cover those too, or the group logic breaks.
 
 Becomes `client.pause()` / `client.resume()` / `client.setDeliveryGroup()`. This also makes
 `delivery` a pure view domain.
 
 ### 6.4 `auth` stops writing `users`
 
-`auth/login.ts:31-36` writes the device snapshot directly. Add `user.recordLogin(id, device)`.
+`auth/login.ts:29-34` writes the device snapshot directly. Add `user.recordLogin(id, device)`.
 
 ### 6.5 Optional `transaction` on every write function
 
