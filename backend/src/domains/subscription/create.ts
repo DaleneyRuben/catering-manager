@@ -7,7 +7,8 @@ import { CreateSubscriptionDto } from '../../schemas/subscription.schema';
 import type { Actor } from '../../types/actor';
 import { appToday, calcContractEndDate } from '../../utils/date';
 import { ConflictError } from '../../utils/errors';
-import { finalizeOverlappingSubscriptions, findUpcomingSubscription } from './_helpers';
+import { finalizeOverlappingSubscriptions } from './finalize-overlapping';
+import { findUpcomingSubscription } from './_helpers';
 
 // TODO: restore contractDate === today validation once backfilling of existing clients is complete
 export const create = async (
