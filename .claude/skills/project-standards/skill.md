@@ -20,10 +20,10 @@ description: >
 
 ## Architecture (backend)
 
-Backend services live under `backend/src/services/<domain>/`. Each domain is a folder with one public function per file, a test subfolder, and an index.
+Backend domains live under `backend/src/domains/<domain>/`. Each domain is a folder with one public function per file, a test subfolder, and an index.
 
 ```
-services/
+domains/
   <domain>/
     <function-name>.ts     ← exports exactly one public function (kebab-case filename)
     _helpers.ts            ← shared private helpers within the domain; never exported
@@ -39,10 +39,11 @@ services/
 - Private helpers shared across multiple functions in the same domain go in `_helpers.ts`
 - `_helpers.ts` is never re-exported from `index.ts` and never imported outside its domain
 - Each function file has a corresponding `__tests__/<function-name>.test.ts` — test first
-- Controllers import from the domain index only: `import { findById } from '../services/client'`
+- Controllers import from the domain index only: `import { findById } from '../domains/client'`
 - Never import directly from a function file outside its domain
 
-See `docs/adr/003-backend-service-architecture.md` for the full rationale and domain map.
+See `docs/adr/003-backend-service-architecture.md` for the full rationale and domain map — its
+`services/` paths are superseded by `domains/` (see `docs/adr/007-domain-ownership.md`).
 
 ---
 

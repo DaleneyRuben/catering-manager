@@ -21,36 +21,9 @@ its work becomes fiction.
 - [x] **#116** — ADR-007, `domains.md`, the standards-skill rules, and the
       `domain.md` → `business-rules.md` rename.
 - [x] **#117** — this backlog, and the target structure section in `domains.md`.
-
----
-
-## 1. Rename `services/` → `domains/` 🟢
-
-We call the unit a **domain**; the folder containing them says `services/`. That is the same
-mismatch we removed by renaming `domain.md`, left in the more visible place.
-
-It is not only consistency. ADR-007 changed what those folders _are_: before, a service layer
-of stateless functions over shared data — after, owners of tables with exclusive write rights.
-`services/` describes the old thing. The rename encodes the decision. It also removes the
-collision with `frontend/src/services/api.ts`, a genuinely different meaning of the word.
-
-**Measured cost:** 56 import lines across 41 source files (36 controllers, 14 routes, 3 utils,
-2 middleware, 1 types), 65 lines across 23 test files, and 10 markdown files — 74 files in
-all. The test figure is **33 imports plus 32 `jest.mock('…/services/…')` calls**; the mock
-paths are strings, so typecheck will not catch them and only a full test run will. Markdown
-includes `.claude/skills/project-standards/skill.md`, which must change in the same PR or it
-will keep directing new code to the old path. **No** coupling in `jest.config`, `tsconfig`,
-`.eslintrc.cjs` or `package.json`.
-
-Supersedes ADR-003's `services/<domain>/` path convention — record that in ADR-007 rather than
-editing ADR-003, which is a historical record.
-
-**Do it first.** Every later item touches controllers and routes anyway; renaming first means
-they are written against the right paths once instead of being rewritten. Its own PR — a
-74-file mechanical diff should not share a review with anything that needs thinking about.
-
-> Paths elsewhere in this backlog are written as `services/…` because that is where the files
-> live until this item lands. Read them as `domains/…` afterwards.
+- [x] **#119** — item 1: `backend/src/services/` → `backend/src/domains/`. 41 TypeScript files
+      (88 import and `jest.mock` lines) plus 5 markdown files. ADR-003 and the archived
+      design/implementation prompts keep their `services/` paths as historical record.
 
 ---
 
@@ -60,7 +33,7 @@ Small, unrelated fixes that share one goal: make the three structural lint rules
 
 ### 2.1 Delete dead `auth.createUser`
 
-`services/auth/create-user.ts` duplicates `user.create` — same bcrypt, same `SALT_ROUNDS`,
+`domains/auth/create-user.ts` duplicates `user.create` — same bcrypt, same `SALT_ROUNDS`,
 same insert — and has **zero callers**. It also makes `users` look like it has two writers.
 
 Delete the file, its test, and the `auth/index.ts` export.
@@ -86,17 +59,17 @@ Add `evaluation.clientHasAppointment(clientId)` and call that instead.
 
 Once 2.1–2.3 land, add to `backend/.eslintrc.cjs` at `error`:
 
-| Rule                                                               | Violations after 2.1–2.3 |
-| ------------------------------------------------------------------ | ------------------------ |
-| no deep imports into a domain (`services/*/` anything but `index`) | 0 after 2.2              |
-| no `_helpers` imports across domains                               | 0 after 2.2              |
-| no model imports in `controllers/`                                 | 0 after 2.3              |
+| Rule                                                              | Violations after 2.1–2.3 |
+| ----------------------------------------------------------------- | ------------------------ |
+| no deep imports into a domain (`domains/*/` anything but `index`) | 0 after 2.2              |
+| no `_helpers` imports across domains                              | 0 after 2.2              |
+| no model imports in `controllers/`                                | 0 after 2.3              |
 
 The first two rules overlap: `evaluation/mark-paid.ts:7` is the only violation of either, and
 2.2 clears both. The narrower `_helpers` rule is still worth stating separately — it is the
 one deep import that a future reader would be tempted to excuse.
 
-The fourth rule — no `services/` imports in `utils/` — waits for item 4.
+The fourth rule — no `domains/` imports in `utils/` — waits for item 4.
 
 ---
 
@@ -117,17 +90,17 @@ Type-only; `yarn typecheck` proves it.
 ## 4. Empty `utils/` of business rules 🟡
 
 `utils/` is meant to be the shared kernel — leaf modules that depend on nothing. Four files in
-it hold real domain rules instead, and two of them import _backwards_ into the service layer:
+it hold real domain rules instead, and two of them import _backwards_ into the domain layer:
 
-| File                                        | Holds                                                                                      | Moves to           |
-| ------------------------------------------- | ------------------------------------------------------------------------------------------ | ------------------ |
-| `utils/kitchenReportBuilder.ts` (337 lines) | pastelería / producción / hiperproteico / "no dar" structure; imports `../services/report` | `services/report/` |
-| `utils/kitchenReportData.ts`                | portion counts, special-instruction grouping; imports `../services/report`                 | `services/report/` |
-| `utils/menuBuilder.ts`                      | menu-card `.docx` construction; imports `../models/Menu`                                   | `services/report/` |
-| `utils/clientStatus.ts`                     | `deriveClientStatus` — the whole derived-status rule                                       | `services/client/` |
+| File                                        | Holds                                                                                     | Moves to          |
+| ------------------------------------------- | ----------------------------------------------------------------------------------------- | ----------------- |
+| `utils/kitchenReportBuilder.ts` (337 lines) | pastelería / producción / hiperproteico / "no dar" structure; imports `../domains/report` | `domains/report/` |
+| `utils/kitchenReportData.ts`                | portion counts, special-instruction grouping; imports `../domains/report`                 | `domains/report/` |
+| `utils/menuBuilder.ts`                      | menu-card `.docx` construction; imports `../models/Menu`                                  | `domains/report/` |
+| `utils/clientStatus.ts`                     | `deriveClientStatus` — the whole derived-status rule                                      | `domains/client/` |
 
-`services/report` is only 39 lines of queries today; by rule 4 it is not a domain until the
-first three land. `clientStatus.ts` has exactly one consumer (`services/client/_helpers.ts`),
+`domains/report` is only 39 lines of queries today; by rule 4 it is not a domain until the
+first three land. `clientStatus.ts` has exactly one consumer (`domains/client/_helpers.ts`),
 so its move is contained.
 
 Afterwards `utils/` holds only leaf modules — `date`, `errors`, `logger`, `response`, `sqids`,
