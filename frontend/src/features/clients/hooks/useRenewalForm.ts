@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import { addDays, format, isWeekend, parseISO } from 'date-fns';
 import { addBusinessDays } from '@/utils/businessDays';
 import { formatDate } from '@/utils/format';
-import type { Plan, Subscription, RenewalPayload } from '@/features/clients/types';
+import type { Subscription, RenewalPayload } from '@/features/clients/types';
+import type { Plan } from '@/features/plans/types';
 
 export type StartMode = 'atEnd' | 'pick' | 'undefined';
 

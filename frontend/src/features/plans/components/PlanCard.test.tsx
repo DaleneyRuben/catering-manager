@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { PlanCard } from '@/features/plans/components/PlanCard';
-import type { Plan } from '@/features/clients/types';
+import type { Plan } from '@/features/plans/types';
 
 const plan: Plan = {
   id: '1',

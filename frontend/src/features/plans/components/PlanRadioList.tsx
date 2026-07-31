@@ -1,5 +1,5 @@
 import { getPlanTier, TIER_LABELS } from '@/features/plans/tiers';
-import type { Plan } from '@/features/clients/types';
+import type { Plan } from '@/features/plans/types';
 
 const SIZE_CLS = {
   md: {

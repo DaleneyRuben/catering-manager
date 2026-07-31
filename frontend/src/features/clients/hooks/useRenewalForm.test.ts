@@ -1,6 +1,7 @@
 import { renderHook, act } from '@testing-library/react';
 import { useRenewalForm } from '@/features/clients/hooks/useRenewalForm';
-import type { Plan, Subscription } from '@/features/clients/types';
+import type { Subscription } from '@/features/clients/types';
+import type { Plan } from '@/features/plans/types';
 
 const plan: Plan = { id: 'plan-1', name: 'Completo', price: 1200, meals: ['breakfast', 'lunch'] };
 

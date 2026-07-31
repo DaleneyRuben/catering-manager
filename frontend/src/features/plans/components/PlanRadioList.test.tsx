@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { PlanRadioList } from '@/features/plans/components/PlanRadioList';
-import type { Plan } from '@/features/clients/types';
+import type { Plan } from '@/features/plans/types';
 
 const plans: Plan[] = [
   { id: '1', name: 'Almuerzo', price: 640, meals: ['lunch'] },

@@ -8,7 +8,8 @@ import {
 } from 'react-hook-form';
 import { CheckboxRow } from '@ui/CheckboxRow';
 import { WizardSectionCard } from '@ui/WizardSectionCard';
-import type { Plan, NewClientFormValues } from '@/features/clients/types';
+import type { NewClientFormValues } from '@/features/clients/types';
+import type { Plan } from '@/features/plans/types';
 import { PlanRadioList } from '@/features/plans/components/PlanRadioList';
 import { PlanRadioListSkeleton } from '@/features/plans/components/PlanRadioListSkeleton';
 import { ContractRow } from '@/features/clients/components/wizard/StepPlan/ContractRow';

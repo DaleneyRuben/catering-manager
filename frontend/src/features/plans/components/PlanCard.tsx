@@ -1,7 +1,7 @@
 import { Icon } from '@ui/Icon';
 import { IconButton } from '@ui/IconButton';
-import type { Plan } from '@/features/clients/types';
 import { MEAL_LABELS } from '@/constants/meals';
+import type { Plan } from '@/features/plans/types';
 import { MEAL_KEYS } from '@/features/plans/types';
 import { getPlanTier, TIER_STYLES } from '@/features/plans/tiers';
 

@@ -1,7 +1,8 @@
 import type { ReactNode } from 'react';
 import { Card } from '@ui/Card';
 import { Label } from '@ui/Label';
-import type { Plan, NewClientFormValues, RestrictionsState } from '@/features/clients/types';
+import type { NewClientFormValues, RestrictionsState } from '@/features/clients/types';
+import type { Plan } from '@/features/plans/types';
 import { addBusinessDays } from '@/utils/businessDays';
 import { formatDate } from '@/utils/format';
 import { SEX_LABELS } from '@/features/clients/constants/clientOptions';

@@ -1,3 +1,10 @@
+export interface Plan {
+  id: string;
+  name: string;
+  meals: string[];
+  price: number;
+}
+
 export const MEAL_KEYS = [
   'breakfast',
   'morning_snack',
