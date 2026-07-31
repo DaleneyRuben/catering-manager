@@ -66,6 +66,24 @@ module.exports = {
         ],
       },
     },
+    // ADR-007: utils is the shared kernel. Leaf modules only, so anything may import it.
+    {
+      files: ['src/utils/*.ts'],
+      rules: {
+        'no-restricted-imports': [
+          'error',
+          {
+            patterns: [
+              {
+                group: ['**/domains/*', '**/domains/**'],
+                message:
+                  'utils holds leaf modules only. Code that needs a domain belongs in that domain.',
+              },
+            ],
+          },
+        ],
+      },
+    },
     {
       files: ['src/controllers/*.ts'],
       rules: {

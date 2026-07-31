@@ -158,15 +158,15 @@ They own no table and write nothing. Each holds a real rule.
 | `delivery`   | Route grouping — zone, then delivery group (one stop per `groupToken`), then individuals                                                       |
 | `report`     | Kitchen report structure — pastelería / producción / hiperproteico / "no dar", portion counts, special-instruction grouping                    |
 
-`report`'s rules currently live in `utils/` — `kitchenReportBuilder.ts` and
-`kitchenReportData.ts` (both importing _backwards_ into `domains/report`) and
-`menuBuilder.ts` (which reads `models/Menu` and is imported straight into
-`report.controller.ts`). All three belong inside the domain and move there. Until then,
-`report` is a 39-line shell that would fail rule 4.
+`report` holds those rules directly: `compute-kitchen-report-data.ts` (portion counts and
+special-instruction grouping), `build-kitchen-report.ts` and `build-menu.ts` (the two `.docx`
+documents), plus the two file-name functions. They lived in `utils/` until #123 — the builders
+imported _backwards_ into `domains/report`, and `report` itself was a 39-line query shell that
+would have failed rule 4.
 
-`utils/clientStatus.ts` is the same mistake in the `client` domain: `deriveClientStatus`
-holds the entire derived-status rule and has exactly one consumer,
-`domains/client/_helpers.ts`. It moves too — see backlog item 4.
+`deriveClientStatus` was the same mistake in the `client` domain, and moved with them to
+`domains/client/derive-client-status.ts`. Its only consumer is still
+`domains/client/_helpers.ts`.
 
 `delivery` currently writes `Client.groupToken` (`set-group.ts`). Under rule 1 it calls
 `client.setDeliveryGroup(...)` instead, making it a pure view domain.
@@ -226,7 +226,7 @@ backend/src/
       _helpers.ts
       create.ts  update.ts  find-all.ts  find-by-id.ts  search.ts
       finalize.ts  soft-delete.ts
-    + client-status.ts                        ← from utils/clientStatus.ts
+      derive-client-status.ts                 ← from utils/clientStatus.ts
     + find-birthdays.ts                       ← from dashboard/
     + pause.ts  resume.ts  set-delivery-group.ts
       __tests__/  index.ts
@@ -360,7 +360,7 @@ Recorded so it is not rediscovered. None of it blocks the rules above.
 delivery on one subscription.
 
 Worse, the column carries two different meanings — as its own comment in
-`utils/clientStatus.ts:27` admits:
+`domains/client/derive-client-status.ts:27` admits:
 
 1. **A mid-plan pause.** A client 8 days into a 20-day plan travels; on resume they are owed
    12 delivery days and the end date must be extended.

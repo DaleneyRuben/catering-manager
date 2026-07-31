@@ -1,8 +1,8 @@
 import { Document, ImageRun, Packer, Paragraph, TextRun, UnderlineType } from 'docx';
 import { format, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
-import Menu from '../models/Menu';
-import { WHATSAPP_PNG_B64 } from './whatsappIcon';
+import Menu from '../../models/Menu';
+import { WHATSAPP_PNG_B64 } from '../../utils/whatsappIcon';
 
 const PURPLE = '7B3FA0';
 const GRAY = '808080';
@@ -177,10 +177,4 @@ export const buildMenu = async (menu: MenuInstance, date: string): Promise<Buffe
     ],
   });
   return Buffer.from(await Packer.toBuffer(doc));
-};
-
-export const menuFileName = (date: string): string => {
-  const parsed = parseISO(date);
-  const dayMonth = format(parsed, 'dd-MM');
-  return `Menu completo ${dayMonth}.docx`;
 };

@@ -1,5 +1,5 @@
 import { addBusinessDays, format, parseISO } from 'date-fns';
-import { EXPIRY_THRESHOLD_DAYS } from '../constants/subscription.constants';
+import { EXPIRY_THRESHOLD_DAYS } from '../../constants/subscription.constants';
 
 export type ClientStatusValue = 'active' | 'expiring' | 'paused' | 'suspended' | 'ended' | 'future';
 

@@ -1,7 +1,7 @@
 import Plan from '../../models/Plan';
 import Subscription from '../../models/Subscription';
 import { appToday } from '../../utils/date';
-import { deriveClientStatus } from '../../utils/clientStatus';
+import { deriveClientStatus } from './derive-client-status';
 
 export const INCLUDE_SUBSCRIPTION_ORDERED = [
   { model: Subscription, include: [Plan], separate: true, order: [['id', 'DESC']] as never },
