@@ -208,6 +208,31 @@ describe('create', () => {
     expect(mockClient.update).toHaveBeenCalledWith({ pausedSince: today });
   });
 
+  // An already-paused client keeps the date they actually paused on: resume counts the days
+  // they are owed from it, so overwriting it silently shortens their plan.
+  it('keeps the original pausedSince when a sin-fecha renewal is created for a paused client', async () => {
+    const mockClient = {
+      id: 1,
+      pausedSince: new Date('2026-01-10T12:00:00'),
+      update: jest.fn().mockResolvedValue({}),
+    };
+    (Client.findByPk as jest.Mock).mockResolvedValue(mockClient);
+    (Subscription.create as jest.Mock).mockResolvedValue({
+      ...mockSubscription,
+      startDate: null,
+      contractEndDate: null,
+    });
+    (ClientHistory.create as jest.Mock).mockResolvedValue({});
+
+    await create(
+      1,
+      { planId: 2, contractDate: today, duration: 20, renewalType: 'renewal' },
+      actor,
+    );
+
+    expect(mockClient.update).not.toHaveBeenCalled();
+  });
+
   it('persists renewalType on the subscription row when provided', async () => {
     (Client.findByPk as jest.Mock).mockResolvedValue({ id: 1, update: jest.fn() });
     (Subscription.create as jest.Mock).mockResolvedValue(mockSubscription);
