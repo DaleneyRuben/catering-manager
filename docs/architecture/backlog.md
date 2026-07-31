@@ -34,38 +34,17 @@ its work becomes fiction.
       `PlansPage.tsx`, and both `types.ts`. `features/plans` now imports nothing from
       `features/clients`, so the arrow points one way. `Subscription.plan` keeps its type by
       importing `Plan` back from `plans`.
-
----
-
-## 4. Empty `utils/` of business rules 🟡
-
-`utils/` is meant to be the shared kernel — leaf modules that depend on nothing. Four files in
-it hold real domain rules instead, and two of them import _backwards_ into the domain layer:
-
-| File                                        | Holds                                                                                     | Moves to          |
-| ------------------------------------------- | ----------------------------------------------------------------------------------------- | ----------------- |
-| `utils/kitchenReportBuilder.ts` (337 lines) | pastelería / producción / hiperproteico / "no dar" structure; imports `../domains/report` | `domains/report/` |
-| `utils/kitchenReportData.ts`                | portion counts, special-instruction grouping; imports `../domains/report`                 | `domains/report/` |
-| `utils/menuBuilder.ts`                      | menu-card `.docx` construction; imports `../models/Menu`                                  | `domains/report/` |
-| `utils/clientStatus.ts`                     | `deriveClientStatus` — the whole derived-status rule                                      | `domains/client/` |
-
-`domains/report` is only 39 lines of queries today; by rule 4 it is not a domain until the
-first three land. `clientStatus.ts` has exactly one consumer (`domains/client/_helpers.ts`),
-so its move is contained.
-
-Afterwards `utils/` holds only leaf modules — `date`, `errors`, `logger`, `response`, `sqids`,
-`sentry`, `devFlags`, `whatsappIcon` — and the fourth structural lint rule (no `domains/` imports
-in `utils/`, deferred by #120) can go on alongside the three already enforced in
-`backend/.eslintrc.cjs`.
-
-Mostly file moves, but `kitchenReportBuilder.ts` is over the 400-line guidance — split it while
-moving. `report.controller.ts` stops importing `utils/menuBuilder` and imports the domain
-instead. **The `.docx` output must be byte-identical**: download a kitchen report and a menu
-card before and after and compare.
-
-`EXPIRY_THRESHOLD_DAYS` (`constants/subscription.constants.ts`) is read by `clientStatus`.
-Constants stay where they are — they are leaf values with no logic, and both domains legitimately
-read them.
+- [x] **#123** — item 4: `utils/` emptied of business rules. `kitchenReportData.ts` and
+      `kitchenReportBuilder.ts` became `domains/report/compute-kitchen-report-data.ts`,
+      `build-kitchen-report.ts` and `kitchen-report-file-name.ts`; `menuBuilder.ts` became
+      `build-menu.ts` and `menu-file-name.ts`; `clientStatus.ts` became
+      `domains/client/derive-client-status.ts`. `utils/` now holds only leaf modules and the
+      fourth structural lint rule is enforced. Two corrections to what this item assumed:
+      `kitchenReportBuilder.ts` was 337 lines, not over 400 — it was split anyway, on the
+      one-public-function-per-file rule, which is the real reason. And `.docx` output cannot be
+      compared byte-for-byte: `docx` stamps `dcterms:created` into `docProps/core.xml`, so two
+      runs of identical input never match. Identity was checked by unzipping both and diffing
+      every part except that one; kitchen report and menu card both came out unchanged.
 
 ---
 
