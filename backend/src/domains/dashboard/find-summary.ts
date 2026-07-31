@@ -6,7 +6,7 @@ import {
   type SubscriptionCounts,
 } from '../subscription';
 import { findBirthdays, type BirthdayPerson } from '../client';
-import { findConnections, type Connection } from './find-connections';
+import { findConnections, type Connection } from '../user';
 import { findMenus, type MenuStatus } from './find-menus';
 
 export type DashboardSummary = SubscriptionCounts & {
