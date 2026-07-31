@@ -29,20 +29,11 @@ its work becomes fiction.
       `evaluation.clientHasAppointment` so `client.controller.ts` stops importing a model; turned
       on the three structural lint rules at `error`. The fourth rule — no `domains/` imports in
       `utils/` — waits for item 4.
-
----
-
-## 3. `Plan` type ownership (frontend) 🟢
-
-`Plan` is declared in `features/clients/types.ts` and imported by seven files in
-`features/plans`, while `clients` imports components and hooks from `plans` — a circular
-dependency between features caused by one misplaced type.
-
-Move `Plan` to `features/plans/types.ts` and update the imports: `PlanCard.tsx`,
-`PlanModal.tsx`, `PlanRadioList.tsx`, `usePlans.ts`, the three matching test files
-(`PlanCard.test.tsx`, `PlanModal.test.tsx`, `PlanRadioList.test.tsx`), plus the `clients` side.
-
-Type-only; `yarn typecheck` proves it.
+- [x] **#122** — item 3: `Plan` moved from `features/clients/types.ts` to
+      `features/plans/types.ts`. 18 files: 7 in `features/plans`, 8 in `features/clients`,
+      `PlansPage.tsx`, and both `types.ts`. `features/plans` now imports nothing from
+      `features/clients`, so the arrow points one way. `Subscription.plan` keeps its type by
+      importing `Plan` back from `plans`.
 
 ---
 
