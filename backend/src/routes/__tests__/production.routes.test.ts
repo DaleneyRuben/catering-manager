@@ -2,7 +2,7 @@ import request from 'supertest';
 import app from '../../app';
 import { verifyToken } from '../../domains/auth';
 import { ROLES } from '../../constants/roles.constants';
-import * as productionService from '../../domains/production';
+import { findGroups } from '../../domains/production';
 
 jest.mock('../../domains/auth');
 jest.mock('../../domains/production');
@@ -17,7 +17,7 @@ const headersForRole = (role: string) => {
 
 beforeEach(() => {
   jest.clearAllMocks();
-  (productionService.findGroups as jest.Mock).mockResolvedValue({
+  (findGroups as jest.Mock).mockResolvedValue({
     date: '2026-07-02',
     isDeliveryDay: true,
     total: 0,

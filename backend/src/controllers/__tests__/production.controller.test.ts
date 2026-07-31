@@ -1,6 +1,6 @@
 import request from 'supertest';
 import app from '../../app';
-import * as productionService from '../../domains/production';
+import { findDayClients, findGroups, findWeeklyCounts } from '../../domains/production';
 import { encodeId } from '../../utils/sqids';
 
 jest.mock('../../domains/production');
@@ -44,8 +44,8 @@ describe('GET /api/production', () => {
   beforeEach(() => jest.clearAllMocks());
 
   it('returns 200 with the summary, weekly counts, and the navigable week starts', async () => {
-    (productionService.findGroups as jest.Mock).mockResolvedValue(mockSummary);
-    (productionService.findWeeklyCounts as jest.Mock).mockResolvedValue(mockWeeklyCounts);
+    (findGroups as jest.Mock).mockResolvedValue(mockSummary);
+    (findWeeklyCounts as jest.Mock).mockResolvedValue(mockWeeklyCounts);
 
     const res = await request(app).get('/api/production');
 
@@ -58,8 +58,8 @@ describe('GET /api/production', () => {
   });
 
   it('returns 500 when the groups service throws', async () => {
-    (productionService.findGroups as jest.Mock).mockRejectedValue(new Error('db error'));
-    (productionService.findWeeklyCounts as jest.Mock).mockResolvedValue(mockWeeklyCounts);
+    (findGroups as jest.Mock).mockRejectedValue(new Error('db error'));
+    (findWeeklyCounts as jest.Mock).mockResolvedValue(mockWeeklyCounts);
 
     const res = await request(app).get('/api/production');
 
@@ -67,8 +67,8 @@ describe('GET /api/production', () => {
   });
 
   it('returns 500 when the weekly counts service throws', async () => {
-    (productionService.findGroups as jest.Mock).mockResolvedValue(mockSummary);
-    (productionService.findWeeklyCounts as jest.Mock).mockRejectedValue(new Error('db error'));
+    (findGroups as jest.Mock).mockResolvedValue(mockSummary);
+    (findWeeklyCounts as jest.Mock).mockRejectedValue(new Error('db error'));
 
     const res = await request(app).get('/api/production');
 
@@ -82,12 +82,12 @@ describe('GET /api/production/weekly-counts', () => {
   it.each(['2026-06-29', '2026-07-06', '2026-07-13'])(
     'returns the counts for navigable week start %s',
     async (weekStart) => {
-      (productionService.findWeeklyCounts as jest.Mock).mockResolvedValue(mockWeeklyCounts);
+      (findWeeklyCounts as jest.Mock).mockResolvedValue(mockWeeklyCounts);
 
       const res = await request(app).get('/api/production/weekly-counts').query({ weekStart });
 
       expect(res.status).toBe(200);
-      expect(productionService.findWeeklyCounts).toHaveBeenCalledWith(weekStart);
+      expect(findWeeklyCounts).toHaveBeenCalledWith(weekStart);
       expect(res.body.data).toEqual(mockWeeklyCounts);
     },
   );
@@ -96,7 +96,7 @@ describe('GET /api/production/weekly-counts', () => {
     const res = await request(app).get('/api/production/weekly-counts');
 
     expect(res.status).toBe(400);
-    expect(productionService.findWeeklyCounts).not.toHaveBeenCalled();
+    expect(findWeeklyCounts).not.toHaveBeenCalled();
   });
 
   it.each([
@@ -109,7 +109,7 @@ describe('GET /api/production/weekly-counts', () => {
     const res = await request(app).get('/api/production/weekly-counts').query({ weekStart });
 
     expect(res.status).toBe(400);
-    expect(productionService.findWeeklyCounts).not.toHaveBeenCalled();
+    expect(findWeeklyCounts).not.toHaveBeenCalled();
   });
 });
 
@@ -123,12 +123,12 @@ describe('GET /api/production/day-clients', () => {
   beforeEach(() => jest.clearAllMocks());
 
   it('returns the active clients for a weekday inside the window', async () => {
-    (productionService.findDayClients as jest.Mock).mockResolvedValue(mockDayClients);
+    (findDayClients as jest.Mock).mockResolvedValue(mockDayClients);
 
     const res = await request(app).get('/api/production/day-clients').query({ date: '2026-07-01' });
 
     expect(res.status).toBe(200);
-    expect(productionService.findDayClients).toHaveBeenCalledWith('2026-07-01');
+    expect(findDayClients).toHaveBeenCalledWith('2026-07-01');
     expect(res.body.data.clients).toEqual([
       { id: encodeId(7), name: 'Ana Rojas', phoneNumber: '70123456', deliveryZone: 'Centro' },
     ]);
@@ -142,7 +142,7 @@ describe('GET /api/production/day-clients', () => {
         .query(date === undefined ? {} : { date });
 
       expect(res.status).toBe(400);
-      expect(productionService.findDayClients).not.toHaveBeenCalled();
+      expect(findDayClients).not.toHaveBeenCalled();
     },
   );
 
@@ -150,7 +150,7 @@ describe('GET /api/production/day-clients', () => {
     const res = await request(app).get('/api/production/day-clients').query({ date: '2026-07-04' });
 
     expect(res.status).toBe(400);
-    expect(productionService.findDayClients).not.toHaveBeenCalled();
+    expect(findDayClients).not.toHaveBeenCalled();
   });
 
   it.each(['2026-06-26', '2026-07-20'])(
@@ -159,12 +159,12 @@ describe('GET /api/production/day-clients', () => {
       const res = await request(app).get('/api/production/day-clients').query({ date });
 
       expect(res.status).toBe(400);
-      expect(productionService.findDayClients).not.toHaveBeenCalled();
+      expect(findDayClients).not.toHaveBeenCalled();
     },
   );
 
   it('accepts the last day of the window', async () => {
-    (productionService.findDayClients as jest.Mock).mockResolvedValue({
+    (findDayClients as jest.Mock).mockResolvedValue({
       date: '2026-07-17',
       count: 0,
       clients: [],
@@ -173,6 +173,6 @@ describe('GET /api/production/day-clients', () => {
     const res = await request(app).get('/api/production/day-clients').query({ date: '2026-07-17' });
 
     expect(res.status).toBe(200);
-    expect(productionService.findDayClients).toHaveBeenCalledWith('2026-07-17');
+    expect(findDayClients).toHaveBeenCalledWith('2026-07-17');
   });
 });

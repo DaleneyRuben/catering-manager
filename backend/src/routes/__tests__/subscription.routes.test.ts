@@ -2,7 +2,7 @@ import request from 'supertest';
 import app from '../../app';
 import { verifyToken } from '../../domains/auth';
 import { ROLES } from '../../constants/roles.constants';
-import * as subscriptionService from '../../domains/subscription';
+import { create } from '../../domains/subscription';
 import { encodeId } from '../../utils/sqids';
 
 jest.mock('../../domains/auth');
@@ -20,7 +20,7 @@ const clientId = encodeId(1);
 
 beforeEach(() => {
   jest.clearAllMocks();
-  (subscriptionService.create as jest.Mock).mockResolvedValue({ id: 1 });
+  (create as jest.Mock).mockResolvedValue({ id: 1 });
 });
 
 describe('POST /api/clients/:clientId/subscriptions role guard', () => {

@@ -2,7 +2,7 @@ import request from 'supertest';
 import app from '../../app';
 import { verifyToken } from '../../domains/auth';
 import { ROLES } from '../../constants/roles.constants';
-import * as evaluationService from '../../domains/evaluation';
+import { findPendingPayment } from '../../domains/evaluation';
 
 jest.mock('../../domains/auth');
 jest.mock('../../domains/evaluation');
@@ -17,7 +17,7 @@ const headersForRole = (role: string) => {
 
 beforeEach(() => {
   jest.clearAllMocks();
-  (evaluationService.findPendingPayment as jest.Mock).mockResolvedValue([]);
+  (findPendingPayment as jest.Mock).mockResolvedValue([]);
 });
 
 describe('GET /api/evaluations/pending-payment role guard', () => {

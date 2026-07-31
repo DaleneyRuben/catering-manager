@@ -1,7 +1,7 @@
 import request from 'supertest';
 import app from '../../app';
-import * as userService from '../../domains/user';
-import * as loginEventService from '../../domains/login-event';
+import { create, findAll, remove, update } from '../../domains/user';
+import { findForUser } from '../../domains/login-event';
 import { encodeId } from '../../utils/sqids';
 import { ROLES } from '../../constants/roles.constants';
 
@@ -13,10 +13,10 @@ jest.mock('../../middleware/auth', () => ({
   requireRole: () => (_req: unknown, _res: unknown, next: () => void) => next(),
 }));
 
-const mockFindAll = userService.findAll as jest.Mock;
-const mockCreate = userService.create as jest.Mock;
-const mockUpdate = userService.update as jest.Mock;
-const mockRemove = userService.remove as jest.Mock;
+const mockFindAll = findAll as jest.Mock;
+const mockCreate = create as jest.Mock;
+const mockUpdate = update as jest.Mock;
+const mockRemove = remove as jest.Mock;
 
 const id1 = encodeId(1);
 const id999 = encodeId(999);
@@ -186,7 +186,7 @@ describe('DELETE /api/users/:id', () => {
 });
 
 describe('GET /api/users/:id/logins', () => {
-  const mockFindForUser = loginEventService.findForUser as jest.Mock;
+  const mockFindForUser = findForUser as jest.Mock;
 
   it('returns the login history for the user', async () => {
     const entries = [

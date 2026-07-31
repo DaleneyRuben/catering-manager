@@ -1,6 +1,6 @@
 import request from 'supertest';
 import app from '../../app';
-import * as deliveryService from '../../domains/delivery';
+import { findRoute } from '../../domains/delivery';
 
 jest.mock('../../domains/delivery');
 jest.mock('../../database/sequelize', () => ({ __esModule: true, default: { query: jest.fn() } }));
@@ -18,7 +18,7 @@ describe('GET /api/delivery', () => {
   beforeEach(() => jest.clearAllMocks());
 
   it('returns 200 with the route keyed by date', async () => {
-    (deliveryService.findRoute as jest.Mock).mockResolvedValue(mockRoute);
+    (findRoute as jest.Mock).mockResolvedValue(mockRoute);
 
     const res = await request(app).get('/api/delivery');
 
@@ -27,7 +27,7 @@ describe('GET /api/delivery', () => {
   });
 
   it('returns 500 when the service throws', async () => {
-    (deliveryService.findRoute as jest.Mock).mockRejectedValue(new Error('db error'));
+    (findRoute as jest.Mock).mockRejectedValue(new Error('db error'));
 
     const res = await request(app).get('/api/delivery');
 

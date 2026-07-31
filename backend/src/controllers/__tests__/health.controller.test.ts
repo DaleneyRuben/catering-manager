@@ -1,6 +1,6 @@
 import request from 'supertest';
 import app from '../../app';
-import * as healthService from '../../domains/health';
+import { getReport } from '../../domains/health';
 
 jest.mock('../../domains/health');
 jest.mock('../../database/sequelize', () => ({ __esModule: true, default: { query: jest.fn() } }));
@@ -9,7 +9,7 @@ jest.mock('../../middleware/auth', () => ({
   requireRole: () => (_req: unknown, _res: unknown, next: () => void) => next(),
 }));
 
-const mockGetReport = healthService.getReport as jest.Mock;
+const mockGetReport = getReport as jest.Mock;
 
 const sampleReport = {
   status: 'ok',

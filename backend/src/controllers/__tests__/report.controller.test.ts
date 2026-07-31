@@ -1,8 +1,11 @@
 import request from 'supertest';
 import app from '../../app';
-import * as menuService from '../../domains/menu';
-import * as reportService from '../../domains/report';
-import * as kitchenReportBuilder from '../../utils/kitchenReportBuilder';
+import { findByDate } from '../../domains/menu';
+import {
+  findActiveClientsWithPlansForDate,
+  findDeliveryClientsForDate,
+} from '../../domains/report';
+import { buildKitchenReport, kitchenReportFileName } from '../../utils/kitchenReportBuilder';
 
 jest.mock('../../domains/menu');
 jest.mock('../../domains/report');
@@ -29,10 +32,7 @@ describe('GET /api/reports/active-clients/download', () => {
   beforeEach(() => jest.clearAllMocks());
 
   it('returns an xlsx file with correct headers', async () => {
-    (reportService.findDeliveryClientsForDate as jest.Mock).mockResolvedValue([
-      'Ana López',
-      'Carlos Ríos',
-    ]);
+    (findDeliveryClientsForDate as jest.Mock).mockResolvedValue(['Ana López', 'Carlos Ríos']);
 
     const res = await request(app).get('/api/reports/active-clients/download?date=15/06/2026');
 
@@ -44,11 +44,11 @@ describe('GET /api/reports/active-clients/download', () => {
   });
 
   it('calls service with date converted to YYYY-MM-DD', async () => {
-    (reportService.findDeliveryClientsForDate as jest.Mock).mockResolvedValue([]);
+    (findDeliveryClientsForDate as jest.Mock).mockResolvedValue([]);
 
     await request(app).get('/api/reports/active-clients/download?date=19/06/2026');
 
-    expect(reportService.findDeliveryClientsForDate).toHaveBeenCalledWith('2026-06-19');
+    expect(findDeliveryClientsForDate).toHaveBeenCalledWith('2026-06-19');
   });
 
   it('returns 400 when date is a saturday', async () => {
@@ -86,7 +86,7 @@ describe('GET /api/reports/menu-card/download', () => {
   beforeEach(() => jest.clearAllMocks());
 
   it('returns a docx file with correct headers when menu exists', async () => {
-    (menuService.findByDate as jest.Mock).mockResolvedValue(mockMenu);
+    (findByDate as jest.Mock).mockResolvedValue(mockMenu);
 
     const res = await request(app).get('/api/reports/menu-card/download?date=2026-06-05');
 
@@ -98,15 +98,15 @@ describe('GET /api/reports/menu-card/download', () => {
   });
 
   it('calls menuService with the given date', async () => {
-    (menuService.findByDate as jest.Mock).mockResolvedValue(mockMenu);
+    (findByDate as jest.Mock).mockResolvedValue(mockMenu);
 
     await request(app).get('/api/reports/menu-card/download?date=2026-06-05');
 
-    expect(menuService.findByDate).toHaveBeenCalledWith('2026-06-05');
+    expect(findByDate).toHaveBeenCalledWith('2026-06-05');
   });
 
   it('returns 404 when no menu exists for the date', async () => {
-    (menuService.findByDate as jest.Mock).mockResolvedValue(null);
+    (findByDate as jest.Mock).mockResolvedValue(null);
 
     const res = await request(app).get('/api/reports/menu-card/download?date=2026-06-05');
 
@@ -132,7 +132,7 @@ describe('GET /api/reports/menu-card/download', () => {
   });
 
   it('returns 500 when service throws', async () => {
-    (menuService.findByDate as jest.Mock).mockRejectedValue(new Error('db error'));
+    (findByDate as jest.Mock).mockRejectedValue(new Error('db error'));
 
     const res = await request(app).get('/api/reports/menu-card/download?date=2026-06-05');
 
@@ -143,13 +143,13 @@ describe('GET /api/reports/menu-card/download', () => {
 describe('GET /api/reports/kitchen-report/download', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    (kitchenReportBuilder.buildKitchenReport as jest.Mock).mockResolvedValue(Buffer.from('docx'));
-    (kitchenReportBuilder.kitchenReportFileName as jest.Mock).mockReturnValue('Jueves 0506.docx');
+    (buildKitchenReport as jest.Mock).mockResolvedValue(Buffer.from('docx'));
+    (kitchenReportFileName as jest.Mock).mockReturnValue('Jueves 0506.docx');
   });
 
   it('returns a docx file with correct headers when menu and clients exist', async () => {
-    (menuService.findByDate as jest.Mock).mockResolvedValue(mockMenu);
-    (reportService.findActiveClientsWithPlansForDate as jest.Mock).mockResolvedValue([
+    (findByDate as jest.Mock).mockResolvedValue(mockMenu);
+    (findActiveClientsWithPlansForDate as jest.Mock).mockResolvedValue([
       { name: 'Ana López', planMeals: ['breakfast', 'lunch'], restrictions: [] },
     ]);
 
@@ -163,18 +163,18 @@ describe('GET /api/reports/kitchen-report/download', () => {
   });
 
   it('calls services with the given date', async () => {
-    (menuService.findByDate as jest.Mock).mockResolvedValue(mockMenu);
-    (reportService.findActiveClientsWithPlansForDate as jest.Mock).mockResolvedValue([]);
+    (findByDate as jest.Mock).mockResolvedValue(mockMenu);
+    (findActiveClientsWithPlansForDate as jest.Mock).mockResolvedValue([]);
 
     await request(app).get('/api/reports/kitchen-report/download?date=2026-06-05');
 
-    expect(menuService.findByDate).toHaveBeenCalledWith('2026-06-05');
-    expect(reportService.findActiveClientsWithPlansForDate).toHaveBeenCalledWith('2026-06-05');
+    expect(findByDate).toHaveBeenCalledWith('2026-06-05');
+    expect(findActiveClientsWithPlansForDate).toHaveBeenCalledWith('2026-06-05');
   });
 
   it('returns 404 when no menu exists for the date', async () => {
-    (menuService.findByDate as jest.Mock).mockResolvedValue(null);
-    (reportService.findActiveClientsWithPlansForDate as jest.Mock).mockResolvedValue([]);
+    (findByDate as jest.Mock).mockResolvedValue(null);
+    (findActiveClientsWithPlansForDate as jest.Mock).mockResolvedValue([]);
 
     const res = await request(app).get('/api/reports/kitchen-report/download?date=2026-06-05');
 

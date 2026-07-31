@@ -1,7 +1,7 @@
 import request from 'supertest';
 import app from '../../app';
-import * as dashboardService from '../../domains/dashboard';
-import * as loginEventService from '../../domains/login-event';
+import { findSummary } from '../../domains/dashboard';
+import { findRecent } from '../../domains/login-event';
 
 jest.mock('../../domains/dashboard');
 jest.mock('../../domains/login-event');
@@ -28,7 +28,7 @@ describe('GET /api/dashboard', () => {
   beforeEach(() => jest.clearAllMocks());
 
   it('returns 200 with the dashboard summary', async () => {
-    (dashboardService.findSummary as jest.Mock).mockResolvedValue(mockSummary);
+    (findSummary as jest.Mock).mockResolvedValue(mockSummary);
 
     const res = await request(app).get('/api/dashboard');
 
@@ -37,7 +37,7 @@ describe('GET /api/dashboard', () => {
   });
 
   it('returns 500 when the service throws', async () => {
-    (dashboardService.findSummary as jest.Mock).mockRejectedValue(new Error('db error'));
+    (findSummary as jest.Mock).mockRejectedValue(new Error('db error'));
 
     const res = await request(app).get('/api/dashboard');
 
@@ -59,7 +59,7 @@ describe('GET /api/dashboard/sessions', () => {
         createdAt: '2026-07-04T10:29:00.000Z',
       },
     ];
-    (loginEventService.findRecent as jest.Mock).mockResolvedValue(entries);
+    (findRecent as jest.Mock).mockResolvedValue(entries);
 
     const res = await request(app).get('/api/dashboard/sessions');
 
@@ -68,24 +68,24 @@ describe('GET /api/dashboard/sessions', () => {
   });
 
   it('passes the roles query param to the service as a list', async () => {
-    (loginEventService.findRecent as jest.Mock).mockResolvedValue([]);
+    (findRecent as jest.Mock).mockResolvedValue([]);
 
     const res = await request(app).get('/api/dashboard/sessions?roles=kitchen,delivery');
 
     expect(res.status).toBe(200);
-    expect(loginEventService.findRecent).toHaveBeenCalledWith(['kitchen', 'delivery']);
+    expect(findRecent).toHaveBeenCalledWith(['kitchen', 'delivery']);
   });
 
   it('calls the service without roles when the param is absent', async () => {
-    (loginEventService.findRecent as jest.Mock).mockResolvedValue([]);
+    (findRecent as jest.Mock).mockResolvedValue([]);
 
     await request(app).get('/api/dashboard/sessions');
 
-    expect(loginEventService.findRecent).toHaveBeenCalledWith(undefined);
+    expect(findRecent).toHaveBeenCalledWith(undefined);
   });
 
   it('returns 500 when the service throws', async () => {
-    (loginEventService.findRecent as jest.Mock).mockRejectedValue(new Error('db error'));
+    (findRecent as jest.Mock).mockRejectedValue(new Error('db error'));
 
     const res = await request(app).get('/api/dashboard/sessions');
 

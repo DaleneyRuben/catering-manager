@@ -1,7 +1,12 @@
 import type { Request } from 'express';
 import request from 'supertest';
 import app from '../../app';
-import * as evaluationService from '../../domains/evaluation';
+import {
+  deletePendingClient,
+  findPendingPayment,
+  markPaid,
+  revertPendingRenewal,
+} from '../../domains/evaluation';
 import { encodeId } from '../../utils/sqids';
 
 jest.mock('../../domains/evaluation');
@@ -19,7 +24,7 @@ const id999 = encodeId(999);
 
 describe('GET /api/evaluations/pending-payment', () => {
   it('returns 200 with clients pending payment', async () => {
-    (evaluationService.findPendingPayment as jest.Mock).mockResolvedValue([{ id: 1 }]);
+    (findPendingPayment as jest.Mock).mockResolvedValue([{ id: 1 }]);
 
     const res = await request(app).get('/api/evaluations/pending-payment');
 
@@ -30,7 +35,7 @@ describe('GET /api/evaluations/pending-payment', () => {
 
 describe('POST /api/evaluations/:id/mark-paid', () => {
   it('returns 200 with the updated subscription', async () => {
-    (evaluationService.markPaid as jest.Mock).mockResolvedValue({ id: 3, paid: true });
+    (markPaid as jest.Mock).mockResolvedValue({ id: 3, paid: true });
 
     const res = await request(app).post(`/api/evaluations/${id1}/mark-paid`);
 
@@ -39,7 +44,7 @@ describe('POST /api/evaluations/:id/mark-paid', () => {
   });
 
   it('returns 404 when the client has no pending payment', async () => {
-    (evaluationService.markPaid as jest.Mock).mockResolvedValue(null);
+    (markPaid as jest.Mock).mockResolvedValue(null);
 
     const res = await request(app).post(`/api/evaluations/${id999}/mark-paid`);
 
@@ -47,17 +52,17 @@ describe('POST /api/evaluations/:id/mark-paid', () => {
   });
 
   it('forwards the acting user to the service', async () => {
-    (evaluationService.markPaid as jest.Mock).mockResolvedValue({ id: 3, paid: true });
+    (markPaid as jest.Mock).mockResolvedValue({ id: 3, paid: true });
 
     await request(app).post(`/api/evaluations/${id1}/mark-paid`);
 
-    expect(evaluationService.markPaid).toHaveBeenCalledWith(1, { userId: 9, username: 'ada' });
+    expect(markPaid).toHaveBeenCalledWith(1, { userId: 9, username: 'ada' });
   });
 });
 
 describe('DELETE /api/evaluations/:id/pending-renewal', () => {
   it('returns 200 when the pending renewal is reverted', async () => {
-    (evaluationService.revertPendingRenewal as jest.Mock).mockResolvedValue({ id: 5 });
+    (revertPendingRenewal as jest.Mock).mockResolvedValue({ id: 5 });
 
     const res = await request(app).delete(`/api/evaluations/${id1}/pending-renewal`);
 
@@ -65,7 +70,7 @@ describe('DELETE /api/evaluations/:id/pending-renewal', () => {
   });
 
   it('returns 404 when the client has no pending renewal', async () => {
-    (evaluationService.revertPendingRenewal as jest.Mock).mockResolvedValue(null);
+    (revertPendingRenewal as jest.Mock).mockResolvedValue(null);
 
     const res = await request(app).delete(`/api/evaluations/${id999}/pending-renewal`);
 
@@ -73,17 +78,17 @@ describe('DELETE /api/evaluations/:id/pending-renewal', () => {
   });
 
   it('decodes the client id and forwards it to the service', async () => {
-    (evaluationService.revertPendingRenewal as jest.Mock).mockResolvedValue({ id: 5 });
+    (revertPendingRenewal as jest.Mock).mockResolvedValue({ id: 5 });
 
     await request(app).delete(`/api/evaluations/${id1}/pending-renewal`);
 
-    expect(evaluationService.revertPendingRenewal).toHaveBeenCalledWith(1);
+    expect(revertPendingRenewal).toHaveBeenCalledWith(1);
   });
 });
 
 describe('DELETE /api/evaluations/:id', () => {
   it('returns 200 when the pending client is deleted', async () => {
-    (evaluationService.deletePendingClient as jest.Mock).mockResolvedValue({ id: 1 });
+    (deletePendingClient as jest.Mock).mockResolvedValue({ id: 1 });
 
     const res = await request(app).delete(`/api/evaluations/${id1}`);
 
@@ -91,7 +96,7 @@ describe('DELETE /api/evaluations/:id', () => {
   });
 
   it('returns 404 when the client does not exist', async () => {
-    (evaluationService.deletePendingClient as jest.Mock).mockResolvedValue(null);
+    (deletePendingClient as jest.Mock).mockResolvedValue(null);
 
     const res = await request(app).delete(`/api/evaluations/${id999}`);
 
@@ -99,11 +104,11 @@ describe('DELETE /api/evaluations/:id', () => {
   });
 
   it('forwards the acting user to the service', async () => {
-    (evaluationService.deletePendingClient as jest.Mock).mockResolvedValue({ id: 1 });
+    (deletePendingClient as jest.Mock).mockResolvedValue({ id: 1 });
 
     await request(app).delete(`/api/evaluations/${id1}`);
 
-    expect(evaluationService.deletePendingClient).toHaveBeenCalledWith(1, {
+    expect(deletePendingClient).toHaveBeenCalledWith(1, {
       userId: 9,
       username: 'ada',
     });
