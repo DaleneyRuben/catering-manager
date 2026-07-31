@@ -1,5 +1,3 @@
-export { findBirthdays } from './find-birthdays';
-export type { BirthdayPerson } from './find-birthdays';
 export { findConnections } from './find-connections';
 export type { Connection } from './find-connections';
 export { findMenus } from './find-menus';

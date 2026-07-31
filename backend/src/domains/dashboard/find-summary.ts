@@ -5,7 +5,7 @@ import {
   type ContractEndingPerson,
   type SubscriptionCounts,
 } from '../subscription';
-import { findBirthdays, type BirthdayPerson } from './find-birthdays';
+import { findBirthdays, type BirthdayPerson } from '../client';
 import { findConnections, type Connection } from './find-connections';
 import { findMenus, type MenuStatus } from './find-menus';
 
