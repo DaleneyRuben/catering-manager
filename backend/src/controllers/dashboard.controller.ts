@@ -1,11 +1,11 @@
 import { NextFunction, Request, Response } from 'express';
-import * as dashboardService from '../domains/dashboard';
+import { findSummary } from '../domains/dashboard';
 import { findRecent } from '../domains/login-event';
 import { sendSuccess } from '../utils/response';
 
 const getSummary = async (_req: Request, res: Response, next: NextFunction) => {
   try {
-    const summary = await dashboardService.findSummary();
+    const summary = await findSummary();
     sendSuccess(res, summary);
   } catch (err) {
     next(err);

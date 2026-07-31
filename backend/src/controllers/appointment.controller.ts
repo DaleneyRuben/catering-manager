@@ -1,5 +1,15 @@
 import { NextFunction, Request, Response } from 'express';
-import * as evaluationService from '../domains/evaluation';
+import {
+  createAppointment,
+  updateAppointment,
+  cancelAppointment,
+  findById as findAppointmentById,
+  findPendingForAdmin,
+  findPendingForNutritionist,
+  findHistoryForNutritionist,
+  convertAppointment,
+  resolveRenewal as resolveAppointmentRenewal,
+} from '../domains/evaluation';
 import { sendSuccess, sendPaginated, sendError } from '../utils/response';
 import { decodeId } from '../utils/sqids';
 
@@ -8,7 +18,7 @@ const VALID_HISTORY_STATUS = ['pagado', 'no_pagado'];
 const create = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { clientId, ...rest } = req.body;
-    const appointment = await evaluationService.createAppointment({
+    const appointment = await createAppointment({
       ...rest,
       ...(clientId !== undefined ? { clientId: decodeId(clientId) } : {}),
     });
@@ -25,7 +35,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
 const update = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { subscriptionId, ...rest } = req.body;
-    const appointment = await evaluationService.updateAppointment(decodeId(req.params.id), {
+    const appointment = await updateAppointment(decodeId(req.params.id), {
       ...rest,
       ...(subscriptionId !== undefined ? { subscriptionId: decodeId(subscriptionId) } : {}),
     });
@@ -41,7 +51,7 @@ const update = async (req: Request, res: Response, next: NextFunction) => {
 
 const remove = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const appointment = await evaluationService.cancelAppointment(decodeId(req.params.id));
+    const appointment = await cancelAppointment(decodeId(req.params.id));
     if (!appointment) {
       sendError(res, 'Appointment not found', 404);
       return;
@@ -54,7 +64,7 @@ const remove = async (req: Request, res: Response, next: NextFunction) => {
 
 const getById = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const appointment = await evaluationService.findById(decodeId(req.params.id));
+    const appointment = await findAppointmentById(decodeId(req.params.id));
     if (!appointment) {
       sendError(res, 'Appointment not found', 404);
       return;
@@ -67,7 +77,7 @@ const getById = async (req: Request, res: Response, next: NextFunction) => {
 
 const getPending = async (_req: Request, res: Response, next: NextFunction) => {
   try {
-    sendSuccess(res, await evaluationService.findPendingForAdmin());
+    sendSuccess(res, await findPendingForAdmin());
   } catch (err) {
     next(err);
   }
@@ -75,7 +85,7 @@ const getPending = async (_req: Request, res: Response, next: NextFunction) => {
 
 const getPendingForNutritionist = async (_req: Request, res: Response, next: NextFunction) => {
   try {
-    sendSuccess(res, await evaluationService.findPendingForNutritionist());
+    sendSuccess(res, await findPendingForNutritionist());
   } catch (err) {
     next(err);
   }
@@ -89,7 +99,7 @@ const getHistoryForNutritionist = async (req: Request, res: Response, next: Next
     const resolvedStatus = VALID_HISTORY_STATUS.includes(status as string)
       ? (status as 'pagado' | 'no_pagado')
       : undefined;
-    const { rows, total } = await evaluationService.findHistoryForNutritionist({
+    const { rows, total } = await findHistoryForNutritionist({
       status: resolvedStatus,
       q: typeof q === 'string' && q ? q : undefined,
       dateFrom: typeof dateFrom === 'string' && dateFrom ? dateFrom : undefined,
@@ -105,7 +115,7 @@ const getHistoryForNutritionist = async (req: Request, res: Response, next: Next
 
 const convert = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const result = await evaluationService.convertAppointment(
+    const result = await convertAppointment(
       decodeId(req.params.id),
       req.body.client,
       req.body.subscription,
@@ -123,7 +133,7 @@ const convert = async (req: Request, res: Response, next: NextFunction) => {
 
 const resolveRenewal = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const result = await evaluationService.resolveRenewal(decodeId(req.params.id), req.body, {
+    const result = await resolveAppointmentRenewal(decodeId(req.params.id), req.body, {
       userId: req.user!.userId,
       username: req.user!.username,
     });

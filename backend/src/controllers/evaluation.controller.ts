@@ -1,11 +1,16 @@
 import { NextFunction, Request, Response } from 'express';
-import * as evaluationService from '../domains/evaluation';
+import {
+  findPendingPayment,
+  markPaid as markSubscriptionPaid,
+  revertPendingRenewal as revertRenewal,
+  deletePendingClient,
+} from '../domains/evaluation';
 import { sendSuccess, sendError } from '../utils/response';
 import { decodeId } from '../utils/sqids';
 
 const getPendingPayment = async (_req: Request, res: Response, next: NextFunction) => {
   try {
-    sendSuccess(res, await evaluationService.findPendingPayment());
+    sendSuccess(res, await findPendingPayment());
   } catch (err) {
     next(err);
   }
@@ -13,7 +18,7 @@ const getPendingPayment = async (_req: Request, res: Response, next: NextFunctio
 
 const markPaid = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const subscription = await evaluationService.markPaid(decodeId(req.params.id), {
+    const subscription = await markSubscriptionPaid(decodeId(req.params.id), {
       userId: req.user!.userId,
       username: req.user!.username,
     });
@@ -29,7 +34,7 @@ const markPaid = async (req: Request, res: Response, next: NextFunction) => {
 
 const revertPendingRenewal = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const subscription = await evaluationService.revertPendingRenewal(decodeId(req.params.id));
+    const subscription = await revertRenewal(decodeId(req.params.id));
     if (!subscription) {
       sendError(res, 'Client has no pending renewal', 404);
       return;
@@ -42,7 +47,7 @@ const revertPendingRenewal = async (req: Request, res: Response, next: NextFunct
 
 const remove = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const client = await evaluationService.deletePendingClient(decodeId(req.params.id), {
+    const client = await deletePendingClient(decodeId(req.params.id), {
       userId: req.user!.userId,
       username: req.user!.username,
     });

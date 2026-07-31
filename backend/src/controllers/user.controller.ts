@@ -1,12 +1,17 @@
 import { NextFunction, Request, Response } from 'express';
-import * as userService from '../domains/user';
+import {
+  findAll as findAllUsers,
+  create as createUser,
+  update as updateUser,
+  remove as removeUser,
+} from '../domains/user';
 import { findForUser } from '../domains/login-event';
 import { sendSuccess, sendError } from '../utils/response';
 import { decodeId } from '../utils/sqids';
 
 const getAll = async (_req: Request, res: Response, next: NextFunction) => {
   try {
-    const users = await userService.findAll();
+    const users = await findAllUsers();
     sendSuccess(res, users);
   } catch (err) {
     next(err);
@@ -15,7 +20,7 @@ const getAll = async (_req: Request, res: Response, next: NextFunction) => {
 
 const create = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const user = await userService.create(req.body);
+    const user = await createUser(req.body);
     sendSuccess(res, { id: user.id, username: user.username, role: user.role }, 201);
   } catch (err) {
     next(err);
@@ -24,7 +29,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
 
 const update = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const user = await userService.update(decodeId(req.params.id), req.body);
+    const user = await updateUser(decodeId(req.params.id), req.body);
     if (!user) {
       sendError(res, 'User not found', 404);
       return;
@@ -37,7 +42,7 @@ const update = async (req: Request, res: Response, next: NextFunction) => {
 
 const remove = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const deleted = await userService.remove(decodeId(req.params.id));
+    const deleted = await removeUser(decodeId(req.params.id));
     if (!deleted) {
       sendError(res, 'User not found', 404);
       return;
