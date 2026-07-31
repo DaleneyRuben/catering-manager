@@ -24,52 +24,11 @@ its work becomes fiction.
 - [x] **#119** — item 1: `backend/src/services/` → `backend/src/domains/`. 41 TypeScript files
       (88 import and `jest.mock` lines) plus 5 markdown files. ADR-003 and the archived
       design/implementation prompts keep their `services/` paths as historical record.
-
----
-
-## 2. Boundary leaks (backend) 🟢
-
-Small, unrelated fixes that share one goal: make the three structural lint rules pass.
-
-### 2.1 Delete dead `auth.createUser`
-
-`domains/auth/create-user.ts` duplicates `user.create` — same bcrypt, same `SALT_ROUNDS`,
-same insert — and has **zero callers**. It also makes `users` look like it has two writers.
-
-Delete the file, its test, and the `auth/index.ts` export.
-
-### 2.2 Promote `finalizeOverlappingSubscriptions` to public API
-
-`evaluation/mark-paid.ts:7` imports `../subscription/_helpers`, which ADR-003 rule 6 forbids.
-Re-exporting from the index is not the fix — `_helpers.ts` is never re-exported either.
-
-Move the function to `subscription/finalize-overlapping.ts` with its own test file, export it
-from `subscription/index.ts`, and update its three callers (`subscription/create.ts:39`,
-`subscription/update.ts:44`, `evaluation/mark-paid.ts:21`).
-
-### 2.3 Get the `Appointment` model out of `client.controller.ts`
-
-`client.controller.ts:57` runs `Appointment.count({ where: { clientId } })` to decide whether a
-Nutricionista may view a client (see ADR-006). Controllers must not touch models, and
-`evaluation` owns `appointments`.
-
-Add `evaluation.clientHasAppointment(clientId)` and call that instead.
-
-### 2.4 Turn on the structural lint rules
-
-Once 2.1–2.3 land, add to `backend/.eslintrc.cjs` at `error`:
-
-| Rule                                                              | Violations after 2.1–2.3 |
-| ----------------------------------------------------------------- | ------------------------ |
-| no deep imports into a domain (`domains/*/` anything but `index`) | 0 after 2.2              |
-| no `_helpers` imports across domains                              | 0 after 2.2              |
-| no model imports in `controllers/`                                | 0 after 2.3              |
-
-The first two rules overlap: `evaluation/mark-paid.ts:7` is the only violation of either, and
-2.2 clears both. The narrower `_helpers` rule is still worth stating separately — it is the
-one deep import that a future reader would be tempted to excuse.
-
-The fourth rule — no `domains/` imports in `utils/` — waits for item 4.
+- [x] **#120** — item 2: the boundary leaks. Deleted the dead `auth.createUser`; moved
+      `finalizeOverlappingSubscriptions` into `subscription/finalize-overlapping.ts`; added
+      `evaluation.clientHasAppointment` so `client.controller.ts` stops importing a model; turned
+      on the three structural lint rules at `error`. The fourth rule — no `domains/` imports in
+      `utils/` — waits for item 4.
 
 ---
 
@@ -104,7 +63,9 @@ first three land. `clientStatus.ts` has exactly one consumer (`domains/client/_h
 so its move is contained.
 
 Afterwards `utils/` holds only leaf modules — `date`, `errors`, `logger`, `response`, `sqids`,
-`sentry`, `devFlags`, `whatsappIcon` — and the fourth lint rule from 2.4 can go on.
+`sentry`, `devFlags`, `whatsappIcon` — and the fourth structural lint rule (no `domains/` imports
+in `utils/`, deferred by #120) can go on alongside the three already enforced in
+`backend/.eslintrc.cjs`.
 
 Mostly file moves, but `kitchenReportBuilder.ts` is over the 400-line guidance — split it while
 moving. `report.controller.ts` stops importing `utils/menuBuilder` and imports the domain
