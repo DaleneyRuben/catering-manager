@@ -1,10 +1,10 @@
 import { render, screen } from '@testing-library/react';
 import { ClientHistoryTab } from '@/features/clients/components/detail/ClientHistoryTab';
-import * as useClientHistoryModule from '@/features/clients/hooks/useClientHistory';
+import { useClientHistory } from '@/features/clients/hooks/useClientHistory';
 import type { ClientHistoryEntry, Subscription } from '@/features/clients/types';
 
 jest.mock('@/features/clients/hooks/useClientHistory');
-const mockUseClientHistory = useClientHistoryModule.useClientHistory as jest.Mock;
+const mockUseClientHistory = useClientHistory as jest.Mock;
 
 const entry = (overrides: Partial<ClientHistoryEntry> = {}): ClientHistoryEntry => ({
   id: '1',

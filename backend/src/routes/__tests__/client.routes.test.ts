@@ -2,8 +2,8 @@ import request from 'supertest';
 import app from '../../app';
 import { verifyToken } from '../../domains/auth';
 import { ROLES } from '../../constants/roles.constants';
-import * as clientService from '../../domains/client';
-import * as evaluationService from '../../domains/evaluation';
+import { findById } from '../../domains/client';
+import { clientHasAppointment } from '../../domains/evaluation';
 import { encodeId } from '../../utils/sqids';
 
 jest.mock('../../domains/auth');
@@ -22,13 +22,13 @@ const clientId = encodeId(1);
 
 beforeEach(() => {
   jest.clearAllMocks();
-  (clientService.findById as jest.Mock).mockResolvedValue({ id: 1 });
-  (evaluationService.clientHasAppointment as jest.Mock).mockResolvedValue(false);
+  (findById as jest.Mock).mockResolvedValue({ id: 1 });
+  (clientHasAppointment as jest.Mock).mockResolvedValue(false);
 });
 
 describe('GET /api/clients/:id role guard', () => {
   it('allows nutritionist when an appointment links her to this client', async () => {
-    (evaluationService.clientHasAppointment as jest.Mock).mockResolvedValue(true);
+    (clientHasAppointment as jest.Mock).mockResolvedValue(true);
 
     const res = await request(app)
       .get(`/api/clients/${clientId}`)
@@ -38,21 +38,21 @@ describe('GET /api/clients/:id role guard', () => {
   });
 
   it('rejects nutritionist with 403 when no appointment links her to this client', async () => {
-    (evaluationService.clientHasAppointment as jest.Mock).mockResolvedValue(false);
+    (clientHasAppointment as jest.Mock).mockResolvedValue(false);
 
     const res = await request(app)
       .get(`/api/clients/${clientId}`)
       .set(headersForRole(ROLES.NUTRITIONIST));
 
     expect(res.status).toBe(403);
-    expect(clientService.findById).not.toHaveBeenCalled();
+    expect(findById).not.toHaveBeenCalled();
   });
 
   it('allows admin regardless of any appointment link', async () => {
     const res = await request(app).get(`/api/clients/${clientId}`).set(headersForRole(ROLES.ADMIN));
 
     expect(res.status).toBe(200);
-    expect(evaluationService.clientHasAppointment).not.toHaveBeenCalled();
+    expect(clientHasAppointment).not.toHaveBeenCalled();
   });
 
   it('rejects kitchen with 403', async () => {

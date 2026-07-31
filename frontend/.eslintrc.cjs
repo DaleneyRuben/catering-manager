@@ -24,6 +24,8 @@ module.exports = {
     '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
     'import/no-extraneous-dependencies': 'off',
     'import/prefer-default-export': 'off',
+    // Named imports only — `import * as x` hides what a module is actually used for.
+    'import/no-namespace': 'error',
     'react/require-default-props': 'off',
     'react/jsx-props-no-spreading': 'off',
     'import/extensions': 'off',

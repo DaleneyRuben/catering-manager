@@ -1,6 +1,6 @@
 import request from 'supertest';
 import app from '../../app';
-import * as menuService from '../../domains/menu';
+import { findAll, findByDate, upsert } from '../../domains/menu';
 
 jest.mock('../../domains/menu');
 jest.mock('../../database/sequelize', () => ({ __esModule: true, default: { query: jest.fn() } }));
@@ -25,7 +25,7 @@ beforeEach(() => jest.clearAllMocks());
 
 describe('GET /api/menus', () => {
   it('returns 200 with all menus', async () => {
-    (menuService.findAll as jest.Mock).mockResolvedValue([mockMenu]);
+    (findAll as jest.Mock).mockResolvedValue([mockMenu]);
 
     const res = await request(app).get('/api/menus');
 
@@ -35,7 +35,7 @@ describe('GET /api/menus', () => {
   });
 
   it('returns 500 when service throws', async () => {
-    (menuService.findAll as jest.Mock).mockRejectedValue(new Error('db error'));
+    (findAll as jest.Mock).mockRejectedValue(new Error('db error'));
 
     const res = await request(app).get('/api/menus');
 
@@ -45,7 +45,7 @@ describe('GET /api/menus', () => {
 
 describe('GET /api/menus/:date', () => {
   it('returns 200 with menu when found', async () => {
-    (menuService.findByDate as jest.Mock).mockResolvedValue(mockMenu);
+    (findByDate as jest.Mock).mockResolvedValue(mockMenu);
 
     const res = await request(app).get('/api/menus/2026-06-05');
 
@@ -54,7 +54,7 @@ describe('GET /api/menus/:date', () => {
   });
 
   it('returns 404 when menu not found', async () => {
-    (menuService.findByDate as jest.Mock).mockResolvedValue(null);
+    (findByDate as jest.Mock).mockResolvedValue(null);
 
     const res = await request(app).get('/api/menus/2026-06-05');
 
@@ -69,7 +69,7 @@ describe('PUT /api/menus', () => {
   };
 
   it('returns 200 with upserted menu', async () => {
-    (menuService.upsert as jest.Mock).mockResolvedValue(mockMenu);
+    (upsert as jest.Mock).mockResolvedValue(mockMenu);
 
     const res = await request(app).put('/api/menus').send(validPayload);
 
@@ -108,7 +108,7 @@ describe('PUT /api/menus', () => {
   });
 
   it('returns 500 when service throws', async () => {
-    (menuService.upsert as jest.Mock).mockRejectedValue(new Error('db error'));
+    (upsert as jest.Mock).mockRejectedValue(new Error('db error'));
 
     const res = await request(app).put('/api/menus').send(validPayload);
 

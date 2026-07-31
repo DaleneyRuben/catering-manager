@@ -41,6 +41,9 @@ domains/
 - Each function file has a corresponding `__tests__/<function-name>.test.ts` — test first
 - Controllers import from the domain index only: `import { findById } from '../domains/client'`
 - Never import directly from a function file outside its domain
+- **Never `import * as`** — named imports only, enforced by `import/no-namespace`. A namespace
+  import hides which functions a file actually uses. When a domain function collides with a local
+  name (a controller handler called `create`), alias it: `create as createClient`
 
 See `docs/adr/003-backend-service-architecture.md` for the full rationale and domain map — its
 `services/` paths are superseded by `domains/` (see `docs/adr/007-domain-ownership.md`).
@@ -106,6 +109,9 @@ src/
 - Anything two or more levels up must use an alias — `../../` paths are never allowed
 - Two aliases are available: `@/` maps to `src/`, `@ui/` maps to `src/components/ui/`
 - No barrel `index.ts` files at feature boundaries — import directly from the file
+- **Never `import * as`** — named imports only, enforced by `import/no-namespace`. This includes
+  test files: `jest.mock('…/useClientGroup')` then `import { useClientGroup }` and cast it,
+  rather than importing the module as a namespace
 - `pages/` files are route orchestrators only — no business logic, no complex state
 - New domain code goes in the relevant `features/<feature>/` folder
 - Generic UI primitives (no domain knowledge) go in `components/ui/`

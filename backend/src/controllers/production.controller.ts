@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import { parseISO } from 'date-fns';
-import * as productionService from '../domains/production';
+import { findDayClients, findGroups, findWeeklyCounts } from '../domains/production';
 import { MAX_WEEK_OFFSET } from '../constants/production.constants';
 import { addCalendarDays, getCurrentMenuWeek, isIsoDate } from '../utils/date';
 import { checkIsWeekend } from '../utils/devFlags';
@@ -14,10 +14,7 @@ const navigableWeekStarts = (): string[] => {
 
 const getOverview = async (_req: Request, res: Response, next: NextFunction) => {
   try {
-    const [summary, weeklyCounts] = await Promise.all([
-      productionService.findGroups(),
-      productionService.findWeeklyCounts(),
-    ]);
+    const [summary, weeklyCounts] = await Promise.all([findGroups(), findWeeklyCounts()]);
     sendSuccess(res, { ...summary, weeklyCounts, weekStarts: navigableWeekStarts() });
   } catch (err) {
     next(err);
@@ -35,7 +32,7 @@ const getWeeklyCounts = async (req: Request, res: Response, next: NextFunction) 
       return;
     }
 
-    sendSuccess(res, await productionService.findWeeklyCounts(weekStart));
+    sendSuccess(res, await findWeeklyCounts(weekStart));
   } catch (err) {
     next(err);
   }
@@ -62,7 +59,7 @@ const getDayClients = async (req: Request, res: Response, next: NextFunction) =>
       return;
     }
 
-    sendSuccess(res, await productionService.findDayClients(date));
+    sendSuccess(res, await findDayClients(date));
   } catch (err) {
     next(err);
   }

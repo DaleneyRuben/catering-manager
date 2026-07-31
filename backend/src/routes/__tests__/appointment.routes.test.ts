@@ -2,7 +2,14 @@ import request from 'supertest';
 import app from '../../app';
 import { verifyToken } from '../../domains/auth';
 import { ROLES } from '../../constants/roles.constants';
-import * as evaluationService from '../../domains/evaluation';
+import {
+  findById,
+  findHistoryForNutritionist,
+  findPendingForAdmin,
+  findPendingForNutritionist,
+  resolveRenewal,
+  updateAppointment,
+} from '../../domains/evaluation';
 
 jest.mock('../../domains/auth');
 jest.mock('../../domains/evaluation');
@@ -17,9 +24,9 @@ const headersForRole = (role: string) => {
 
 beforeEach(() => {
   jest.clearAllMocks();
-  (evaluationService.findPendingForAdmin as jest.Mock).mockResolvedValue([]);
-  (evaluationService.findPendingForNutritionist as jest.Mock).mockResolvedValue([]);
-  (evaluationService.findHistoryForNutritionist as jest.Mock).mockResolvedValue({
+  (findPendingForAdmin as jest.Mock).mockResolvedValue([]);
+  (findPendingForNutritionist as jest.Mock).mockResolvedValue([]);
+  (findHistoryForNutritionist as jest.Mock).mockResolvedValue({
     rows: [],
     total: 0,
   });
@@ -141,7 +148,7 @@ describe('PATCH /api/appointments/:id role guard', () => {
   });
 
   it('allows admin', async () => {
-    (evaluationService.updateAppointment as jest.Mock).mockResolvedValue({ id: 1 });
+    (updateAppointment as jest.Mock).mockResolvedValue({ id: 1 });
 
     const res = await request(app)
       .patch('/api/appointments/abc123')
@@ -163,7 +170,7 @@ describe('PATCH /api/appointments/:id role guard', () => {
 
 describe('GET /api/appointments/:id role guard', () => {
   it('allows nutritionist', async () => {
-    (evaluationService.findById as jest.Mock).mockResolvedValue({ id: 1 });
+    (findById as jest.Mock).mockResolvedValue({ id: 1 });
 
     const res = await request(app)
       .get('/api/appointments/abc123')
@@ -173,7 +180,7 @@ describe('GET /api/appointments/:id role guard', () => {
   });
 
   it('allows admin', async () => {
-    (evaluationService.findById as jest.Mock).mockResolvedValue({ id: 1 });
+    (findById as jest.Mock).mockResolvedValue({ id: 1 });
 
     const res = await request(app).get('/api/appointments/abc123').set(headersForRole(ROLES.ADMIN));
 
@@ -209,7 +216,7 @@ describe('nutritionist-only convert route role guard', () => {
 
 describe('nutritionist-only resolve-renewal route role guard', () => {
   it('allows nutritionist', async () => {
-    (evaluationService.resolveRenewal as jest.Mock).mockResolvedValue({ subscription: { id: 1 } });
+    (resolveRenewal as jest.Mock).mockResolvedValue({ subscription: { id: 1 } });
 
     const res = await request(app)
       .post('/api/appointments/abc123/resolve-renewal')

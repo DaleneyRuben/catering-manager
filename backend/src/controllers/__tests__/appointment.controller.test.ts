@@ -1,7 +1,17 @@
 import type { Request } from 'express';
 import request from 'supertest';
 import app from '../../app';
-import * as evaluationService from '../../domains/evaluation';
+import {
+  cancelAppointment,
+  convertAppointment,
+  createAppointment,
+  findById,
+  findHistoryForNutritionist,
+  findPendingForAdmin,
+  findPendingForNutritionist,
+  resolveRenewal,
+  updateAppointment,
+} from '../../domains/evaluation';
 import { encodeId } from '../../utils/sqids';
 
 jest.mock('../../domains/evaluation');
@@ -28,7 +38,7 @@ const validPayload = {
 
 describe('POST /api/appointments', () => {
   it('returns 201 with the created appointment', async () => {
-    (evaluationService.createAppointment as jest.Mock).mockResolvedValue({
+    (createAppointment as jest.Mock).mockResolvedValue({
       id: 1,
       ...validPayload,
     });
@@ -45,7 +55,7 @@ describe('POST /api/appointments', () => {
       .send({ ...validPayload, date: '2026-01-01' });
 
     expect(res.status).toBe(400);
-    expect(evaluationService.createAppointment).not.toHaveBeenCalled();
+    expect(createAppointment).not.toHaveBeenCalled();
   });
 
   it('returns 400 when name is missing', async () => {
@@ -57,7 +67,7 @@ describe('POST /api/appointments', () => {
   });
 
   it('returns 500 when service throws', async () => {
-    (evaluationService.createAppointment as jest.Mock).mockRejectedValue(new Error('db error'));
+    (createAppointment as jest.Mock).mockRejectedValue(new Error('db error'));
 
     const res = await request(app).post('/api/appointments').send(validPayload);
 
@@ -65,7 +75,7 @@ describe('POST /api/appointments', () => {
   });
 
   it('decodes clientId and passes it to the service in existing-client mode', async () => {
-    (evaluationService.createAppointment as jest.Mock).mockResolvedValue({
+    (createAppointment as jest.Mock).mockResolvedValue({
       id: 1,
       clientId: 5,
       name: 'Fernando Daleney',
@@ -79,7 +89,7 @@ describe('POST /api/appointments', () => {
       .send({ clientId: encodeId(5), date: '2026-08-03', time: '09:00' });
 
     expect(res.status).toBe(201);
-    expect(evaluationService.createAppointment).toHaveBeenCalledWith({
+    expect(createAppointment).toHaveBeenCalledWith({
       clientId: 5,
       date: '2026-08-03',
       time: '09:00',
@@ -87,7 +97,7 @@ describe('POST /api/appointments', () => {
   });
 
   it('returns 404 when the linked client does not exist', async () => {
-    (evaluationService.createAppointment as jest.Mock).mockResolvedValue(null);
+    (createAppointment as jest.Mock).mockResolvedValue(null);
 
     const res = await request(app)
       .post('/api/appointments')
@@ -102,13 +112,13 @@ describe('POST /api/appointments', () => {
       .send({ clientId: encodeId(5), ...validPayload });
 
     expect(res.status).toBe(400);
-    expect(evaluationService.createAppointment).not.toHaveBeenCalled();
+    expect(createAppointment).not.toHaveBeenCalled();
   });
 });
 
 describe('PATCH /api/appointments/:id', () => {
   it('returns 200 with the updated appointment', async () => {
-    (evaluationService.updateAppointment as jest.Mock).mockResolvedValue({
+    (updateAppointment as jest.Mock).mockResolvedValue({
       id: 1,
       name: 'Nuevo nombre',
     });
@@ -120,7 +130,7 @@ describe('PATCH /api/appointments/:id', () => {
   });
 
   it('returns 404 when the appointment does not exist', async () => {
-    (evaluationService.updateAppointment as jest.Mock).mockResolvedValue(null);
+    (updateAppointment as jest.Mock).mockResolvedValue(null);
 
     const res = await request(app)
       .patch(`/api/appointments/${id999}`)
@@ -136,7 +146,7 @@ describe('PATCH /api/appointments/:id', () => {
   });
 
   it('decodes subscriptionId and passes it to the service when stamping a renewal', async () => {
-    (evaluationService.updateAppointment as jest.Mock).mockResolvedValue({
+    (updateAppointment as jest.Mock).mockResolvedValue({
       id: 1,
       subscriptionId: 3,
     });
@@ -146,13 +156,13 @@ describe('PATCH /api/appointments/:id', () => {
       .send({ subscriptionId: encodeId(3) });
 
     expect(res.status).toBe(200);
-    expect(evaluationService.updateAppointment).toHaveBeenCalledWith(1, { subscriptionId: 3 });
+    expect(updateAppointment).toHaveBeenCalledWith(1, { subscriptionId: 3 });
   });
 });
 
 describe('DELETE /api/appointments/:id', () => {
   it('returns 200 when the appointment is cancelled', async () => {
-    (evaluationService.cancelAppointment as jest.Mock).mockResolvedValue({ id: 1 });
+    (cancelAppointment as jest.Mock).mockResolvedValue({ id: 1 });
 
     const res = await request(app).delete(`/api/appointments/${id1}`);
 
@@ -160,7 +170,7 @@ describe('DELETE /api/appointments/:id', () => {
   });
 
   it('returns 404 when the appointment does not exist or is already converted', async () => {
-    (evaluationService.cancelAppointment as jest.Mock).mockResolvedValue(null);
+    (cancelAppointment as jest.Mock).mockResolvedValue(null);
 
     const res = await request(app).delete(`/api/appointments/${id999}`);
 
@@ -170,7 +180,7 @@ describe('DELETE /api/appointments/:id', () => {
 
 describe('GET /api/appointments/pending', () => {
   it('returns 200 with the pending appointments', async () => {
-    (evaluationService.findPendingForAdmin as jest.Mock).mockResolvedValue([{ id: 1 }]);
+    (findPendingForAdmin as jest.Mock).mockResolvedValue([{ id: 1 }]);
 
     const res = await request(app).get('/api/appointments/pending');
 
@@ -181,7 +191,7 @@ describe('GET /api/appointments/pending', () => {
 
 describe('GET /api/appointments/:id', () => {
   it('returns 200 with the appointment', async () => {
-    (evaluationService.findById as jest.Mock).mockResolvedValue({
+    (findById as jest.Mock).mockResolvedValue({
       id: 1,
       clientId: 5,
       name: 'Fernando Daleney',
@@ -195,7 +205,7 @@ describe('GET /api/appointments/:id', () => {
   });
 
   it('returns 404 when the appointment does not exist', async () => {
-    (evaluationService.findById as jest.Mock).mockResolvedValue(null);
+    (findById as jest.Mock).mockResolvedValue(null);
 
     const res = await request(app).get(`/api/appointments/${id999}`);
 
@@ -205,7 +215,7 @@ describe('GET /api/appointments/:id', () => {
 
 describe('GET /api/appointments/nutritionist/pending', () => {
   it('returns 200 with the pending appointments', async () => {
-    (evaluationService.findPendingForNutritionist as jest.Mock).mockResolvedValue([{ id: 1 }]);
+    (findPendingForNutritionist as jest.Mock).mockResolvedValue([{ id: 1 }]);
 
     const res = await request(app).get('/api/appointments/nutritionist/pending');
 
@@ -216,7 +226,7 @@ describe('GET /api/appointments/nutritionist/pending', () => {
 
 describe('GET /api/appointments/nutritionist/history', () => {
   it('returns 200 with paginated history', async () => {
-    (evaluationService.findHistoryForNutritionist as jest.Mock).mockResolvedValue({
+    (findHistoryForNutritionist as jest.Mock).mockResolvedValue({
       rows: [{ id: 1 }],
       total: 1,
     });
@@ -231,7 +241,7 @@ describe('GET /api/appointments/nutritionist/history', () => {
   });
 
   it('forwards status, q, dateFrom, dateTo, page, and limit to the service', async () => {
-    (evaluationService.findHistoryForNutritionist as jest.Mock).mockResolvedValue({
+    (findHistoryForNutritionist as jest.Mock).mockResolvedValue({
       rows: [],
       total: 0,
     });
@@ -240,7 +250,7 @@ describe('GET /api/appointments/nutritionist/history', () => {
       '/api/appointments/nutritionist/history?status=pagado&q=Julia&dateFrom=2026-08-01&dateTo=2026-08-10&page=2&limit=10',
     );
 
-    expect(evaluationService.findHistoryForNutritionist).toHaveBeenCalledWith({
+    expect(findHistoryForNutritionist).toHaveBeenCalledWith({
       status: 'pagado',
       q: 'Julia',
       dateFrom: '2026-08-01',
@@ -251,27 +261,27 @@ describe('GET /api/appointments/nutritionist/history', () => {
   });
 
   it('ignores an invalid status value', async () => {
-    (evaluationService.findHistoryForNutritionist as jest.Mock).mockResolvedValue({
+    (findHistoryForNutritionist as jest.Mock).mockResolvedValue({
       rows: [],
       total: 0,
     });
 
     await request(app).get('/api/appointments/nutritionist/history?status=bogus');
 
-    expect(evaluationService.findHistoryForNutritionist).toHaveBeenCalledWith(
+    expect(findHistoryForNutritionist).toHaveBeenCalledWith(
       expect.objectContaining({ status: undefined }),
     );
   });
 
   it('defaults to page 1 and limit 25', async () => {
-    (evaluationService.findHistoryForNutritionist as jest.Mock).mockResolvedValue({
+    (findHistoryForNutritionist as jest.Mock).mockResolvedValue({
       rows: [],
       total: 0,
     });
 
     await request(app).get('/api/appointments/nutritionist/history');
 
-    expect(evaluationService.findHistoryForNutritionist).toHaveBeenCalledWith(
+    expect(findHistoryForNutritionist).toHaveBeenCalledWith(
       expect.objectContaining({ page: 1, limit: 25 }),
     );
   });
@@ -296,7 +306,7 @@ describe('POST /api/appointments/:id/convert', () => {
   };
 
   it('returns 201 with the client and subscription', async () => {
-    (evaluationService.convertAppointment as jest.Mock).mockResolvedValue({
+    (convertAppointment as jest.Mock).mockResolvedValue({
       client: { id: 7 },
       subscription: { id: 3 },
     });
@@ -310,7 +320,7 @@ describe('POST /api/appointments/:id/convert', () => {
   });
 
   it('returns 404 when the appointment does not exist or is already converted', async () => {
-    (evaluationService.convertAppointment as jest.Mock).mockResolvedValue(null);
+    (convertAppointment as jest.Mock).mockResolvedValue(null);
 
     const res = await request(app)
       .post(`/api/appointments/${id999}/convert`)
@@ -320,7 +330,7 @@ describe('POST /api/appointments/:id/convert', () => {
   });
 
   it('forwards the acting user to the service', async () => {
-    (evaluationService.convertAppointment as jest.Mock).mockResolvedValue({
+    (convertAppointment as jest.Mock).mockResolvedValue({
       client: { id: 7 },
       subscription: { id: 3 },
     });
@@ -329,12 +339,10 @@ describe('POST /api/appointments/:id/convert', () => {
       .post(`/api/appointments/${id1}/convert`)
       .send({ client: clientData, subscription: subscriptionData });
 
-    expect(evaluationService.convertAppointment).toHaveBeenCalledWith(
-      1,
-      expect.anything(),
-      expect.anything(),
-      { userId: 9, username: 'ada' },
-    );
+    expect(convertAppointment).toHaveBeenCalledWith(1, expect.anything(), expect.anything(), {
+      userId: 9,
+      username: 'ada',
+    });
   });
 
   it('returns 400 when client data is invalid', async () => {
@@ -354,7 +362,7 @@ describe('POST /api/appointments/:id/resolve-renewal', () => {
   };
 
   it('returns 201 with the created subscription', async () => {
-    (evaluationService.resolveRenewal as jest.Mock).mockResolvedValue({
+    (resolveRenewal as jest.Mock).mockResolvedValue({
       subscription: { id: 3 },
     });
 
@@ -367,20 +375,20 @@ describe('POST /api/appointments/:id/resolve-renewal', () => {
   });
 
   it('forwards the acting user to the service', async () => {
-    (evaluationService.resolveRenewal as jest.Mock).mockResolvedValue({
+    (resolveRenewal as jest.Mock).mockResolvedValue({
       subscription: { id: 3 },
     });
 
     await request(app).post(`/api/appointments/${id1}/resolve-renewal`).send(subscriptionData);
 
-    expect(evaluationService.resolveRenewal).toHaveBeenCalledWith(1, expect.anything(), {
+    expect(resolveRenewal).toHaveBeenCalledWith(1, expect.anything(), {
       userId: 9,
       username: 'ada',
     });
   });
 
   it('returns 404 when the appointment does not exist, has no linked client, or is already resolved', async () => {
-    (evaluationService.resolveRenewal as jest.Mock).mockResolvedValue(null);
+    (resolveRenewal as jest.Mock).mockResolvedValue(null);
 
     const res = await request(app)
       .post(`/api/appointments/${id999}/resolve-renewal`)
@@ -390,7 +398,7 @@ describe('POST /api/appointments/:id/resolve-renewal', () => {
   });
 
   it('returns 409 when the client already has a pending unpaid renewal', async () => {
-    (evaluationService.resolveRenewal as jest.Mock).mockResolvedValue({
+    (resolveRenewal as jest.Mock).mockResolvedValue({
       subscription: null,
       reason: 'already_pending',
     });

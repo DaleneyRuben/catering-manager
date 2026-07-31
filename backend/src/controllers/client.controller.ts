@@ -1,6 +1,14 @@
 import { NextFunction, Request, Response } from 'express';
-import * as clientService from '../domains/client';
-import * as deliveryService from '../domains/delivery';
+import {
+  findAll as findAllClients,
+  findById as findClientById,
+  create as createClient,
+  update as updateClient,
+  finalize as finalizeClient,
+  softDelete as softDeleteClient,
+  search as searchClients,
+} from '../domains/client';
+import { setGroup } from '../domains/delivery';
 import { clientHasAppointment } from '../domains/evaluation';
 import { ROLES } from '../constants/roles.constants';
 import { sendSuccess, sendPaginated, sendError } from '../utils/response';
@@ -8,7 +16,7 @@ import { decodeId } from '../utils/sqids';
 
 const create = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const client = await clientService.create(req.body);
+    const client = await createClient(req.body);
     sendSuccess(res, client, 201);
   } catch (err) {
     next(err);
@@ -20,7 +28,7 @@ const getAll = async (req: Request, res: Response, next: NextFunction) => {
     const { status, q, restriction, page, limit } = req.query;
     const resolvedPage = Math.max(1, page ? Number(page) : 1);
     const resolvedLimit = Math.min(100, Math.max(1, limit ? Number(limit) : 25));
-    const { rows, total } = await clientService.findAll({
+    const { rows, total } = await findAllClients({
       status: typeof status === 'string' ? status : undefined,
       q: typeof q === 'string' && q ? q : undefined,
       restriction: typeof restriction === 'string' && restriction ? restriction : undefined,
@@ -40,7 +48,7 @@ const search = async (req: Request, res: Response, next: NextFunction) => {
       sendSuccess(res, []);
       return;
     }
-    const clients = await clientService.search(q);
+    const clients = await searchClients(q);
     sendSuccess(res, clients);
   } catch (err) {
     next(err);
@@ -61,7 +69,7 @@ const getById = async (req: Request, res: Response, next: NextFunction) => {
       }
     }
 
-    const client = await clientService.findById(id);
+    const client = await findClientById(id);
     if (!client) {
       sendError(res, 'Client not found', 404);
       return;
@@ -74,7 +82,7 @@ const getById = async (req: Request, res: Response, next: NextFunction) => {
 
 const update = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const client = await clientService.update(decodeId(req.params.id), req.body, {
+    const client = await updateClient(decodeId(req.params.id), req.body, {
       userId: req.user!.userId,
       username: req.user!.username,
     });
@@ -90,7 +98,7 @@ const update = async (req: Request, res: Response, next: NextFunction) => {
 
 const finalize = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const client = await clientService.finalize(decodeId(req.params.id), {
+    const client = await finalizeClient(decodeId(req.params.id), {
       userId: req.user!.userId,
       username: req.user!.username,
     });
@@ -106,7 +114,7 @@ const finalize = async (req: Request, res: Response, next: NextFunction) => {
 
 const remove = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const client = await clientService.softDelete(decodeId(req.params.id), {
+    const client = await softDeleteClient(decodeId(req.params.id), {
       userId: req.user!.userId,
       username: req.user!.username,
     });
@@ -124,8 +132,8 @@ const setGroupHandler = async (req: Request, res: Response, next: NextFunction) 
   try {
     const clientId = decodeId(req.params.id);
     const memberIds = (req.body.memberIds as string[]).map(decodeId);
-    await deliveryService.setGroup(clientId, memberIds);
-    const client = await clientService.findById(clientId);
+    await setGroup(clientId, memberIds);
+    const client = await findClientById(clientId);
     if (!client) {
       sendError(res, 'Client not found', 404);
       return;

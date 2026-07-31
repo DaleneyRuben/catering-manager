@@ -2,7 +2,7 @@ import request from 'supertest';
 import app from '../../app';
 import { verifyToken } from '../../domains/auth';
 import { ROLES } from '../../constants/roles.constants';
-import * as planService from '../../domains/plan';
+import { findAll, getClientCounts } from '../../domains/plan';
 
 jest.mock('../../domains/auth');
 jest.mock('../../domains/plan');
@@ -17,8 +17,8 @@ const headersForRole = (role: string) => {
 
 beforeEach(() => {
   jest.clearAllMocks();
-  (planService.findAll as jest.Mock).mockResolvedValue([]);
-  (planService.getClientCounts as jest.Mock).mockResolvedValue([]);
+  (findAll as jest.Mock).mockResolvedValue([]);
+  (getClientCounts as jest.Mock).mockResolvedValue([]);
 });
 
 describe('GET /api/plans role guard', () => {

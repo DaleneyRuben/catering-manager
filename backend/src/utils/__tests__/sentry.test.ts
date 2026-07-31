@@ -1,4 +1,4 @@
-import * as Sentry from '@sentry/node';
+import { captureException, flush, init } from '@sentry/node';
 import { isSentryEnabled, initSentry, captureError } from '../sentry';
 
 jest.mock('@sentry/node', () => ({
@@ -48,7 +48,7 @@ describe('initSentry', () => {
 
     initSentry();
 
-    expect(Sentry.init).toHaveBeenCalledWith({ dsn: 'https://key@sentry.example/1' });
+    expect(init).toHaveBeenCalledWith({ dsn: 'https://key@sentry.example/1' });
   });
 
   it('does nothing when disabled', () => {
@@ -57,7 +57,7 @@ describe('initSentry', () => {
 
     initSentry();
 
-    expect(Sentry.init).not.toHaveBeenCalled();
+    expect(init).not.toHaveBeenCalled();
   });
 });
 
@@ -69,8 +69,8 @@ describe('captureError', () => {
 
     await captureError(err);
 
-    expect(Sentry.captureException).toHaveBeenCalledWith(err);
-    expect(Sentry.flush).toHaveBeenCalled();
+    expect(captureException).toHaveBeenCalledWith(err);
+    expect(flush).toHaveBeenCalled();
   });
 
   it('does nothing when disabled', async () => {
@@ -78,14 +78,14 @@ describe('captureError', () => {
 
     await captureError(new Error('db exploded'));
 
-    expect(Sentry.captureException).not.toHaveBeenCalled();
-    expect(Sentry.flush).not.toHaveBeenCalled();
+    expect(captureException).not.toHaveBeenCalled();
+    expect(flush).not.toHaveBeenCalled();
   });
 
   it('never throws even if flushing fails', async () => {
     process.env.NODE_ENV = 'production';
     process.env.SENTRY_DSN = 'https://key@sentry.example/1';
-    (Sentry.flush as jest.Mock).mockRejectedValueOnce(new Error('network down'));
+    (flush as jest.Mock).mockRejectedValueOnce(new Error('network down'));
 
     await expect(captureError(new Error('db exploded'))).resolves.toBeUndefined();
   });

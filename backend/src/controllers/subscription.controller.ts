@@ -1,11 +1,15 @@
 import { NextFunction, Request, Response } from 'express';
-import * as subscriptionService from '../domains/subscription';
+import {
+  create as createSubscription,
+  update as updateSubscription,
+  deleteUpcomingSubscription as deleteUpcoming,
+} from '../domains/subscription';
 import { sendSuccess, sendError } from '../utils/response';
 import { decodeId } from '../utils/sqids';
 
 const create = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const subscription = await subscriptionService.create(decodeId(req.params.clientId), req.body, {
+    const subscription = await createSubscription(decodeId(req.params.clientId), req.body, {
       userId: req.user!.userId,
       username: req.user!.username,
     });
@@ -21,7 +25,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
 
 const update = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const subscription = await subscriptionService.update(
+    const subscription = await updateSubscription(
       decodeId(req.params.clientId),
       decodeId(req.params.id),
       req.body,
@@ -41,7 +45,7 @@ const update = async (req: Request, res: Response, next: NextFunction) => {
 // is the client's only live plan, so this never ends a running contract (that is Finalizar).
 const deleteUpcomingSubscription = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const subscription = await subscriptionService.deleteUpcomingSubscription(
+    const subscription = await deleteUpcoming(
       decodeId(req.params.clientId),
       decodeId(req.params.id),
       { userId: req.user!.userId, username: req.user!.username },
