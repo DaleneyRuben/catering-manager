@@ -45,26 +45,16 @@ its work becomes fiction.
       compared byte-for-byte: `docx` stamps `dcterms:created` into `docProps/core.xml`, so two
       runs of identical input never match. Identity was checked by unzipping both and diffing
       every part except that one; kitchen report and menu card both came out unchanged.
-
----
-
-## 5. Dissolve the `dashboard` domain 🟡
-
-It owns no rule, and duplicates `delivery`'s stop-counting logic (`find-counts.ts:13`) because
-it had no domain to borrow from.
-
-| Was                               | Goes to                                                        |
-| --------------------------------- | -------------------------------------------------------------- |
-| `findCounts` (active / suspended) | `subscription`                                                 |
-| `findCounts` (`deliveriesToday`)  | `delivery` — deletes the duplicated rule                       |
-| `findContractEnding`              | `subscription`                                                 |
-| `findBirthdays`                   | `client`                                                       |
-| `findConnections`                 | `user`                                                         |
-| `findMenus`                       | `menu`                                                         |
-| `findSummary`                     | `dashboard.controller.ts` — same `Promise.all`, one layer down |
-
-`GET /api/dashboard` must return a byte-identical payload; the frontend `dashboard` feature and
-its `['dashboard']` query key do not change. Verify by comparing the response before and after.
+- [x] **#124** — item 5: the `dashboard` domain is gone. Its six queries moved to the domains
+      that own their data (`subscription`, `delivery`, `client`, `user`, `menu`) and
+      `findSummary` became the same `Promise.all` inside `dashboard.controller.ts`. The
+      `GET /api/dashboard` payload was captured from the running app before and after: byte
+      identical. One correction to what this item assumed: the duplicated stop-counting rule
+      was not at `delivery/find-counts.ts:13` — no such file existed. It was inside
+      `find-route.ts`, written as `groups.length + singles.length` per zone, so it was not a
+      line that could simply be deleted: the same rule stated twice over different shapes
+      (subscriptions vs. client rows) and different granularities (one total vs. per zone).
+      Both now call `countStops` in `delivery/_helpers.ts`.
 
 ---
 

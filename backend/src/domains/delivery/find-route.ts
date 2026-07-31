@@ -3,6 +3,7 @@ import Client from '../../models/Client';
 import { appToday, addCalendarDays } from '../../utils/date';
 import { checkIsWeekend } from '../../utils/devFlags';
 import { findActiveSubscriptionsForDate } from '../subscription';
+import { countStops } from './_helpers';
 
 // Display order for the Entregas page — Sur first, matching the route layout, not the
 // alphabetical order used for client-facing zone dropdowns elsewhere in the app.
@@ -78,7 +79,12 @@ const buildZones = (clients: DeliveryClientRow[], date: string): DeliveryZoneRou
       .map((c) => toPerson(c, date))
       .sort(byName);
 
-    return { zone, deliveryCount: groups.length + singles.length, groups, singles };
+    return {
+      zone,
+      deliveryCount: countStops(inZone.map((c) => c.groupToken)),
+      groups,
+      singles,
+    };
   }).filter((z) => z.deliveryCount > 0);
 
 // Weekends are never delivery days — return an empty route without hitting the DB.

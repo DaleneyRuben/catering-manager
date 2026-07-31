@@ -6,5 +6,7 @@ export { update } from './update';
 export { finalize } from './finalize';
 export { softDelete } from './soft-delete';
 export { search } from './search';
+export { findBirthdays } from './find-birthdays';
+export type { BirthdayPerson } from './find-birthdays';
 export { deriveClientStatus } from './derive-client-status';
 export type { ClientStatusValue } from './derive-client-status';

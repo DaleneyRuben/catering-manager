@@ -186,29 +186,34 @@ and is deleted.
 
 ---
 
-## Dissolved: `dashboard`
+## Dissolved: `dashboard` (#124)
 
 There is no business activity called "dashboard" — it was named after a tab. Its
 `find-summary.ts` was five unrelated queries in a `Promise.all`, sharing nothing but a page.
-It also had to re-implement `delivery`'s stop-counting rule (`find-counts.ts:13`) because it
-had no domain to borrow it from — a domain that copies another's rules is a caller, not a
-domain.
+It also re-stated `delivery`'s stop-counting rule because it had no domain to borrow it from —
+a domain that copies another's rules is a caller, not a domain.
 
-Each query moves to the domain that owns its data. The screen-shaped assembly moves to
+Each query moved to the domain that owns its data. The screen-shaped assembly moved to
 `dashboard.controller.ts`, which is the honest home for screen-shaped code.
 
 | Was                               | Now                                                                |
 | --------------------------------- | ------------------------------------------------------------------ |
-| `findCounts` (active / suspended) | `subscription`                                                     |
-| `findCounts` (`deliveriesToday`)  | `delivery` — deletes the duplicated rule                           |
-| `findContractEnding`              | `subscription`                                                     |
-| `findBirthdays`                   | `client`                                                           |
-| `findConnections`                 | `user`                                                             |
-| `findMenus`                       | `menu`                                                             |
+| `findCounts` (active / suspended) | `subscription/find-subscription-counts.ts`                         |
+| `findCounts` (`deliveriesToday`)  | `delivery/count-deliveries-today.ts` — over the shared rule        |
+| `findContractEnding`              | `subscription/find-contract-ending.ts`                             |
+| `findBirthdays`                   | `client/find-birthdays.ts`                                         |
+| `findConnections`                 | `user/find-connections.ts`                                         |
+| `findMenus`                       | `menu/find-menu-status.ts`                                         |
 | `findSummary`                     | `dashboard.controller.ts` — the same `Promise.all`, one layer down |
 
-`GET /api/dashboard` keeps its contract. The **frontend** `dashboard` feature and its
-`['dashboard']` query key are untouched — only the backend's internal organisation changes.
+The stop-counting rule now lives once, in `delivery/_helpers.ts` as `countStops`, called by
+both `count-deliveries-today.ts` and `find-route.ts`. The two callers still ask about
+different days on purpose: the dashboard counts the next delivery day, so a weekend reports
+the coming Monday, while the Entregas route shows the literal day.
+
+`GET /api/dashboard` keeps its contract — the payload was compared before and after and is
+byte-identical. The **frontend** `dashboard` feature and its `['dashboard']` query key are
+untouched; only the backend's internal organisation changed.
 
 ---
 
@@ -227,7 +232,7 @@ backend/src/
       create.ts  update.ts  find-all.ts  find-by-id.ts  search.ts
       finalize.ts  soft-delete.ts
       derive-client-status.ts                 ← from utils/clientStatus.ts
-    + find-birthdays.ts                       ← from dashboard/
+      find-birthdays.ts                       ← from dashboard/
     + pause.ts  resume.ts  set-delivery-group.ts
       __tests__/  index.ts
 
@@ -237,9 +242,9 @@ backend/src/
       delete-upcoming-subscription.ts
       find-active-subscriptions-for-date.ts
       find-suspended-subscriptions-for-date.ts
-    + finalize-overlapping.ts                 ← promoted out of _helpers.ts
+      finalize-overlapping.ts                 ← promoted out of _helpers.ts
     + finalize.ts  mark-paid.ts  remove.ts  extend-after-pause.ts
-    + find-contract-ending.ts  count-active.ts  count-suspended.ts   ← from dashboard/
+      find-contract-ending.ts  find-subscription-counts.ts          ← from dashboard/
 
     client-history/                           ← owning: client_history. Was history/
       find-by-client.ts
