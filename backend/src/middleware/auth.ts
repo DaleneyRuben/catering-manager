@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { verifyToken } from '../services/auth';
+import { verifyToken } from '../domains/auth';
 import type { UserRole } from '../models/User';
 
 export const requireAuth = (req: Request, res: Response, next: NextFunction): void => {

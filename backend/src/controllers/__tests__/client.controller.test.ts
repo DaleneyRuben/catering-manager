@@ -1,11 +1,11 @@
 import type { Request } from 'express';
 import request from 'supertest';
 import app from '../../app';
-import * as clientService from '../../services/client';
+import * as clientService from '../../domains/client';
 import { encodeId } from '../../utils/sqids';
 
-jest.mock('../../services/client');
-jest.mock('../../services/delivery');
+jest.mock('../../domains/client');
+jest.mock('../../domains/delivery');
 jest.mock('../../database/sequelize', () => ({ __esModule: true, default: { query: jest.fn() } }));
 jest.mock('../../middleware/auth', () => ({
   requireAuth: (req: Request, _res: unknown, next: () => void) => {

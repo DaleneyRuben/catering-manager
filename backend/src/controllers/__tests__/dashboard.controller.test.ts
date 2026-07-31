@@ -1,10 +1,10 @@
 import request from 'supertest';
 import app from '../../app';
-import * as dashboardService from '../../services/dashboard';
-import * as loginEventService from '../../services/login-event';
+import * as dashboardService from '../../domains/dashboard';
+import * as loginEventService from '../../domains/login-event';
 
-jest.mock('../../services/dashboard');
-jest.mock('../../services/login-event');
+jest.mock('../../domains/dashboard');
+jest.mock('../../domains/login-event');
 jest.mock('../../database/sequelize', () => ({ __esModule: true, default: { query: jest.fn() } }));
 jest.mock('../../middleware/auth', () => ({
   requireAuth: (_req: unknown, _res: unknown, next: () => void) => next(),

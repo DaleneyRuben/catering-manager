@@ -1,9 +1,9 @@
 import request from 'supertest';
 import app from '../../app';
-import * as authService from '../../services/auth';
-import { InvalidCredentialsError } from '../../services/auth';
+import * as authService from '../../domains/auth';
+import { InvalidCredentialsError } from '../../domains/auth';
 
-jest.mock('../../services/auth');
+jest.mock('../../domains/auth');
 jest.mock('../../database/sequelize', () => ({ __esModule: true, default: { query: jest.fn() } }));
 
 const mockLogin = authService.login as jest.Mock;

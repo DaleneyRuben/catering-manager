@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
-import * as evaluationService from '../services/evaluation';
+import * as evaluationService from '../domains/evaluation';
 import { sendSuccess, sendError } from '../utils/response';
 import { decodeId } from '../utils/sqids';
 

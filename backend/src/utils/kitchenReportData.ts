@@ -1,6 +1,6 @@
 import { format, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
-import type { ActiveClientRow } from '../services/report';
+import type { ActiveClientRow } from '../domains/report';
 import { spanishWeekdayFileName } from './date';
 
 export type MenuData = {

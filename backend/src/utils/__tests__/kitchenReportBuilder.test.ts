@@ -1,5 +1,5 @@
 import { computeKitchenReportData, kitchenReportFileName } from '../kitchenReportBuilder';
-import type { ActiveClientRow } from '../../services/report';
+import type { ActiveClientRow } from '../../domains/report';
 
 const mockMenu = {
   breakfast: 'Queque de platano',

@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import { parseISO } from 'date-fns';
-import * as productionService from '../services/production';
+import * as productionService from '../domains/production';
 import { MAX_WEEK_OFFSET } from '../constants/production.constants';
 import { addCalendarDays, getCurrentMenuWeek, isIsoDate } from '../utils/date';
 import { checkIsWeekend } from '../utils/devFlags';

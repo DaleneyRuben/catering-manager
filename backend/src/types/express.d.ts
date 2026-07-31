@@ -1,4 +1,4 @@
-import type { TokenPayload } from '../services/auth';
+import type { TokenPayload } from '../domains/auth';
 
 declare module 'express-serve-static-core' {
   interface Request {
