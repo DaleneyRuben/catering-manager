@@ -1,7 +1,6 @@
 import { format, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
-import type { ActiveClientRow } from '../domains/report';
-import { spanishWeekdayFileName } from './date';
+import type { ActiveClientRow } from './find-active-clients-with-plans-for-date';
 
 export type MenuData = {
   breakfast: string | null;
@@ -103,5 +102,3 @@ export const computeKitchenReportData = (
   hiperproteico: clients.filter((c) => c.planMeals.includes('extra')).map((c) => c.name),
   mainMeals: toSection(MAIN_MEALS, menu, clients),
 });
-
-export const kitchenReportFileName = (date: string): string => spanishWeekdayFileName(date, 'docx');

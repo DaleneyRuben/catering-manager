@@ -2,14 +2,14 @@ import request from 'supertest';
 import app from '../../app';
 import { findByDate } from '../../domains/menu';
 import {
+  buildKitchenReport,
   findActiveClientsWithPlansForDate,
   findDeliveryClientsForDate,
+  kitchenReportFileName,
 } from '../../domains/report';
-import { buildKitchenReport, kitchenReportFileName } from '../../utils/kitchenReportBuilder';
 
 jest.mock('../../domains/menu');
 jest.mock('../../domains/report');
-jest.mock('../../utils/kitchenReportBuilder');
 jest.mock('../../database/sequelize', () => ({ __esModule: true, default: { query: jest.fn() } }));
 jest.mock('../../middleware/auth', () => ({
   requireAuth: (_req: unknown, _res: unknown, next: () => void) => next(),

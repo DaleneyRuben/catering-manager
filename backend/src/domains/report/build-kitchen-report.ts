@@ -13,17 +13,14 @@ import {
   BorderStyle,
   AlignmentType,
 } from 'docx';
-import type { ActiveClientRow } from '../domains/report';
+import type { ActiveClientRow } from './find-active-clients-with-plans-for-date';
 import {
   type MenuData,
   type MealConfig,
   BAKERY_MEALS,
   MAIN_MEALS,
   computeKitchenReportData,
-} from './kitchenReportData';
-
-export type { MenuData, MealSection, KitchenReportData } from './kitchenReportData';
-export { computeKitchenReportData, kitchenReportFileName } from './kitchenReportData';
+} from './compute-kitchen-report-data';
 
 const RED = 'C00000';
 const GRAY = '595959';

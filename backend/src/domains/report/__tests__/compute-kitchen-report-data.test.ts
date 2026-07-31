@@ -1,5 +1,5 @@
-import { computeKitchenReportData, kitchenReportFileName } from '../kitchenReportBuilder';
-import type { ActiveClientRow } from '../../domains/report';
+import { computeKitchenReportData } from '../compute-kitchen-report-data';
+import type { ActiveClientRow } from '../find-active-clients-with-plans-for-date';
 
 const mockMenu = {
   breakfast: 'Queque de platano',
@@ -18,20 +18,6 @@ const makeClient = (
 ): ActiveClientRow => ({ name, planMeals, specialInstructions });
 
 const allMeals = ['breakfast', 'morning_snack', 'salad', 'lunch', 'afternoon_snack', 'dinner'];
-
-describe('kitchenReportFileName', () => {
-  it('returns a filename with the Spanish day name capitalized and formatted date', () => {
-    expect(kitchenReportFileName('2026-06-15')).toBe('Lunes 15-06.docx');
-  });
-
-  it('formats a Friday correctly', () => {
-    expect(kitchenReportFileName('2026-06-19')).toBe('Viernes 19-06.docx');
-  });
-
-  it('formats a Wednesday correctly', () => {
-    expect(kitchenReportFileName('2026-06-17')).toBe('Miércoles 17-06.docx');
-  });
-});
 
 describe('computeKitchenReportData', () => {
   it('sets date text and total client count', () => {
