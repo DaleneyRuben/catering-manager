@@ -8,7 +8,7 @@ import { appToday, calcContractEndDate } from '../../utils/date';
 import { ConflictError } from '../../utils/errors';
 import { record } from '../client-history';
 import { finalizeOverlappingSubscriptions } from './finalize-overlapping';
-import { findUpcomingSubscription } from './_helpers';
+import { applyRenewalPauseState, findUpcomingSubscription, historyEventTypeFor } from './_helpers';
 
 // TODO: restore contractDate === today validation once backfilling of existing clients is complete
 export const create = async (
@@ -57,11 +57,7 @@ export const create = async (
     ? await Subscription.create(subscriptionData, { transaction })
     : await Subscription.create(subscriptionData);
 
-  const eventTypeByRenewal = {
-    reactivation: 'reactivated',
-    renewal: 'plan_renewed',
-  } as const;
-  const eventType = data.renewalType ? eventTypeByRenewal[data.renewalType] : 'plan_assigned';
+  const eventType = historyEventTypeFor(data.renewalType ?? null);
 
   // unpaid subscriptions of any kind defer their history write until an admin marks them paid
   if (paid) {
@@ -89,16 +85,12 @@ export const create = async (
   }
 
   if (paid) {
-    if (data.renewalType === 'reactivation') {
-      if (transaction) await client.update({ pausedSince: null }, { transaction });
-      else await client.update({ pausedSince: null });
-    } else if (data.renewalType === 'renewal' && !data.startDate && !client.pausedSince) {
-      // sin fecha renewal: pause the client until a start date is manually assigned.
-      // Skipped when already paused: resume counts the days still owed from pausedSince, so
-      // restamping it to today would silently shorten a mid-plan pause.
-      if (transaction) await client.update({ pausedSince: today }, { transaction });
-      else await client.update({ pausedSince: today });
-    }
+    await applyRenewalPauseState(
+      client,
+      data.renewalType ?? null,
+      data.startDate ?? null,
+      transaction,
+    );
   }
 
   return subscription;
