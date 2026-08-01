@@ -1,9 +1,9 @@
 import Client from '../../../models/Client';
-import ClientHistory from '../../../models/ClientHistory';
+import { record } from '../../client-history';
 import { update } from '../update';
 
 jest.mock('../../../models/Client');
-jest.mock('../../../models/ClientHistory');
+jest.mock('../../client-history');
 jest.mock('../../../models/Subscription');
 jest.mock('../../../database/sequelize', () => ({
   __esModule: true,
@@ -29,13 +29,11 @@ describe('update', () => {
       update: jest.fn().mockResolvedValue({ ...mockClient, pausedSince }),
     };
     (Client.findByPk as jest.Mock).mockResolvedValue(mockInstance);
-    (ClientHistory.create as jest.Mock).mockResolvedValue({});
+    (record as jest.Mock).mockResolvedValue(undefined);
 
     await update(1, { pausedSince }, actor);
 
-    expect(ClientHistory.create).toHaveBeenCalledWith(
-      expect.objectContaining({ clientId: 1, eventType: 'paused' }),
-    );
+    expect(record).toHaveBeenCalledWith(actor, { type: 'paused', clientId: 1 });
   });
 
   it('records resumed history event when resuming', async () => {
@@ -46,13 +44,11 @@ describe('update', () => {
       update: jest.fn().mockResolvedValue({ ...mockClient, pausedSince: null }),
     };
     (Client.findByPk as jest.Mock).mockResolvedValue(mockInstance);
-    (ClientHistory.create as jest.Mock).mockResolvedValue({});
+    (record as jest.Mock).mockResolvedValue(undefined);
 
     await update(1, { pausedSince: null }, actor);
 
-    expect(ClientHistory.create).toHaveBeenCalledWith(
-      expect.objectContaining({ clientId: 1, eventType: 'resumed' }),
-    );
+    expect(record).toHaveBeenCalledWith(actor, { type: 'resumed', clientId: 1 });
   });
 
   it('records the acting user on the history event', async () => {
@@ -63,12 +59,13 @@ describe('update', () => {
       update: jest.fn().mockResolvedValue({ ...mockClient, pausedSince: '2026-06-10T12:00:00Z' }),
     };
     (Client.findByPk as jest.Mock).mockResolvedValue(mockInstance);
-    (ClientHistory.create as jest.Mock).mockResolvedValue({});
+    (record as jest.Mock).mockResolvedValue(undefined);
 
     await update(1, { pausedSince: '2026-06-10T12:00:00Z' }, actor);
 
-    expect(ClientHistory.create).toHaveBeenCalledWith(
+    expect(record).toHaveBeenCalledWith(
       expect.objectContaining({ userId: 9, username: 'ada' }),
+      expect.anything(),
     );
   });
 
@@ -86,7 +83,7 @@ describe('update', () => {
       update: jest.fn().mockResolvedValue({ ...mockClient, pausedSince: null }),
     };
     (Client.findByPk as jest.Mock).mockResolvedValue(mockInstance);
-    (ClientHistory.create as jest.Mock).mockResolvedValue({});
+    (record as jest.Mock).mockResolvedValue(undefined);
 
     await update(1, { pausedSince: null }, actor);
 
@@ -117,7 +114,7 @@ describe('update', () => {
       update: jest.fn().mockResolvedValue({ ...mockClient, pausedSince: null }),
     };
     (Client.findByPk as jest.Mock).mockResolvedValue(mockInstance);
-    (ClientHistory.create as jest.Mock).mockResolvedValue({});
+    (record as jest.Mock).mockResolvedValue(undefined);
 
     await update(1, { pausedSince: null }, actor);
 
@@ -149,7 +146,7 @@ describe('update', () => {
       update: jest.fn().mockResolvedValue({ ...mockClient, pausedSince: null }),
     };
     (Client.findByPk as jest.Mock).mockResolvedValue(mockInstance);
-    (ClientHistory.create as jest.Mock).mockResolvedValue({});
+    (record as jest.Mock).mockResolvedValue(undefined);
 
     await update(1, { pausedSince: null }, actor);
 
@@ -168,7 +165,7 @@ describe('update', () => {
 
     await update(1, { name: 'Jane Doe' }, actor);
 
-    expect(ClientHistory.create).not.toHaveBeenCalled();
+    expect(record).not.toHaveBeenCalled();
   });
 
   it('returns null when client not found', async () => {

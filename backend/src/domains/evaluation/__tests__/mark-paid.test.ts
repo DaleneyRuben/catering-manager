@@ -1,15 +1,15 @@
 import { Op } from 'sequelize';
 import Client from '../../../models/Client';
-import ClientHistory from '../../../models/ClientHistory';
 import Plan from '../../../models/Plan';
 import Subscription from '../../../models/Subscription';
+import { record } from '../../client-history';
 import { markPaid } from '../mark-paid';
 import { appToday, subtractDeliveryDays } from '../../../utils/date';
 
 jest.mock('../../../models/Subscription');
 jest.mock('../../../models/Client');
 jest.mock('../../../models/Plan');
-jest.mock('../../../models/ClientHistory');
+jest.mock('../../client-history');
 
 const actor = { userId: 9, username: 'ada' };
 
@@ -22,7 +22,7 @@ describe('markPaid', () => {
     const result = await markPaid(1, actor);
 
     expect(result).toBeNull();
-    expect(ClientHistory.create).not.toHaveBeenCalled();
+    expect(record).not.toHaveBeenCalled();
   });
 
   it('marks the subscription paid and logs a plan_assigned history event', async () => {
@@ -46,10 +46,9 @@ describe('markPaid', () => {
       order: [['id', 'ASC']],
     });
     expect(subscription.update).toHaveBeenCalledWith({ paid: true });
-    expect(ClientHistory.create).toHaveBeenCalledWith({
+    expect(record).toHaveBeenCalledWith(actor, {
+      type: 'plan_assigned',
       clientId: 1,
-      eventType: 'plan_assigned',
-      occurredAt: expect.any(Date),
       metadata: {
         planId: 2,
         planName: 'Completo',
@@ -59,8 +58,6 @@ describe('markPaid', () => {
         contractEndDate: '2026-08-21',
         discount: 500,
       },
-      userId: 9,
-      username: 'ada',
     });
     expect(result).toBe(subscription);
   });
@@ -82,9 +79,7 @@ describe('markPaid', () => {
 
     await markPaid(1, actor);
 
-    expect(ClientHistory.create).toHaveBeenCalledWith(
-      expect.objectContaining({ eventType: 'plan_renewed' }),
-    );
+    expect(record).toHaveBeenCalledWith(actor, expect.objectContaining({ type: 'plan_renewed' }));
   });
 
   it('logs a reactivated history event when the subscription renewalType is reactivation', async () => {
@@ -104,9 +99,7 @@ describe('markPaid', () => {
 
     await markPaid(1, actor);
 
-    expect(ClientHistory.create).toHaveBeenCalledWith(
-      expect.objectContaining({ eventType: 'reactivated' }),
-    );
+    expect(record).toHaveBeenCalledWith(actor, expect.objectContaining({ type: 'reactivated' }));
   });
 
   it('includes the appointmentId in the history metadata when persisted on the subscription', async () => {
@@ -126,7 +119,8 @@ describe('markPaid', () => {
 
     await markPaid(1, actor);
 
-    expect(ClientHistory.create).toHaveBeenCalledWith(
+    expect(record).toHaveBeenCalledWith(
+      actor,
       expect.objectContaining({ metadata: expect.objectContaining({ appointmentId: 4 }) }),
     );
   });
@@ -148,7 +142,7 @@ describe('markPaid', () => {
 
     await markPaid(1, actor);
 
-    const call = (ClientHistory.create as jest.Mock).mock.calls[0][0];
+    const call = (record as jest.Mock).mock.calls[0][1];
     expect(call.metadata).not.toHaveProperty('appointmentId');
   });
 

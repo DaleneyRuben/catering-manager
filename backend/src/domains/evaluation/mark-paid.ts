@@ -1,9 +1,9 @@
 import Client from '../../models/Client';
-import ClientHistory from '../../models/ClientHistory';
 import Plan from '../../models/Plan';
 import Subscription from '../../models/Subscription';
 import type { Actor } from '../../types/actor';
 import { appToday } from '../../utils/date';
+import { record } from '../client-history';
 import { finalizeOverlappingSubscriptions } from '../subscription';
 
 export const markPaid = async (clientId: number, actor: Actor) => {
@@ -37,10 +37,9 @@ export const markPaid = async (clientId: number, actor: Actor) => {
     : 'plan_assigned';
 
   const plan = await Plan.findByPk(subscription.planId);
-  await ClientHistory.create({
+  await record(actor, {
+    type: eventType,
     clientId,
-    eventType,
-    occurredAt: new Date(),
     metadata: {
       planId: subscription.planId,
       planName: plan?.name ?? null,
@@ -51,8 +50,6 @@ export const markPaid = async (clientId: number, actor: Actor) => {
       discount: subscription.discount,
       ...(subscription.appointmentId ? { appointmentId: subscription.appointmentId } : {}),
     },
-    userId: actor.userId,
-    username: actor.username,
   });
 
   return subscription;

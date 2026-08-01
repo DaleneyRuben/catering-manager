@@ -1,7 +1,7 @@
 import Client from '../../models/Client';
-import ClientHistory from '../../models/ClientHistory';
 import type { Actor } from '../../types/actor';
 import { appToday } from '../../utils/date';
+import { record } from '../client-history';
 import { withStatus, getCurrentSubscription, INCLUDE_SUBSCRIPTION_ORDERED } from './_helpers';
 
 type SubLike = {
@@ -23,14 +23,7 @@ export const finalize = async (id: number, actor: Actor) => {
 
   if (sub) await sub.update({ contractEndDate: today, finalizedAt: today });
 
-  await ClientHistory.create({
-    clientId: client.id,
-    eventType: 'finalized',
-    occurredAt: new Date(),
-    metadata: {},
-    userId: actor.userId,
-    username: actor.username,
-  });
+  await record(actor, { type: 'finalized', clientId: client.id });
 
   return withStatus(client);
 };

@@ -1,12 +1,12 @@
 import { Transaction } from 'sequelize';
 import Client from '../../models/Client';
-import ClientHistory from '../../models/ClientHistory';
 import Plan from '../../models/Plan';
 import Subscription from '../../models/Subscription';
 import { CreateSubscriptionDto } from '../../schemas/subscription.schema';
 import type { Actor } from '../../types/actor';
 import { appToday, calcContractEndDate } from '../../utils/date';
 import { ConflictError } from '../../utils/errors';
+import { record } from '../client-history';
 import { finalizeOverlappingSubscriptions } from './finalize-overlapping';
 import { findUpcomingSubscription } from './_helpers';
 
@@ -68,25 +68,24 @@ export const create = async (
     const plan = transaction
       ? await Plan.findByPk(data.planId, { transaction })
       : await Plan.findByPk(data.planId);
-    const historyData = {
-      clientId,
-      eventType,
-      occurredAt: new Date(),
-      metadata: {
-        planId: data.planId,
-        planName: plan?.name ?? null,
-        planPrice: plan?.price ?? null,
-        startDate: data.startDate ?? null,
-        duration: data.duration,
-        contractEndDate,
-        discount: data.discount ?? 0,
-        ...(data.appointmentId ? { appointmentId: data.appointmentId } : {}),
+    await record(
+      actor,
+      {
+        type: eventType,
+        clientId,
+        metadata: {
+          planId: data.planId,
+          planName: plan?.name ?? null,
+          planPrice: plan?.price ?? null,
+          startDate: data.startDate ?? null,
+          duration: data.duration,
+          contractEndDate,
+          discount: data.discount ?? 0,
+          ...(data.appointmentId ? { appointmentId: data.appointmentId } : {}),
+        },
       },
-      userId: actor.userId,
-      username: actor.username,
-    };
-    if (transaction) await ClientHistory.create(historyData, { transaction });
-    else await ClientHistory.create(historyData);
+      transaction,
+    );
   }
 
   if (paid) {

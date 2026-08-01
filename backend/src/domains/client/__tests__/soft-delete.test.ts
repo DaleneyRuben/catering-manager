@@ -1,9 +1,9 @@
 import Client from '../../../models/Client';
-import ClientHistory from '../../../models/ClientHistory';
+import { record } from '../../client-history';
 import { softDelete } from '../soft-delete';
 
 jest.mock('../../../models/Client');
-jest.mock('../../../models/ClientHistory');
+jest.mock('../../client-history');
 jest.mock('../../../database/sequelize', () => ({
   __esModule: true,
   default: { query: jest.fn() },
@@ -20,14 +20,12 @@ describe('softDelete', () => {
       destroy: jest.fn().mockResolvedValue({}),
     };
     (Client.findByPk as jest.Mock).mockResolvedValue(mockInstance);
-    (ClientHistory.create as jest.Mock).mockResolvedValue({});
+    (record as jest.Mock).mockResolvedValue(undefined);
 
     await softDelete(1, actor);
 
     expect(mockInstance.destroy).toHaveBeenCalledTimes(1);
-    expect(ClientHistory.create).toHaveBeenCalledWith(
-      expect.objectContaining({ clientId: 1, eventType: 'deleted' }),
-    );
+    expect(record).toHaveBeenCalledWith(actor, { type: 'deleted', clientId: 1 });
   });
 
   it('records the acting user on the history event', async () => {
@@ -36,12 +34,13 @@ describe('softDelete', () => {
       destroy: jest.fn().mockResolvedValue({}),
     };
     (Client.findByPk as jest.Mock).mockResolvedValue(mockInstance);
-    (ClientHistory.create as jest.Mock).mockResolvedValue({});
+    (record as jest.Mock).mockResolvedValue(undefined);
 
     await softDelete(1, actor);
 
-    expect(ClientHistory.create).toHaveBeenCalledWith(
+    expect(record).toHaveBeenCalledWith(
       expect.objectContaining({ userId: 9, username: 'ada' }),
+      expect.anything(),
     );
   });
 

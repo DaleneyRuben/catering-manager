@@ -1,9 +1,9 @@
 import { differenceInBusinessDays, parseISO } from 'date-fns';
 import Client from '../../models/Client';
-import ClientHistory from '../../models/ClientHistory';
 import { UpdateClientDto } from '../../schemas/client.schema';
 import type { Actor } from '../../types/actor';
 import { appToday, addDeliveryDays, toAppDate } from '../../utils/date';
+import { record } from '../client-history';
 import { withStatus, getCurrentSubscription, INCLUDE_SUBSCRIPTION_ORDERED } from './_helpers';
 
 type SubLike = {
@@ -25,14 +25,7 @@ export const update = async (id: number, data: UpdateClientDto, actor: Actor) =>
     const isResuming = data.pausedSince === null && client.pausedSince !== null;
 
     if (isPausing || isResuming) {
-      await ClientHistory.create({
-        clientId: client.id,
-        eventType: isPausing ? 'paused' : 'resumed',
-        occurredAt: new Date(),
-        metadata: {},
-        userId: actor.userId,
-        username: actor.username,
-      });
+      await record(actor, { type: isPausing ? 'paused' : 'resumed', clientId: client.id });
     }
 
     if (isResuming && client.pausedSince) {

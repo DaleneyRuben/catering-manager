@@ -1,11 +1,11 @@
 import Client from '../../../models/Client';
-import ClientHistory from '../../../models/ClientHistory';
+import { record } from '../../client-history';
 import { finalize } from '../finalize';
 
 const actor = { userId: 9, username: 'ada' };
 
 jest.mock('../../../models/Client');
-jest.mock('../../../models/ClientHistory');
+jest.mock('../../client-history');
 jest.mock('../../../models/Subscription');
 jest.mock('../../../database/sequelize', () => ({
   __esModule: true,
@@ -28,7 +28,7 @@ describe('finalize', () => {
       update: jest.fn().mockResolvedValue({}),
     };
     (Client.findByPk as jest.Mock).mockResolvedValue(mockInstance);
-    (ClientHistory.create as jest.Mock).mockResolvedValue({});
+    (record as jest.Mock).mockResolvedValue(undefined);
 
     await finalize(1, actor);
 
@@ -38,9 +38,7 @@ describe('finalize', () => {
         finalizedAt: expect.any(String),
       }),
     );
-    expect(ClientHistory.create).toHaveBeenCalledWith(
-      expect.objectContaining({ clientId: 1, eventType: 'finalized' }),
-    );
+    expect(record).toHaveBeenCalledWith(actor, { type: 'finalized', clientId: 1 });
   });
 
   it('records the acting user on the history event', async () => {
@@ -52,12 +50,13 @@ describe('finalize', () => {
       update: jest.fn().mockResolvedValue({}),
     };
     (Client.findByPk as jest.Mock).mockResolvedValue(mockInstance);
-    (ClientHistory.create as jest.Mock).mockResolvedValue({});
+    (record as jest.Mock).mockResolvedValue(undefined);
 
     await finalize(1, actor);
 
-    expect(ClientHistory.create).toHaveBeenCalledWith(
+    expect(record).toHaveBeenCalledWith(
       expect.objectContaining({ userId: 9, username: 'ada' }),
+      expect.anything(),
     );
   });
 
@@ -71,7 +70,7 @@ describe('finalize', () => {
       update: jest.fn().mockResolvedValue({}),
     };
     (Client.findByPk as jest.Mock).mockResolvedValue(mockInstance);
-    (ClientHistory.create as jest.Mock).mockResolvedValue({});
+    (record as jest.Mock).mockResolvedValue(undefined);
 
     await finalize(1, actor);
 
@@ -106,7 +105,7 @@ describe('finalize', () => {
       update: jest.fn().mockResolvedValue({}),
     };
     (Client.findByPk as jest.Mock).mockResolvedValue(mockInstance);
-    (ClientHistory.create as jest.Mock).mockResolvedValue({});
+    (record as jest.Mock).mockResolvedValue(undefined);
 
     await finalize(1, actor);
 
