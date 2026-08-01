@@ -67,14 +67,16 @@ The owner's API is named after what the caller wants, not after the shape of the
 subscription.update(id, { contractEndDate: today, finalizedAt: today });
 
 // ✅ the rule stays where it belongs
-subscription.finalize(clientId, actor);
+subscription.finalize(subscriptionId);
 ```
 
 This is what stops an owning domain degrading into an anemic CRUD shell. If the API is
 shaped like the table, every caller ends up holding a piece of the domain's rules.
 
-Its absence is already visible: `evaluation/mark-paid.ts` reaches into
-`subscription/_helpers` precisely because there is no intention-shaped function to call.
+The cost of its absence is on record: `markPaid` lived in `evaluation` while
+`subscription/create.ts` held the same three side effects for the paid case, and the two
+copies drifted — the already-paused guard from #115 was added to one and not the other,
+losing a paused client their remaining delivery days. Both now call one helper.
 
 ### 3. Every write function accepts an optional `transaction`.
 
@@ -248,7 +250,7 @@ backend/src/
       find-active-subscriptions-for-date.ts
       find-suspended-subscriptions-for-date.ts
       finalize-overlapping.ts                 ← promoted out of _helpers.ts
-    + finalize.ts  mark-paid.ts  remove.ts  extend-after-pause.ts
+      finalize.ts  mark-paid.ts  remove.ts  extend-after-pause.ts   ← mark-paid from evaluation/
       find-contract-ending.ts  find-subscription-counts.ts          ← from dashboard/
 
     client-history/                           ← owning: client_history. Was history/
@@ -266,10 +268,16 @@ backend/src/
                      sqids, sentry, devFlags, whatsappIcon
 ```
 
-`client.finalize()` and `client.resume()` stay in `client` because they are the client-facing
-operations the controller calls — but they no longer write `subscriptions` themselves. They
-delegate to `subscription.finalize()` and `subscription.extendAfterPause()`. Two functions
-named `finalize` is deliberate: one is the client-level action, the other the table-level rule.
+`client.finalize()` and the resume branch of `client.update()` stay in `client` because they
+are the client-facing operations the controller calls — but they no longer write
+`subscriptions` themselves. They delegate to `subscription.finalize()` and
+`subscription.extendAfterPause()`. Two functions named `finalize` is deliberate: one is the
+client-level action, the other the table-level rule.
+
+Both take a subscription id rather than a client id. Picking _which_ subscription describes a
+client today is `getCurrentSubscription` in `client/_helpers.ts`, shared with `withStatus`;
+having `subscription` re-derive it would duplicate the selection rule to remove a write, which
+is the trade this backlog exists to avoid.
 
 ### Why models stay in `models/`
 
