@@ -1,5 +1,6 @@
 export { create } from './create';
 export { update } from './update';
+export { markPaid } from './mark-paid';
 export { deleteUpcomingSubscription } from './delete-upcoming-subscription';
 export { finalizeOverlappingSubscriptions } from './finalize-overlapping';
 export { findActiveSubscriptionsForDate } from './find-active-subscriptions-for-date';

@@ -4,7 +4,7 @@ import Subscription from '../../models/Subscription';
 import type { Actor } from '../../types/actor';
 import { appToday } from '../../utils/date';
 import { record } from '../client-history';
-import { finalizeOverlappingSubscriptions } from '../subscription';
+import { finalizeOverlappingSubscriptions } from './finalize-overlapping';
 
 export const markPaid = async (clientId: number, actor: Actor) => {
   const subscription = await Subscription.findOne({

@@ -9,7 +9,6 @@ export {
   type FindHistoryFilters,
 } from './find-history-for-nutritionist';
 export { convertAppointment } from './convert-appointment';
-export { markPaid } from './mark-paid';
 export { deletePendingClient } from './delete-pending-client';
 export { revertPendingRenewal } from './revert-pending-renewal';
 export { resolveRenewal, type ResolveRenewalResult } from './resolve-renewal';

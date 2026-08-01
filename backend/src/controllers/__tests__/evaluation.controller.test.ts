@@ -4,12 +4,13 @@ import app from '../../app';
 import {
   deletePendingClient,
   findPendingPayment,
-  markPaid,
   revertPendingRenewal,
 } from '../../domains/evaluation';
+import { markPaid } from '../../domains/subscription';
 import { encodeId } from '../../utils/sqids';
 
 jest.mock('../../domains/evaluation');
+jest.mock('../../domains/subscription');
 jest.mock('../../database/sequelize', () => ({ __esModule: true, default: { query: jest.fn() } }));
 jest.mock('../../middleware/auth', () => ({
   requireAuth: (req: Request, _res: unknown, next: () => void) => {

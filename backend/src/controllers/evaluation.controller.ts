@@ -1,10 +1,10 @@
 import { NextFunction, Request, Response } from 'express';
 import {
   findPendingPayment,
-  markPaid as markSubscriptionPaid,
   revertPendingRenewal as revertRenewal,
   deletePendingClient,
 } from '../domains/evaluation';
+import { markPaid as markSubscriptionPaid } from '../domains/subscription';
 import { sendSuccess, sendError } from '../utils/response';
 import { decodeId } from '../utils/sqids';
 
