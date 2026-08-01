@@ -1,13 +1,13 @@
 import { Op } from 'sequelize';
 import Appointment from '../../../models/Appointment';
-import ClientHistory from '../../../models/ClientHistory';
 import Plan from '../../../models/Plan';
 import Subscription from '../../../models/Subscription';
+import { record } from '../../client-history';
 import { deleteUpcomingSubscription } from '../delete-upcoming-subscription';
 import { appToday, addDeliveryDays } from '../../../utils/date';
 
 jest.mock('../../../models/Subscription');
-jest.mock('../../../models/ClientHistory');
+jest.mock('../../client-history');
 jest.mock('../../../models/Plan');
 jest.mock('../../../models/Appointment');
 
@@ -37,7 +37,7 @@ describe('deleteUpcomingSubscription', () => {
     (Subscription.findOne as jest.Mock).mockResolvedValue(null);
 
     expect(await deleteUpcomingSubscription(1, 9, actor)).toBeNull();
-    expect(ClientHistory.create).not.toHaveBeenCalled();
+    expect(record).not.toHaveBeenCalled();
   });
 
   it('deletes an upcoming subscription', async () => {
@@ -71,10 +71,11 @@ describe('deleteUpcomingSubscription', () => {
 
     await deleteUpcomingSubscription(1, 9, actor);
 
-    expect(ClientHistory.create).toHaveBeenCalledWith(
+    expect(record).toHaveBeenCalledWith(
+      actor,
       expect.objectContaining({
+        type: 'renewal_deleted',
         clientId: 1,
-        eventType: 'renewal_deleted',
         metadata: expect.objectContaining({
           planId: 2,
           planName: 'Completo',
@@ -94,7 +95,8 @@ describe('deleteUpcomingSubscription', () => {
 
     await deleteUpcomingSubscription(1, 9, actor);
 
-    expect(ClientHistory.create).toHaveBeenCalledWith(
+    expect(record).toHaveBeenCalledWith(
+      actor,
       expect.objectContaining({
         metadata: expect.objectContaining({ registeredAt: sub.createdAt }),
       }),
@@ -109,8 +111,9 @@ describe('deleteUpcomingSubscription', () => {
 
     await deleteUpcomingSubscription(1, 9, actor);
 
-    expect(ClientHistory.create).toHaveBeenCalledWith(
+    expect(record).toHaveBeenCalledWith(
       expect.objectContaining({ userId: 7, username: 'daleney' }),
+      expect.anything(),
     );
   });
 

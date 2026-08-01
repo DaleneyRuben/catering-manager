@@ -1,13 +1,13 @@
 import { Op } from 'sequelize';
 import Subscription from '../../../models/Subscription';
 import Client from '../../../models/Client';
-import ClientHistory from '../../../models/ClientHistory';
+import { record } from '../../client-history';
 import { update } from '../update';
 import { addDeliveryDays, subtractDeliveryDays } from '../../../utils/date';
 
 jest.mock('../../../models/Subscription');
 jest.mock('../../../models/Client');
-jest.mock('../../../models/ClientHistory');
+jest.mock('../../client-history');
 jest.mock('../../../models/Plan');
 
 beforeEach(() => {
@@ -82,12 +82,13 @@ describe('update', () => {
     };
     (Subscription.findOne as jest.Mock).mockResolvedValue(mockInstance);
     (Client.findByPk as jest.Mock).mockResolvedValue({ id: 1, update: jest.fn() });
-    (ClientHistory.create as jest.Mock).mockResolvedValue({});
+    (record as jest.Mock).mockResolvedValue(undefined);
 
     await update(1, 1, { startDate: '2026-06-01' }, actor);
 
-    expect(ClientHistory.create).toHaveBeenCalledWith(
+    expect(record).toHaveBeenCalledWith(
       expect.objectContaining({ userId: 9, username: 'ada' }),
+      expect.anything(),
     );
   });
 
@@ -100,12 +101,13 @@ describe('update', () => {
       update: jest.fn().mockResolvedValue({}),
     };
     (Subscription.findOne as jest.Mock).mockResolvedValue(mockInstance);
-    (ClientHistory.create as jest.Mock).mockResolvedValue({});
+    (record as jest.Mock).mockResolvedValue(undefined);
 
     await update(1, 1, { suspendedDates: ['2026-06-10'] }, actor);
 
-    expect(ClientHistory.create).toHaveBeenCalledWith(
-      expect.objectContaining({ clientId: 1, eventType: 'suspended' }),
+    expect(record).toHaveBeenCalledWith(
+      actor,
+      expect.objectContaining({ type: 'suspended', clientId: 1 }),
     );
   });
 
@@ -118,12 +120,13 @@ describe('update', () => {
       update: jest.fn().mockResolvedValue({}),
     };
     (Subscription.findOne as jest.Mock).mockResolvedValue(mockInstance);
-    (ClientHistory.create as jest.Mock).mockResolvedValue({});
+    (record as jest.Mock).mockResolvedValue(undefined);
 
     await update(1, 1, { suspendedDates: ['2026-06-10'] }, actor);
 
-    expect(ClientHistory.create).toHaveBeenCalledWith(
+    expect(record).toHaveBeenCalledWith(
       expect.objectContaining({ userId: 9, username: 'ada' }),
+      expect.anything(),
     );
   });
 
