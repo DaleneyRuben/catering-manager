@@ -1,10 +1,12 @@
 import Appointment from '../../../models/Appointment';
 import Subscription from '../../../models/Subscription';
+import { remove } from '../../subscription';
 import { revertPendingRenewal } from '../revert-pending-renewal';
 import { appToday } from '../../../utils/date';
 
 jest.mock('../../../models/Appointment');
 jest.mock('../../../models/Subscription');
+jest.mock('../../subscription');
 
 describe('revertPendingRenewal', () => {
   beforeEach(() => jest.resetAllMocks());
@@ -23,7 +25,7 @@ describe('revertPendingRenewal', () => {
     });
     expect(Appointment.findOne).toHaveBeenCalledWith({ where: { subscriptionId: 5 } });
     expect(appointment.update).toHaveBeenCalledWith({ subscriptionId: null });
-    expect(subscription.destroy).toHaveBeenCalledWith();
+    expect(remove).toHaveBeenCalledWith(5);
     expect(result).toBe(subscription);
   });
 
@@ -78,7 +80,7 @@ describe('revertPendingRenewal', () => {
 
     const result = await revertPendingRenewal(1);
 
-    expect(subscription.destroy).toHaveBeenCalledWith();
+    expect(remove).toHaveBeenCalledWith(5);
     expect(result).toBe(subscription);
   });
 });

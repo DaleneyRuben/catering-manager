@@ -1,5 +1,6 @@
 import Appointment from '../../models/Appointment';
 import Subscription from '../../models/Subscription';
+import { remove } from '../subscription';
 import { appToday } from '../../utils/date';
 
 export const revertPendingRenewal = async (clientId: number) => {
@@ -22,7 +23,7 @@ export const revertPendingRenewal = async (clientId: number) => {
     });
   }
 
-  await subscription.destroy();
+  await remove(subscription.id);
 
   return subscription;
 };

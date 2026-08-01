@@ -1,9 +1,11 @@
 import Client from '../../../models/Client';
 import { record } from '../../client-history';
+import { extendAfterPause } from '../../subscription';
 import { update } from '../update';
 
 jest.mock('../../../models/Client');
 jest.mock('../../client-history');
+jest.mock('../../subscription');
 jest.mock('../../../models/Subscription');
 jest.mock('../../../database/sequelize', () => ({
   __esModule: true,
@@ -69,16 +71,17 @@ describe('update', () => {
     );
   });
 
-  it('extends contractEndDate on the subscription when resuming', async () => {
+  it('extends the subscription when resuming', async () => {
+    const pausedSince = new Date('2026-06-03T15:00:00Z');
     const mockSub = {
+      id: 5,
       startDate: '2026-06-01',
       duration: 10,
       contractEndDate: '2026-06-12',
-      update: jest.fn().mockResolvedValue({}),
     };
     const mockInstance = {
       id: 1,
-      pausedSince: new Date('2026-06-03T15:00:00Z'),
+      pausedSince,
       subscriptions: [mockSub],
       update: jest.fn().mockResolvedValue({ ...mockClient, pausedSince: null }),
     };
@@ -87,7 +90,7 @@ describe('update', () => {
 
     await update(1, { pausedSince: null }, actor);
 
-    expect(mockSub.update).toHaveBeenCalledWith({ contractEndDate: '2026-06-17' });
+    expect(extendAfterPause).toHaveBeenCalledWith(5, pausedSince);
   });
 
   it('extends the paid subscription, not a newer pending unpaid renewal, when resuming', async () => {
@@ -97,7 +100,6 @@ describe('update', () => {
       startDate: '2026-06-01',
       duration: 10,
       contractEndDate: '2026-06-12',
-      update: jest.fn().mockResolvedValue({}),
     };
     const unpaidSub = {
       id: 66,
@@ -105,7 +107,6 @@ describe('update', () => {
       startDate: null,
       duration: 20,
       contractEndDate: null,
-      update: jest.fn().mockResolvedValue({}),
     };
     const mockInstance = {
       id: 1,
@@ -118,8 +119,8 @@ describe('update', () => {
 
     await update(1, { pausedSince: null }, actor);
 
-    expect(paidSub.update).toHaveBeenCalledWith({ contractEndDate: '2026-06-17' });
-    expect(unpaidSub.update).not.toHaveBeenCalled();
+    expect(extendAfterPause).toHaveBeenCalledWith(60, expect.any(Date));
+    expect(extendAfterPause).not.toHaveBeenCalledWith(66, expect.anything());
   });
 
   it('extends the subscription covering today, not a queued future renewal, when resuming', async () => {
@@ -129,7 +130,6 @@ describe('update', () => {
       duration: 10,
       contractEndDate: '2026-07-15',
       finalizedAt: null,
-      update: jest.fn().mockResolvedValue({}),
     };
     const pausedSub = {
       id: 5,
@@ -137,7 +137,6 @@ describe('update', () => {
       duration: 10,
       contractEndDate: '2026-06-12',
       finalizedAt: null,
-      update: jest.fn().mockResolvedValue({}),
     };
     const mockInstance = {
       id: 1,
@@ -150,8 +149,8 @@ describe('update', () => {
 
     await update(1, { pausedSince: null }, actor);
 
-    expect(pausedSub.update).toHaveBeenCalledWith({ contractEndDate: '2026-06-17' });
-    expect(futureSub.update).not.toHaveBeenCalled();
+    expect(extendAfterPause).toHaveBeenCalledWith(5, expect.any(Date));
+    expect(extendAfterPause).not.toHaveBeenCalledWith(8, expect.anything());
   });
 
   it('does not record history when non-pause fields are updated', async () => {

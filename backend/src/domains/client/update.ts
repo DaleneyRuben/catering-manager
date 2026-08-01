@@ -1,9 +1,9 @@
-import { differenceInBusinessDays, parseISO } from 'date-fns';
 import Client from '../../models/Client';
 import { UpdateClientDto } from '../../schemas/client.schema';
 import type { Actor } from '../../types/actor';
-import { appToday, addDeliveryDays, toAppDate } from '../../utils/date';
+import { appToday } from '../../utils/date';
 import { record } from '../client-history';
+import { extendAfterPause } from '../subscription';
 import { withStatus, getCurrentSubscription, INCLUDE_SUBSCRIPTION_ORDERED } from './_helpers';
 
 type SubLike = {
@@ -12,8 +12,6 @@ type SubLike = {
   startDate: string | null;
   contractEndDate?: string | null;
   finalizedAt?: string | null;
-  duration: number;
-  update: (d: object) => Promise<void>;
 };
 
 export const update = async (id: number, data: UpdateClientDto, actor: Actor) => {
@@ -31,18 +29,7 @@ export const update = async (id: number, data: UpdateClientDto, actor: Actor) =>
     if (isResuming && client.pausedSince) {
       const subs = (client as never as { subscriptions: SubLike[] }).subscriptions ?? [];
       const sub = getCurrentSubscription(subs, appToday());
-      if (sub?.startDate) {
-        const pausedDateStr = toAppDate(client.pausedSince);
-        const elapsed = differenceInBusinessDays(
-          parseISO(`${pausedDateStr}T12:00:00`),
-          parseISO(`${sub.startDate}T12:00:00`),
-        );
-        const remaining = sub.duration - elapsed;
-        if (remaining > 0) {
-          const newContractEndDate = addDeliveryDays(appToday(), remaining);
-          await sub.update({ contractEndDate: newContractEndDate });
-        }
-      }
+      if (sub) await extendAfterPause(sub.id, client.pausedSince);
     }
   }
 
