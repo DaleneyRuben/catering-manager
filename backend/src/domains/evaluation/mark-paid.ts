@@ -25,7 +25,9 @@ export const markPaid = async (clientId: number, actor: Actor) => {
     if (client) await client.update({ pausedSince: null });
   } else if (subscription.renewalType === 'renewal' && !subscription.startDate) {
     const client = await Client.findByPk(clientId);
-    if (client) await client.update({ pausedSince: appToday() });
+    // Skipped when already paused: resume counts the days still owed from pausedSince, so
+    // restamping it to today would silently shorten a mid-plan pause.
+    if (client && !client.pausedSince) await client.update({ pausedSince: appToday() });
   }
 
   const eventTypeByRenewal = {
