@@ -98,6 +98,19 @@ describe('useClient', () => {
     expect(returned).toEqual(updated);
   });
 
+  it('refetches the client after update instead of caching the PATCH response directly', async () => {
+    const patchResponse = { ...client1, name: 'Ana García' };
+    const refetched = { ...client1, name: 'Ana García', groupMembers: [{ id: 2, name: 'Otro' }] };
+    mockGet.mockResolvedValueOnce(client1).mockResolvedValueOnce(refetched);
+    mockPatch.mockResolvedValue(patchResponse);
+    const { result } = renderHook(() => useClient('1'), { wrapper: makeWrapper() });
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    await result.current.update({ name: 'Ana García' });
+
+    await waitFor(() => expect(result.current.client).toEqual(refetched));
+  });
+
   it('renew resolves with the created subscription', async () => {
     const createdSubscription = { id: 'sub-9', clientId: '1', planId: 'plan-1' };
     mockGet.mockResolvedValue(client1);
