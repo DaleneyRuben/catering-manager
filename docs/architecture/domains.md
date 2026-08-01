@@ -12,10 +12,6 @@ This document describes the **target**. The code does not fully match it yet —
 work, in dependency order, is tracked in [backlog.md](./backlog.md). Where the two disagree,
 this document is the intent and the backlog says what is left to do about it.
 
-One naming note, so nothing reads as a contradiction against the repo as it stands today:
-
-- The `client-history` domain is still called `history/` until backlog item 6.1.
-
 ---
 
 ## Vocabulary
@@ -134,11 +130,20 @@ Every table has exactly one owner. This table is the authority.
 
 ### `client-history`
 
-Renamed from `history`, which was ambiguous — `login-event` is also a history. It owns
-`client_history` and, under rule 1, is the **only** writer of it. Today eight sites across
-three domains write history events with the same six fields copied by hand; all of them
-become calls to one function whose signature can validate that, say, a `plan_renewed` event
-always carries an end date.
+Renamed from `history` (#125), which was ambiguous — `login-event` is also a history. It owns
+`client_history` and, under rule 1, is the **only** writer of it. The eight sites across three
+domains that used to copy the same six fields by hand are now calls to `record(actor, event)`,
+where `event` is a union keyed on the event type, so metadata is checked per event.
+
+`record` takes the optional `transaction` (rule 3) and decides itself whether to pass it to
+Sequelize. That is what removed the last duplication in `subscription/create.ts`, which
+previously branched over an `if (transaction)` to make the same call two ways.
+
+One event carries two shapes: `plan_assigned` is emitted both when a plan is put in place,
+with the plan and its price, and when a start date or duration is later edited, with only the
+new dates. The union keeps the plan fields optional so the refactor changed no stored row.
+Splitting it into two event types — which would also give the declared-but-unemitted
+`plan_changed` a home — is deliberately left to its own change.
 
 ### `evaluation` orchestrates
 
@@ -248,7 +253,7 @@ backend/src/
 
     client-history/                           ← owning: client_history. Was history/
       find-by-client.ts
-    + record.ts                               ← the ONLY writer of client_history
+      record.ts                               ← the ONLY writer of client_history
 
     plan/  menu/  evaluation/  user/  login-event/     ← owning
     production/  delivery/  report/                     ← view: read, never write
@@ -395,5 +400,6 @@ A dedicated `delivery_groups` table owned by `delivery` is the better model and 
 ### `plan_changed` is declared but never emitted
 
 The event type exists; changing only the assigned plan on an existing subscription records no
-history entry. Noted in `business-rules.md`. Once `client-history` is the sole writer, this
-becomes a one-function change.
+history entry. Noted in `business-rules.md`. Now that `client-history` is the sole writer, this
+is a union member and a `record` call — and it belongs with the `plan_assigned` split described
+under `client-history` above, since both concern what a plan-change event should carry.

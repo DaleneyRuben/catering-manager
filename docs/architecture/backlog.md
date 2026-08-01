@@ -55,6 +55,14 @@ its work becomes fiction.
       line that could simply be deleted: the same rule stated twice over different shapes
       (subscriptions vs. client rows) and different granularities (one total vs. per zone).
       Both now call `countStops` in `delivery/_helpers.ts`.
+- [x] **#125** — item 6.1: `client-history` is the only writer of `client_history`. The domain
+      folder was renamed from `history/`, and the eight hand-copied sites became
+      `record(actor, event)` calls — 27 lines of duplicated field-copying replaced by 6 in
+      `client`, and the `if (transaction) … else …` pair in `subscription/create.ts` collapsed
+      into one call, since `record` takes the optional transaction itself. Every backlog line
+      reference in this item was accurate. The `plan_assigned` collision found while typing the
+      event union — one event type carrying two different metadata shapes — was left as-is and
+      split out into item 6.6 rather than fixed here, so this item changed no stored row.
 
 ---
 
@@ -63,31 +71,13 @@ its work becomes fiction.
 The core of ADR-007, and the only item that moves business logic. **Needs explicit approval
 before any code is written**, and should be split across several PRs rather than one.
 
-### 6.1 `client-history` becomes the only writer
-
-Eight sites hand-copy the same six-field event shape:
-
-```
-subscription/create.ts:87-88      subscription/update.ts:49, :78
-subscription/delete-upcoming-subscription.ts:52
-evaluation/mark-paid.ts:40
-client/finalize.ts:26   client/soft-delete.ts:10   client/update.ts:28
-```
-
-Replace with `clientHistory.record(actor, event)` — one writer, with a discriminated union on
-`eventType` so metadata is type-checked per event. Rename the `history` domain folder to
-`client-history` in the same PR.
-
-**Highest value per hour in this backlog**: it removes the duplication _and_ establishes the
-pattern every later item follows.
-
 ### 6.2 `subscription` owns `subscriptions`
 
 Five writes live outside the domain:
 
 ```
 client/finalize.ts:24                      → subscription.finalize(clientId, actor)
-client/update.ts:50                        → subscription.extendAfterPause(...)
+client/update.ts:43                        → subscription.extendAfterPause(...)
 evaluation/mark-paid.ts:16                 → subscription.markPaid(id, actor)
 evaluation/revert-pending-renewal.ts:25    → subscription.remove(id)
 evaluation/delete-pending-client.ts:11     → subscription.remove(...)
@@ -97,7 +87,7 @@ Each new function is **intention-shaped** (rule 2) — `finalize`, not
 `update({ contractEndDate, finalizedAt })`. The rule for finalizing moves out of `client` and
 into its owner.
 
-Note `client/update.ts:38-52` currently holds the entire resume calculation behind a
+Note `client/update.ts:23-45` currently holds the entire resume calculation behind a
 `pausedSince` field check. That is subscription lifecycle logic living in a generic CRUD
 updater, and it moves with this item.
 
@@ -131,7 +121,20 @@ together. `subscription/create.ts` already threads a transaction — make it uni
 
 Watch for the cross-domain writes that have **no** transaction today, and gain one here:
 `client/finalize.ts` (subscription + history) and `subscription/update.ts` (history written
-_before_ the update it describes, so a failure leaves an orphan event).
+_before_ the update it describes, so a failure leaves an orphan event). `client-history.record`
+already takes the parameter — the callers are what still need threading.
+
+### 6.6 Split the two meanings of `plan_assigned`
+
+Deferred out of 6.1 so that item stayed provably behaviour-identical. `plan_assigned` is
+emitted both when a plan is put in place (metadata: plan, price, dates, discount) and when a
+start date or duration is later edited (metadata: dates only). `record`'s union keeps the plan
+fields optional to allow both, which costs the per-event type checking that was the point.
+
+Give the edit case its own event type, and emit `plan_changed` (debt D3) at the same time —
+both are decisions about what a plan-change event should carry. Changes what lands in
+`client_history`, so it needs a label in the frontend timeline; rows already written keep the
+old type.
 
 ---
 
