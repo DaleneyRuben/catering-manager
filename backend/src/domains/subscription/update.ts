@@ -1,9 +1,9 @@
 import Client from '../../models/Client';
-import ClientHistory from '../../models/ClientHistory';
 import Subscription from '../../models/Subscription';
 import { UpdateSubscriptionDto } from '../../schemas/subscription.schema';
 import type { Actor } from '../../types/actor';
 import { addDeliveryDays, subtractDeliveryDays, calcContractEndDate } from '../../utils/date';
+import { record } from '../client-history';
 import { finalizeOverlappingSubscriptions } from './finalize-overlapping';
 
 export const update = async (
@@ -46,17 +46,14 @@ export const update = async (
       if (client) await client.update({ pausedSince: null });
     }
 
-    await ClientHistory.create({
+    await record(actor, {
+      type: 'plan_assigned',
       clientId: subscription.clientId,
-      eventType: 'plan_assigned',
-      occurredAt: new Date(),
       metadata: {
         startDate: newStartDate,
         duration: newDuration,
         contractEndDate: newContractEndDate,
       },
-      userId: actor.userId,
-      username: actor.username,
     });
 
     return subscription.update(base);
@@ -75,13 +72,10 @@ export const update = async (
     }
 
     if (added.length > 0) {
-      await ClientHistory.create({
+      await record(actor, {
+        type: 'suspended',
         clientId: subscription.clientId,
-        eventType: 'suspended',
-        occurredAt: new Date(),
         metadata: { dates: added },
-        userId: actor.userId,
-        username: actor.username,
       });
     }
 

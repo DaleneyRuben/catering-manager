@@ -1,11 +1,11 @@
 import { Op } from 'sequelize';
 import Appointment from '../../models/Appointment';
-import ClientHistory from '../../models/ClientHistory';
 import Plan from '../../models/Plan';
 import Subscription from '../../models/Subscription';
 import { appToday } from '../../utils/date';
 import { ConflictError } from '../../utils/errors';
 import { Actor } from '../../types/actor';
+import { record } from '../client-history';
 
 // Only a renewal registered ahead of time can be removed: the running plan is ended with
 // Finalizar plan, and a client whose only live plan has not started yet keeps it — deleting it
@@ -49,10 +49,9 @@ export const deleteUpcomingSubscription = async (
 
   await subscription.destroy();
 
-  await ClientHistory.create({
+  await record(actor, {
+    type: 'renewal_deleted',
     clientId,
-    eventType: 'renewal_deleted',
-    occurredAt: new Date(),
     metadata: {
       planId: subscription.planId,
       planName: plan?.name ?? null,
@@ -64,8 +63,6 @@ export const deleteUpcomingSubscription = async (
       // the plan_renewed entry above it — that entry is never modified
       registeredAt: subscription.createdAt,
     },
-    userId: actor.userId,
-    username: actor.username,
   });
 
   return subscription;

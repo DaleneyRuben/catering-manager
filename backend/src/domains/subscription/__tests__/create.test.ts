@@ -116,6 +116,7 @@ describe('create', () => {
     expect(record).toHaveBeenCalledWith(
       actor,
       expect.objectContaining({ type: 'plan_assigned', clientId: 1 }),
+      undefined,
     );
   });
 
@@ -130,6 +131,7 @@ describe('create', () => {
     expect(record).toHaveBeenCalledWith(
       expect.objectContaining({ userId: 9, username: 'ada' }),
       expect.anything(),
+      undefined,
     );
   });
 
@@ -168,6 +170,7 @@ describe('create', () => {
     expect(record).toHaveBeenCalledWith(
       actor,
       expect.objectContaining({ type: 'plan_renewed', clientId: 1 }),
+      undefined,
     );
   });
 
@@ -312,6 +315,7 @@ describe('create', () => {
     expect(record).toHaveBeenCalledWith(
       actor,
       expect.objectContaining({ metadata: expect.objectContaining({ appointmentId: 4 }) }),
+      undefined,
     );
   });
 
