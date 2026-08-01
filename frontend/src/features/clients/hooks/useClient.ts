@@ -30,10 +30,9 @@ export function useClient(id: string | number) {
   const updateMutation = useMutation({
     mutationFn: (data: ClientUpdateDraft): Promise<Client> =>
       api.patch<Client>(`/clients/${id}`, data),
-    onSuccess: (updated) => {
-      qc.setQueryData(['clients', id], updated);
+    onSuccess: () => {
+      invalidateClient();
       invalidateClientList();
-      qc.invalidateQueries({ queryKey: ['clients', id, 'history'] });
       toast.success('Datos del cliente actualizados');
     },
   });

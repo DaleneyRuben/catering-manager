@@ -133,13 +133,14 @@ describe('ClientDetailPage', () => {
   });
 
   it('calls PATCH on pause and toggles button', async () => {
-    mockPatch.mockResolvedValue({
-      ...mockClient,
-      status: 'paused',
-      pausedSince: '2026-06-15T00:00:00.000Z',
-    });
+    const paused = { ...mockClient, status: 'paused', pausedSince: '2026-06-15T00:00:00.000Z' };
+    mockPatch.mockResolvedValue(paused);
     renderPage();
     const btn = await screen.findByRole('button', { name: /pausar/i });
+    mockGet.mockImplementation((url: string) => {
+      if (url.includes('/history')) return Promise.resolve([]);
+      return Promise.resolve(mockPatch.mock.calls.length > 0 ? paused : mockClient);
+    });
     fireEvent.click(btn);
     await waitFor(() =>
       expect(mockPatch).toHaveBeenCalledWith(
@@ -184,10 +185,15 @@ describe('ClientDetailPage', () => {
   });
 
   it('Guardar calls PATCH with updated fields and shows new name', async () => {
-    mockPatch.mockResolvedValue({ ...mockClient, name: 'Jane Doe' });
+    const renamed = { ...mockClient, name: 'Jane Doe' };
+    mockPatch.mockResolvedValue(renamed);
     renderPage();
     fireEvent.click(await screen.findByRole('button', { name: /más acciones/i }));
     fireEvent.click(screen.getByText('Editar datos'));
+    mockGet.mockImplementation((url: string) => {
+      if (url.includes('/history')) return Promise.resolve([]);
+      return Promise.resolve(mockPatch.mock.calls.length > 0 ? renamed : mockClient);
+    });
     fireEvent.change(screen.getByDisplayValue('John Doe'), { target: { value: 'Jane Doe' } });
     fireEvent.click(screen.getByRole('button', { name: /guardar/i }));
     await waitFor(() =>
