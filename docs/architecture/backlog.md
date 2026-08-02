@@ -79,6 +79,16 @@ its work becomes fiction.
       the history metadata too would have forced `create` to read the persisted row instead of
       the DTO, rewriting ~20 test mocks for no rule-level gain. `client/finalize.ts` still
       records `finalized` itself, so the event survives a client with no subscription, as before.
+- [x] **#128** — item 6.3, `groupToken` half only: `client` is the only writer of `groupToken`.
+      `delivery/set-group.ts` moved wholesale to `client/set-delivery-group.ts` — all five writes,
+      not just the two instance ones, because the three `Client.update(…, { where })` statements
+      are the same grouping rule applied to other members' rows; fronting them with a client API
+      while the rule stayed in `delivery` would have split one rule across two domains, which is
+      what #127 found had already gone wrong once. `delivery` is now a pure view domain. The
+      endpoint already lived on the client controller (`PUT /api/clients/:id/group`), so that
+      import now points at the domain owning the table. The `pausedSince` half is **deferred to
+      D1** — see 6.3 below for the import cycle that makes the intermediate step not worth
+      building.
 
 ---
 
@@ -87,24 +97,38 @@ its work becomes fiction.
 The core of ADR-007, and the only item that moves business logic. **Needs explicit approval
 before any code is written**, and should be split across several PRs rather than one.
 
-### 6.3 `client` owns `clients`
+### 6.3 `client` owns `clients` — `pausedSince` half, blocked on D1
 
-Twelve write statements live outside the domain, across four files:
+The `groupToken` half landed in #128 as `client.setDeliveryGroup()`. What remains is the
+`pausedSince` write: **three statements across two files**, both in `subscription`.
 
 ```
-subscription/create.ts:93-94, :99-100                     (pausedSince — each an if/else
-subscription/update.ts:46                                  transaction pair, so 2 decisions)
-evaluation/mark-paid.ts:25, :28                           (pausedSince)
-delivery/set-group.ts:13, :16, :24, :29, :35              (groupToken)
+subscription/_helpers.ts:42, :47   (applyRenewalPauseState — one clear, one stamp)
+subscription/update.ts:46          (cleared when a sin-fecha renewal is given a start date)
 ```
 
-`set-group.ts` is the bulk of it and the least obvious: only `:13` and `:24` are instance
-writes on the client being edited. `:16`, `:29` and `:35` are `Client.update(…, { where })`
-statements rewriting _other_ clients' tokens — evicting old members and stamping new ones.
-Any `client.setDeliveryGroup()` API has to cover those too, or the group logic breaks.
+The count this item carried before — twelve statements across four files, naming
+`subscription/create.ts` and `evaluation/mark-paid.ts` — is stale twice over. #127 moved
+`markPaid` into `subscription` and collapsed both callers onto one helper, so its four
+`pausedSince` writes became the two in `_helpers.ts`; #128 removed the five `groupToken` ones.
 
-Becomes `client.pause()` / `client.resume()` / `client.setDeliveryGroup()`. This also makes
-`delivery` a pure view domain.
+**Why the rest waits for D1.** The obvious fix — add `client.pause()` / `client.resume()` and
+call them from `subscription` — cannot be written today. `client/update.ts:6` already imports
+`extendAfterPause` from `subscription`, so an import back the other way closes a loop, and
+`import/no-cycle` (error, inherited from airbnb-base) rejects it. Confirmed on the #128 branch
+rather than assumed:
+
+```
+subscription/_helpers.ts
+  2:1  error  Dependency cycle via ../client:6=>./update:5=>../subscription:6
+```
+
+Breaking the loop means moving the pause/resume decisions — the history event and the
+resume-time contract extension — out of `client` and into `subscription`. That is most of what
+D1 does anyway, and D1 then deletes the `client.pause()` / `client.resume()` pair it would have
+created: once `pausedSince` is a column on `subscriptions`, `subscription` writing it is not a
+cross-domain write at all. The wrapper would ship with a known expiry date. Do D1 first; this
+item closes with it.
 
 ### 6.4 `auth` stops writing `users`
 
@@ -139,6 +163,10 @@ old type.
 After item 6, add `no-restricted-syntax` overrides — one per owning domain — rejecting
 `Model.create` / `.update` / `.destroy` / `.bulkCreate` outside the owner.
 
+The `Client` override is the one that cannot go in early: a rule keyed on the model cannot
+exempt a single column, so it stays blocked by the `pausedSince` writes in `subscription` until
+D1 lands (see 6.3). Every other model's override is unaffected.
+
 Known and accepted gap: instance writes (`sub.update({ ... })`) cannot be caught, because
 ESLint has no type information for a local variable. Narrowed by returning data rather than
 live Sequelize instances from domain APIs; otherwise it rests on review.
@@ -167,10 +195,15 @@ session; the #115 guard holds until then — now in one place (`subscription/_he
 #127 found it had been missed on the mark-paid path. That a one-column rule could be half-applied
 for two months is the clearest argument yet for fixing the model rather than the symptom.
 
+**Now blocking, not just debt.** The remaining half of item 6.3 and the `Client` half of item 7
+both wait on this — the import cycle in 6.3 is the same wrong-table problem showing up as a
+build error. Scheduling it is no longer optional if the backlog is to be finished and deleted.
+
 ### D2. `groupToken` as a `clients` column 🟡
 
-A delivery group is a delivery concept stored as a client field, which is why `delivery` writes
-to `clients`. Item 6.3 resolves the ownership violation. A dedicated `delivery_groups` table
+A delivery group is a delivery concept stored as a client field, which is why `delivery` used to
+write to `clients`. #128 resolved the ownership violation by moving the function, not the model —
+the concept still lives in the wrong table. A dedicated `delivery_groups` table
 owned by `delivery` is the better model and would make it an owning domain — a migration, not
 required by anything above.
 
