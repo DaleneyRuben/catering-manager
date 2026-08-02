@@ -50,16 +50,18 @@ describe('extendAfterPause', () => {
   it('keeps the contract long enough to cover days suspended after the resume date', async () => {
     const sub = {
       id: 5,
-      startDate: '2026-07-27',
+      startDate: '2026-06-01',
       duration: 20,
-      suspendedDates: ['2026-08-10', '2026-08-11'],
+      suspendedDates: ['2026-06-10', '2026-06-11'],
       update: jest.fn(),
     };
     (Subscription.findByPk as jest.Mock).mockResolvedValue(sub);
 
-    await extendAfterPause(5, new Date('2026-08-01T12:00:00'));
+    await extendAfterPause(5, new Date('2026-06-05T12:00:00'));
 
-    expect(sub.update).toHaveBeenCalledWith({ contractEndDate: '2026-08-25' });
+    // 16 days owed from the mocked today of 05/06 would end on 29/06, but the two suspended
+    // days are not deliveries, so the contract has to run two days further.
+    expect(sub.update).toHaveBeenCalledWith({ contractEndDate: '2026-07-01' });
   });
 
   it('does not count days suspended before the pause as elapsed', async () => {
