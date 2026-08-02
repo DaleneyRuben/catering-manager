@@ -10,7 +10,7 @@ export {
 } from './find-history-for-nutritionist';
 export { convertAppointment } from './convert-appointment';
 export { deletePendingClient } from './delete-pending-client';
-export { revertPendingRenewal } from './revert-pending-renewal';
+export { discardPendingRenewal } from './discard-pending-renewal';
 export { resolveRenewal, type ResolveRenewalResult } from './resolve-renewal';
 export { findPendingPayment } from './find-pending-payment';
 export { clientHasAppointment } from './client-has-appointment';

@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import {
   findPendingPayment,
-  revertPendingRenewal as revertRenewal,
+  discardPendingRenewal as discardRenewal,
   deletePendingClient,
 } from '../domains/evaluation';
 import { markPaid as markSubscriptionPaid } from '../domains/subscription';
@@ -32,9 +32,9 @@ const markPaid = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
-const revertPendingRenewal = async (req: Request, res: Response, next: NextFunction) => {
+const discardPendingRenewal = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const subscription = await revertRenewal(decodeId(req.params.id));
+    const subscription = await discardRenewal(decodeId(req.params.id));
     if (!subscription) {
       sendError(res, 'Client has no pending renewal', 404);
       return;
@@ -61,4 +61,4 @@ const remove = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
-export default { getPendingPayment, markPaid, revertPendingRenewal, remove };
+export default { getPendingPayment, markPaid, discardPendingRenewal, remove };
