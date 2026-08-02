@@ -24,6 +24,25 @@ export const addDeliveryDays = (startDate: string, days: number): string => {
   return format(result, 'yyyy-MM-dd');
 };
 
+// Like addDeliveryDays, but dates in `skipDates` do not count towards `days` — the caller walks
+// past them and keeps counting. Used to carry suspended days across a recalculated contract end.
+export const addDeliveryDaysSkipping = (
+  startDate: string,
+  days: number,
+  skipDates: string[],
+): string => {
+  const skip = new Set(skipDates);
+  let cursor = startDate;
+  let counted = 0;
+
+  while (counted < days) {
+    cursor = addDeliveryDays(cursor, 1);
+    if (!skip.has(cursor)) counted += 1;
+  }
+
+  return cursor;
+};
+
 export const subtractDeliveryDays = (startDate: string, days: number): string => {
   const result = subBusinessDays(parseISO(`${startDate}T12:00:00`), days);
   return format(result, 'yyyy-MM-dd');

@@ -1,5 +1,6 @@
 import {
   addDeliveryDays,
+  addDeliveryDaysSkipping,
   subtractDeliveryDays,
   addCalendarDays,
   isIsoDate,
@@ -152,5 +153,28 @@ describe('isIsoDate', () => {
 
   it('rejects well-formed but impossible dates', () => {
     expect(isIsoDate('2026-13-40')).toBe(false);
+  });
+});
+
+describe('addDeliveryDaysSkipping', () => {
+  it('behaves like addDeliveryDays when nothing is skipped', () => {
+    expect(addDeliveryDaysSkipping('2026-08-01', 15, [])).toBe(addDeliveryDays('2026-08-01', 15));
+  });
+
+  // Sat Aug 1 + 15 delivery days lands on Aug 21; skipping Mon 10 and Tue 11 pushes it to Aug 25.
+  it('does not count a skipped date as a delivery day', () => {
+    expect(addDeliveryDaysSkipping('2026-08-01', 15, ['2026-08-10', '2026-08-11'])).toBe(
+      '2026-08-25',
+    );
+  });
+
+  it('ignores skipped dates that fall before the start date', () => {
+    expect(addDeliveryDaysSkipping('2026-08-01', 5, ['2026-07-29'])).toBe('2026-08-07');
+  });
+
+  it('ignores skipped dates that fall on a weekend', () => {
+    expect(addDeliveryDaysSkipping('2026-08-01', 5, ['2026-08-08', '2026-08-09'])).toBe(
+      '2026-08-07',
+    );
   });
 });

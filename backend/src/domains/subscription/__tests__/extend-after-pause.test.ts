@@ -44,4 +44,38 @@ describe('extendAfterPause', () => {
 
     expect(await extendAfterPause(999, new Date('2026-05-15T12:00:00'))).toBeNull();
   });
+
+  // A suspended day is one the client paid for and did not receive. The contract end date had
+  // already been pushed out to cover it, so recalculating on resume must not drop it.
+  it('keeps the contract long enough to cover days suspended after the resume date', async () => {
+    const sub = {
+      id: 5,
+      startDate: '2026-07-27',
+      duration: 20,
+      suspendedDates: ['2026-08-10', '2026-08-11'],
+      update: jest.fn(),
+    };
+    (Subscription.findByPk as jest.Mock).mockResolvedValue(sub);
+
+    await extendAfterPause(5, new Date('2026-08-01T12:00:00'));
+
+    expect(sub.update).toHaveBeenCalledWith({ contractEndDate: '2026-08-25' });
+  });
+
+  it('does not count days suspended before the pause as elapsed', async () => {
+    const sub = {
+      id: 5,
+      startDate: '2026-05-01',
+      duration: 20,
+      suspendedDates: ['2026-05-08'],
+      update: jest.fn(),
+    };
+    (Subscription.findByPk as jest.Mock).mockResolvedValue(sub);
+
+    await extendAfterPause(5, new Date('2026-05-15T12:00:00'));
+
+    // 10 business days elapsed minus the 1 suspended day inside that window = 9 consumed,
+    // so 11 are still owed instead of 10.
+    expect(sub.update).toHaveBeenCalledWith({ contractEndDate: '2026-06-22' });
+  });
 });
