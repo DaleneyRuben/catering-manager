@@ -3,11 +3,13 @@ import jwt from 'jsonwebtoken';
 import User from '../../../models/User';
 import { login, InvalidCredentialsError } from '../login';
 import { record } from '../../login-event';
+import { recordLogin } from '../../user';
 import { encodeId } from '../../../utils/sqids';
 import { ROLES } from '../../../constants/roles.constants';
 
 jest.mock('../../../models/User');
 jest.mock('../../login-event');
+jest.mock('../../user');
 jest.mock('bcrypt');
 jest.mock('jsonwebtoken');
 
@@ -61,7 +63,7 @@ describe('login', () => {
     );
   });
 
-  it('updates lastLoginAt and the device snapshot on successful login', async () => {
+  it('hands the device snapshot to the user domain on successful login', async () => {
     (User.findOne as jest.Mock).mockResolvedValue(mockUser);
     (bcrypt.compare as jest.Mock).mockResolvedValue(true);
     (jwt.sign as jest.Mock).mockReturnValue('signed-token');
@@ -73,12 +75,12 @@ describe('login', () => {
 
     await login('ada', 'correct-password', ANDROID_CHROME_UA);
 
-    expect(mockUser.update).toHaveBeenCalledWith({
-      lastLoginAt: expect.any(Date),
-      lastDeviceType: 'mobile',
-      lastOs: 'Android 14',
-      lastBrowser: 'Chrome 126',
+    expect(recordLogin).toHaveBeenCalledWith(1, {
+      deviceType: 'mobile',
+      os: 'Android 14',
+      browser: 'Chrome 126',
     });
+    expect(mockUser.update).not.toHaveBeenCalled();
   });
 
   it('records a login event with the user agent', async () => {
