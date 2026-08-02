@@ -1,3 +1,4 @@
+import User from '../../models/User';
 import type { DeviceType } from '../../models/LoginEvent';
 
 export type LoginDevice = {
@@ -6,5 +7,14 @@ export type LoginDevice = {
   browser: string | null;
 };
 
-export const recordLogin = async (_id: number, _device: LoginDevice): Promise<void> =>
-  Promise.resolve();
+export const recordLogin = async (id: number, device: LoginDevice): Promise<void> => {
+  const user = await User.findByPk(id);
+  if (!user) return;
+
+  await user.update({
+    lastLoginAt: new Date(),
+    lastDeviceType: device.deviceType,
+    lastOs: device.os,
+    lastBrowser: device.browser,
+  });
+};
