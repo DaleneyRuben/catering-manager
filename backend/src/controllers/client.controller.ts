@@ -7,8 +7,8 @@ import {
   finalize as finalizeClient,
   softDelete as softDeleteClient,
   search as searchClients,
+  setDeliveryGroup,
 } from '../domains/client';
-import { setGroup } from '../domains/delivery';
 import { clientHasAppointment } from '../domains/evaluation';
 import { ROLES } from '../constants/roles.constants';
 import { sendSuccess, sendPaginated, sendError } from '../utils/response';
@@ -132,7 +132,7 @@ const setGroupHandler = async (req: Request, res: Response, next: NextFunction) 
   try {
     const clientId = decodeId(req.params.id);
     const memberIds = (req.body.memberIds as string[]).map(decodeId);
-    await setGroup(clientId, memberIds);
+    await setDeliveryGroup(clientId, memberIds);
     const client = await findClientById(clientId);
     if (!client) {
       sendError(res, 'Client not found', 404);

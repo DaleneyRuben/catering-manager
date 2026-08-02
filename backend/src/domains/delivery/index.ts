@@ -1,4 +1,3 @@
-export { setGroup } from './set-group';
 export { findMembers } from './find-members';
 export { findRoute } from './find-route';
 export { countDeliveriesToday } from './count-deliveries-today';

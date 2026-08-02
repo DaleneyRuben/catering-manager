@@ -5,6 +5,7 @@ export { create } from './create';
 export { update } from './update';
 export { finalize } from './finalize';
 export { softDelete } from './soft-delete';
+export { setDeliveryGroup } from './set-delivery-group';
 export { search } from './search';
 export { findBirthdays } from './find-birthdays';
 export type { BirthdayPerson } from './find-birthdays';
