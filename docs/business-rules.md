@@ -230,7 +230,7 @@ The queue shows a distinguishing badge on any appointment linked to an existing 
 - **New-client appointment** (no `clientId`) — opens the existing new-client wizard, unchanged: she fills in the remaining details and confirms a plan, and the wizard asks whether the service was paid at this visit ("¿Pagó el servicio?"). Submitting creates the client + subscription and stamps the appointment's `subscriptionId` (a **Conversion**).
 - **Existing-client appointment** (`clientId` set) — opens a dedicated, read-only summary view (name, phone, current status, current plan, contract end date only — never the full client detail page, which the Nutricionista cannot otherwise reach) for that one client. From there she renews or reactivates the client's plan using the same rules an Admin uses from the Clientes screen (see Client Lifecycle), including the same "¿Pagó el servicio?" choice. An Admin-initiated renewal from the Clientes screen has no such choice and is always implicitly paid — the question only appears in this appointment-driven flow. Submitting stamps the appointment's `subscriptionId` with the new subscription, exactly as a Conversion does.
 
-Once an appointment is resolved (`subscriptionId` set) it cannot be resolved again — the only way a resolved appointment reverts to pending is the unpaid rollback below.
+Once an appointment is resolved (`subscriptionId` set) it cannot be resolved again.
 
 ### Unpaid resolutions ("Pendientes de pago")
 
@@ -239,7 +239,7 @@ Whether from a Conversion or an appointment-driven renewal, marking the resoluti
 If a still-unpaid resolution is instead abandoned (the Admin's "Pendientes de pago" cleanup action):
 
 - **New-client appointment** — the client is soft-deleted, their one subscription is deleted permanently, and the appointment is deleted with it. Nothing else exists to lose.
-- **Existing-client appointment** — only the subscription created by the renewal is deleted, permanently; the client, their other subscriptions, and their history are untouched. The appointment reverts to pending (`subscriptionId` cleared) so it reappears in the Nutricionista's queue.
+- **Existing-client appointment** — the subscription created by the renewal and the appointment itself are both deleted, permanently; the client, their other subscriptions, and their history are untouched. The appointment does not return to the Nutricionista's queue — if a new evaluation is needed, the Admin schedules a fresh appointment.
 
 Subscriptions are never soft-deleted (the model is not paranoid, unlike Client): a subscription is only ever removed when it should not have existed at all, and `client_history` keeps the record of what happened.
 
