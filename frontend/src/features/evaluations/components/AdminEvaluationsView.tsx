@@ -147,8 +147,8 @@ export function AdminEvaluationsView() {
           message={
             <>
               ¿Seguro que quieres descartar la renovación de{' '}
-              <span className="font-semibold">{modal.client.name}</span>? La cita volverá a la cola
-              de la nutricionista. Esta acción no se puede deshacer.
+              <span className="font-semibold">{modal.client.name}</span>? Se eliminará la cita junto
+              con la renovación pendiente. Esta acción no se puede deshacer.
             </>
           }
           confirmLabel="Descartar"
