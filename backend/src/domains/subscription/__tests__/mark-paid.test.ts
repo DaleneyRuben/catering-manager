@@ -223,6 +223,34 @@ describe('markPaid', () => {
     expect(mockClient.update).toHaveBeenCalledWith({ pausedSince: appToday() });
   });
 
+  // Same rule as subscription/create.ts: an already-paused client keeps the date they actually
+  // paused on, because resume counts the days they are owed from it. Deferring the renewal
+  // behind a payment must not lose the guard.
+  it('keeps the original pausedSince when confirming a sin-fecha renewal for a paused client', async () => {
+    const mockClient = {
+      pausedSince: new Date('2026-01-10T12:00:00'),
+      update: jest.fn().mockResolvedValue({}),
+    };
+    const subscription = {
+      id: 3,
+      clientId: 1,
+      planId: 2,
+      startDate: null,
+      duration: 20,
+      contractEndDate: null,
+      discount: 500,
+      renewalType: 'renewal',
+      update: jest.fn().mockResolvedValue({}),
+    };
+    (Subscription.findOne as jest.Mock).mockResolvedValue(subscription);
+    (Client.findByPk as jest.Mock).mockResolvedValue(mockClient);
+    (Plan.findByPk as jest.Mock).mockResolvedValue({ id: 2, name: 'Completo', price: 5000 });
+
+    await markPaid(1, actor);
+
+    expect(mockClient.update).not.toHaveBeenCalled();
+  });
+
   it('clears pausedSince when confirming payment for a reactivation', async () => {
     const mockClient = { update: jest.fn().mockResolvedValue({}) };
     const subscription = {

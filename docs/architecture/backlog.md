@@ -63,6 +63,22 @@ its work becomes fiction.
       reference in this item was accurate. The `plan_assigned` collision found while typing the
       event union — one event type carrying two different metadata shapes — was left as-is and
       split out into item 6.6 rather than fixed here, so this item changed no stored row.
+- [x] **#127** — item 6.2: `subscription` is the only writer of `subscriptions`. All five sites
+      were where this file said they were. `markPaid` moved wholesale from `evaluation` rather
+      than being fronted by a thin flag-setter: it is the deferred half of `subscription/create`
+      (same three side effects — overlap finalization, history, `pausedSince`), and splitting the
+      pair across two domains is what let them drift. **The drift was live**: the already-paused
+      guard from #115 was in `create.ts` and missing from `mark-paid.ts`, so a paused client
+      renewed sin fecha through an unpaid appointment lost their remaining pause days when an
+      admin confirmed payment. Fixed first, in its own red/green pair, then the move.
+      Two deviations from what this item assumed. `finalize` and `extendAfterPause` take a
+      **subscription id**, not a client id: choosing which subscription describes a client today
+      is `getCurrentSubscription`, shared with `withStatus` in `client/_helpers.ts`, and moving
+      it would have duplicated a selection rule to remove a write. And only the `pausedSince`
+      rule plus the event-type map were extracted into `subscription/_helpers.ts` — converging
+      the history metadata too would have forced `create` to read the persisted row instead of
+      the DTO, rewriting ~20 test mocks for no rule-level gain. `client/finalize.ts` still
+      records `finalized` itself, so the event survives a client with no subscription, as before.
 
 ---
 
@@ -70,26 +86,6 @@ its work becomes fiction.
 
 The core of ADR-007, and the only item that moves business logic. **Needs explicit approval
 before any code is written**, and should be split across several PRs rather than one.
-
-### 6.2 `subscription` owns `subscriptions`
-
-Five writes live outside the domain:
-
-```
-client/finalize.ts:24                      → subscription.finalize(clientId, actor)
-client/update.ts:43                        → subscription.extendAfterPause(...)
-evaluation/mark-paid.ts:16                 → subscription.markPaid(id, actor)
-evaluation/revert-pending-renewal.ts:25    → subscription.remove(id)
-evaluation/delete-pending-client.ts:11     → subscription.remove(...)
-```
-
-Each new function is **intention-shaped** (rule 2) — `finalize`, not
-`update({ contractEndDate, finalizedAt })`. The rule for finalizing moves out of `client` and
-into its owner.
-
-Note `client/update.ts:23-45` currently holds the entire resume calculation behind a
-`pausedSince` field check. That is subscription lifecycle logic living in a generic CRUD
-updater, and it moves with this item.
 
 ### 6.3 `client` owns `clients`
 
@@ -167,7 +163,9 @@ running app.
 
 **Direction:** move `pausedSince` onto `subscriptions` and represent the two situations
 distinctly. Migration + rewrite of derived status and pause/resume. Deserves its own design
-session; the #115 guard holds until then.
+session; the #115 guard holds until then — now in one place (`subscription/_helpers.ts`), after
+#127 found it had been missed on the mark-paid path. That a one-column rule could be half-applied
+for two months is the clearest argument yet for fixing the model rather than the symptom.
 
 ### D2. `groupToken` as a `clients` column 🟡
 

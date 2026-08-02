@@ -2,9 +2,9 @@ import Client from '../../models/Client';
 import Plan from '../../models/Plan';
 import Subscription from '../../models/Subscription';
 import type { Actor } from '../../types/actor';
-import { appToday } from '../../utils/date';
 import { record } from '../client-history';
-import { finalizeOverlappingSubscriptions } from '../subscription';
+import { finalizeOverlappingSubscriptions } from './finalize-overlapping';
+import { applyRenewalPauseState, historyEventTypeFor } from './_helpers';
 
 export const markPaid = async (clientId: number, actor: Actor) => {
   const subscription = await Subscription.findOne({
@@ -20,21 +20,12 @@ export const markPaid = async (clientId: number, actor: Actor) => {
   if (subscription.startDate) {
     await finalizeOverlappingSubscriptions(clientId, subscription.startDate, subscription.id);
   }
-  if (subscription.renewalType === 'reactivation') {
+  if (subscription.renewalType) {
     const client = await Client.findByPk(clientId);
-    if (client) await client.update({ pausedSince: null });
-  } else if (subscription.renewalType === 'renewal' && !subscription.startDate) {
-    const client = await Client.findByPk(clientId);
-    if (client) await client.update({ pausedSince: appToday() });
+    await applyRenewalPauseState(client, subscription.renewalType, subscription.startDate);
   }
 
-  const eventTypeByRenewal = {
-    reactivation: 'reactivated',
-    renewal: 'plan_renewed',
-  } as const;
-  const eventType = subscription.renewalType
-    ? eventTypeByRenewal[subscription.renewalType as 'renewal' | 'reactivation']
-    : 'plan_assigned';
+  const eventType = historyEventTypeFor(subscription.renewalType);
 
   const plan = await Plan.findByPk(subscription.planId);
   await record(actor, {
