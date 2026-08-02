@@ -2,6 +2,7 @@ import bcrypt from 'bcrypt';
 import User, { type UserRole } from '../../models/User';
 import { encodeId } from '../../utils/sqids';
 import { record as recordLoginEvent } from '../login-event';
+import { recordLogin } from '../user';
 import { signToken } from './sign-token';
 
 const verifyPassword = (plain: string, hash: string): Promise<boolean> =>
@@ -26,12 +27,7 @@ export const login = async (
   if (!valid) throw new InvalidCredentialsError();
 
   const device = await recordLoginEvent(user.id as number, userAgent);
-  await user.update({
-    lastLoginAt: new Date(),
-    lastDeviceType: device.deviceType,
-    lastOs: device.os,
-    lastBrowser: device.browser,
-  });
+  await recordLogin(user.id as number, device);
 
   const token = signToken({ userId: user.id as number, username: user.username, role: user.role });
   return {

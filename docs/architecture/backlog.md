@@ -89,6 +89,15 @@ its work becomes fiction.
       import now points at the domain owning the table. The `pausedSince` half is **deferred to
       D1** — see 6.3 below for the import cycle that makes the intermediate step not worth
       building.
+- [x] **#130** — item 6.4: `auth` no longer writes `users`. The device snapshot write moved to
+      `user/record-login.ts` as `recordLogin(id, device)`, which takes the device but not the
+      timestamp — when "now" is belongs to the owner, not the caller. The device shape is `user`'s
+      own exported `LoginDevice` type rather than an import of `login-event`'s `ParsedDevice`:
+      both are built on `DeviceType` from the model, so they cannot drift on the enum, and `user`
+      gains no dependency on a domain it only receives data from. One consequence worth naming:
+      `login` had the `User` instance in hand and now re-reads it by id inside `recordLogin`, so a
+      successful login costs one extra `findByPk`. Accepted — the alternative is passing a live
+      Sequelize instance across a domain boundary, which is what item 7 wants less of, not more.
 
 ---
 
@@ -129,10 +138,6 @@ D1 does anyway, and D1 then deletes the `client.pause()` / `client.resume()` pai
 created: once `pausedSince` is a column on `subscriptions`, `subscription` writing it is not a
 cross-domain write at all. The wrapper would ship with a known expiry date. Do D1 first; this
 item closes with it.
-
-### 6.4 `auth` stops writing `users`
-
-`auth/login.ts:29-34` writes the device snapshot directly. Add `user.recordLogin(id, device)`.
 
 ### 6.5 Optional `transaction` on every write function
 
