@@ -4,7 +4,7 @@ import app from '../../app';
 import {
   deletePendingClient,
   findPendingPayment,
-  revertPendingRenewal,
+  discardPendingRenewal,
 } from '../../domains/evaluation';
 import { markPaid } from '../../domains/subscription';
 import { encodeId } from '../../utils/sqids';
@@ -62,8 +62,8 @@ describe('POST /api/evaluations/:id/mark-paid', () => {
 });
 
 describe('DELETE /api/evaluations/:id/pending-renewal', () => {
-  it('returns 200 when the pending renewal is reverted', async () => {
-    (revertPendingRenewal as jest.Mock).mockResolvedValue({ id: 5 });
+  it('returns 200 when the pending renewal is discarded', async () => {
+    (discardPendingRenewal as jest.Mock).mockResolvedValue({ id: 5 });
 
     const res = await request(app).delete(`/api/evaluations/${id1}/pending-renewal`);
 
@@ -71,7 +71,7 @@ describe('DELETE /api/evaluations/:id/pending-renewal', () => {
   });
 
   it('returns 404 when the client has no pending renewal', async () => {
-    (revertPendingRenewal as jest.Mock).mockResolvedValue(null);
+    (discardPendingRenewal as jest.Mock).mockResolvedValue(null);
 
     const res = await request(app).delete(`/api/evaluations/${id999}/pending-renewal`);
 
@@ -79,11 +79,11 @@ describe('DELETE /api/evaluations/:id/pending-renewal', () => {
   });
 
   it('decodes the client id and forwards it to the service', async () => {
-    (revertPendingRenewal as jest.Mock).mockResolvedValue({ id: 5 });
+    (discardPendingRenewal as jest.Mock).mockResolvedValue({ id: 5 });
 
     await request(app).delete(`/api/evaluations/${id1}/pending-renewal`);
 
-    expect(revertPendingRenewal).toHaveBeenCalledWith(1);
+    expect(discardPendingRenewal).toHaveBeenCalledWith(1);
   });
 });
 
