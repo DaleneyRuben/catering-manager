@@ -175,8 +175,9 @@ would have failed rule 4.
 `domains/client/derive-client-status.ts`. Its only consumer is still
 `domains/client/_helpers.ts`.
 
-`delivery` currently writes `Client.groupToken` (`set-group.ts`). Under rule 1 it calls
-`client.setDeliveryGroup(...)` instead, making it a pure view domain.
+`delivery` wrote `Client.groupToken` (`set-group.ts`) until #128, which moved the whole function
+to `client/set-delivery-group.ts` rather than fronting its five writes with an API. `delivery` is
+now a pure view domain.
 
 ---
 
@@ -240,7 +241,8 @@ backend/src/
       finalize.ts  soft-delete.ts
       derive-client-status.ts                 ← from utils/clientStatus.ts
       find-birthdays.ts                       ← from dashboard/
-    + pause.ts  resume.ts  set-delivery-group.ts
+      set-delivery-group.ts                   ← from delivery/set-group.ts
+    + pause.ts  resume.ts                     ← deferred with the pausedSince debt below
       __tests__/  index.ts
 
     subscription/                             ← owning: subscriptions. Largest domain
@@ -394,14 +396,23 @@ the code assumes "the current one."
 
 **Direction:** move `pausedSince` onto `subscriptions` and represent the two situations
 distinctly. This is a migration plus a rewrite of derived-status and pause/resume logic — it
-changes business rules and needs its own design work. It does not affect the ownership rules:
-`client` owns `clients` today, so `client.pause()` / `client.resume()` are the only writers
-either way, and moving the column later invalidates nothing here.
+changes business rules and needs its own design work.
+
+It was recorded here as not affecting the ownership rules. That turned out to be wrong, and the
+correction is the sharpest evidence for the direction above. `subscription` still writes
+`pausedSince` in three places, and the `client.pause()` / `client.resume()` pair meant to absorb
+them **cannot be written while the column lives on `clients`**: `client/update.ts` imports
+`extendAfterPause` from `subscription`, so the call back the other way closes an import cycle
+that `import/no-cycle` rejects. Untangling it means moving pause/resume decisions into
+`subscription` — after which the wrapper pair is deleted by the migration that follows it. So
+the wrapper is skipped: those three writes stay put until the column moves. See item 6.3 in
+[backlog.md](./backlog.md).
 
 ### `groupToken` as a `clients` column
 
-A delivery group is a delivery concept stored as a client field, which is why `delivery`
-writes to `clients` today. Rule 1 resolves the violation via `client.setDeliveryGroup(...)`.
+A delivery group is a delivery concept stored as a client field, which is why `delivery` wrote
+to `clients`. #128 resolved the ownership violation by moving the function, not the model — the
+concept still sits in the wrong table.
 A dedicated `delivery_groups` table owned by `delivery` is the better model and would make
 `delivery` an owning domain, but it is a migration and is not required by anything here.
 

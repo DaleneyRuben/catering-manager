@@ -2,7 +2,10 @@ import { Op } from 'sequelize';
 import { randomUUID } from 'crypto';
 import Client from '../../models/Client';
 
-export const setGroup = async (clientId: number, memberIds: number[]): Promise<void> => {
+// A delivery group is a set of clients at one address, linked by a shared token on `clients`.
+// It lives here rather than in `delivery` because every step of it writes that table — including
+// the rows of clients other than the one being edited.
+export const setDeliveryGroup = async (clientId: number, memberIds: number[]): Promise<void> => {
   const client = await Client.findByPk(clientId);
   if (!client) throw new Error(`Client ${clientId} not found`);
 
