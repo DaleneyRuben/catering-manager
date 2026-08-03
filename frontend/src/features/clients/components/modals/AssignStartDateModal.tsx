@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { isWeekend, parseISO, startOfTomorrow } from 'date-fns';
+import { startOfTomorrow } from 'date-fns';
 import { Modal } from '@ui/Modal';
 import { Button } from '@ui/Button';
 import { Field } from '@ui/Field';
 import { DatePickerInput } from '@ui/DatePickerInput';
 import { MODAL_CANCEL_STYLE, MODAL_CONFIRM_STYLE } from '@ui/modalButtonStyles';
+import { isWeekendStartDate } from '@/features/clients/utils/startDate';
 
 interface Props {
   clientName: string;
@@ -20,7 +21,7 @@ export function AssignStartDateModal({ clientName, planName, duration, onClose, 
   const [isSaving, setIsSaving] = useState(false);
 
   const handleAssign = async () => {
-    if (isWeekend(parseISO(startDate))) {
+    if (isWeekendStartDate(startDate)) {
       setError('El inicio debe ser un día hábil (lunes a viernes)');
       return;
     }

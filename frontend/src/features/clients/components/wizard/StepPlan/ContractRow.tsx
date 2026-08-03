@@ -1,9 +1,10 @@
 import { type UseFormRegister, type FieldErrors, type Control, Controller } from 'react-hook-form';
-import { startOfToday, isWeekend, parseISO, addDays } from 'date-fns';
+import { startOfToday, addDays } from 'date-fns';
 import { Field, inputCls } from '@ui/Field';
 import { DatePickerInput } from '@ui/DatePickerInput';
 import { WizardSectionCard } from '@ui/WizardSectionCard';
 import { addBusinessDays } from '@/utils/businessDays';
+import { isWeekendStartDate } from '@/features/clients/utils/startDate';
 import { formatDate } from '@/utils/format';
 import type { NewClientFormValues } from '@/features/clients/types';
 
@@ -61,7 +62,7 @@ export function ContractRow({
           rules={{
             required: 'Fecha de inicio es requerida',
             validate: (v) =>
-              !v || !isWeekend(parseISO(v)) || 'El inicio debe ser un día hábil (lunes a viernes)',
+              !isWeekendStartDate(v ?? '') || 'El inicio debe ser un día hábil (lunes a viernes)',
           }}
           render={({ field }) => (
             <Field
