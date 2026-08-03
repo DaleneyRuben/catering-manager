@@ -1,6 +1,7 @@
 import { Op } from 'sequelize';
 import Subscription from '../../../models/Subscription';
 import Client from '../../../models/Client';
+import sequelize from '../../../database/sequelize';
 import { record } from '../../client-history';
 import { update } from '../update';
 import { addDeliveryDays, subtractDeliveryDays } from '../../../utils/date';
@@ -9,9 +10,17 @@ jest.mock('../../../models/Subscription');
 jest.mock('../../../models/Client');
 jest.mock('../../client-history');
 jest.mock('../../../models/Plan');
+jest.mock('../../../database/sequelize', () => ({
+  __esModule: true,
+  default: { transaction: jest.fn() },
+}));
+
+const transaction = { id: 'own' };
+const callerTransaction = { id: 'caller' } as never;
 
 beforeEach(() => {
   jest.clearAllMocks();
+  (sequelize.transaction as jest.Mock).mockImplementation((work) => work(transaction));
 });
 
 const actor = { userId: 9, username: 'ada' };
@@ -24,7 +33,12 @@ describe('update', () => {
 
     const result = await update(1, 1, { contractEndDate: '2026-06-30' }, actor);
 
-    expect(mockInstance.update).toHaveBeenCalledWith({ contractEndDate: '2026-06-30' });
+    expect(mockInstance.update).toHaveBeenCalledWith(
+      { contractEndDate: '2026-06-30' },
+      {
+        transaction,
+      },
+    );
     expect(result).toMatchObject({ contractEndDate: '2026-06-30' });
   });
 
@@ -52,6 +66,7 @@ describe('update', () => {
 
     expect(mockInstance.update).toHaveBeenCalledWith(
       expect.objectContaining({ contractEndDate: addDeliveryDays('2026-06-01', 19) }),
+      { transaction },
     );
   });
 
@@ -68,6 +83,7 @@ describe('update', () => {
 
     expect(mockInstance.update).toHaveBeenCalledWith(
       expect.objectContaining({ contractEndDate: addDeliveryDays(baseEnd, 1) }),
+      { transaction },
     );
   });
 
@@ -89,6 +105,7 @@ describe('update', () => {
     expect(record).toHaveBeenCalledWith(
       expect.objectContaining({ userId: 9, username: 'ada' }),
       expect.anything(),
+      transaction,
     );
   });
 
@@ -108,6 +125,7 @@ describe('update', () => {
     expect(record).toHaveBeenCalledWith(
       actor,
       expect.objectContaining({ type: 'suspended', clientId: 1 }),
+      transaction,
     );
   });
 
@@ -127,6 +145,7 @@ describe('update', () => {
     expect(record).toHaveBeenCalledWith(
       expect.objectContaining({ userId: 9, username: 'ada' }),
       expect.anything(),
+      transaction,
     );
   });
 
@@ -149,6 +168,7 @@ describe('update', () => {
     const expectedEnd = addDeliveryDays(baseEnd, 2);
     expect(mockInstance.update).toHaveBeenCalledWith(
       expect.objectContaining({ contractEndDate: expectedEnd }),
+      { transaction },
     );
   });
 
@@ -171,6 +191,7 @@ describe('update', () => {
     const expectedEnd = addDeliveryDays(baseEnd, 2);
     expect(mockInstance.update).toHaveBeenCalledWith(
       expect.objectContaining({ contractEndDate: expectedEnd }),
+      { transaction },
     );
   });
 
@@ -191,18 +212,22 @@ describe('update', () => {
 
     await update(1, 3, { startDate: '2026-07-03' }, actor);
 
-    expect(Subscription.findAll).toHaveBeenCalledWith({
-      where: expect.objectContaining({
-        clientId: 1,
-        finalizedAt: null,
-        contractEndDate: { [Op.gte]: '2026-07-03' },
-        id: { [Op.ne]: 3 },
+    expect(Subscription.findAll).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({
+          clientId: 1,
+          finalizedAt: null,
+          contractEndDate: { [Op.gte]: '2026-07-03' },
+          id: { [Op.ne]: 3 },
+        }),
+        transaction,
       }),
-    });
+    );
     expect(otherSub.update).toHaveBeenCalledWith(
       expect.objectContaining({
         contractEndDate: subtractDeliveryDays('2026-07-03', 1),
       }),
+      { transaction },
     );
   });
 
@@ -221,5 +246,116 @@ describe('update', () => {
     await update(1, 1, { duration: 30 }, actor);
 
     expect(Subscription.findAll).not.toHaveBeenCalled();
+  });
+
+  it('clears pausedSince inside the transaction when a startDate is assigned', async () => {
+    const client = { id: 1, update: jest.fn() };
+    const mockInstance = {
+      id: 3,
+      clientId: 1,
+      startDate: null,
+      duration: 20,
+      contractEndDate: null,
+      suspendedDates: [],
+      update: jest.fn().mockResolvedValue({}),
+    };
+    (Subscription.findOne as jest.Mock).mockResolvedValue(mockInstance);
+    (Subscription.findAll as jest.Mock).mockResolvedValue([]);
+    (Client.findByPk as jest.Mock).mockResolvedValue(client);
+
+    await update(1, 3, { startDate: '2026-07-03' }, actor);
+
+    expect(Client.findByPk).toHaveBeenCalledWith(1, { transaction });
+    expect(client.update).toHaveBeenCalledWith({ pausedSince: null }, { transaction });
+  });
+
+  it('writes the plan_assigned event only after the subscription it describes', async () => {
+    const mockInstance = {
+      clientId: 1,
+      startDate: '2026-05-26',
+      duration: 20,
+      contractEndDate: addDeliveryDays('2026-05-26', 19),
+      suspendedDates: [],
+      update: jest.fn().mockResolvedValue({}),
+    };
+    (Subscription.findOne as jest.Mock).mockResolvedValue(mockInstance);
+    (Client.findByPk as jest.Mock).mockResolvedValue({ id: 1, update: jest.fn() });
+
+    await update(1, 1, { startDate: '2026-06-01' }, actor);
+
+    const [updateOrder] = mockInstance.update.mock.invocationCallOrder;
+    const [recordOrder] = (record as jest.Mock).mock.invocationCallOrder;
+    expect(recordOrder).toBeGreaterThan(updateOrder);
+  });
+
+  it('writes the suspended event only after the subscription it describes', async () => {
+    const mockInstance = {
+      id: 1,
+      clientId: 1,
+      suspendedDates: [],
+      contractEndDate: '2026-06-22',
+      update: jest.fn().mockResolvedValue({}),
+    };
+    (Subscription.findOne as jest.Mock).mockResolvedValue(mockInstance);
+
+    await update(1, 1, { suspendedDates: ['2026-06-10'] }, actor);
+
+    const [updateOrder] = mockInstance.update.mock.invocationCallOrder;
+    const [recordOrder] = (record as jest.Mock).mock.invocationCallOrder;
+    expect(recordOrder).toBeGreaterThan(updateOrder);
+  });
+
+  it('leaves no history event behind when the subscription update fails', async () => {
+    const mockInstance = {
+      clientId: 1,
+      startDate: '2026-05-26',
+      duration: 20,
+      contractEndDate: addDeliveryDays('2026-05-26', 19),
+      suspendedDates: [],
+      update: jest.fn().mockRejectedValue(new Error('db error')),
+    };
+    (Subscription.findOne as jest.Mock).mockResolvedValue(mockInstance);
+    (Client.findByPk as jest.Mock).mockResolvedValue({ id: 1, update: jest.fn() });
+
+    await expect(update(1, 1, { startDate: '2026-06-01' }, actor)).rejects.toThrow('db error');
+    expect(record).not.toHaveBeenCalled();
+  });
+
+  it('changes the plan and records the event in one transaction', async () => {
+    const mockInstance = {
+      clientId: 1,
+      startDate: '2026-05-26',
+      duration: 20,
+      contractEndDate: addDeliveryDays('2026-05-26', 19),
+      suspendedDates: [],
+      update: jest.fn().mockResolvedValue({}),
+    };
+    (Subscription.findOne as jest.Mock).mockResolvedValue(mockInstance);
+    (Client.findByPk as jest.Mock).mockResolvedValue({ id: 1, update: jest.fn() });
+
+    await update(1, 1, { startDate: '2026-06-01' }, actor);
+
+    expect(sequelize.transaction).toHaveBeenCalledTimes(1);
+  });
+
+  it("joins the caller's transaction rather than opening its own", async () => {
+    const mockInstance = {
+      clientId: 1,
+      startDate: '2026-05-26',
+      duration: 20,
+      contractEndDate: addDeliveryDays('2026-05-26', 19),
+      suspendedDates: [],
+      update: jest.fn().mockResolvedValue({}),
+    };
+    (Subscription.findOne as jest.Mock).mockResolvedValue(mockInstance);
+    (Client.findByPk as jest.Mock).mockResolvedValue({ id: 1, update: jest.fn() });
+
+    await update(1, 1, { startDate: '2026-06-01' }, actor, callerTransaction);
+
+    expect(sequelize.transaction).not.toHaveBeenCalled();
+    expect(mockInstance.update).toHaveBeenCalledWith(expect.anything(), {
+      transaction: callerTransaction,
+    });
+    expect(record).toHaveBeenCalledWith(actor, expect.anything(), callerTransaction);
   });
 });
