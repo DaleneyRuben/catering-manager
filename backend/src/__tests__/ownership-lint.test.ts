@@ -69,6 +69,20 @@ describe('ownership lint', () => {
     expect(await ownershipErrorsIn('report', code)).toHaveLength(0);
   });
 
+  // Restating airbnb-base's four restrictions inside the override is load-bearing: a rule's
+  // options replace rather than merge, so dropping them would silently start allowing for..of in
+  // every domain file. Verified by removing them and watching this go quiet.
+  it("keeps airbnb-base's own syntax restrictions in domain files", async () => {
+    const code =
+      'export const run = (xs: number[]) => {\n' +
+      '  for (const x of xs) {\n    return x;\n  }\n  return 0;\n};\n';
+
+    const errors = await ownershipErrorsIn('client', code);
+
+    expect(errors).toHaveLength(1);
+    expect(errors[0].message).toContain('iterators/generators');
+  });
+
   // Known and accepted gap, recorded so a future change to it is deliberate: ESLint has no type
   // information for a local variable, so a row fetched into a variable and then written escapes
   // the rule. Every ownership violation this backlog has actually found took this shape.

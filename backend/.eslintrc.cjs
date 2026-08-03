@@ -1,3 +1,73 @@
+// ADR-007 rule 1: any domain may read any table, exactly one domain may write it. The reading
+// half needs no rule — cross-domain joins are the reason this is a monolith. The writing half is
+// enforced below.
+//
+// Known and accepted gap: only writes that name the model are caught. A row fetched into a
+// variable and then written (`const c = await Client.findByPk(id); c.update(…)`) escapes, because
+// ESLint has no type information for a local variable. Narrowed by returning data rather than live
+// Sequelize instances from domain APIs; otherwise it rests on review. See backlog item 7.
+const TABLE_OWNERS = {
+  Client: 'client',
+  Subscription: 'subscription',
+  Plan: 'plan',
+  Menu: 'menu',
+  Appointment: 'evaluation',
+  User: 'user',
+  LoginEvent: 'login-event',
+  ClientHistory: 'client-history',
+};
+
+const WRITE_METHODS = ['create', 'update', 'destroy', 'bulkCreate'];
+
+// Copied from airbnb-base. A rule's options replace rather than merge, so setting
+// no-restricted-syntax below would drop these four in domain files if they were not restated.
+const AIRBNB_RESTRICTED_SYNTAX = [
+  {
+    selector: 'ForInStatement',
+    message:
+      'for..in loops iterate over the entire prototype chain, which is virtually never what you want. Use Object.{keys,values,entries}, and iterate over the resulting array.',
+  },
+  {
+    selector: 'ForOfStatement',
+    message:
+      'iterators/generators require regenerator-runtime, which is too heavyweight for this guide to allow them. Separately, loops should be avoided in favor of array iterations.',
+  },
+  {
+    selector: 'LabeledStatement',
+    message:
+      'Labels are a form of GOTO; using them makes code confusing and hard to maintain and understand.',
+  },
+  {
+    selector: 'WithStatement',
+    message:
+      '`with` is disallowed in strict mode because it makes code impossible to predict and optimize.',
+  },
+];
+
+const foreignWriteBans = (ownedModel) =>
+  Object.entries(TABLE_OWNERS)
+    .filter(([model]) => model !== ownedModel)
+    .map(([model, owner]) => ({
+      selector: `CallExpression[callee.object.name='${model}'][callee.property.name=/^(${WRITE_METHODS.join('|')})$/]`,
+      message: `${model} is owned by the ${owner} domain — call its public function instead of writing the model here. Reading it is fine.`,
+    }));
+
+// One override per owning domain, each allowing only its own model. Overrides are last-match-wins
+// for a given rule, so these must come after the catch-all and cannot be merged into it.
+const ownershipOverrides = [
+  { files: ['src/domains/**/*.ts'], owns: null },
+  ...Object.entries(TABLE_OWNERS).map(([model, owner]) => ({
+    files: [`src/domains/${owner}/**/*.ts`],
+    owns: model,
+  })),
+].map(({ files, owns }) => ({
+  files,
+  excludedFiles: ['**/*.test.ts'],
+  rules: {
+    'no-restricted-syntax': ['error', ...AIRBNB_RESTRICTED_SYNTAX, ...foreignWriteBans(owns)],
+  },
+}));
+
 module.exports = {
   root: true,
   env: {
@@ -100,5 +170,7 @@ module.exports = {
         ],
       },
     },
+    // Last, so the per-owner allowances win over the catch-all they follow.
+    ...ownershipOverrides,
   ],
 };
