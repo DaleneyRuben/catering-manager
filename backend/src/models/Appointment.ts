@@ -16,9 +16,10 @@ class Appointment extends Model {
   @Column({ type: DataType.STRING, allowNull: false })
   declare time: string;
 
-  // ON DELETE SET NULL is load-bearing, not incidental: deleting a renewal that resolved an
-  // appointment has to clear this link, and subscription cannot write it — evaluation owns the
-  // table. See docs/adr/007-domain-ownership.md.
+  // ON DELETE CASCADE is load-bearing, not incidental: deleting a renewal has to take the cita
+  // that resolved into it, or the cita reappears in the nutritionist's queue as unresolved. The
+  // rule lives in the constraint because subscription cannot write this table — evaluation owns
+  // it. Pinned by backend/scripts/check-schema-rules.sql. See docs/adr/007-domain-ownership.md.
   @ForeignKey(() => Subscription)
   @Column({ type: DataType.INTEGER, allowNull: true, defaultValue: null })
   declare subscriptionId: number | null;
