@@ -68,8 +68,10 @@ UI labels are neutral Spanish. Each entry: term (code identifier) — definition
   Client.
 - **Resolving an appointment** — the umbrella action that stamps `subscriptionId` on the
   Appointment, whichever of the two paths below produced it. An Appointment can't be resolved
-  twice; the only way a resolved Appointment reverts to pending is the existing-client unpaid
-  rollback (see **Pendiente de pago**).
+  twice, and **never becomes resolvable again** — whatever happens to the subscription afterwards,
+  a cita the Nutricionista has acted on does not return to her queue. If the plan it produced is
+  removed, the cita is deleted with it by the `appointments.subscriptionId` foreign key; it does
+  not revert to pending.
 - **Conversion** — resolving a **new-client appointment**: turning it into a full Client +
   Subscription record, via the same wizard used for a direct client creation, with one
   addition: an explicit paid/unpaid choice made by the Nutricionista.
@@ -102,9 +104,10 @@ UI labels are neutral Spanish. Each entry: term (code identifier) — definition
   only one ever, so an existing Client stays fully reachable throughout a pending unpaid
   renewal; and the "Pendientes de pago" cleanup action itself branches — a still-unpaid
   **new-client appointment** deletes the whole Client (nothing else exists to lose), while a
-  still-unpaid **existing-client appointment**'s renewal instead only removes the Subscription
-  it created and resets the Appointment back to pending, leaving the Client and its history
-  untouched. _Avoid_: treating this as a `ClientStatus` value shown in the Clientes UI — it
+  still-unpaid **existing-client appointment**'s renewal instead deletes both the Subscription it
+  created and the Appointment itself, permanently, leaving the Client, its other subscriptions and
+  its history untouched. The Appointment does not return to the queue — a client needing another
+  evaluation gets a freshly scheduled cita. _Avoid_: treating this as a `ClientStatus` value shown in the Clientes UI — it
   never reaches that table or its filters at all.
 - **Nutricionista** (role: `nutritionist`) — staff role whose only screens are Evaluaciones and
   (via Appointment-driven renewal) the read-only summary view for one specific existing Client,
