@@ -1,19 +1,7 @@
 import { Table, Column, Model, DataType, ForeignKey, BelongsTo } from 'sequelize-typescript';
+import type { HistoryEventType } from '../constants/history.constants';
 import Client from './Client';
 import User from './User';
-
-export type HistoryEventType =
-  | 'paused'
-  | 'resumed'
-  | 'plan_assigned'
-  | 'plan_renewed'
-  | 'plan_changed'
-  | 'contract_updated'
-  | 'suspended'
-  | 'reactivated'
-  | 'finalized'
-  | 'renewal_deleted'
-  | 'deleted';
 
 @Table({ tableName: 'client_history', timestamps: false })
 class ClientHistory extends Model {

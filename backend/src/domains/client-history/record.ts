@@ -1,4 +1,5 @@
 import type { Transaction } from 'sequelize';
+import { HISTORY_EVENTS } from '../../constants/history.constants';
 import ClientHistory from '../../models/ClientHistory';
 import type { Actor } from '../../types/actor';
 
@@ -44,17 +45,38 @@ type RenewalDeletedMetadata = {
   registeredAt: Date;
 };
 
+type PlanEvent = typeof HISTORY_EVENTS.PLAN_ASSIGNED | typeof HISTORY_EVENTS.PLAN_RENEWED;
+
 export type HistoryEvent =
   | {
-      type: 'plan_assigned' | 'plan_renewed' | 'reactivated';
+      type: PlanEvent | typeof HISTORY_EVENTS.PLAN_REACTIVATED;
       clientId: number;
       metadata: PlanEventMetadata;
     }
-  | { type: 'contract_updated'; clientId: number; metadata: ContractEventMetadata }
-  | { type: 'plan_changed'; clientId: number; metadata: PlanChangedMetadata }
-  | { type: 'renewal_deleted'; clientId: number; metadata: RenewalDeletedMetadata }
-  | { type: 'suspended'; clientId: number; metadata: { dates: string[] } }
-  | { type: 'paused' | 'resumed' | 'finalized' | 'deleted'; clientId: number };
+  | {
+      type: typeof HISTORY_EVENTS.DATES_CHANGED;
+      clientId: number;
+      metadata: ContractEventMetadata;
+    }
+  | { type: typeof HISTORY_EVENTS.TERMS_CHANGED; clientId: number; metadata: PlanChangedMetadata }
+  | {
+      type: typeof HISTORY_EVENTS.RENEWAL_DELETED;
+      clientId: number;
+      metadata: RenewalDeletedMetadata;
+    }
+  | {
+      type: typeof HISTORY_EVENTS.DAYS_SUSPENDED;
+      clientId: number;
+      metadata: { dates: string[] };
+    }
+  | {
+      type:
+        | typeof HISTORY_EVENTS.PLAN_PAUSED
+        | typeof HISTORY_EVENTS.PLAN_RESUMED
+        | typeof HISTORY_EVENTS.PLAN_FINALIZED
+        | typeof HISTORY_EVENTS.CLIENT_DELETED;
+      clientId: number;
+    };
 
 // The only writer of client_history. History is append-only, so there is no update or delete
 // counterpart: rows are removed only when their client is, by the cascade on the foreign key.

@@ -100,7 +100,7 @@ const ACTIVE_CLIENTS = [
     suspendedDates: [],
     history: [
       { eventType: 'plan_assigned', occurredAt: '2026-02-15', metadata: { plan: 'Básico', price: 1500 } },
-      { eventType: 'plan_changed', occurredAt: '2026-04-01', metadata: { previousPlan: 'Básico', newPlan: 'Ligero', newPrice: 2000 } },
+      { eventType: 'terms_changed', occurredAt: '2026-04-01', metadata: { previousPlan: 'Básico', newPlan: 'Ligero', newPrice: 2000 } },
     ],
   },
   // id: 3
@@ -126,7 +126,7 @@ const ACTIVE_CLIENTS = [
     suspendedDates: [],
     history: [
       { eventType: 'plan_assigned', occurredAt: '2026-01-20', metadata: { plan: 'Ejecutivo', price: 1800 } },
-      { eventType: 'plan_changed', occurredAt: '2026-03-15', metadata: { previousPlan: 'Ejecutivo', newPlan: 'Ejecutivo', newPrice: 1600 } },
+      { eventType: 'terms_changed', occurredAt: '2026-03-15', metadata: { previousPlan: 'Ejecutivo', newPlan: 'Ejecutivo', newPrice: 1600 } },
     ],
   },
   // id: 4  — was paused and resumed
@@ -152,8 +152,8 @@ const ACTIVE_CLIENTS = [
     suspendedDates: [],
     history: [
       { eventType: 'plan_assigned', occurredAt: '2026-01-10', metadata: { plan: 'Básico', price: 1500 } },
-      { eventType: 'paused', occurredAt: '2026-03-01', metadata: { remainingDays: 80 } },
-      { eventType: 'resumed', occurredAt: '2026-03-20', metadata: { newContractEndDate: '2026-08-30' } },
+      { eventType: 'plan_paused', occurredAt: '2026-03-01', metadata: { remainingDays: 80 } },
+      { eventType: 'plan_resumed', occurredAt: '2026-03-20', metadata: { newContractEndDate: '2026-08-30' } },
     ],
   },
   // id: 5
@@ -202,8 +202,8 @@ const ACTIVE_CLIENTS = [
     suspendedDates: [],
     history: [
       { eventType: 'plan_assigned', occurredAt: '2026-02-01', metadata: { plan: 'Ligero', price: 2000 } },
-      { eventType: 'paused', occurredAt: '2026-04-10', metadata: { remainingDays: 95 } },
-      { eventType: 'resumed', occurredAt: '2026-04-25', metadata: { newContractEndDate: '2026-09-01' } },
+      { eventType: 'plan_paused', occurredAt: '2026-04-10', metadata: { remainingDays: 95 } },
+      { eventType: 'plan_resumed', occurredAt: '2026-04-25', metadata: { newContractEndDate: '2026-09-01' } },
     ],
   },
   // id: 7
@@ -321,8 +321,8 @@ const ACTIVE_CLIENTS = [
     suspendedDates: [],
     history: [
       { eventType: 'plan_assigned', occurredAt: '2025-10-01', metadata: { plan: 'Básico', price: 1500 } },
-      { eventType: 'finalized', occurredAt: '2026-01-15', metadata: {} },
-      { eventType: 'reactivated', occurredAt: '2026-05-10', metadata: {} },
+      { eventType: 'plan_finalized', occurredAt: '2026-01-15', metadata: {} },
+      { eventType: 'plan_reactivated', occurredAt: '2026-05-10', metadata: {} },
       { eventType: 'plan_assigned', occurredAt: '2026-05-10', metadata: { plan: 'Completo', price: 3500 } },
     ],
   },
@@ -349,8 +349,8 @@ const ACTIVE_CLIENTS = [
     suspendedDates: [],
     history: [
       { eventType: 'plan_assigned', occurredAt: '2025-09-15', metadata: { plan: 'Ligero', price: 2000 } },
-      { eventType: 'finalized', occurredAt: '2025-12-20', metadata: {} },
-      { eventType: 'reactivated', occurredAt: '2026-05-05', metadata: {} },
+      { eventType: 'plan_finalized', occurredAt: '2025-12-20', metadata: {} },
+      { eventType: 'plan_reactivated', occurredAt: '2026-05-05', metadata: {} },
       { eventType: 'plan_assigned', occurredAt: '2026-05-05', metadata: { plan: 'Premium', price: 4200 } },
     ],
   },
@@ -749,7 +749,7 @@ const SUSPENDED_CLIENTS = [
     suspendedDates: [TODAY],
     history: [
       { eventType: 'plan_assigned', occurredAt: '2026-04-01', metadata: { plan: 'Básico', price: 1500 } },
-      { eventType: 'suspended', occurredAt: TODAY, metadata: { suspendedDate: TODAY } },
+      { eventType: 'days_suspended', occurredAt: TODAY, metadata: { suspendedDate: TODAY } },
     ],
   },
   {
@@ -774,7 +774,7 @@ const SUSPENDED_CLIENTS = [
     suspendedDates: [TODAY],
     history: [
       { eventType: 'plan_assigned', occurredAt: '2026-03-25', metadata: { plan: 'Ligero', price: 2000 } },
-      { eventType: 'suspended', occurredAt: TODAY, metadata: { suspendedDate: TODAY } },
+      { eventType: 'days_suspended', occurredAt: TODAY, metadata: { suspendedDate: TODAY } },
     ],
   },
   {
@@ -799,7 +799,7 @@ const SUSPENDED_CLIENTS = [
     suspendedDates: [TODAY],
     history: [
       { eventType: 'plan_assigned', occurredAt: '2026-02-10', metadata: { plan: 'Ejecutivo', price: 1800 } },
-      { eventType: 'suspended', occurredAt: TODAY, metadata: { suspendedDate: TODAY } },
+      { eventType: 'days_suspended', occurredAt: TODAY, metadata: { suspendedDate: TODAY } },
     ],
   },
   {
@@ -824,7 +824,7 @@ const SUSPENDED_CLIENTS = [
     suspendedDates: [TODAY],
     history: [
       { eventType: 'plan_assigned', occurredAt: '2026-04-20', metadata: { plan: 'Completo', price: 3500 } },
-      { eventType: 'suspended', occurredAt: TODAY, metadata: { suspendedDate: TODAY } },
+      { eventType: 'days_suspended', occurredAt: TODAY, metadata: { suspendedDate: TODAY } },
     ],
   },
   {
@@ -849,7 +849,7 @@ const SUSPENDED_CLIENTS = [
     suspendedDates: [TODAY],
     history: [
       { eventType: 'plan_assigned', occurredAt: '2026-05-05', metadata: { plan: 'Básico', price: 1500 } },
-      { eventType: 'suspended', occurredAt: TODAY, metadata: { suspendedDate: TODAY } },
+      { eventType: 'days_suspended', occurredAt: TODAY, metadata: { suspendedDate: TODAY } },
     ],
   },
 ];
@@ -878,7 +878,7 @@ const PAUSED_CLIENTS = [
     suspendedDates: [],
     history: [
       { eventType: 'plan_assigned', occurredAt: '2026-03-01', metadata: { plan: 'Ligero', price: 2000 } },
-      { eventType: 'paused', occurredAt: '2026-05-20', metadata: { remainingDays: 75 } },
+      { eventType: 'plan_paused', occurredAt: '2026-05-20', metadata: { remainingDays: 75 } },
     ],
   },
   {
@@ -903,7 +903,7 @@ const PAUSED_CLIENTS = [
     suspendedDates: [],
     history: [
       { eventType: 'plan_assigned', occurredAt: '2026-02-05', metadata: { plan: 'Ejecutivo', price: 1800 } },
-      { eventType: 'paused', occurredAt: '2026-05-10', metadata: { remainingDays: 110 } },
+      { eventType: 'plan_paused', occurredAt: '2026-05-10', metadata: { remainingDays: 110 } },
     ],
   },
   {
@@ -928,7 +928,7 @@ const PAUSED_CLIENTS = [
     suspendedDates: [],
     history: [
       { eventType: 'plan_assigned', occurredAt: '2026-01-25', metadata: { plan: 'Básico', price: 1500 } },
-      { eventType: 'paused', occurredAt: '2026-05-01', metadata: { remainingDays: 80 } },
+      { eventType: 'plan_paused', occurredAt: '2026-05-01', metadata: { remainingDays: 80 } },
     ],
   },
   {
@@ -953,7 +953,7 @@ const PAUSED_CLIENTS = [
     suspendedDates: [],
     history: [
       { eventType: 'plan_assigned', occurredAt: '2026-04-01', metadata: { plan: 'Completo', price: 3500 } },
-      { eventType: 'paused', occurredAt: '2026-05-25', metadata: { remainingDays: 115 } },
+      { eventType: 'plan_paused', occurredAt: '2026-05-25', metadata: { remainingDays: 115 } },
     ],
   },
   {
@@ -978,7 +978,7 @@ const PAUSED_CLIENTS = [
     suspendedDates: [],
     history: [
       { eventType: 'plan_assigned', occurredAt: '2026-03-10', metadata: { plan: 'Premium', price: 4200 } },
-      { eventType: 'paused', occurredAt: '2026-05-15', metadata: { remainingDays: 100 } },
+      { eventType: 'plan_paused', occurredAt: '2026-05-15', metadata: { remainingDays: 100 } },
     ],
   },
 ];
@@ -1007,7 +1007,7 @@ const FINALIZED_CLIENTS = [
     suspendedDates: [],
     history: [
       { eventType: 'plan_assigned', occurredAt: '2025-11-01', metadata: { plan: 'Básico', price: 1500 } },
-      { eventType: 'finalized', occurredAt: '2026-03-31', metadata: {} },
+      { eventType: 'plan_finalized', occurredAt: '2026-03-31', metadata: {} },
     ],
   },
   {
@@ -1032,7 +1032,7 @@ const FINALIZED_CLIENTS = [
     suspendedDates: [],
     history: [
       { eventType: 'plan_assigned', occurredAt: '2025-12-01', metadata: { plan: 'Ligero', price: 2000 } },
-      { eventType: 'finalized', occurredAt: '2026-04-30', metadata: {} },
+      { eventType: 'plan_finalized', occurredAt: '2026-04-30', metadata: {} },
     ],
   },
   {
@@ -1057,8 +1057,8 @@ const FINALIZED_CLIENTS = [
     suspendedDates: [],
     history: [
       { eventType: 'plan_assigned', occurredAt: '2025-10-15', metadata: { plan: 'Completo', price: 3500 } },
-      { eventType: 'plan_changed', occurredAt: '2025-12-01', metadata: { previousPlan: 'Completo', newPlan: 'Completo', newPrice: 3000 } },
-      { eventType: 'finalized', occurredAt: '2026-02-28', metadata: {} },
+      { eventType: 'terms_changed', occurredAt: '2025-12-01', metadata: { previousPlan: 'Completo', newPlan: 'Completo', newPrice: 3000 } },
+      { eventType: 'plan_finalized', occurredAt: '2026-02-28', metadata: {} },
     ],
   },
   {
@@ -1083,7 +1083,7 @@ const FINALIZED_CLIENTS = [
     suspendedDates: [],
     history: [
       { eventType: 'plan_assigned', occurredAt: '2025-09-01', metadata: { plan: 'Ejecutivo', price: 1800 } },
-      { eventType: 'finalized', occurredAt: '2026-01-31', metadata: {} },
+      { eventType: 'plan_finalized', occurredAt: '2026-01-31', metadata: {} },
     ],
   },
   {
@@ -1108,7 +1108,7 @@ const FINALIZED_CLIENTS = [
     suspendedDates: [],
     history: [
       { eventType: 'plan_assigned', occurredAt: '2026-01-05', metadata: { plan: 'Básico', price: 1500 } },
-      { eventType: 'finalized', occurredAt: '2026-05-05', metadata: {} },
+      { eventType: 'plan_finalized', occurredAt: '2026-05-05', metadata: {} },
     ],
   },
   // finalized with paused/resumed history
@@ -1134,9 +1134,9 @@ const FINALIZED_CLIENTS = [
     suspendedDates: [],
     history: [
       { eventType: 'plan_assigned', occurredAt: '2025-10-01', metadata: { plan: 'Ligero', price: 2000 } },
-      { eventType: 'paused', occurredAt: '2025-12-10', metadata: { remainingDays: 55 } },
-      { eventType: 'resumed', occurredAt: '2025-12-28', metadata: { newContractEndDate: '2026-03-15' } },
-      { eventType: 'finalized', occurredAt: '2026-03-15', metadata: {} },
+      { eventType: 'plan_paused', occurredAt: '2025-12-10', metadata: { remainingDays: 55 } },
+      { eventType: 'plan_resumed', occurredAt: '2025-12-28', metadata: { newContractEndDate: '2026-03-15' } },
+      { eventType: 'plan_finalized', occurredAt: '2026-03-15', metadata: {} },
     ],
   },
   {
@@ -1161,7 +1161,7 @@ const FINALIZED_CLIENTS = [
     suspendedDates: [],
     history: [
       { eventType: 'plan_assigned', occurredAt: '2026-01-10', metadata: { plan: 'Completo', price: 3500 } },
-      { eventType: 'finalized', occurredAt: '2026-05-10', metadata: {} },
+      { eventType: 'plan_finalized', occurredAt: '2026-05-10', metadata: {} },
     ],
   },
   {
@@ -1186,7 +1186,7 @@ const FINALIZED_CLIENTS = [
     suspendedDates: [],
     history: [
       { eventType: 'plan_assigned', occurredAt: '2025-11-15', metadata: { plan: 'Premium', price: 4200 } },
-      { eventType: 'finalized', occurredAt: '2026-04-15', metadata: {} },
+      { eventType: 'plan_finalized', occurredAt: '2026-04-15', metadata: {} },
     ],
   },
   // finalized with plan change history
@@ -1212,8 +1212,8 @@ const FINALIZED_CLIENTS = [
     suspendedDates: [],
     history: [
       { eventType: 'plan_assigned', occurredAt: '2025-12-15', metadata: { plan: 'Ligero', price: 2000 } },
-      { eventType: 'plan_changed', occurredAt: '2026-02-01', metadata: { previousPlan: 'Ligero', newPlan: 'Ejecutivo', newPrice: 1800 } },
-      { eventType: 'finalized', occurredAt: '2026-05-20', metadata: {} },
+      { eventType: 'terms_changed', occurredAt: '2026-02-01', metadata: { previousPlan: 'Ligero', newPlan: 'Ejecutivo', newPrice: 1800 } },
+      { eventType: 'plan_finalized', occurredAt: '2026-05-20', metadata: {} },
     ],
   },
   {
@@ -1238,7 +1238,7 @@ const FINALIZED_CLIENTS = [
     suspendedDates: [],
     history: [
       { eventType: 'plan_assigned', occurredAt: '2026-01-20', metadata: { plan: 'Básico', price: 1500 } },
-      { eventType: 'finalized', occurredAt: '2026-05-30', metadata: {} },
+      { eventType: 'plan_finalized', occurredAt: '2026-05-30', metadata: {} },
     ],
   },
 ];

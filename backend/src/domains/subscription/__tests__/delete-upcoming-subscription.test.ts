@@ -1,4 +1,5 @@
 import { Op } from 'sequelize';
+import { HISTORY_EVENTS } from '../../../constants/history.constants';
 import Appointment from '../../../models/Appointment';
 import Plan from '../../../models/Plan';
 import Subscription from '../../../models/Subscription';
@@ -84,7 +85,7 @@ describe('deleteUpcomingSubscription', () => {
     expect(record).toHaveBeenCalledWith(
       actor,
       expect.objectContaining({
-        type: 'renewal_deleted',
+        type: HISTORY_EVENTS.RENEWAL_DELETED,
         clientId: 1,
         metadata: expect.objectContaining({
           planId: 2,

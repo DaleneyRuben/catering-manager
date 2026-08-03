@@ -1,3 +1,4 @@
+import { HISTORY_EVENTS } from '../../../constants/history.constants';
 import Client from '../../../models/Client';
 import sequelize from '../../../database/sequelize';
 import { record } from '../../client-history';
@@ -33,7 +34,7 @@ describe('softDelete', () => {
     expect(mockInstance.destroy).toHaveBeenCalledWith({ transaction });
     expect(record).toHaveBeenCalledWith(
       actor,
-      { type: 'client_deleted', clientId: 1 },
+      { type: HISTORY_EVENTS.CLIENT_DELETED, clientId: 1 },
       transaction,
     );
   });
@@ -74,7 +75,7 @@ describe('softDelete', () => {
     expect(mockInstance.destroy).toHaveBeenCalledWith({ transaction: callerTransaction });
     expect(record).toHaveBeenCalledWith(
       actor,
-      { type: 'client_deleted', clientId: 1 },
+      { type: HISTORY_EVENTS.CLIENT_DELETED, clientId: 1 },
       callerTransaction,
     );
   });

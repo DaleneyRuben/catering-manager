@@ -1,3 +1,4 @@
+import { HISTORY_EVENTS } from '../../../constants/history.constants';
 import Client from '../../../models/Client';
 import sequelize from '../../../database/sequelize';
 import { record } from '../../client-history';
@@ -42,7 +43,7 @@ describe('finalize', () => {
     expect(finalizeSubscription).toHaveBeenCalledWith(5, transaction);
     expect(record).toHaveBeenCalledWith(
       actor,
-      { type: 'plan_finalized', clientId: 1 },
+      { type: HISTORY_EVENTS.PLAN_FINALIZED, clientId: 1 },
       transaction,
     );
   });
@@ -95,7 +96,7 @@ describe('finalize', () => {
     expect(finalizeSubscription).toHaveBeenCalledWith(5, callerTransaction);
     expect(record).toHaveBeenCalledWith(
       actor,
-      { type: 'plan_finalized', clientId: 1 },
+      { type: HISTORY_EVENTS.PLAN_FINALIZED, clientId: 1 },
       callerTransaction,
     );
   });
@@ -129,7 +130,7 @@ describe('finalize', () => {
     expect(finalizeSubscription).not.toHaveBeenCalled();
     expect(record).toHaveBeenCalledWith(
       actor,
-      { type: 'plan_finalized', clientId: 1 },
+      { type: HISTORY_EVENTS.PLAN_FINALIZED, clientId: 1 },
       transaction,
     );
   });

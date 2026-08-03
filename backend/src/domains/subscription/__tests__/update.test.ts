@@ -1,4 +1,5 @@
 import { Op } from 'sequelize';
+import { HISTORY_EVENTS } from '../../../constants/history.constants';
 import Subscription from '../../../models/Subscription';
 import Client from '../../../models/Client';
 import Plan from '../../../models/Plan';
@@ -129,7 +130,7 @@ describe('update', () => {
     expect(record).toHaveBeenCalledWith(
       actor,
       {
-        type: 'dates_changed',
+        type: HISTORY_EVENTS.DATES_CHANGED,
         clientId: 1,
         metadata: {
           startDate: '2026-06-01',
@@ -156,7 +157,7 @@ describe('update', () => {
 
     expect(record).toHaveBeenCalledWith(
       actor,
-      expect.objectContaining({ type: 'days_suspended', clientId: 1 }),
+      expect.objectContaining({ type: HISTORY_EVENTS.DAYS_SUSPENDED, clientId: 1 }),
       transaction,
     );
   });
@@ -379,7 +380,7 @@ describe('update', () => {
     expect(record).toHaveBeenCalledWith(
       actor,
       {
-        type: 'terms_changed',
+        type: HISTORY_EVENTS.TERMS_CHANGED,
         clientId: 1,
         metadata: {
           planId: 5,
@@ -416,7 +417,7 @@ describe('update', () => {
     expect(record).toHaveBeenCalledWith(
       actor,
       {
-        type: 'terms_changed',
+        type: HISTORY_EVENTS.TERMS_CHANGED,
         clientId: 1,
         metadata: {
           planId: 2,

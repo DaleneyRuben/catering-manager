@@ -1,4 +1,5 @@
 import { Transaction } from 'sequelize';
+import { HISTORY_EVENTS } from '../../constants/history.constants';
 import Plan from '../../models/Plan';
 import Subscription from '../../models/Subscription';
 import { withTransaction } from '../../database/with-transaction';
@@ -67,7 +68,11 @@ export const update = async (
       if (planChange) {
         await record(
           actor,
-          { type: 'plan_changed', clientId: subscription.clientId, metadata: planChange },
+          {
+            type: HISTORY_EVENTS.TERMS_CHANGED,
+            clientId: subscription.clientId,
+            metadata: planChange,
+          },
           t,
         );
       }
@@ -106,7 +111,7 @@ export const update = async (
       await record(
         actor,
         {
-          type: 'contract_updated',
+          type: HISTORY_EVENTS.DATES_CHANGED,
           clientId: subscription.clientId,
           metadata: {
             startDate: newStartDate,
@@ -141,7 +146,7 @@ export const update = async (
         await record(
           actor,
           {
-            type: 'suspended',
+            type: HISTORY_EVENTS.DAYS_SUSPENDED,
             clientId: subscription.clientId,
             metadata: { dates: added },
           },

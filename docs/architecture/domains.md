@@ -143,11 +143,13 @@ where `event` is a union keyed on the event type, so metadata is checked per eve
 Sequelize. That is what removed the last duplication in `subscription/create.ts`, which
 previously branched over an `if (transaction)` to make the same call two ways.
 
-One event carries two shapes: `plan_assigned` is emitted both when a plan is put in place,
-with the plan and its price, and when a start date or duration is later edited, with only the
-new dates. The union keeps the plan fields optional so the refactor changed no stored row.
-Splitting it into two event types — which would also give the declared-but-unemitted
-`plan_changed` a home — is deliberately left to its own change.
+Each event type carries exactly one metadata shape. `plan_assigned` used to carry two — a plan
+being put in place, and a later edit to its dates — which forced every plan field to be optional;
+the edit case is now `dates_changed` and the commercial move is `terms_changed`, so the shapes are
+tight (#141). The stored key strings live in `constants/history.constants.ts` as `HISTORY_EVENTS`
+and are written as literals nowhere else, so the union is built from that constant rather than
+repeating it (#143). Renaming a value there is a data change: `client_history` rows already carry
+the old string and need a migration to match.
 
 ### `evaluation` orchestrates
 

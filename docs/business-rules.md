@@ -236,7 +236,7 @@ This is enforced by the `appointments.subscriptionId` foreign key (`ON DELETE CA
 
 ### Unpaid resolutions ("Pendientes de pago")
 
-Whether from a Conversion or an appointment-driven renewal, marking the resolution unpaid defers the corresponding history entry (`plan_assigned`, `plan_renewed`, or `reactivated`) until an Admin later marks it paid from the Evaluaciones screen — see History.
+Whether from a Conversion or an appointment-driven renewal, marking the resolution unpaid defers the corresponding history entry (`plan_assigned`, `plan_renewed`, or `plan_reactivated`) until an Admin later marks it paid from the Evaluaciones screen — see History.
 
 If a still-unpaid resolution is instead abandoned (the Admin's "Pendientes de pago" cleanup action):
 
@@ -345,19 +345,23 @@ The internal Sun–Thu kitchen schedule is never shown to the client.
 
 ## History
 
-For each client, the system tracks these events:
+For each client, the system tracks these events. Every key is `<subject>_<verb>` — the stored values live in one place per side (`backend/src/constants/history.constants.ts` and `frontend/src/features/clients/constants/historyEvents.ts`) and are never written as literals outside the tests that pin them.
 
 - Plan assignment (`plan_assigned`) — on subscription creation only (metadata: the plan, its price at that moment, start date, duration, end date, and discount).
-- Renewal (`plan_renewed`) and reactivation (`reactivated`).
-- Contract edit (`contract_updated`) — whenever the start date or duration of an existing subscription changes, including when a "sin fecha" renewal is given its start date (metadata: the new dates and duration, and nothing about the plan, which the edit does not touch).
-- Plan change (`plan_changed`) — whenever the assigned plan or the discount of an existing subscription changes (metadata: previous and new plan, the new plan's price, and previous and new discount). Both fields are covered by one event because both change what the client pays. It fires only when a value actually differs from the stored one, so re-submitting the same plan records nothing.
-- Pause (`paused`), resume (`resumed`), suspension (`suspended` — with the newly suspended dates), finalization (`finalized`), and client deletion (`deleted`).
+- Renewal (`plan_renewed`) and reactivation (`plan_reactivated`).
+- Dates change (`dates_changed`) — whenever the start date or duration of an existing subscription changes, including when a "sin fecha" renewal is given its start date (metadata: the new dates and duration, and nothing about the plan, which the edit does not touch).
+- Terms change (`terms_changed`) — whenever the assigned plan or the discount of an existing subscription changes (metadata: previous and new plan, the new plan's price, and previous and new discount). Both fields are covered by one event because both change what the client pays. It fires only when a value actually differs from the stored one, so re-submitting the same plan records nothing.
+- Pause (`plan_paused`), resume (`plan_resumed`), suspension (`days_suspended` — with the newly suspended dates), finalization (`plan_finalized`), and client deletion (`client_deleted`).
 
-History entries are append-only — past records are never overwritten when a plan changes. Entries written before `contract_updated` existed are `plan_assigned` rows carrying only dates; they are left as they are and keep their original label.
+History entries are append-only — past records are never overwritten when a plan changes. Entries written before `dates_changed` existed are `plan_assigned` rows carrying only dates; they are left as they are and keep their original label.
 
-No screen currently sends a new plan for an existing subscription, so in practice `plan_changed` is written today only for discount edits — the plan half is reachable through the API alone until a plan-change control exists.
+No screen currently sends a new plan for an existing subscription, so in practice `terms_changed` is written today only for discount edits — the plan half is reachable through the API alone until a plan-change control exists.
 
-Every history event, regardless of type or who triggered it (Admin or Nutricionista), records the acting user's id and username. A `plan_assigned`, `plan_renewed`, or `reactivated` event originating from Evaluaciones additionally carries the originating appointment's id in its metadata, so provenance survives even if the appointment record itself is later pruned (see Evaluaciones (Appointments)).
+Every history event, regardless of type or who triggered it (Admin or Nutricionista), records the acting user's id and username. A `plan_assigned`, `plan_renewed`, or `plan_reactivated` event originating from Evaluaciones additionally carries the originating appointment's id in its metadata, so provenance survives even if the appointment record itself is later pruned (see Evaluaciones (Appointments)).
+
+### How an event is labelled
+
+The Spanish label on a timeline row is derived when the page renders, never stored, so relabelling costs no migration. Most keys map to one fixed label (`plan_paused` → "Plan pausado"). `terms_changed` is the exception: it produces **"Precio modificado"**, **"Plan modificado"** or **"Plan y precio modificados"**, chosen by comparing the previous and new values the row already carries. Rows also show what moved — `antes 1.450 · ahora 1.300/mes` for a price, `antes Ligero · ahora Completo` for a plan. When the plan moved, the old total is not shown: the previous plan's price is not recorded, so it cannot be reconstructed.
 
 ---
 

@@ -1,5 +1,6 @@
 import { Transaction } from 'sequelize';
 import Subscription from '../../models/Subscription';
+import { HISTORY_EVENTS } from '../../constants/history.constants';
 import { withTransaction } from '../../database/with-transaction';
 import type { Actor } from '../../types/actor';
 import { record } from '../client-history';
@@ -16,7 +17,7 @@ export const pause = async (subscriptionId: number, actor: Actor, transaction?: 
     if (subscription.pausedSince) return subscription;
 
     await subscription.update({ pausedSince: new Date() }, { transaction: t });
-    await record(actor, { type: 'paused', clientId: subscription.clientId }, t);
+    await record(actor, { type: HISTORY_EVENTS.PLAN_PAUSED, clientId: subscription.clientId }, t);
 
     return subscription;
   });

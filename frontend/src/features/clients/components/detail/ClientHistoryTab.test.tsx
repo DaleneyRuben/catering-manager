@@ -1,6 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import { ClientHistoryTab } from '@/features/clients/components/detail/ClientHistoryTab';
 import { useClientHistory } from '@/features/clients/hooks/useClientHistory';
+import { HISTORY_EVENTS } from '@/features/clients/constants/historyEvents';
 import type { ClientHistoryEntry, Subscription } from '@/features/clients/types';
 
 jest.mock('@/features/clients/hooks/useClientHistory');
@@ -9,7 +10,7 @@ const mockUseClientHistory = useClientHistory as jest.Mock;
 const entry = (overrides: Partial<ClientHistoryEntry> = {}): ClientHistoryEntry => ({
   id: '1',
   clientId: '1',
-  eventType: 'plan_assigned',
+  eventType: HISTORY_EVENTS.PLAN_ASSIGNED,
   occurredAt: '2026-06-19T14:20:00',
   metadata: {},
   username: null,
@@ -42,7 +43,7 @@ describe('ClientHistoryTab', () => {
     mockUseClientHistory.mockReturnValue({
       history: [
         entry({
-          eventType: 'renewal_deleted',
+          eventType: HISTORY_EVENTS.RENEWAL_DELETED,
           metadata: {
             planName: 'Hiperproteico',
             startDate: '2026-07-02',
@@ -64,7 +65,7 @@ describe('ClientHistoryTab', () => {
     mockUseClientHistory.mockReturnValue({
       history: [
         entry({
-          eventType: 'renewal_deleted',
+          eventType: HISTORY_EVENTS.RENEWAL_DELETED,
           username: 'Daleney',
           metadata: {
             planName: 'Hiperproteico',
@@ -88,7 +89,7 @@ describe('ClientHistoryTab', () => {
     mockUseClientHistory.mockReturnValue({
       history: [
         entry({
-          eventType: 'renewal_deleted',
+          eventType: HISTORY_EVENTS.RENEWAL_DELETED,
           username: 'Daleney',
           metadata: {
             planName: 'Hiperproteico',
@@ -108,7 +109,9 @@ describe('ClientHistoryTab', () => {
 
   it('names the deleter alone when the registration time is unknown', () => {
     mockUseClientHistory.mockReturnValue({
-      history: [entry({ eventType: 'renewal_deleted', username: 'Daleney', metadata: {} })],
+      history: [
+        entry({ eventType: HISTORY_EVENTS.RENEWAL_DELETED, username: 'Daleney', metadata: {} }),
+      ],
       isLoading: false,
     });
 
@@ -119,7 +122,7 @@ describe('ClientHistoryTab', () => {
 
   it('omits the line entirely on a renewal deleted before users were tracked', () => {
     mockUseClientHistory.mockReturnValue({
-      history: [entry({ eventType: 'renewal_deleted' })],
+      history: [entry({ eventType: HISTORY_EVENTS.RENEWAL_DELETED })],
       isLoading: false,
     });
 
@@ -161,7 +164,7 @@ describe('ClientHistoryTab', () => {
     mockUseClientHistory.mockReturnValue({
       history: [
         entry({
-          eventType: 'dates_changed',
+          eventType: HISTORY_EVENTS.DATES_CHANGED,
           metadata: { startDate: '2026-07-02', duration: 20, contractEndDate: '2026-07-29' },
         }),
       ],
@@ -179,7 +182,7 @@ describe('ClientHistoryTab', () => {
     mockUseClientHistory.mockReturnValue({
       history: [
         entry({
-          eventType: 'terms_changed',
+          eventType: HISTORY_EVENTS.TERMS_CHANGED,
           metadata: {
             planId: '2',
             planName: 'Reductor',
@@ -205,7 +208,7 @@ describe('ClientHistoryTab', () => {
     mockUseClientHistory.mockReturnValue({
       history: [
         entry({
-          eventType: 'terms_changed',
+          eventType: HISTORY_EVENTS.TERMS_CHANGED,
           metadata: {
             planId: '5',
             planName: 'Completo',
@@ -231,7 +234,7 @@ describe('ClientHistoryTab', () => {
     mockUseClientHistory.mockReturnValue({
       history: [
         entry({
-          eventType: 'plan_reactivated',
+          eventType: HISTORY_EVENTS.PLAN_REACTIVATED,
           metadata: { planName: 'Completo', planPrice: 1800 },
         }),
       ],

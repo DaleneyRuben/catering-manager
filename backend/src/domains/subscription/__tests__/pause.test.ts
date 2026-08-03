@@ -1,3 +1,4 @@
+import { HISTORY_EVENTS } from '../../../constants/history.constants';
 import Subscription from '../../../models/Subscription';
 import sequelize from '../../../database/sequelize';
 import { record } from '../../client-history';
@@ -49,7 +50,11 @@ describe('pause', () => {
 
     await pause(5, actor);
 
-    expect(record).toHaveBeenCalledWith(actor, { type: 'plan_paused', clientId: 42 }, transaction);
+    expect(record).toHaveBeenCalledWith(
+      actor,
+      { type: HISTORY_EVENTS.PLAN_PAUSED, clientId: 42 },
+      transaction,
+    );
   });
 
   it('leaves an already-paused subscription untouched so the days still owed are not reset', async () => {

@@ -1,3 +1,4 @@
+import { HISTORY_EVENTS } from '../../../constants/history.constants';
 import Subscription from '../../../models/Subscription';
 import sequelize from '../../../database/sequelize';
 import { record } from '../../client-history';
@@ -58,7 +59,11 @@ describe('resume', () => {
 
     await resume(5, actor);
 
-    expect(record).toHaveBeenCalledWith(actor, { type: 'plan_resumed', clientId: 42 }, transaction);
+    expect(record).toHaveBeenCalledWith(
+      actor,
+      { type: HISTORY_EVENTS.PLAN_RESUMED, clientId: 42 },
+      transaction,
+    );
   });
 
   // A sin-fecha renewal is paused without ever having delivered a day, so there is nothing owed.

@@ -1,4 +1,8 @@
-import { EVENT_LABELS, PLAN_CHANGE_LABELS } from '@/features/clients/constants/historyEvents';
+import {
+  EVENT_LABELS,
+  HISTORY_EVENTS,
+  PLAN_CHANGE_LABELS,
+} from '@/features/clients/constants/historyEvents';
 import type { ClientHistoryEntry } from '@/features/clients/types';
 import { formatDate } from '@/utils/format';
 
@@ -30,15 +34,19 @@ const readPlanChange = (meta: Metadata): PlanChange => {
 };
 
 export const resolveEventLabel = (entry: ClientHistoryEntry): string => {
-  if (entry.eventType !== 'plan_changed') return EVENT_LABELS[entry.eventType];
+  // an unrecognised key means a row written by an older deploy, or read before the rename
+  // migration has run — showing the raw key beats leaving the timeline row blank
+  if (entry.eventType !== HISTORY_EVENTS.TERMS_CHANGED) {
+    return EVENT_LABELS[entry.eventType] ?? entry.eventType;
+  }
 
   const change = readPlanChange(entry.metadata);
-  if (!change) return EVENT_LABELS.plan_changed;
+  if (!change) return EVENT_LABELS.terms_changed;
 
   if (change.planMoved && change.priceMoved) return PLAN_CHANGE_LABELS.both;
   if (change.planMoved) return PLAN_CHANGE_LABELS.plan;
   if (change.priceMoved) return PLAN_CHANGE_LABELS.price;
-  return EVENT_LABELS.plan_changed;
+  return EVENT_LABELS.terms_changed;
 };
 
 const describeContractEdit = (meta: Metadata): string | null => {
@@ -75,7 +83,7 @@ const describePlanChange = (meta: Metadata): string | null => {
 };
 
 export const resolveEventChange = (entry: ClientHistoryEntry): string | null => {
-  if (entry.eventType === 'contract_updated') return describeContractEdit(entry.metadata);
-  if (entry.eventType === 'plan_changed') return describePlanChange(entry.metadata);
+  if (entry.eventType === HISTORY_EVENTS.DATES_CHANGED) return describeContractEdit(entry.metadata);
+  if (entry.eventType === HISTORY_EVENTS.TERMS_CHANGED) return describePlanChange(entry.metadata);
   return null;
 };

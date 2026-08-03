@@ -1,10 +1,11 @@
+import { HISTORY_EVENTS } from '@/features/clients/constants/historyEvents';
 import type { ClientHistoryEntry } from '@/features/clients/types';
 import { resolveEventLabel, resolveEventChange } from '@/features/clients/utils/historyEvent';
 
 const entry = (overrides: Partial<ClientHistoryEntry> = {}): ClientHistoryEntry => ({
   id: '1',
   clientId: '1',
-  eventType: 'terms_changed',
+  eventType: HISTORY_EVENTS.TERMS_CHANGED,
   occurredAt: '2026-08-03T14:20:00',
   metadata: {},
   username: 'Daleney',
@@ -67,17 +68,27 @@ describe('resolveEventLabel', () => {
   });
 
   it('calls a reactivation a plan reactivation, matching a renewal', () => {
-    expect(resolveEventLabel(entry({ eventType: 'plan_reactivated' }))).toBe('Plan reactivado');
+    expect(resolveEventLabel(entry({ eventType: HISTORY_EVENTS.PLAN_REACTIVATED }))).toBe(
+      'Plan reactivado',
+    );
   });
 
   it('calls a contract edit a change of dates', () => {
-    expect(resolveEventLabel(entry({ eventType: 'dates_changed' }))).toBe('Fechas modificadas');
+    expect(resolveEventLabel(entry({ eventType: HISTORY_EVENTS.DATES_CHANGED }))).toBe(
+      'Fechas modificadas',
+    );
   });
 
   it('leaves the events that already say what they do alone', () => {
-    expect(resolveEventLabel(entry({ eventType: 'plan_paused' }))).toBe('Plan pausado');
-    expect(resolveEventLabel(entry({ eventType: 'plan_renewed' }))).toBe('Plan renovado');
-    expect(resolveEventLabel(entry({ eventType: 'plan_finalized' }))).toBe('Plan finalizado');
+    expect(resolveEventLabel(entry({ eventType: HISTORY_EVENTS.PLAN_PAUSED }))).toBe(
+      'Plan pausado',
+    );
+    expect(resolveEventLabel(entry({ eventType: HISTORY_EVENTS.PLAN_RENEWED }))).toBe(
+      'Plan renovado',
+    );
+    expect(resolveEventLabel(entry({ eventType: HISTORY_EVENTS.PLAN_FINALIZED }))).toBe(
+      'Plan finalizado',
+    );
   });
 
   // a row written by an older deploy, or read before the rename migration has run: showing the
@@ -141,7 +152,7 @@ describe('resolveEventChange', () => {
   it('shows the contract span and its duration on a dates edit', () => {
     const change = resolveEventChange(
       entry({
-        eventType: 'dates_changed',
+        eventType: HISTORY_EVENTS.DATES_CHANGED,
         metadata: { startDate: '2026-08-03', duration: 25, contractEndDate: '2026-09-05' },
       }),
     );
@@ -150,7 +161,9 @@ describe('resolveEventChange', () => {
   });
 
   it('says nothing for an event that carries no change to describe', () => {
-    expect(resolveEventChange(entry({ eventType: 'plan_paused', metadata: {} }))).toBeNull();
+    expect(
+      resolveEventChange(entry({ eventType: HISTORY_EVENTS.PLAN_PAUSED, metadata: {} })),
+    ).toBeNull();
     expect(resolveEventChange(planChange({ planName: 'Completo' }))).toBeNull();
   });
 });
