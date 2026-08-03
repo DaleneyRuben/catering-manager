@@ -1,4 +1,6 @@
+import { Transaction } from 'sequelize';
 import Client from '../../models/Client';
+import { withTransaction } from '../../database/with-transaction';
 import type { Actor } from '../../types/actor';
 import { appToday } from '../../utils/date';
 import { record } from '../client-history';
@@ -13,7 +15,7 @@ type SubLike = {
   finalizedAt?: string | null;
 };
 
-export const finalize = async (id: number, actor: Actor) => {
+export const finalize = async (id: number, actor: Actor, transaction?: Transaction) => {
   const client = await Client.findByPk(id, { include: INCLUDE_SUBSCRIPTION_ORDERED });
   if (!client) return null;
 
@@ -21,10 +23,12 @@ export const finalize = async (id: number, actor: Actor) => {
   const subs = (client as never as { subscriptions: SubLike[] }).subscriptions ?? [];
   const sub = getCurrentSubscription(subs, today);
 
-  if (sub) await finalizeSubscription(sub.id);
+  await withTransaction(transaction, async (t) => {
+    if (sub) await finalizeSubscription(sub.id, t);
 
-  // Recorded even when there is no subscription to end: the client was still finalized.
-  await record(actor, { type: 'finalized', clientId: client.id });
+    // Recorded even when there is no subscription to end: the client was still finalized.
+    await record(actor, { type: 'finalized', clientId: client.id }, t);
+  });
 
   return withStatus(client);
 };

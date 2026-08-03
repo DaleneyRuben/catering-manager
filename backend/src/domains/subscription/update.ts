@@ -1,5 +1,7 @@
+import { Transaction } from 'sequelize';
 import Client from '../../models/Client';
 import Subscription from '../../models/Subscription';
+import { withTransaction } from '../../database/with-transaction';
 import { UpdateSubscriptionDto } from '../../schemas/subscription.schema';
 import type { Actor } from '../../types/actor';
 import { addDeliveryDays, subtractDeliveryDays, calcContractEndDate } from '../../utils/date';
@@ -11,6 +13,7 @@ export const update = async (
   id: number,
   data: UpdateSubscriptionDto,
   actor: Actor,
+  transaction?: Transaction,
 ) => {
   const subscription = await Subscription.findOne({ where: { id, clientId } });
   if (!subscription) return null;
@@ -19,68 +22,86 @@ export const update = async (
   const base: Record<string, unknown> = { ...rest };
   if (contractDate !== undefined) base.contractDate = contractDate;
 
-  if (startDate !== undefined || duration !== undefined) {
-    const newStartDate = startDate ?? subscription.startDate;
-    const newDuration = duration ?? subscription.duration;
+  return withTransaction(transaction, async (t) => {
+    if (startDate !== undefined || duration !== undefined) {
+      const newStartDate = startDate ?? subscription.startDate;
+      const newDuration = duration ?? subscription.duration;
 
-    const baseContractEndDate = calcContractEndDate(newStartDate ?? null, newDuration);
+      const baseContractEndDate = calcContractEndDate(newStartDate ?? null, newDuration);
 
-    const cleanedSuspendedDates = newStartDate
-      ? (subscription.suspendedDates ?? []).filter((d) => d >= newStartDate)
-      : [];
+      const cleanedSuspendedDates = newStartDate
+        ? (subscription.suspendedDates ?? []).filter((d) => d >= newStartDate)
+        : [];
 
-    const newContractEndDate =
-      baseContractEndDate && cleanedSuspendedDates.length > 0
-        ? addDeliveryDays(baseContractEndDate, cleanedSuspendedDates.length)
-        : baseContractEndDate;
+      const newContractEndDate =
+        baseContractEndDate && cleanedSuspendedDates.length > 0
+          ? addDeliveryDays(baseContractEndDate, cleanedSuspendedDates.length)
+          : baseContractEndDate;
 
-    if (startDate !== undefined) base.startDate = startDate;
-    if (duration !== undefined) base.duration = duration;
-    base.contractEndDate = newContractEndDate;
-    base.suspendedDates = cleanedSuspendedDates;
+      if (startDate !== undefined) base.startDate = startDate;
+      if (duration !== undefined) base.duration = duration;
+      base.contractEndDate = newContractEndDate;
+      base.suspendedDates = cleanedSuspendedDates;
 
-    // assigning a start date activates a sin-fecha paused client
-    if (startDate) {
-      await finalizeOverlappingSubscriptions(clientId, startDate, subscription.id);
-      const client = await Client.findByPk(clientId);
-      if (client) await client.update({ pausedSince: null });
+      // assigning a start date activates a sin-fecha paused client
+      if (startDate) {
+        await finalizeOverlappingSubscriptions(clientId, startDate, subscription.id, t);
+        const client = await Client.findByPk(clientId, { transaction: t });
+        if (client) await client.update({ pausedSince: null }, { transaction: t });
+      }
+
+      const updated = await subscription.update(base, { transaction: t });
+
+      // recorded after the write it describes, so a failed update leaves no orphan event
+      await record(
+        actor,
+        {
+          type: 'plan_assigned',
+          clientId: subscription.clientId,
+          metadata: {
+            startDate: newStartDate,
+            duration: newDuration,
+            contractEndDate: newContractEndDate,
+          },
+        },
+        t,
+      );
+
+      return updated;
     }
 
-    await record(actor, {
-      type: 'plan_assigned',
-      clientId: subscription.clientId,
-      metadata: {
-        startDate: newStartDate,
-        duration: newDuration,
-        contractEndDate: newContractEndDate,
-      },
-    });
+    if (suspendedDates !== undefined) {
+      const current = subscription.suspendedDates ?? [];
+      const added = suspendedDates.filter((d) => !current.includes(d));
+      const removed = current.filter((d) => !suspendedDates.includes(d));
 
-    return subscription.update(base);
-  }
+      const net = added.length - removed.length;
+      let { contractEndDate } = subscription;
+      if (contractEndDate) {
+        if (net > 0) contractEndDate = addDeliveryDays(contractEndDate, net);
+        else if (net < 0) contractEndDate = subtractDeliveryDays(contractEndDate, Math.abs(net));
+      }
 
-  if (suspendedDates !== undefined) {
-    const current = subscription.suspendedDates ?? [];
-    const added = suspendedDates.filter((d) => !current.includes(d));
-    const removed = current.filter((d) => !suspendedDates.includes(d));
+      const updated = await subscription.update(
+        { ...base, suspendedDates, contractEndDate },
+        { transaction: t },
+      );
 
-    const net = added.length - removed.length;
-    let { contractEndDate } = subscription;
-    if (contractEndDate) {
-      if (net > 0) contractEndDate = addDeliveryDays(contractEndDate, net);
-      else if (net < 0) contractEndDate = subtractDeliveryDays(contractEndDate, Math.abs(net));
+      if (added.length > 0) {
+        await record(
+          actor,
+          {
+            type: 'suspended',
+            clientId: subscription.clientId,
+            metadata: { dates: added },
+          },
+          t,
+        );
+      }
+
+      return updated;
     }
 
-    if (added.length > 0) {
-      await record(actor, {
-        type: 'suspended',
-        clientId: subscription.clientId,
-        metadata: { dates: added },
-      });
-    }
-
-    return subscription.update({ ...base, suspendedDates, contractEndDate });
-  }
-
-  return subscription.update(base);
+    return subscription.update(base, { transaction: t });
+  });
 };

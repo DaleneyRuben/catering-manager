@@ -104,7 +104,7 @@ describe('finalize', () => {
       update: jest.fn().mockResolvedValue({}),
     };
     (Client.findByPk as jest.Mock).mockResolvedValue(mockInstance);
-    (finalizeSubscription as jest.Mock).mockRejectedValue(new Error('db error'));
+    (finalizeSubscription as jest.Mock).mockRejectedValueOnce(new Error('db error'));
 
     await expect(finalize(1, actor)).rejects.toThrow('db error');
     expect(record).not.toHaveBeenCalled();
