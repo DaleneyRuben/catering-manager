@@ -10,6 +10,8 @@ const WINDOWS_CHROME_UA =
 const MAC_CHROME_UA =
   'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36';
 
+const transaction = { id: 'caller' } as never;
+
 beforeEach(() => {
   jest.resetAllMocks();
   (LoginEvent.create as jest.Mock).mockResolvedValue({});
@@ -20,19 +22,25 @@ describe('record', () => {
   it('creates an event with parsed device info and the raw user agent', async () => {
     await record(7, ANDROID_CHROME_UA);
 
-    expect(LoginEvent.create).toHaveBeenCalledWith({
-      userId: 7,
-      deviceType: 'mobile',
-      os: 'Android',
-      browser: 'Chrome 126',
-      userAgent: ANDROID_CHROME_UA,
-    });
+    expect(LoginEvent.create).toHaveBeenCalledWith(
+      {
+        userId: 7,
+        deviceType: 'mobile',
+        os: 'Android',
+        browser: 'Chrome 126',
+        userAgent: ANDROID_CHROME_UA,
+      },
+      {},
+    );
   });
 
   it('stores the os name without a version', async () => {
     await record(7, WINDOWS_CHROME_UA);
 
-    expect(LoginEvent.create).toHaveBeenCalledWith(expect.objectContaining({ os: 'Windows' }));
+    expect(LoginEvent.create).toHaveBeenCalledWith(
+      expect.objectContaining({ os: 'Windows' }),
+      expect.anything(),
+    );
   });
 
   it('normalizes Mac OS to macOS', async () => {
@@ -40,6 +48,7 @@ describe('record', () => {
 
     expect(LoginEvent.create).toHaveBeenCalledWith(
       expect.objectContaining({ deviceType: 'desktop', os: 'macOS', browser: 'Chrome 149' }),
+      expect.anything(),
     );
   });
 
@@ -48,19 +57,23 @@ describe('record', () => {
 
     expect(LoginEvent.create).toHaveBeenCalledWith(
       expect.objectContaining({ deviceType: 'desktop', os: 'Windows', browser: 'Chrome 126' }),
+      expect.anything(),
     );
   });
 
   it('stores nulls when no user agent is provided', async () => {
     await record(7, undefined);
 
-    expect(LoginEvent.create).toHaveBeenCalledWith({
-      userId: 7,
-      deviceType: null,
-      os: null,
-      browser: null,
-      userAgent: null,
-    });
+    expect(LoginEvent.create).toHaveBeenCalledWith(
+      {
+        userId: 7,
+        deviceType: null,
+        os: null,
+        browser: null,
+        userAgent: null,
+      },
+      {},
+    );
   });
 
   it('returns the parsed device info', async () => {
@@ -73,5 +86,11 @@ describe('record', () => {
     await record(7, ANDROID_CHROME_UA);
 
     expect(LoginEvent.destroy).not.toHaveBeenCalled();
+  });
+
+  it("writes the event on the caller's transaction when given one", async () => {
+    await record(7, ANDROID_CHROME_UA, transaction);
+
+    expect(LoginEvent.create).toHaveBeenCalledWith(expect.anything(), { transaction });
   });
 });
