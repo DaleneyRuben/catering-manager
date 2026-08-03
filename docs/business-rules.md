@@ -196,7 +196,7 @@ The reporting layer should remain extensible — additional reports may be added
 Each client's displayed status is derived on read from their latest subscription — never stored:
 
 - **ended** — no subscription, manually finalized, or `contractEndDate` in the past (a past end date ends the plan even while paused).
-- **paused** — `pausedSince` is set (covers both mid-plan pauses and "sin fecha" renewals awaiting a start date).
+- **paused** — the subscription's `pausedSince` is set (covers both mid-plan pauses and "sin fecha" renewals awaiting a start date). The pause belongs to the plan, not to the client: registering a sin-fecha renewal pauses only that renewal, so a plan still running keeps its deliveries until its own contract ends.
 - **future** — subscription exists but has no dates yet, or the start date is still ahead.
 - **suspended** — today is one of the subscription's suspended dates.
 - **expiring** — `contractEndDate` falls within the next 5 business days (Mon–Fri, as implemented).
