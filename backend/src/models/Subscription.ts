@@ -43,6 +43,11 @@ class Subscription extends Model {
   @Column({ type: DataType.DATEONLY, allowNull: true, defaultValue: null })
   declare finalizedAt: string | null;
 
+  // Set on the plan that is paused, never on the client: a client may hold a running plan and a
+  // "sin fecha" renewal at once, and only the renewal is paused.
+  @Column({ type: DataType.DATE, allowNull: true, defaultValue: null })
+  declare pausedSince: Date | null;
+
   @Column({ type: DataType.JSONB, allowNull: false, defaultValue: {} })
   declare specialInstructions: Record<string, string>;
 

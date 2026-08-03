@@ -50,8 +50,9 @@ describe('findSuspendedSubscriptionsForDate', () => {
     expect(call.where?.contractEndDate).toBeDefined();
     expect(call.where?.finalizedAt).toEqual({ [Symbol.for('is')]: null });
     expect(call.where?.paid).toBe(true);
+    expect(call.where?.pausedSince).toEqual({ [Symbol.for('is')]: null });
     const clientInclude = call.include?.find((i: { model: typeof Client }) => i.model === Client);
-    expect(clientInclude?.where).toMatchObject({ pausedSince: null });
+    expect(clientInclude?.where).toBeUndefined();
   });
 
   it('includes both Client and Plan models', async () => {

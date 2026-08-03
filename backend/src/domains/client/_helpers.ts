@@ -76,20 +76,20 @@ export function withStatus(client: any): Record<string, unknown> {
   );
   const sub = subs[0] ?? null;
   const status = deriveClientStatus(
-    {
-      pausedSince: client.pausedSince ?? null,
-      sub: sub
-        ? {
-            startDate: sub.startDate ?? null,
-            contractEndDate: sub.contractEndDate ?? null,
-            suspendedDates: sub.suspendedDates ?? [],
-            finalizedAt: sub.finalizedAt ?? null,
-          }
-        : null,
-    },
+    sub
+      ? {
+          startDate: sub.startDate ?? null,
+          contractEndDate: sub.contractEndDate ?? null,
+          suspendedDates: sub.suspendedDates ?? [],
+          finalizedAt: sub.finalizedAt ?? null,
+          pausedSince: sub.pausedSince ?? null,
+        }
+      : null,
     today,
   );
   const plain: Record<string, unknown> =
     typeof client.toJSON === 'function' ? client.toJSON() : { ...client };
-  return { ...plain, status };
+  // Derived, never stored: the detail view needs to know whether the plan on screen is the paused
+  // one to choose between Pausar and Reanudar, and that is a fact about the current subscription.
+  return { ...plain, status, pausedSince: sub?.pausedSince ?? null };
 }

@@ -39,7 +39,7 @@ export const findAll = (filters: FindAllFilters = {}) => {
 
   switch (filters.status) {
     case CLIENT_STATUS.ACTIVE:
-      clientWhere.pausedSince = { [Op.is]: null };
+      subscriptionWhere.pausedSince = { [Op.is]: null };
       subscriptionWhere.contractEndDate = { [Op.gte]: todayStr };
       subscriptionWhere.finalizedAt = { [Op.is]: null };
       andConditions.push(
@@ -50,7 +50,7 @@ export const findAll = (filters: FindAllFilters = {}) => {
       );
       break;
     case CLIENT_STATUS.EXPIRING:
-      clientWhere.pausedSince = { [Op.is]: null };
+      subscriptionWhere.pausedSince = { [Op.is]: null };
       subscriptionWhere.finalizedAt = { [Op.is]: null };
       andConditions.push(
         // filtered on the client, not on the join: a queued renewal ends beyond the expiry
@@ -69,7 +69,10 @@ export const findAll = (filters: FindAllFilters = {}) => {
       subscriptionWhere.finalizedAt = { [Op.is]: null };
       andConditions.push({
         [Op.or]: [
-          { pausedSince: { [Op.not]: null } },
+          // the pause lives on the plan now, so this asks whether any live plan of theirs is paused
+          literal(
+            `EXISTS (SELECT 1 FROM subscriptions sp WHERE sp."clientId" = "Client"."id" AND sp."pausedSince" IS NOT NULL AND sp."finalizedAt" IS NULL)`,
+          ),
           literal(
             `"Client"."id" IN (SELECT s2."clientId" FROM subscriptions s2 WHERE '${todayStr}'::date = ANY(s2."suspendedDates") AND s2."contractEndDate" >= '${todayStr}')`,
           ),

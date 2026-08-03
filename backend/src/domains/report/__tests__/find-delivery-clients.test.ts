@@ -82,13 +82,16 @@ describe('findDeliveryClientsForDate', () => {
     expect(call.where?.finalizedAt).toEqual({ [Symbol.for('is')]: null });
   });
 
-  it('excludes paused clients via where clause on Client include', async () => {
+  // Scoped to the plan, not the person: a client with a paused sin-fecha renewal still gets the
+  // deliveries their running plan has already paid for.
+  it('excludes paused plans via the subscription where clause', async () => {
     (Subscription.findAll as jest.Mock).mockResolvedValue([]);
 
     await findDeliveryClientsForDate('2026-06-15');
 
     const call = (Subscription.findAll as jest.Mock).mock.calls[0][0];
+    expect(call.where?.pausedSince).toEqual({ [Symbol.for('is')]: null });
     const clientInclude = call.include?.find((i: { model: typeof Client }) => i.model === Client);
-    expect(clientInclude?.where).toMatchObject({ pausedSince: null });
+    expect(clientInclude?.where).toBeUndefined();
   });
 });

@@ -33,15 +33,22 @@ describe('findAll', () => {
     expect(result.total).toBe(1);
   });
 
-  it('status=active filters by pausedSince IS NULL and requires subscription', async () => {
+  // The pause filter moved onto the joined subscription: the client is active when a plan of
+  // theirs is running and unpaused, whatever state their other plans are in.
+  it('status=active filters by pausedSince IS NULL on the subscription and requires it', async () => {
     (Client.findAndCountAll as jest.Mock).mockResolvedValue({ rows: [], count: 0 });
 
     await findAll({ status: 'active' });
 
     const call = (Client.findAndCountAll as jest.Mock).mock.calls[0][0];
-    expect(call.where).toMatchObject({ pausedSince: { [Op.is]: null } });
+    expect(call.where).not.toMatchObject({ pausedSince: { [Op.is]: null } });
     expect(call.include).toEqual(
-      expect.arrayContaining([expect.objectContaining({ required: true })]),
+      expect.arrayContaining([
+        expect.objectContaining({
+          required: true,
+          where: expect.objectContaining({ pausedSince: { [Op.is]: null } }),
+        }),
+      ]),
     );
   });
 

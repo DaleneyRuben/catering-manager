@@ -3,29 +3,31 @@ import { EXPIRY_THRESHOLD_DAYS } from '../../constants/subscription.constants';
 
 export type ClientStatusValue = 'active' | 'expiring' | 'paused' | 'suspended' | 'ended' | 'future';
 
-interface StatusInput {
+export interface StatusSubscription {
+  startDate: string | null;
+  contractEndDate: string | null;
+  suspendedDates: string[];
+  finalizedAt: string | null;
   pausedSince: Date | null;
-  sub: {
-    startDate: string | null;
-    contractEndDate: string | null;
-    suspendedDates: string[];
-    finalizedAt: string | null;
-  } | null;
 }
 
-export function deriveClientStatus(input: StatusInput, today: string): ClientStatusValue {
-  const { pausedSince, sub } = input;
-
+// Derived from the one subscription that describes the client today (see getCurrentSubscription).
+// Every rule here is a fact about that plan — including the pause, which is why a paused renewal
+// queued behind a running plan cannot report the client as paused.
+export function deriveClientStatus(
+  sub: StatusSubscription | null,
+  today: string,
+): ClientStatusValue {
   if (!sub) return 'ended';
 
   // manually finalized plans are immediately ended regardless of contractEndDate
   if (sub.finalizedAt !== null) return 'ended';
 
-  // a real past contractEndDate ends the plan even if the client is paused
+  // a real past contractEndDate ends the plan even if it is paused
   if (sub.contractEndDate && sub.contractEndDate < today) return 'ended';
 
-  // pausedSince covers both mid-plan pauses and sin-fecha (null dates with pausedSince set)
-  if (pausedSince !== null) return 'paused';
+  // covers both a mid-plan pause and a sin-fecha renewal waiting for its start date
+  if (sub.pausedSince !== null) return 'paused';
 
   // null dates with no pause = plan not yet configured → future
   if (!sub.contractEndDate && !sub.startDate) return 'future';

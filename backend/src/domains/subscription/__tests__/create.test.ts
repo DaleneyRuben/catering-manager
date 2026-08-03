@@ -539,6 +539,7 @@ describe('create with overlapping prior subscriptions', () => {
       ...mockSubscription,
       startDate: null,
       contractEndDate: null,
+      update: jest.fn().mockResolvedValue({}),
     });
 
     await create(

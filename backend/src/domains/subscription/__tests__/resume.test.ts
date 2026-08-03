@@ -30,6 +30,7 @@ describe('resume', () => {
   const mockSub = (over: Record<string, unknown> = {}) => ({
     id: 5,
     clientId: 1,
+    startDate: '2026-06-01',
     pausedSince,
     update: jest.fn().mockResolvedValue(undefined),
     ...over,
