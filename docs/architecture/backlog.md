@@ -169,24 +169,21 @@ its work becomes fiction.
       is left below is 6.6, which is a history-event decision rather than an ownership violation,
       and the modelling debt.
 
----
-
-## 6. Write ownership 🔴
-
-The core of ADR-007, and the only item that moves business logic. **Needs explicit approval
-before any code is written**, and should be split across several PRs rather than one.
-
-### 6.6 Split the two meanings of `plan_assigned`
-
-Deferred out of 6.1 so that item stayed provably behaviour-identical. `plan_assigned` is
-emitted both when a plan is put in place (metadata: plan, price, dates, discount) and when a
-start date or duration is later edited (metadata: dates only). `record`'s union keeps the plan
-fields optional to allow both, which costs the per-event type checking that was the point.
-
-Give the edit case its own event type, and emit `plan_changed` (debt D3) at the same time —
-both are decisions about what a plan-change event should carry. Changes what lands in
-`client_history`, so it needs a label in the frontend timeline; rows already written keep the
-old type.
+- [x] **item 6.6 + D3** — `plan_assigned` now means one thing. The edit case became
+      `contract_updated` (dates only, no plan fields to be optional about) and `plan_changed` went
+      from declared-but-dead to emitted, so `PlanEventMetadata` could tighten: `planId`, `discount`,
+      `planName` and `planPrice` are all required, with the two plan fields nullable rather than
+      absent — they are null only when the plan row is gone by the time the event is written.
+      **One deviation from what this item scoped, approved before the code:** `plan_changed` fires
+      on a discount change as well as a plan change. The two were the same hole — the subscription
+      PATCH accepts a change to what the client pays and recorded nothing — and of the two, the
+      discount is the one with a button behind it (the billing card), while `planId` is reachable
+      through the API alone. One event rather than two, because `business-rules.md` already
+      described this event as carrying "new cost", which is plan price minus discount. Detection is
+      a comparison against the stored row, so a PATCH that resubmits the same values records
+      nothing. No migration: rows already written keep `plan_assigned` and render exactly as before,
+      since the timeline hides the plan chip when `planName` is absent. What is left below is the
+      modelling debt alone.
 
 ---
 
@@ -201,11 +198,6 @@ write to `clients`. #128 resolved the ownership violation by moving the function
 the concept still lives in the wrong table. A dedicated `delivery_groups` table
 owned by `delivery` is the better model and would make it an owning domain — a migration, not
 required by anything above.
-
-### D3. `plan_changed` is declared but never emitted 🟡
-
-The event type exists; changing only the assigned plan on an existing subscription records no
-history. Noted in `business-rules.md`. After 6.1 this is a one-function change.
 
 ---
 
