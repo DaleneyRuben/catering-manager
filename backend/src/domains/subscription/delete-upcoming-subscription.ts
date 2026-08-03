@@ -46,10 +46,10 @@ export const deleteUpcomingSubscription = async (
 
     const plan = await Plan.findByPk(subscription.planId, { transaction: t });
 
-    // An appointment that resolved into this renewal is unlinked by the foreign key, not here:
-    // appointments belongs to evaluation. Only the link is cleared, never the date, so a past
-    // appointment is pruned on the next queue read rather than pushed back onto the
-    // nutritionist's list.
+    // An appointment that resolved into this renewal goes with it, deleted by the foreign key
+    // rather than here: appointments belongs to evaluation. A cita the nutritionist has already
+    // acted on must never reappear in her queue, and that queue is "appointments with no
+    // subscriptionId" — so clearing the link would put it straight back.
     await subscription.destroy({ transaction: t });
 
     await record(
