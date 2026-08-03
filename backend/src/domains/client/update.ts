@@ -1,4 +1,6 @@
+import { Transaction } from 'sequelize';
 import Client from '../../models/Client';
+import { withTransaction } from '../../database/with-transaction';
 import { UpdateClientDto } from '../../schemas/client.schema';
 import type { Actor } from '../../types/actor';
 import { appToday } from '../../utils/date';
@@ -14,25 +16,33 @@ type SubLike = {
   finalizedAt?: string | null;
 };
 
-export const update = async (id: number, data: UpdateClientDto, actor: Actor) => {
+export const update = async (
+  id: number,
+  data: UpdateClientDto,
+  actor: Actor,
+  transaction?: Transaction,
+) => {
   const client = await Client.findByPk(id, { include: INCLUDE_SUBSCRIPTION_ORDERED });
   if (!client) return null;
 
-  if (data.pausedSince !== undefined) {
-    const isPausing = data.pausedSince !== null && client.pausedSince === null;
-    const isResuming = data.pausedSince === null && client.pausedSince !== null;
+  const updated = await withTransaction(transaction, async (t) => {
+    if (data.pausedSince !== undefined) {
+      const isPausing = data.pausedSince !== null && client.pausedSince === null;
+      const isResuming = data.pausedSince === null && client.pausedSince !== null;
 
-    if (isPausing || isResuming) {
-      await record(actor, { type: isPausing ? 'paused' : 'resumed', clientId: client.id });
+      if (isPausing || isResuming) {
+        await record(actor, { type: isPausing ? 'paused' : 'resumed', clientId: client.id }, t);
+      }
+
+      if (isResuming && client.pausedSince) {
+        const subs = (client as never as { subscriptions: SubLike[] }).subscriptions ?? [];
+        const sub = getCurrentSubscription(subs, appToday());
+        if (sub) await extendAfterPause(sub.id, client.pausedSince, t);
+      }
     }
 
-    if (isResuming && client.pausedSince) {
-      const subs = (client as never as { subscriptions: SubLike[] }).subscriptions ?? [];
-      const sub = getCurrentSubscription(subs, appToday());
-      if (sub) await extendAfterPause(sub.id, client.pausedSince);
-    }
-  }
+    return client.update(data, { transaction: t });
+  });
 
-  const updated = await client.update(data);
   return withStatus(updated);
 };
