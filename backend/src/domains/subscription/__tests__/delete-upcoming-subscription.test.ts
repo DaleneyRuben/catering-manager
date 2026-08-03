@@ -130,7 +130,9 @@ describe('deleteUpcomingSubscription', () => {
     );
   });
 
-  it('unlinks an appointment that resolved into the deleted renewal', async () => {
+  // appointments belongs to evaluation. The link is cleared by the foreign key
+  // (ON DELETE SET NULL), so this domain neither reads nor writes the table.
+  it('never touches the appointments table', async () => {
     const sub = upcoming();
     const appointment = { id: 3, date: startDate, update: jest.fn().mockResolvedValue({}) };
     (Subscription.findOne as jest.Mock).mockResolvedValue(sub);
@@ -140,21 +142,9 @@ describe('deleteUpcomingSubscription', () => {
 
     await deleteUpcomingSubscription(1, 9, actor);
 
-    expect(Appointment.findOne).toHaveBeenCalledWith({ where: { subscriptionId: 9 }, transaction });
-    expect(appointment.update).toHaveBeenCalledWith({ subscriptionId: null }, { transaction });
-  });
-
-  it('leaves the appointment date untouched so a past one is pruned instead of re-queued', async () => {
-    const sub = upcoming();
-    const appointment = { id: 3, date: '2020-01-02', update: jest.fn().mockResolvedValue({}) };
-    (Subscription.findOne as jest.Mock).mockResolvedValue(sub);
-    (Subscription.count as jest.Mock).mockResolvedValue(1);
-    (Plan.findByPk as jest.Mock).mockResolvedValue({ id: 2, name: 'Completo', price: 5000 });
-    (Appointment.findOne as jest.Mock).mockResolvedValue(appointment);
-
-    await deleteUpcomingSubscription(1, 9, actor);
-
-    expect(appointment.update).toHaveBeenCalledWith({ subscriptionId: null }, { transaction });
+    expect(Appointment.findOne).not.toHaveBeenCalled();
+    expect(Appointment.update).not.toHaveBeenCalled();
+    expect(appointment.update).not.toHaveBeenCalled();
   });
 
   it('deletes a renewal that no appointment resolved into', async () => {
@@ -162,7 +152,6 @@ describe('deleteUpcomingSubscription', () => {
     (Subscription.findOne as jest.Mock).mockResolvedValue(sub);
     (Subscription.count as jest.Mock).mockResolvedValue(1);
     (Plan.findByPk as jest.Mock).mockResolvedValue({ id: 2, name: 'Completo', price: 5000 });
-    (Appointment.findOne as jest.Mock).mockResolvedValue(null);
 
     await deleteUpcomingSubscription(1, 9, actor);
 
@@ -223,15 +212,11 @@ describe('deleteUpcomingSubscription', () => {
     expect(sinFecha.destroy).toHaveBeenCalled();
   });
 
-  it('unlinks the appointment, deletes the row and records history in one transaction', async () => {
+  it('deletes the row and records history in one transaction', async () => {
     const sub = upcoming();
     (Subscription.findOne as jest.Mock).mockResolvedValue(sub);
     (Subscription.count as jest.Mock).mockResolvedValue(1);
     (Plan.findByPk as jest.Mock).mockResolvedValue({ id: 2, name: 'Completo', price: 5000 });
-    (Appointment.findOne as jest.Mock).mockResolvedValue({
-      id: 3,
-      update: jest.fn().mockResolvedValue({}),
-    });
 
     await deleteUpcomingSubscription(1, 9, actor);
 
@@ -251,7 +236,7 @@ describe('deleteUpcomingSubscription', () => {
     expect(record).toHaveBeenCalledWith(actor, expect.anything(), callerTransaction);
   });
 
-  it('leaves the appointment linked and the history unwritten when the delete fails', async () => {
+  it('leaves the history unwritten when the delete fails', async () => {
     const sub = { ...upcoming(), destroy: jest.fn().mockRejectedValue(new Error('db error')) };
     (Subscription.findOne as jest.Mock).mockResolvedValue(sub);
     (Subscription.count as jest.Mock).mockResolvedValue(1);
