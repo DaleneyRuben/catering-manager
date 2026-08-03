@@ -1,11 +1,12 @@
 import { z } from 'zod';
-import { isWeekend, parseISO } from 'date-fns';
+import { parseISO } from 'date-fns';
+import { checkIsWeekend } from '../utils/devFlags';
 import { decodeId } from '../utils/sqids';
 
 const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
 const dateField = z.string().regex(dateRegex, 'must be YYYY-MM-DD');
 const weekdayDateField = dateField.refine(
-  (v) => !isWeekend(parseISO(v)),
+  (v) => !checkIsWeekend(parseISO(v)),
   'startDate must be a weekday (Mon–Fri)',
 );
 
