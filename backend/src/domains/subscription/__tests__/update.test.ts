@@ -1,6 +1,7 @@
 import { Op } from 'sequelize';
 import Subscription from '../../../models/Subscription';
 import Client from '../../../models/Client';
+import Plan from '../../../models/Plan';
 import sequelize from '../../../database/sequelize';
 import { record } from '../../client-history';
 import { update } from '../update';
@@ -87,7 +88,7 @@ describe('update', () => {
     );
   });
 
-  it('records the acting user on the plan_assigned history event', async () => {
+  it('records the acting user on the contract_updated history event', async () => {
     const mockInstance = {
       clientId: 1,
       startDate: '2026-05-26',
@@ -105,6 +106,37 @@ describe('update', () => {
     expect(record).toHaveBeenCalledWith(
       expect.objectContaining({ userId: 9, username: 'ada' }),
       expect.anything(),
+      transaction,
+    );
+  });
+
+  // An edit to the contract dates is not a plan being put in place, so it no longer borrows
+  // plan_assigned's type — and it carries no plan fields to borrow it with.
+  it('records a contract_updated event carrying only the new contract dates', async () => {
+    const mockInstance = {
+      clientId: 1,
+      startDate: '2026-05-26',
+      duration: 20,
+      contractEndDate: addDeliveryDays('2026-05-26', 19),
+      suspendedDates: [],
+      update: jest.fn().mockResolvedValue({}),
+    };
+    (Subscription.findOne as jest.Mock).mockResolvedValue(mockInstance);
+    (Client.findByPk as jest.Mock).mockResolvedValue({ id: 1, update: jest.fn() });
+
+    await update(1, 1, { startDate: '2026-06-01' }, actor);
+
+    expect(record).toHaveBeenCalledWith(
+      actor,
+      {
+        type: 'contract_updated',
+        clientId: 1,
+        metadata: {
+          startDate: '2026-06-01',
+          duration: 20,
+          contractEndDate: addDeliveryDays('2026-06-01', 19),
+        },
+      },
       transaction,
     );
   });
@@ -274,7 +306,7 @@ describe('update', () => {
     );
   });
 
-  it('writes the plan_assigned event only after the subscription it describes', async () => {
+  it('writes the contract_updated event only after the subscription it describes', async () => {
     const mockInstance = {
       clientId: 1,
       startDate: '2026-05-26',
@@ -324,6 +356,120 @@ describe('update', () => {
 
     await expect(update(1, 1, { startDate: '2026-06-01' }, actor)).rejects.toThrow('db error');
     expect(record).not.toHaveBeenCalled();
+  });
+
+  it('records a plan_changed event when the assigned plan changes', async () => {
+    const mockInstance = {
+      clientId: 1,
+      planId: 2,
+      discount: 100,
+      startDate: '2026-05-26',
+      duration: 20,
+      contractEndDate: addDeliveryDays('2026-05-26', 19),
+      suspendedDates: [],
+      update: jest.fn().mockResolvedValue({}),
+    };
+    (Subscription.findOne as jest.Mock).mockResolvedValue(mockInstance);
+    (Plan.findByPk as jest.Mock)
+      .mockResolvedValueOnce({ id: 2, name: 'Ligero', price: 1200 })
+      .mockResolvedValueOnce({ id: 5, name: 'Completo', price: 1800 });
+
+    await update(1, 1, { planId: 5 }, actor);
+
+    expect(record).toHaveBeenCalledWith(
+      actor,
+      {
+        type: 'plan_changed',
+        clientId: 1,
+        metadata: {
+          planId: 5,
+          planName: 'Completo',
+          planPrice: 1800,
+          previousPlanId: 2,
+          previousPlanName: 'Ligero',
+          discount: 100,
+          previousDiscount: 100,
+        },
+      },
+      transaction,
+    );
+  });
+
+  // The discount is what the client actually pays, so moving it is a change to the commercial
+  // terms even when the plan behind it stays put.
+  it('records a plan_changed event when only the discount changes', async () => {
+    const mockInstance = {
+      clientId: 1,
+      planId: 2,
+      discount: 100,
+      startDate: '2026-05-26',
+      duration: 20,
+      contractEndDate: addDeliveryDays('2026-05-26', 19),
+      suspendedDates: [],
+      update: jest.fn().mockResolvedValue({}),
+    };
+    (Subscription.findOne as jest.Mock).mockResolvedValue(mockInstance);
+    (Plan.findByPk as jest.Mock).mockResolvedValue({ id: 2, name: 'Ligero', price: 1200 });
+
+    await update(1, 1, { discount: 250 }, actor);
+
+    expect(record).toHaveBeenCalledWith(
+      actor,
+      {
+        type: 'plan_changed',
+        clientId: 1,
+        metadata: {
+          planId: 2,
+          planName: 'Ligero',
+          planPrice: 1200,
+          previousPlanId: 2,
+          previousPlanName: 'Ligero',
+          discount: 250,
+          previousDiscount: 100,
+        },
+      },
+      transaction,
+    );
+    // the plan on both sides of the change is the same row — reading it twice would be waste
+    expect(Plan.findByPk).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not record plan_changed when neither the plan nor the discount moves', async () => {
+    const mockInstance = {
+      clientId: 1,
+      planId: 2,
+      discount: 100,
+      suspendedDates: [],
+      update: jest.fn().mockResolvedValue({}),
+    };
+    (Subscription.findOne as jest.Mock).mockResolvedValue(mockInstance);
+
+    await update(
+      1,
+      1,
+      { planId: 2, discount: 100, specialInstructions: { lunch: 'GRANDE' } },
+      actor,
+    );
+
+    expect(record).not.toHaveBeenCalled();
+  });
+
+  it('writes the plan_changed event only after the subscription it describes', async () => {
+    const mockInstance = {
+      clientId: 1,
+      planId: 2,
+      discount: 100,
+      suspendedDates: [],
+      update: jest.fn().mockResolvedValue({}),
+    };
+    (Subscription.findOne as jest.Mock).mockResolvedValue(mockInstance);
+    (Plan.findByPk as jest.Mock).mockResolvedValue({ id: 2, name: 'Ligero', price: 1200 });
+
+    await update(1, 1, { discount: 250 }, actor);
+
+    const [updateOrder] = mockInstance.update.mock.invocationCallOrder;
+    const [recordOrder] = (record as jest.Mock).mock.invocationCallOrder;
+    expect(recordOrder).toBeGreaterThan(updateOrder);
   });
 
   it('changes the plan and records the event in one transaction', async () => {
