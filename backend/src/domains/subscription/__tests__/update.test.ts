@@ -88,7 +88,7 @@ describe('update', () => {
     );
   });
 
-  it('records the acting user on the contract_updated history event', async () => {
+  it('records the acting user on the dates_changed history event', async () => {
     const mockInstance = {
       clientId: 1,
       startDate: '2026-05-26',
@@ -112,7 +112,7 @@ describe('update', () => {
 
   // An edit to the contract dates is not a plan being put in place, so it no longer borrows
   // plan_assigned's type — and it carries no plan fields to borrow it with.
-  it('records a contract_updated event carrying only the new contract dates', async () => {
+  it('records a dates_changed event carrying only the new contract dates', async () => {
     const mockInstance = {
       clientId: 1,
       startDate: '2026-05-26',
@@ -129,7 +129,7 @@ describe('update', () => {
     expect(record).toHaveBeenCalledWith(
       actor,
       {
-        type: 'contract_updated',
+        type: 'dates_changed',
         clientId: 1,
         metadata: {
           startDate: '2026-06-01',
@@ -141,7 +141,7 @@ describe('update', () => {
     );
   });
 
-  it('records suspended history event when dates are added', async () => {
+  it('records a days_suspended history event when dates are added', async () => {
     const mockInstance = {
       id: 1,
       clientId: 1,
@@ -156,12 +156,12 @@ describe('update', () => {
 
     expect(record).toHaveBeenCalledWith(
       actor,
-      expect.objectContaining({ type: 'suspended', clientId: 1 }),
+      expect.objectContaining({ type: 'days_suspended', clientId: 1 }),
       transaction,
     );
   });
 
-  it('records the acting user on the suspended history event', async () => {
+  it('records the acting user on the days_suspended history event', async () => {
     const mockInstance = {
       id: 1,
       clientId: 1,
@@ -306,7 +306,7 @@ describe('update', () => {
     );
   });
 
-  it('writes the contract_updated event only after the subscription it describes', async () => {
+  it('writes the dates_changed event only after the subscription it describes', async () => {
     const mockInstance = {
       clientId: 1,
       startDate: '2026-05-26',
@@ -325,7 +325,7 @@ describe('update', () => {
     expect(recordOrder).toBeGreaterThan(updateOrder);
   });
 
-  it('writes the suspended event only after the subscription it describes', async () => {
+  it('writes the days_suspended event only after the subscription it describes', async () => {
     const mockInstance = {
       id: 1,
       clientId: 1,
@@ -358,7 +358,7 @@ describe('update', () => {
     expect(record).not.toHaveBeenCalled();
   });
 
-  it('records a plan_changed event when the assigned plan changes', async () => {
+  it('records a terms_changed event when the assigned plan changes', async () => {
     const mockInstance = {
       clientId: 1,
       planId: 2,
@@ -379,7 +379,7 @@ describe('update', () => {
     expect(record).toHaveBeenCalledWith(
       actor,
       {
-        type: 'plan_changed',
+        type: 'terms_changed',
         clientId: 1,
         metadata: {
           planId: 5,
@@ -397,7 +397,7 @@ describe('update', () => {
 
   // The discount is what the client actually pays, so moving it is a change to the commercial
   // terms even when the plan behind it stays put.
-  it('records a plan_changed event when only the discount changes', async () => {
+  it('records a terms_changed event when only the discount changes', async () => {
     const mockInstance = {
       clientId: 1,
       planId: 2,
@@ -416,7 +416,7 @@ describe('update', () => {
     expect(record).toHaveBeenCalledWith(
       actor,
       {
-        type: 'plan_changed',
+        type: 'terms_changed',
         clientId: 1,
         metadata: {
           planId: 2,
@@ -434,7 +434,7 @@ describe('update', () => {
     expect(Plan.findByPk).toHaveBeenCalledTimes(1);
   });
 
-  it('does not record plan_changed when neither the plan nor the discount moves', async () => {
+  it('does not record terms_changed when neither the plan nor the discount moves', async () => {
     const mockInstance = {
       clientId: 1,
       planId: 2,
@@ -454,7 +454,7 @@ describe('update', () => {
     expect(record).not.toHaveBeenCalled();
   });
 
-  it('writes the plan_changed event only after the subscription it describes', async () => {
+  it('writes the terms_changed event only after the subscription it describes', async () => {
     const mockInstance = {
       clientId: 1,
       planId: 2,

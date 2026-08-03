@@ -53,12 +53,12 @@ describe('resume', () => {
     expect(extendAfterPause).toHaveBeenCalledWith(5, pausedSince, transaction);
   });
 
-  it('records a resumed history event against the subscription owner', async () => {
+  it('records a plan_resumed history event against the subscription owner', async () => {
     (Subscription.findByPk as jest.Mock).mockResolvedValue(mockSub({ clientId: 42 }));
 
     await resume(5, actor);
 
-    expect(record).toHaveBeenCalledWith(actor, { type: 'resumed', clientId: 42 }, transaction);
+    expect(record).toHaveBeenCalledWith(actor, { type: 'plan_resumed', clientId: 42 }, transaction);
   });
 
   // A sin-fecha renewal is paused without ever having delivered a day, so there is nothing owed.

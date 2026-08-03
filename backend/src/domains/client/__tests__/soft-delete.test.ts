@@ -20,7 +20,7 @@ describe('softDelete', () => {
     (sequelize.transaction as jest.Mock).mockImplementation((work) => work(transaction));
   });
 
-  it('calls destroy on the client and records deleted history event', async () => {
+  it('calls destroy on the client and records a client_deleted history event', async () => {
     const mockInstance = {
       id: 1,
       destroy: jest.fn().mockResolvedValue({}),
@@ -31,7 +31,11 @@ describe('softDelete', () => {
     await softDelete(1, actor);
 
     expect(mockInstance.destroy).toHaveBeenCalledWith({ transaction });
-    expect(record).toHaveBeenCalledWith(actor, { type: 'deleted', clientId: 1 }, transaction);
+    expect(record).toHaveBeenCalledWith(
+      actor,
+      { type: 'client_deleted', clientId: 1 },
+      transaction,
+    );
   });
 
   it('records the acting user on the history event', async () => {
@@ -68,7 +72,11 @@ describe('softDelete', () => {
 
     expect(sequelize.transaction).not.toHaveBeenCalled();
     expect(mockInstance.destroy).toHaveBeenCalledWith({ transaction: callerTransaction });
-    expect(record).toHaveBeenCalledWith(actor, { type: 'deleted', clientId: 1 }, callerTransaction);
+    expect(record).toHaveBeenCalledWith(
+      actor,
+      { type: 'client_deleted', clientId: 1 },
+      callerTransaction,
+    );
   });
 
   it('leaves the history event unwritten when the delete fails', async () => {

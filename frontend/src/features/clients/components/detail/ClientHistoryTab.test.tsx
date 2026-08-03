@@ -161,7 +161,7 @@ describe('ClientHistoryTab', () => {
     mockUseClientHistory.mockReturnValue({
       history: [
         entry({
-          eventType: 'contract_updated',
+          eventType: 'dates_changed',
           metadata: { startDate: '2026-07-02', duration: 20, contractEndDate: '2026-07-29' },
         }),
       ],
@@ -179,7 +179,7 @@ describe('ClientHistoryTab', () => {
     mockUseClientHistory.mockReturnValue({
       history: [
         entry({
-          eventType: 'plan_changed',
+          eventType: 'terms_changed',
           metadata: {
             planId: '2',
             planName: 'Reductor',
@@ -205,7 +205,7 @@ describe('ClientHistoryTab', () => {
     mockUseClientHistory.mockReturnValue({
       history: [
         entry({
-          eventType: 'plan_changed',
+          eventType: 'terms_changed',
           metadata: {
             planId: '5',
             planName: 'Completo',
@@ -230,7 +230,10 @@ describe('ClientHistoryTab', () => {
   it('names a reactivation after the plan, matching a renewal', () => {
     mockUseClientHistory.mockReturnValue({
       history: [
-        entry({ eventType: 'reactivated', metadata: { planName: 'Completo', planPrice: 1800 } }),
+        entry({
+          eventType: 'plan_reactivated',
+          metadata: { planName: 'Completo', planPrice: 1800 },
+        }),
       ],
       isLoading: false,
     });

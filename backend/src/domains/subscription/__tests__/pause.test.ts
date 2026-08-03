@@ -44,12 +44,12 @@ describe('pause', () => {
     );
   });
 
-  it('records a paused history event against the subscription owner', async () => {
+  it('records a plan_paused history event against the subscription owner', async () => {
     (Subscription.findByPk as jest.Mock).mockResolvedValue(mockSub({ clientId: 42 }));
 
     await pause(5, actor);
 
-    expect(record).toHaveBeenCalledWith(actor, { type: 'paused', clientId: 42 }, transaction);
+    expect(record).toHaveBeenCalledWith(actor, { type: 'plan_paused', clientId: 42 }, transaction);
   });
 
   it('leaves an already-paused subscription untouched so the days still owed are not reset', async () => {

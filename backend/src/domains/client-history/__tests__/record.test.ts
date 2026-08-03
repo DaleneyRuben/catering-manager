@@ -16,7 +16,7 @@ describe('record', () => {
   });
 
   it('stamps the acting user on the row', async () => {
-    await record(actor, { type: 'finalized', clientId: 42 });
+    await record(actor, { type: 'plan_finalized', clientId: 42 });
 
     expect(mockedCreate).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -29,13 +29,17 @@ describe('record', () => {
   });
 
   it('defaults metadata to an empty object for an event that carries none', async () => {
-    await record(actor, { type: 'deleted', clientId: 42 });
+    await record(actor, { type: 'client_deleted', clientId: 42 });
 
     expect(mockedCreate.mock.calls[0][0].metadata).toEqual({});
   });
 
   it('passes the event metadata through untouched', async () => {
-    await record(actor, { type: 'suspended', clientId: 42, metadata: { dates: ['2026-08-03'] } });
+    await record(actor, {
+      type: 'days_suspended',
+      clientId: 42,
+      metadata: { dates: ['2026-08-03'] },
+    });
 
     expect(mockedCreate.mock.calls[0][0].metadata).toEqual({ dates: ['2026-08-03'] });
   });
@@ -43,7 +47,7 @@ describe('record', () => {
   it('records the moment the event occurred', async () => {
     jest.useFakeTimers().setSystemTime(new Date('2026-08-01T09:30:00Z'));
 
-    await record(actor, { type: 'paused', clientId: 42 });
+    await record(actor, { type: 'plan_paused', clientId: 42 });
 
     expect(mockedCreate.mock.calls[0][0].occurredAt).toEqual(new Date('2026-08-01T09:30:00Z'));
 
@@ -53,13 +57,13 @@ describe('record', () => {
   it('joins the caller transaction when one is given', async () => {
     const transaction = {} as Transaction;
 
-    await record(actor, { type: 'resumed', clientId: 42 }, transaction);
+    await record(actor, { type: 'plan_resumed', clientId: 42 }, transaction);
 
     expect(mockedCreate).toHaveBeenCalledWith(expect.any(Object), { transaction });
   });
 
   it('writes without a transaction argument when none is given', async () => {
-    await record(actor, { type: 'resumed', clientId: 42 });
+    await record(actor, { type: 'plan_resumed', clientId: 42 });
 
     expect(mockedCreate.mock.calls[0]).toHaveLength(1);
   });
@@ -67,6 +71,8 @@ describe('record', () => {
   it('propagates a write failure', async () => {
     mockedCreate.mockRejectedValue(new Error('db down'));
 
-    await expect(record(actor, { type: 'finalized', clientId: 42 })).rejects.toThrow('db down');
+    await expect(record(actor, { type: 'plan_finalized', clientId: 42 })).rejects.toThrow(
+      'db down',
+    );
   });
 });

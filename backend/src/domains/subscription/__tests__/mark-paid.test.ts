@@ -101,7 +101,7 @@ describe('markPaid', () => {
     );
   });
 
-  it('logs a reactivated history event when the subscription renewalType is reactivation', async () => {
+  it('logs a plan_reactivated history event when the subscription renewalType is reactivation', async () => {
     const subscription = {
       id: 3,
       clientId: 1,
@@ -120,7 +120,7 @@ describe('markPaid', () => {
 
     expect(record).toHaveBeenCalledWith(
       actor,
-      expect.objectContaining({ type: 'reactivated' }),
+      expect.objectContaining({ type: 'plan_reactivated' }),
       transaction,
     );
   });

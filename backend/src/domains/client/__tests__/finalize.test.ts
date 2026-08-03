@@ -27,7 +27,7 @@ describe('finalize', () => {
     (sequelize.transaction as jest.Mock).mockImplementation((work) => work(transaction));
   });
 
-  it('finalizes the current subscription and records a finalized history event', async () => {
+  it('finalizes the current subscription and records a plan_finalized history event', async () => {
     const mockInstance = {
       id: 1,
       pausedSince: null,
@@ -40,7 +40,11 @@ describe('finalize', () => {
     await finalize(1, actor);
 
     expect(finalizeSubscription).toHaveBeenCalledWith(5, transaction);
-    expect(record).toHaveBeenCalledWith(actor, { type: 'finalized', clientId: 1 }, transaction);
+    expect(record).toHaveBeenCalledWith(
+      actor,
+      { type: 'plan_finalized', clientId: 1 },
+      transaction,
+    );
   });
 
   it('records the acting user on the history event', async () => {
@@ -91,7 +95,7 @@ describe('finalize', () => {
     expect(finalizeSubscription).toHaveBeenCalledWith(5, callerTransaction);
     expect(record).toHaveBeenCalledWith(
       actor,
-      { type: 'finalized', clientId: 1 },
+      { type: 'plan_finalized', clientId: 1 },
       callerTransaction,
     );
   });
@@ -123,7 +127,11 @@ describe('finalize', () => {
     await finalize(1, actor);
 
     expect(finalizeSubscription).not.toHaveBeenCalled();
-    expect(record).toHaveBeenCalledWith(actor, { type: 'finalized', clientId: 1 }, transaction);
+    expect(record).toHaveBeenCalledWith(
+      actor,
+      { type: 'plan_finalized', clientId: 1 },
+      transaction,
+    );
   });
 
   it('finalizes the paid subscription, not a newer pending unpaid renewal', async () => {
