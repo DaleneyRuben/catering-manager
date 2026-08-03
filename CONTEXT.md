@@ -117,6 +117,90 @@ UI labels are neutral Spanish. Each entry: term (code identifier) — definition
   by a specific Nutricionista user — any user with this role sees and can act on the same
   shared queue. There is currently no concept of "my appointments" vs. someone else's.
 
+## Finanzas (money in and out) — designed, not yet built
+
+⚠ Nothing in this section exists in code yet. It records the language agreed during design so the
+implementation has one vocabulary to start from.
+
+- **Cash basis** — every financial record is dated by **the day the money moved**, never by the
+  period it relates to. A renewal paid in July for a plan running in August is July income. This
+  is a register of what came in and went out, not a profit-and-loss statement, and there is no
+  concept of accrual anywhere in the model.
+- **Payment** (`payment`) — money arriving. Carries its own amount and date, because a plan's
+  price may change after the money was received and the register must keep what was actually
+  paid. A payment for a subscription is created when that subscription is marked paid, so
+  subscription revenue has exactly one source and the ledger can never disagree with the
+  Clientes screen.
+  ⚠ Distinct from **`Subscription.paid`**, which is an _activation gate_, not a payment: while
+  `paid: false` the subscription "isn't real yet" (see [ADR-004](./docs/adr/004-unpaid-clients-as-full-records.md))
+  — excluded from active-subscription queries, hidden from Clientes, its history deferred. The
+  boolean answers "is this plan live?"; a Payment answers "how much money arrived, and when".
+  The two must never be collapsed into each other.
+- **Partial payment** — a payment for less than the subscription total. Happens occasionally in
+  the business but is **deliberately not permitted** by the system: a payment's amount is always
+  the full total. Consequently there is no outstanding-balance concept, no debt chasing, and no
+  "pendientes de cobro" view. Permitting it later is a validation change, not a schema change.
+- **Expense** (`expense`) — money leaving: one flat record of date, amount, category, description
+  and who registered it. Never a document with line items; there is no supplier, invoice or
+  attachment entity. Paying one thing in several instalments (the rent is paid this way) is
+  several Expenses, not one Expense partly settled. Description is optional, the amount is always
+  positive (a negative expense would be a refund, and there are none), and the date defaults to
+  today, may be backdated, and is never in the future. _Rejected fields_: payment method
+  (efectivo/transferencia) and any link to a client — both add friction to the most frequently
+  used form in the system, since delivery is paid daily.
+- **Expense category** (`expenseCategory`) — a managed catalog, seeded with Insumos, Personal,
+  Transporte, Empaques, Servicios, Alquiler, Equipamiento and Otros. Chosen from a list, **never
+  free text** — free text produces "Mercado" / "mercado" / "Compras mercado" as three categories
+  and silently breaks every total. Salaries are Personal; they are not tracked anywhere else. A
+  category with expenses against it is deactivated, never deleted, so historical totals stay put.
+  There are no sub-categories: if one proves too coarse, it becomes two categories.
+- **Obligation** — _rejected term_. The register records money that moved, never money owed. It
+  cannot answer "have I finished paying August's rent?" and is not meant to; that would be an
+  accounts-payable module, and it would be lopsided against the income side, which tracks no
+  receivables either.
+- **Movement** (`movement`, UI: "Movimiento") — a Payment or an Expense seen as one row of the
+  register's single chronological list. Income and expenses are one interleaved stream, not two
+  tabs: a cash register is money moving in both directions, and splitting it makes the reader do
+  the balance arithmetic themselves. A movement is a display concept only — nothing stores one.
+- **Register start** — the month Finanzas goes live. Nothing before it is shown or navigable, and
+  no backfill is performed, even though `client_history` could reconstruct one (see
+  [ADR-008](./docs/adr/008-finance-owns-payments.md)). Backfilled income against months where no
+  expenses were ever recorded would show pure profit, and Balance is the headline number on the
+  screen. The known cost: the first month understates income, since clients who paid before
+  launch were already `paid: true` and generate no Payment.
+- **Mutability** — Expenses are typed by hand and are freely editable and soft-deleted
+  (`paranoid`, as `Client` already is), each recording who registered it. Payments are never typed
+  and are **neither editable nor deletable**: nothing on one is a human's to revise.
+- **Client profitability** — _rejected_. With no client-specific expenses, every client costs the
+  same per delivery day, so a per-client margin ranking would only restate which discounts were
+  granted. Per-client expense tagging is rejected outright: tagging the ~5% of costs that could be
+  attributed would produce a precise-looking number that is mostly fiction.
+- **Recurring expense** — _rejected as an automatic concept_. Nothing is ever generated on a
+  schedule: this backend has no scheduled-job infrastructure (see docs/business-rules.md), and an
+  auto-generated row would assert money left the business when it may not have, which contradicts
+  cash basis. Repetition is handled by **duplicating** an existing Expense into a new one dated
+  today — the primary entry path, since delivery is paid daily and is the highest-frequency
+  record in the system.
+
+## Plan change (cambio de plan) — designed, not yet built
+
+- **Plan change** — replacing the assigned plan on a client's **running** subscription, typically
+  about a week in, once they have tried the food. One subscription throughout: nothing is
+  finalized and nothing is created.
+  ⚠ **Never produces a Payment**, in either direction — the client pays no difference on an
+  upgrade and receives no refund on a downgrade. The difference is settled in **delivery days**:
+  the admin sets a new duration so the money already paid covers the new plan over a shorter or
+  longer period. The system does not derive that duration; the admin enters it.
+  Recorded as `terms_changed` (the plan moved) plus `dates_changed` (the duration moved with it).
+  The backend already accepts this — `subscription/update.ts` writes `terms_changed` for a new
+  `planId`. Only the UI control is missing.
+- **Finalize-and-recreate** — _the workaround to retire_, not a concept to preserve. With no plan
+  change control, admins today end the plan and create a second one. It records a client who left
+  and came back (`plan_finalized` + `plan_assigned`) instead of one who changed their mind, and it
+  leaves a second subscription that the dashboard and each plan's client count both count. Once
+  Finanzas exists it would also double-count the client's payment, which is why the plan change
+  control must ship **before** it.
+
 ## Existing core terms (referenced by production)
 
 - **Active subscription (for a date)** — a subscription whose `startDate`–`contractEndDate`

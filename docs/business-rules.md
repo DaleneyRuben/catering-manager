@@ -273,6 +273,31 @@ When an active plan reaches its end date, the client may renew. Renewal rules:
 
 A Nutricionista can also perform a renewal or reactivation through Evaluaciones' appointment-driven renewal flow, subject to the same rules above, with one addition: a paid/unpaid choice not present in the Admin-initiated flow (see Evaluaciones (Appointments)).
 
+### Change of plan (planned — not yet implemented)
+
+A client may switch to a different plan mid-contract — typically about a week in, once they have
+tried the food. This is a change to the **existing** subscription, never a new one.
+
+- The assigned plan is replaced on the running subscription. No second subscription is created,
+  no plan is finalized, and the client's contract continues.
+- **No money changes hands, in either direction.** An upgrade is not charged a difference and a
+  downgrade is not refunded. The difference is settled in **delivery days**: the admin sets a new
+  duration so the amount already paid covers the new plan over a shorter (upgrade) or longer
+  (downgrade) period. The system does not compute this proportionally — the admin enters the
+  duration, and `contractEndDate` is recalculated from it exactly as any other duration change.
+- The change records `terms_changed` (the plan moved) and, since the duration moves with it,
+  `dates_changed` — see History.
+
+The backend already supports this: `subscription/update.ts` accepts a new `planId` and writes
+`terms_changed` with the previous and new plan. **What is missing is the UI control** — no screen
+sends a plan for an existing subscription today (see the note at the end of History).
+
+Until that control exists, admins simulate a plan change by finalizing the plan and creating a new
+one. That workaround is wrong and must be retired with this feature: it records the client as
+having ended their plan and started another (`plan_finalized` + `plan_assigned`) rather than having
+modified it, and it leaves a second subscription row that is counted by the dashboard and by each
+plan's client count.
+
 ### Pause / Resume
 
 A client may pause their plan indefinitely, subject to a configurable maximum pause duration (see below). While paused:
