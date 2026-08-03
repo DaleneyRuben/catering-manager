@@ -61,3 +61,9 @@ jobs:
         run: yarn workspace catering-manager-backend db:migrate
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/catering_migrate_check
+      # Rules the app depends on but the Jest suite cannot see, because every test mocks the models.
+      - name: Check schema rules
+        run: |
+          psql -v ON_ERROR_STOP=1 "$DATABASE_URL" -f backend/scripts/check-schema-rules.sql
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/catering_migrate_check
