@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { addDays, format, isWeekend, parseISO } from 'date-fns';
+import { addDays, format } from 'date-fns';
 import { addBusinessDays } from '@/utils/businessDays';
+import { isWeekendStartDate } from '@/features/clients/utils/startDate';
 import { formatDate } from '@/utils/format';
 import type { Subscription, RenewalPayload } from '@/features/clients/types';
 import type { Plan } from '@/features/plans/types';
@@ -73,8 +74,7 @@ export function useRenewalForm({
   const newEnd = newStart && validDuration ? addBusinessDays(newStart, validDuration - 1) : null; // duration - 1 because startDate counts as day 1
 
   const willBePaused = startMode === 'undefined';
-  const pickedDateIsWeekend =
-    startMode === 'pick' && !!pickedDate && isWeekend(parseISO(pickedDate));
+  const pickedDateIsWeekend = startMode === 'pick' && isWeekendStartDate(pickedDate ?? '');
   const canConfirm =
     !!validDuration &&
     precioNum !== undefined &&
