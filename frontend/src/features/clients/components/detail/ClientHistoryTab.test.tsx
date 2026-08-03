@@ -157,7 +157,7 @@ describe('ClientHistoryTab', () => {
     expect(screen.queryByText(/\$/)).not.toBeInTheDocument();
   });
 
-  it('labels a contract edit without dressing it up as a plan', () => {
+  it('labels a contract edit by the dates it moved, and shows them', () => {
     mockUseClientHistory.mockReturnValue({
       history: [
         entry({
@@ -170,11 +170,38 @@ describe('ClientHistoryTab', () => {
 
     render(<ClientHistoryTab clientId="1" />);
 
-    expect(screen.getByText('Contrato actualizado')).toBeInTheDocument();
+    expect(screen.getByText('Fechas modificadas')).toBeInTheDocument();
+    expect(screen.getByText('02/07/2026 → 29/07/2026 · 20 días')).toBeInTheDocument();
     expect(screen.queryByText(/\/mes$/)).not.toBeInTheDocument();
   });
 
-  it('shows the plan and cost the client moved to on a plan change', () => {
+  it('calls a price edit a price edit, and shows what the client paid before', () => {
+    mockUseClientHistory.mockReturnValue({
+      history: [
+        entry({
+          eventType: 'plan_changed',
+          metadata: {
+            planId: '2',
+            planName: 'Reductor',
+            planPrice: 1450,
+            previousPlanId: '2',
+            previousPlanName: 'Reductor',
+            discount: 150,
+            previousDiscount: 0,
+          },
+        }),
+      ],
+      isLoading: false,
+    });
+
+    render(<ClientHistoryTab clientId="1" />);
+
+    expect(screen.getByText('Precio modificado')).toBeInTheDocument();
+    expect(screen.getByText('Reductor')).toBeInTheDocument();
+    expect(screen.getByText('antes 1.450 · ahora 1.300/mes')).toBeInTheDocument();
+  });
+
+  it('shows the plan the client moved to and from on a plan change', () => {
     mockUseClientHistory.mockReturnValue({
       history: [
         entry({
@@ -195,9 +222,23 @@ describe('ClientHistoryTab', () => {
 
     render(<ClientHistoryTab clientId="1" />);
 
-    expect(screen.getByText('Plan modificado')).toBeInTheDocument();
+    expect(screen.getByText('Plan y precio modificados')).toBeInTheDocument();
     expect(screen.getByText('Completo')).toBeInTheDocument();
-    expect(screen.getByText('1.550/mes')).toBeInTheDocument();
+    expect(screen.getByText('antes Ligero · ahora Completo')).toBeInTheDocument();
+  });
+
+  it('names a reactivation after the plan, matching a renewal', () => {
+    mockUseClientHistory.mockReturnValue({
+      history: [
+        entry({ eventType: 'reactivated', metadata: { planName: 'Completo', planPrice: 1800 } }),
+      ],
+      isLoading: false,
+    });
+
+    render(<ClientHistoryTab clientId="1" />);
+
+    expect(screen.getByText('Plan reactivado')).toBeInTheDocument();
+    expect(screen.queryByText('Cliente reactivado')).not.toBeInTheDocument();
   });
 
   it('does not show the delivery calendar for an active client', () => {
