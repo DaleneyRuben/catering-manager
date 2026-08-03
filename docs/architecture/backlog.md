@@ -139,16 +139,6 @@ created: once `pausedSince` is a column on `subscriptions`, `subscription` writi
 cross-domain write at all. The wrapper would ship with a known expiry date. Do D1 first; this
 item closes with it.
 
-### 6.5 Optional `transaction` on every write function
-
-Rule 3. Once a workflow crosses domains it is several API calls, and they must commit or fail
-together. `subscription/create.ts` already threads a transaction — make it universal.
-
-Watch for the cross-domain writes that have **no** transaction today, and gain one here:
-`client/finalize.ts` (subscription + history) and `subscription/update.ts` (history written
-_before_ the update it describes, so a failure leaves an orphan event). `client-history.record`
-already takes the parameter — the callers are what still need threading.
-
 ### 6.6 Split the two meanings of `plan_assigned`
 
 Deferred out of 6.1 so that item stayed provably behaviour-identical. `plan_assigned` is
@@ -160,6 +150,46 @@ Give the edit case its own event type, and emit `plan_changed` (debt D3) at the 
 both are decisions about what a plan-change event should carry. Changes what lands in
 `client_history`, so it needs a label in the frontend timeline; rows already written keep the
 old type.
+
+### 6.7 `evaluation` owns `appointments` — the renewal-deletion write, blocked on a cycle
+
+Found while threading transactions in 6.5, and flagged in #134 rather than fixed there. **One
+write, in `subscription`:**
+
+```
+subscription/delete-upcoming-subscription.ts:53-54   (find the appointment that resolved into
+                                                      this renewal, clear its subscriptionId)
+```
+
+Deleting a renewal registered ahead of time has to clear the link on the appointment that
+resolved into it, or the appointment points at a destroyed row. Only the link is cleared — the
+date stays as it was, so a past appointment is pruned on the next queue read rather than pushed
+back onto the Nutricionista's list. The rule is right; it is written in the wrong domain.
+
+**Why the obvious fix fails.** Both shapes of it are rejected by lint. Confirmed on a branch, not
+assumed. Adding `evaluation.unlinkSubscription()` and calling it closes a loop — `evaluation`
+already imports `subscription` in four files, because resolving a cita creates a subscription:
+
+```
+subscription/delete-upcoming-subscription.ts
+  9:1  error  Dependency cycle via ./convert-appointment:11=>../subscription:7  import/no-cycle
+```
+
+Reaching past the index at that one function dodges the cycle and lands on the other rule —
+`no-restricted-imports`: "Import another domain through its index only, never a function file
+directly."
+
+**Direction: the foreign key, not a wrapper.** `appointments.subscriptionId` declared
+`ON DELETE SET NULL` clears the link whenever a subscription is deleted, so neither domain writes
+the other's table and the violation dissolves rather than being fronted by an API. Same shape as
+D1 closing 6.3 — move the model so the cross-domain write stops existing, instead of wrapping it.
+A migration, so it wants its own scheduling. It changes nothing for `deletePendingClient` or
+`discardPendingRenewal`: both destroy the appointment row outright, so `SET NULL` never fires for
+them.
+
+Composing it in `subscription.controller.ts` is possible today and was rejected: it lifts the rule
+out of every domain into a route handler, where the next caller of `deleteUpcomingSubscription`
+would not inherit it.
 
 ---
 
