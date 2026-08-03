@@ -200,6 +200,39 @@ describe('findAll', () => {
     expect(futureBranch?.val).toContain('"startDate" <= ');
   });
 
+  // A paused sin-fecha renewal behind a running plan must not put the client in Pausados: the
+  // badge is derived from the plan that describes them, and the filter has to ask the same
+  // question or the list and the badge disagree (Nancy Barrios showed "Por vencer" under Pausados).
+  it('status=paused ignores a paused plan when an unpaused plan is still running', async () => {
+    (Client.findAndCountAll as jest.Mock).mockResolvedValue({ rows: [], count: 0 });
+
+    await findAll({ status: 'paused' });
+
+    const call = (Client.findAndCountAll as jest.Mock).mock.calls[0][0];
+    const andConditions = call.where?.[Symbol.for('and')];
+    const orCondition = andConditions?.find((c: Record<symbol, unknown>) => c?.[Symbol.for('or')]);
+    const branches = orCondition[Symbol.for('or')] as { val?: string }[];
+    const pausedBranch = branches.find((c) => c?.val?.includes?.('"pausedSince" IS NOT NULL'));
+
+    expect(pausedBranch?.val).toContain('NOT EXISTS');
+    expect(pausedBranch?.val).toContain('sr."pausedSince" IS NULL');
+  });
+
+  // Mirror image: the running plan is the paused one, so they belong in Pausados and not Activos.
+  it('status=active excludes a client whose running plan is the paused one', async () => {
+    (Client.findAndCountAll as jest.Mock).mockResolvedValue({ rows: [], count: 0 });
+
+    await findAll({ status: 'active' });
+
+    const call = (Client.findAndCountAll as jest.Mock).mock.calls[0][0];
+    const andConditions = call.where?.[Symbol.for('and')];
+    const pausedGuard = andConditions?.find((c: { val?: string }) =>
+      c?.val?.includes?.('"pausedSince" IS NOT NULL'),
+    );
+
+    expect(pausedGuard?.val).toMatch(/^NOT /);
+  });
+
   it('orders results by createdAt ascending, oldest first', async () => {
     (Client.findAndCountAll as jest.Mock).mockResolvedValue({ rows: [], count: 0 });
 
