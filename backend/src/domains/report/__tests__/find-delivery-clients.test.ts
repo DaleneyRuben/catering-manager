@@ -5,6 +5,10 @@ import { findDeliveryClientsForDate } from '../find-delivery-clients';
 jest.mock('../../../models/Client');
 jest.mock('../../../models/Plan');
 jest.mock('../../../models/Subscription');
+jest.mock('../../../database/sequelize', () => ({
+  __esModule: true,
+  default: { transaction: jest.fn() },
+}));
 
 const makeClient = (name: string) => ({ name });
 
