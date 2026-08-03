@@ -2,6 +2,7 @@ import { Op } from 'sequelize';
 import Appointment from '../../../models/Appointment';
 import Plan from '../../../models/Plan';
 import Subscription from '../../../models/Subscription';
+import sequelize from '../../../database/sequelize';
 import { record } from '../../client-history';
 import { deleteUpcomingSubscription } from '../delete-upcoming-subscription';
 import { appToday, addDeliveryDays } from '../../../utils/date';
@@ -10,9 +11,17 @@ jest.mock('../../../models/Subscription');
 jest.mock('../../client-history');
 jest.mock('../../../models/Plan');
 jest.mock('../../../models/Appointment');
+jest.mock('../../../database/sequelize', () => ({
+  __esModule: true,
+  default: { query: jest.fn(), transaction: jest.fn() },
+}));
+
+const transaction = { id: 'own' };
+const callerTransaction = { id: 'caller' } as never;
 
 beforeEach(() => {
   jest.clearAllMocks();
+  (sequelize.transaction as jest.Mock).mockImplementation((work) => work(transaction));
 });
 
 const actor = { userId: 7, username: 'daleney' };
@@ -38,6 +47,7 @@ describe('deleteUpcomingSubscription', () => {
 
     expect(await deleteUpcomingSubscription(1, 9, actor)).toBeNull();
     expect(record).not.toHaveBeenCalled();
+    expect(sequelize.transaction).not.toHaveBeenCalled();
   });
 
   it('deletes an upcoming subscription', async () => {
@@ -60,7 +70,7 @@ describe('deleteUpcomingSubscription', () => {
 
     await deleteUpcomingSubscription(1, 9, actor);
 
-    expect(sub.destroy).toHaveBeenCalledWith();
+    expect(sub.destroy).toHaveBeenCalledWith({ transaction });
   });
 
   it('records a renewal_deleted history event with the deleted contract', async () => {
@@ -84,6 +94,7 @@ describe('deleteUpcomingSubscription', () => {
           duration: 20,
         }),
       }),
+      transaction,
     );
   });
 
@@ -100,6 +111,7 @@ describe('deleteUpcomingSubscription', () => {
       expect.objectContaining({
         metadata: expect.objectContaining({ registeredAt: sub.createdAt }),
       }),
+      transaction,
     );
   });
 
@@ -114,6 +126,7 @@ describe('deleteUpcomingSubscription', () => {
     expect(record).toHaveBeenCalledWith(
       expect.objectContaining({ userId: 7, username: 'daleney' }),
       expect.anything(),
+      expect.anything(),
     );
   });
 
@@ -127,8 +140,8 @@ describe('deleteUpcomingSubscription', () => {
 
     await deleteUpcomingSubscription(1, 9, actor);
 
-    expect(Appointment.findOne).toHaveBeenCalledWith({ where: { subscriptionId: 9 } });
-    expect(appointment.update).toHaveBeenCalledWith({ subscriptionId: null });
+    expect(Appointment.findOne).toHaveBeenCalledWith({ where: { subscriptionId: 9 }, transaction });
+    expect(appointment.update).toHaveBeenCalledWith({ subscriptionId: null }, { transaction });
   });
 
   it('leaves the appointment date untouched so a past one is pruned instead of re-queued', async () => {
@@ -141,7 +154,7 @@ describe('deleteUpcomingSubscription', () => {
 
     await deleteUpcomingSubscription(1, 9, actor);
 
-    expect(appointment.update).toHaveBeenCalledWith({ subscriptionId: null });
+    expect(appointment.update).toHaveBeenCalledWith({ subscriptionId: null }, { transaction });
   });
 
   it('deletes a renewal that no appointment resolved into', async () => {
@@ -178,7 +191,9 @@ describe('deleteUpcomingSubscription', () => {
     expect(sub.destroy).not.toHaveBeenCalled();
   });
 
-  it('counts only the running plans of the client', async () => {
+  // The guard reads the client's other subscriptions. Counted outside the transaction it would
+  // miss a plan the same workflow just finalized, and let the client's last renewal go with it.
+  it('counts the running plans inside the transaction that deletes the renewal', async () => {
     const sub = upcoming();
     (Subscription.findOne as jest.Mock).mockResolvedValue(sub);
     (Subscription.count as jest.Mock).mockResolvedValue(1);
@@ -193,6 +208,7 @@ describe('deleteUpcomingSubscription', () => {
         startDate: { [Op.lte]: today },
         contractEndDate: { [Op.gte]: today },
       },
+      transaction,
     });
   });
 
@@ -205,5 +221,43 @@ describe('deleteUpcomingSubscription', () => {
     await deleteUpcomingSubscription(1, 9, actor);
 
     expect(sinFecha.destroy).toHaveBeenCalled();
+  });
+
+  it('unlinks the appointment, deletes the row and records history in one transaction', async () => {
+    const sub = upcoming();
+    (Subscription.findOne as jest.Mock).mockResolvedValue(sub);
+    (Subscription.count as jest.Mock).mockResolvedValue(1);
+    (Plan.findByPk as jest.Mock).mockResolvedValue({ id: 2, name: 'Completo', price: 5000 });
+    (Appointment.findOne as jest.Mock).mockResolvedValue({
+      id: 3,
+      update: jest.fn().mockResolvedValue({}),
+    });
+
+    await deleteUpcomingSubscription(1, 9, actor);
+
+    expect(sequelize.transaction).toHaveBeenCalledTimes(1);
+  });
+
+  it("joins the caller's transaction rather than opening its own", async () => {
+    const sub = upcoming();
+    (Subscription.findOne as jest.Mock).mockResolvedValue(sub);
+    (Subscription.count as jest.Mock).mockResolvedValue(1);
+    (Plan.findByPk as jest.Mock).mockResolvedValue({ id: 2, name: 'Completo', price: 5000 });
+
+    await deleteUpcomingSubscription(1, 9, actor, callerTransaction);
+
+    expect(sequelize.transaction).not.toHaveBeenCalled();
+    expect(sub.destroy).toHaveBeenCalledWith({ transaction: callerTransaction });
+    expect(record).toHaveBeenCalledWith(actor, expect.anything(), callerTransaction);
+  });
+
+  it('leaves the appointment linked and the history unwritten when the delete fails', async () => {
+    const sub = { ...upcoming(), destroy: jest.fn().mockRejectedValue(new Error('db error')) };
+    (Subscription.findOne as jest.Mock).mockResolvedValue(sub);
+    (Subscription.count as jest.Mock).mockResolvedValue(1);
+    (Plan.findByPk as jest.Mock).mockResolvedValue({ id: 2, name: 'Completo', price: 5000 });
+
+    await expect(deleteUpcomingSubscription(1, 9, actor)).rejects.toThrow('db error');
+    expect(record).not.toHaveBeenCalled();
   });
 });

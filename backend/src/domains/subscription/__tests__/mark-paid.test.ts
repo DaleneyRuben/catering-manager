@@ -2,6 +2,7 @@ import { Op } from 'sequelize';
 import Client from '../../../models/Client';
 import Plan from '../../../models/Plan';
 import Subscription from '../../../models/Subscription';
+import sequelize from '../../../database/sequelize';
 import { record } from '../../client-history';
 import { markPaid } from '../mark-paid';
 import { appToday, subtractDeliveryDays } from '../../../utils/date';
@@ -10,11 +11,20 @@ jest.mock('../../../models/Subscription');
 jest.mock('../../../models/Client');
 jest.mock('../../../models/Plan');
 jest.mock('../../client-history');
+jest.mock('../../../database/sequelize', () => ({
+  __esModule: true,
+  default: { query: jest.fn(), transaction: jest.fn() },
+}));
 
 const actor = { userId: 9, username: 'ada' };
+const transaction = { id: 'own' };
+const callerTransaction = { id: 'caller' } as never;
 
 describe('markPaid', () => {
-  beforeEach(() => jest.resetAllMocks());
+  beforeEach(() => {
+    jest.resetAllMocks();
+    (sequelize.transaction as jest.Mock).mockImplementation((work) => work(transaction));
+  });
 
   it('returns null when the client has no unpaid subscription', async () => {
     (Subscription.findOne as jest.Mock).mockResolvedValue(null);
@@ -23,6 +33,7 @@ describe('markPaid', () => {
 
     expect(result).toBeNull();
     expect(record).not.toHaveBeenCalled();
+    expect(sequelize.transaction).not.toHaveBeenCalled();
   });
 
   it('marks the subscription paid and logs a plan_assigned history event', async () => {
@@ -45,20 +56,24 @@ describe('markPaid', () => {
       where: { clientId: 1, paid: false },
       order: [['id', 'ASC']],
     });
-    expect(subscription.update).toHaveBeenCalledWith({ paid: true });
-    expect(record).toHaveBeenCalledWith(actor, {
-      type: 'plan_assigned',
-      clientId: 1,
-      metadata: {
-        planId: 2,
-        planName: 'Completo',
-        planPrice: 5000,
-        startDate: '2026-07-27',
-        duration: 20,
-        contractEndDate: '2026-08-21',
-        discount: 500,
+    expect(subscription.update).toHaveBeenCalledWith({ paid: true }, { transaction });
+    expect(record).toHaveBeenCalledWith(
+      actor,
+      {
+        type: 'plan_assigned',
+        clientId: 1,
+        metadata: {
+          planId: 2,
+          planName: 'Completo',
+          planPrice: 5000,
+          startDate: '2026-07-27',
+          duration: 20,
+          contractEndDate: '2026-08-21',
+          discount: 500,
+        },
       },
-    });
+      transaction,
+    );
     expect(result).toBe(subscription);
   });
 
@@ -79,7 +94,11 @@ describe('markPaid', () => {
 
     await markPaid(1, actor);
 
-    expect(record).toHaveBeenCalledWith(actor, expect.objectContaining({ type: 'plan_renewed' }));
+    expect(record).toHaveBeenCalledWith(
+      actor,
+      expect.objectContaining({ type: 'plan_renewed' }),
+      transaction,
+    );
   });
 
   it('logs a reactivated history event when the subscription renewalType is reactivation', async () => {
@@ -99,7 +118,11 @@ describe('markPaid', () => {
 
     await markPaid(1, actor);
 
-    expect(record).toHaveBeenCalledWith(actor, expect.objectContaining({ type: 'reactivated' }));
+    expect(record).toHaveBeenCalledWith(
+      actor,
+      expect.objectContaining({ type: 'reactivated' }),
+      transaction,
+    );
   });
 
   it('includes the appointmentId in the history metadata when persisted on the subscription', async () => {
@@ -122,6 +145,7 @@ describe('markPaid', () => {
     expect(record).toHaveBeenCalledWith(
       actor,
       expect.objectContaining({ metadata: expect.objectContaining({ appointmentId: 4 }) }),
+      transaction,
     );
   });
 
@@ -171,12 +195,16 @@ describe('markPaid', () => {
           clientId: 1,
           id: { [Op.ne]: 3 },
         }),
+        transaction,
       }),
     );
-    expect(oldSub.update).toHaveBeenCalledWith({
-      contractEndDate: subtractDeliveryDays('2026-07-27', 1),
-      finalizedAt: appToday(),
-    });
+    expect(oldSub.update).toHaveBeenCalledWith(
+      {
+        contractEndDate: subtractDeliveryDays('2026-07-27', 1),
+        finalizedAt: appToday(),
+      },
+      { transaction },
+    );
   });
 
   it('does not look for overlaps when confirming payment for a sin-fecha renewal', async () => {
@@ -219,8 +247,7 @@ describe('markPaid', () => {
 
     await markPaid(1, actor);
 
-    expect(Client.findByPk).toHaveBeenCalledWith(1);
-    expect(mockClient.update).toHaveBeenCalledWith({ pausedSince: appToday() });
+    expect(mockClient.update).toHaveBeenCalledWith({ pausedSince: appToday() }, { transaction });
   });
 
   // Same rule as subscription/create.ts: an already-paused client keeps the date they actually
@@ -251,6 +278,29 @@ describe('markPaid', () => {
     expect(mockClient.update).not.toHaveBeenCalled();
   });
 
+  // The pause guard above reads client.pausedSince. Read outside the transaction it would miss a
+  // pause the same workflow just wrote, and restamp a date the guard exists to protect.
+  it('reads the client inside the transaction so the pause guard sees uncommitted state', async () => {
+    const subscription = {
+      id: 3,
+      clientId: 1,
+      planId: 2,
+      startDate: null,
+      duration: 20,
+      contractEndDate: null,
+      discount: 500,
+      renewalType: 'renewal',
+      update: jest.fn().mockResolvedValue({}),
+    };
+    (Subscription.findOne as jest.Mock).mockResolvedValue(subscription);
+    (Client.findByPk as jest.Mock).mockResolvedValue({ update: jest.fn().mockResolvedValue({}) });
+    (Plan.findByPk as jest.Mock).mockResolvedValue({ id: 2, name: 'Completo', price: 5000 });
+
+    await markPaid(1, actor);
+
+    expect(Client.findByPk).toHaveBeenCalledWith(1, { transaction });
+  });
+
   it('clears pausedSince when confirming payment for a reactivation', async () => {
     const mockClient = { update: jest.fn().mockResolvedValue({}) };
     const subscription = {
@@ -271,7 +321,7 @@ describe('markPaid', () => {
 
     await markPaid(1, actor);
 
-    expect(mockClient.update).toHaveBeenCalledWith({ pausedSince: null });
+    expect(mockClient.update).toHaveBeenCalledWith({ pausedSince: null }, { transaction });
   });
 
   it('does not touch pausedSince when confirming payment for a plain plan_assigned subscription', async () => {
@@ -293,5 +343,70 @@ describe('markPaid', () => {
     await markPaid(1, actor);
 
     expect(Client.findByPk).not.toHaveBeenCalled();
+  });
+
+  it('marks paid, finalizes overlaps and records history in one transaction', async () => {
+    const subscription = {
+      id: 3,
+      clientId: 1,
+      planId: 2,
+      startDate: '2026-07-27',
+      duration: 20,
+      contractEndDate: '2026-08-21',
+      discount: 500,
+      renewalType: 'renewal',
+      update: jest.fn().mockResolvedValue({}),
+    };
+    (Subscription.findOne as jest.Mock).mockResolvedValue(subscription);
+    (Subscription.findAll as jest.Mock).mockResolvedValue([]);
+    (Client.findByPk as jest.Mock).mockResolvedValue({ update: jest.fn().mockResolvedValue({}) });
+    (Plan.findByPk as jest.Mock).mockResolvedValue({ id: 2, name: 'Completo', price: 5000 });
+
+    await markPaid(1, actor);
+
+    expect(sequelize.transaction).toHaveBeenCalledTimes(1);
+  });
+
+  it("joins the caller's transaction rather than opening its own", async () => {
+    const subscription = {
+      id: 3,
+      clientId: 1,
+      planId: 2,
+      startDate: '2026-07-27',
+      duration: 20,
+      contractEndDate: '2026-08-21',
+      discount: 500,
+      update: jest.fn().mockResolvedValue({}),
+    };
+    (Subscription.findOne as jest.Mock).mockResolvedValue(subscription);
+    (Subscription.findAll as jest.Mock).mockResolvedValue([]);
+    (Plan.findByPk as jest.Mock).mockResolvedValue({ id: 2, name: 'Completo', price: 5000 });
+
+    await markPaid(1, actor, callerTransaction);
+
+    expect(sequelize.transaction).not.toHaveBeenCalled();
+    expect(subscription.update).toHaveBeenCalledWith(
+      { paid: true },
+      { transaction: callerTransaction },
+    );
+    expect(record).toHaveBeenCalledWith(actor, expect.anything(), callerTransaction);
+  });
+
+  it('leaves the history event unwritten when the paid flag fails to persist', async () => {
+    const subscription = {
+      id: 3,
+      clientId: 1,
+      planId: 2,
+      startDate: '2026-07-27',
+      duration: 20,
+      contractEndDate: '2026-08-21',
+      discount: 500,
+      update: jest.fn().mockRejectedValue(new Error('db error')),
+    };
+    (Subscription.findOne as jest.Mock).mockResolvedValue(subscription);
+    (Plan.findByPk as jest.Mock).mockResolvedValue({ id: 2, name: 'Completo', price: 5000 });
+
+    await expect(markPaid(1, actor)).rejects.toThrow('db error');
+    expect(record).not.toHaveBeenCalled();
   });
 });
