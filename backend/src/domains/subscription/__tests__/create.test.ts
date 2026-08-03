@@ -174,7 +174,7 @@ describe('create', () => {
     );
   });
 
-  it('clears pausedSince when renewalType is reactivation', async () => {
+  it('clears the pause on the client other subscriptions when renewalType is reactivation', async () => {
     const mockClient = { id: 1, update: jest.fn().mockResolvedValue({}) };
     (Client.findByPk as jest.Mock).mockResolvedValue(mockClient);
     (Subscription.create as jest.Mock).mockResolvedValue(mockSubscription);
@@ -192,42 +192,24 @@ describe('create', () => {
       actor,
     );
 
-    expect(mockClient.update).toHaveBeenCalledWith({ pausedSince: null });
+    expect(Subscription.update).toHaveBeenCalledWith(
+      { pausedSince: null },
+      expect.objectContaining({ where: expect.objectContaining({ clientId: 1 }) }),
+    );
   });
 
-  it('sets pausedSince to today when renewalType is renewal with no startDate', async () => {
+  // The sin-fecha marker goes on the renewal itself. Stamping the client instead used to
+  // suppress every plan they had, including one still running and still paid for.
+  it('pauses the new subscription when renewalType is renewal with no startDate', async () => {
     const mockClient = { id: 1, update: jest.fn().mockResolvedValue({}) };
-    (Client.findByPk as jest.Mock).mockResolvedValue(mockClient);
-    (Subscription.create as jest.Mock).mockResolvedValue({
+    const created = {
       ...mockSubscription,
       startDate: null,
       contractEndDate: null,
-    });
-    (record as jest.Mock).mockResolvedValue(undefined);
-
-    await create(
-      1,
-      { planId: 2, contractDate: today, duration: 20, renewalType: 'renewal' },
-      actor,
-    );
-
-    expect(mockClient.update).toHaveBeenCalledWith({ pausedSince: today });
-  });
-
-  // An already-paused client keeps the date they actually paused on: resume counts the days
-  // they are owed from it, so overwriting it silently shortens their plan.
-  it('keeps the original pausedSince when a sin-fecha renewal is created for a paused client', async () => {
-    const mockClient = {
-      id: 1,
-      pausedSince: new Date('2026-01-10T12:00:00'),
       update: jest.fn().mockResolvedValue({}),
     };
     (Client.findByPk as jest.Mock).mockResolvedValue(mockClient);
-    (Subscription.create as jest.Mock).mockResolvedValue({
-      ...mockSubscription,
-      startDate: null,
-      contractEndDate: null,
-    });
+    (Subscription.create as jest.Mock).mockResolvedValue(created);
     (record as jest.Mock).mockResolvedValue(undefined);
 
     await create(
@@ -236,7 +218,31 @@ describe('create', () => {
       actor,
     );
 
+    expect(created.update).toHaveBeenCalledWith({ pausedSince: today });
     expect(mockClient.update).not.toHaveBeenCalled();
+  });
+
+  // The old guard existed because one column served every plan the client had; a brand-new
+  // renewal row cannot collide with a mid-plan pause recorded on a different row.
+  it('pauses the new renewal even when another subscription is already paused', async () => {
+    const mockClient = { id: 1, update: jest.fn().mockResolvedValue({}) };
+    const created = {
+      ...mockSubscription,
+      startDate: null,
+      contractEndDate: null,
+      update: jest.fn().mockResolvedValue({}),
+    };
+    (Client.findByPk as jest.Mock).mockResolvedValue(mockClient);
+    (Subscription.create as jest.Mock).mockResolvedValue(created);
+    (record as jest.Mock).mockResolvedValue(undefined);
+
+    await create(
+      1,
+      { planId: 2, contractDate: today, duration: 20, renewalType: 'renewal' },
+      actor,
+    );
+
+    expect(created.update).toHaveBeenCalledWith({ pausedSince: today });
   });
 
   it('persists renewalType on the subscription row when provided', async () => {
