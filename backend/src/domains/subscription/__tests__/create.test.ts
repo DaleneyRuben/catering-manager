@@ -1,4 +1,5 @@
 import { Op } from 'sequelize';
+import { HISTORY_EVENTS } from '../../../constants/history.constants';
 import Subscription from '../../../models/Subscription';
 import Client from '../../../models/Client';
 import Plan from '../../../models/Plan';
@@ -115,7 +116,7 @@ describe('create', () => {
 
     expect(record).toHaveBeenCalledWith(
       actor,
-      expect.objectContaining({ type: 'plan_assigned', clientId: 1 }),
+      expect.objectContaining({ type: HISTORY_EVENTS.PLAN_ASSIGNED, clientId: 1 }),
       undefined,
     );
   });
@@ -169,7 +170,7 @@ describe('create', () => {
 
     expect(record).toHaveBeenCalledWith(
       actor,
-      expect.objectContaining({ type: 'plan_renewed', clientId: 1 }),
+      expect.objectContaining({ type: HISTORY_EVENTS.PLAN_RENEWED, clientId: 1 }),
       undefined,
     );
   });

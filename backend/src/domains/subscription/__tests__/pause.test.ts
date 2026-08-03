@@ -1,3 +1,4 @@
+import { HISTORY_EVENTS } from '../../../constants/history.constants';
 import Subscription from '../../../models/Subscription';
 import sequelize from '../../../database/sequelize';
 import { record } from '../../client-history';
@@ -44,12 +45,16 @@ describe('pause', () => {
     );
   });
 
-  it('records a paused history event against the subscription owner', async () => {
+  it('records a plan_paused history event against the subscription owner', async () => {
     (Subscription.findByPk as jest.Mock).mockResolvedValue(mockSub({ clientId: 42 }));
 
     await pause(5, actor);
 
-    expect(record).toHaveBeenCalledWith(actor, { type: 'paused', clientId: 42 }, transaction);
+    expect(record).toHaveBeenCalledWith(
+      actor,
+      { type: HISTORY_EVENTS.PLAN_PAUSED, clientId: 42 },
+      transaction,
+    );
   });
 
   it('leaves an already-paused subscription untouched so the days still owed are not reset', async () => {

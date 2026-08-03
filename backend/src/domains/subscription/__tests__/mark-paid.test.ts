@@ -1,4 +1,5 @@
 import { Op } from 'sequelize';
+import { HISTORY_EVENTS } from '../../../constants/history.constants';
 import Client from '../../../models/Client';
 import Plan from '../../../models/Plan';
 import Subscription from '../../../models/Subscription';
@@ -60,7 +61,7 @@ describe('markPaid', () => {
     expect(record).toHaveBeenCalledWith(
       actor,
       {
-        type: 'plan_assigned',
+        type: HISTORY_EVENTS.PLAN_ASSIGNED,
         clientId: 1,
         metadata: {
           planId: 2,
@@ -96,12 +97,12 @@ describe('markPaid', () => {
 
     expect(record).toHaveBeenCalledWith(
       actor,
-      expect.objectContaining({ type: 'plan_renewed' }),
+      expect.objectContaining({ type: HISTORY_EVENTS.PLAN_RENEWED }),
       transaction,
     );
   });
 
-  it('logs a reactivated history event when the subscription renewalType is reactivation', async () => {
+  it('logs a plan_reactivated history event when the subscription renewalType is reactivation', async () => {
     const subscription = {
       id: 3,
       clientId: 1,
@@ -120,7 +121,7 @@ describe('markPaid', () => {
 
     expect(record).toHaveBeenCalledWith(
       actor,
-      expect.objectContaining({ type: 'reactivated' }),
+      expect.objectContaining({ type: HISTORY_EVENTS.PLAN_REACTIVATED }),
       transaction,
     );
   });

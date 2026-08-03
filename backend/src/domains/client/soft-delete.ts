@@ -1,4 +1,5 @@
 import { Transaction } from 'sequelize';
+import { HISTORY_EVENTS } from '../../constants/history.constants';
 import Client from '../../models/Client';
 import { withTransaction } from '../../database/with-transaction';
 import type { Actor } from '../../types/actor';
@@ -10,7 +11,7 @@ export const softDelete = async (id: number, actor: Actor, transaction?: Transac
 
   await withTransaction(transaction, async (t) => {
     await client.destroy({ transaction: t });
-    await record(actor, { type: 'deleted', clientId: id }, t);
+    await record(actor, { type: HISTORY_EVENTS.CLIENT_DELETED, clientId: id }, t);
   });
 
   return client;

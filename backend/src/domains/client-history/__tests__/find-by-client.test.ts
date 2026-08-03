@@ -1,3 +1,4 @@
+import { HISTORY_EVENTS } from '../../../constants/history.constants';
 import Client from '../../../models/Client';
 import ClientHistory from '../../../models/ClientHistory';
 import { findByClient } from '../find-by-client';
@@ -10,7 +11,9 @@ describe('findByClient', () => {
 
   it('returns history ordered by occurredAt descending when the client exists', async () => {
     (Client.findByPk as jest.Mock).mockResolvedValue({ id: 1 });
-    (ClientHistory.findAll as jest.Mock).mockResolvedValue([{ id: 1, eventType: 'paused' }]);
+    (ClientHistory.findAll as jest.Mock).mockResolvedValue([
+      { id: 1, eventType: HISTORY_EVENTS.PLAN_PAUSED },
+    ]);
 
     const result = await findByClient(1);
 
@@ -18,7 +21,7 @@ describe('findByClient', () => {
       where: { clientId: 1 },
       order: [['occurredAt', 'DESC']],
     });
-    expect(result).toEqual([{ id: 1, eventType: 'paused' }]);
+    expect(result).toEqual([{ id: 1, eventType: HISTORY_EVENTS.PLAN_PAUSED }]);
   });
 
   it('returns null without querying history when the client does not exist', async () => {

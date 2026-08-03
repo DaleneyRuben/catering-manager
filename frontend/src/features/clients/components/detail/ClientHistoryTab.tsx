@@ -3,7 +3,8 @@ import { Card } from '@ui/Card';
 import { Skeleton } from '@ui/Skeleton';
 import { useClientHistory } from '@/features/clients/hooks/useClientHistory';
 import { formatDate } from '@/utils/format';
-import { EVENT_LABELS } from '@/features/clients/constants/historyEvents';
+import { HISTORY_EVENTS, PLAN_CHIP_EVENTS } from '@/features/clients/constants/historyEvents';
+import { resolveEventChange, resolveEventLabel } from '@/features/clients/utils/historyEvent';
 import { ClientHistorySummary } from '@/features/clients/components/detail/ClientHistorySummary';
 import { DeliveryCalendarCard } from '@/features/clients/components/detail/DeliveryCalendarCard';
 import { buildDeliveryCalendar } from '@/features/clients/utils/deliveryCalendar';
@@ -115,23 +116,22 @@ export function ClientHistoryTab({
               const planPrice =
                 meta?.planPrice !== null ? parseFloat(String(meta.planPrice)) : null;
               const discount = typeof meta?.discount === 'number' ? meta.discount : 0;
-              const showPlanDetails =
-                (entry.eventType === 'plan_assigned' ||
-                  entry.eventType === 'plan_renewed' ||
-                  entry.eventType === 'plan_changed' ||
-                  entry.eventType === 'reactivated') &&
-                planName;
+              const showPlanDetails = PLAN_CHIP_EVENTS.includes(entry.eventType) && planName;
+
+              // what actually moved on this row — a price, a plan, or a contract's dates
+              const changeLine = resolveEventChange(entry);
 
               const suspendedDates = Array.isArray(meta?.dates) ? (meta.dates as string[]) : null;
               // a deleted renewal keeps its contract on record, muted: it never delivered
               const deletedRange =
-                entry.eventType === 'renewal_deleted' && typeof meta?.contractEndDate === 'string'
+                entry.eventType === HISTORY_EVENTS.RENEWAL_DELETED &&
+                typeof meta?.contractEndDate === 'string'
                   ? `${formatDate(meta.startDate as string)} → ${formatDate(meta.contractEndDate)}`
                   : null;
               // the deletion is credited to whoever triggered it and points back at the moment the
               // renewal was registered, which is what ties this row to the plan_renewed one above
               const deletionCredit =
-                entry.eventType === 'renewal_deleted' && entry.username
+                entry.eventType === HISTORY_EVENTS.RENEWAL_DELETED && entry.username
                   ? `Eliminada por ${entry.username}${
                       typeof meta?.registeredAt === 'string'
                         ? ` · registrada el ${formatEventDateTime(meta.registeredAt)}`
@@ -150,9 +150,9 @@ export function ClientHistoryTab({
                     {formatEventDateTime(entry.occurredAt)}
                   </p>
                   <p className="text-[14px] font-semibold text-ink mt-[3px]">
-                    {EVENT_LABELS[entry.eventType]}
+                    {resolveEventLabel(entry)}
                   </p>
-                  {entry.username && entry.eventType !== 'renewal_deleted' && (
+                  {entry.username && entry.eventType !== HISTORY_EVENTS.RENEWAL_DELETED && (
                     <p className="text-[12px] text-faint mt-[2px]">por {entry.username}</p>
                   )}
                   {showPlanDetails && (
@@ -160,14 +160,22 @@ export function ClientHistoryTab({
                       <span className="px-[9px] py-[3px] rounded-[6px] text-[11px] font-mono bg-olive-800 text-olive-50">
                         {planName}
                       </span>
-                      {planPrice !== null && (
-                        <span className="font-mono text-[11px] text-faint">
-                          {(planPrice - discount).toLocaleString('es-BO')}/mes
-                        </span>
+                      {/* a row that moved something says what moved; the rest state the cost */}
+                      {changeLine ? (
+                        <span className="font-mono text-[11px] text-faint">{changeLine}</span>
+                      ) : (
+                        planPrice !== null && (
+                          <span className="font-mono text-[11px] text-faint">
+                            {(planPrice - discount).toLocaleString('es-BO')}/mes
+                          </span>
+                        )
                       )}
                     </div>
                   )}
-                  {entry.eventType === 'renewal_deleted' && planName && (
+                  {!showPlanDetails && changeLine && (
+                    <p className="font-mono text-[11px] text-faint mt-[7px]">{changeLine}</p>
+                  )}
+                  {entry.eventType === HISTORY_EVENTS.RENEWAL_DELETED && planName && (
                     <div className="flex items-center gap-[9px] mt-[7px]">
                       <span className="px-[9px] py-[3px] rounded-[6px] text-[11px] font-mono bg-muted text-olive-50">
                         {planName}

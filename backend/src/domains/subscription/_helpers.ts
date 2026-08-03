@@ -1,4 +1,5 @@
 import { Op, Transaction } from 'sequelize';
+import { HISTORY_EVENTS } from '../../constants/history.constants';
 import Client from '../../models/Client';
 import Plan from '../../models/Plan';
 import Subscription from '../../models/Subscription';
@@ -62,12 +63,12 @@ export const applyRenewalPauseState = async (
 };
 
 const eventTypeByRenewal = {
-  reactivation: 'reactivated',
-  renewal: 'plan_renewed',
+  reactivation: HISTORY_EVENTS.PLAN_REACTIVATED,
+  renewal: HISTORY_EVENTS.PLAN_RENEWED,
 } as const;
 
 export const historyEventTypeFor = (renewalType: RenewalType) =>
-  renewalType ? eventTypeByRenewal[renewalType] : ('plan_assigned' as const);
+  renewalType ? eventTypeByRenewal[renewalType] : HISTORY_EVENTS.PLAN_ASSIGNED;
 
 // A client may hold at most one upcoming subscription: one not yet started (a renewal registered
 // ahead of time) or one still waiting for a start date (a "sin fecha" renewal).

@@ -1,4 +1,5 @@
 import { Op, Transaction } from 'sequelize';
+import { HISTORY_EVENTS } from '../../constants/history.constants';
 import Plan from '../../models/Plan';
 import Subscription from '../../models/Subscription';
 import { withTransaction } from '../../database/with-transaction';
@@ -55,7 +56,7 @@ export const deleteUpcomingSubscription = async (
     await record(
       actor,
       {
-        type: 'renewal_deleted',
+        type: HISTORY_EVENTS.RENEWAL_DELETED,
         clientId,
         metadata: {
           planId: subscription.planId,

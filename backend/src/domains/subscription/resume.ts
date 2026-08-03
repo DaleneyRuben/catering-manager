@@ -1,5 +1,6 @@
 import { Transaction } from 'sequelize';
 import Subscription from '../../models/Subscription';
+import { HISTORY_EVENTS } from '../../constants/history.constants';
 import { withTransaction } from '../../database/with-transaction';
 import type { Actor } from '../../types/actor';
 import { record } from '../client-history';
@@ -21,7 +22,7 @@ export const resume = async (subscriptionId: number, actor: Actor, transaction?:
     if (subscription.startDate) await extendAfterPause(subscriptionId, pausedSince, t);
 
     await subscription.update({ pausedSince: null }, { transaction: t });
-    await record(actor, { type: 'resumed', clientId: subscription.clientId }, t);
+    await record(actor, { type: HISTORY_EVENTS.PLAN_RESUMED, clientId: subscription.clientId }, t);
 
     return subscription;
   });

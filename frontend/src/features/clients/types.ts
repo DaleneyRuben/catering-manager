@@ -1,3 +1,4 @@
+import type { HistoryEventType } from '@/features/clients/constants/historyEvents';
 import type { Plan } from '@/features/plans/types';
 
 export interface Subscription {
@@ -40,18 +41,7 @@ export interface Client {
   groupMembers: GroupMember[];
 }
 
-export type HistoryEventType =
-  | 'paused'
-  | 'resumed'
-  | 'plan_assigned'
-  | 'plan_renewed'
-  | 'plan_changed'
-  | 'contract_updated'
-  | 'suspended'
-  | 'reactivated'
-  | 'finalized'
-  | 'renewal_deleted'
-  | 'deleted';
+export type { HistoryEventType };
 
 export interface ClientHistoryEntry {
   id: string;
