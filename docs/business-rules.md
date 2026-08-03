@@ -347,13 +347,15 @@ The internal Sun–Thu kitchen schedule is never shown to the client.
 
 For each client, the system tracks these events:
 
-- Plan assignment (`plan_assigned`) — on subscription creation (metadata: the plan, its price at that moment, start date, duration, end date, and discount) and whenever the start date or duration changes (metadata: the new dates and duration).
+- Plan assignment (`plan_assigned`) — on subscription creation only (metadata: the plan, its price at that moment, start date, duration, end date, and discount).
 - Renewal (`plan_renewed`) and reactivation (`reactivated`).
+- Contract edit (`contract_updated`) — whenever the start date or duration of an existing subscription changes, including when a "sin fecha" renewal is given its start date (metadata: the new dates and duration, and nothing about the plan, which the edit does not touch).
+- Plan change (`plan_changed`) — whenever the assigned plan or the discount of an existing subscription changes (metadata: previous and new plan, the new plan's price, and previous and new discount). Both fields are covered by one event because both change what the client pays. It fires only when a value actually differs from the stored one, so re-submitting the same plan records nothing.
 - Pause (`paused`), resume (`resumed`), suspension (`suspended` — with the newly suspended dates), finalization (`finalized`), and client deletion (`deleted`).
 
-History entries are append-only — past records are never overwritten when a plan changes.
+History entries are append-only — past records are never overwritten when a plan changes. Entries written before `contract_updated` existed are `plan_assigned` rows carrying only dates; they are left as they are and keep their original label.
 
-Not yet implemented: a dedicated plan-change event (`plan_changed` — date, previous plan, new plan, new cost). The event type is declared but never emitted; changing only the assigned plan on an existing subscription currently records no history entry.
+No screen currently sends a new plan for an existing subscription, so in practice `plan_changed` is written today only for discount edits — the plan half is reachable through the API alone until a plan-change control exists.
 
 Every history event, regardless of type or who triggered it (Admin or Nutricionista), records the acting user's id and username. A `plan_assigned`, `plan_renewed`, or `reactivated` event originating from Evaluaciones additionally carries the originating appointment's id in its metadata, so provenance survives even if the appointment record itself is later pruned (see Evaluaciones (Appointments)).
 

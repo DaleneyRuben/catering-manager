@@ -157,6 +157,49 @@ describe('ClientHistoryTab', () => {
     expect(screen.queryByText(/\$/)).not.toBeInTheDocument();
   });
 
+  it('labels a contract edit without dressing it up as a plan', () => {
+    mockUseClientHistory.mockReturnValue({
+      history: [
+        entry({
+          eventType: 'contract_updated',
+          metadata: { startDate: '2026-07-02', duration: 20, contractEndDate: '2026-07-29' },
+        }),
+      ],
+      isLoading: false,
+    });
+
+    render(<ClientHistoryTab clientId="1" />);
+
+    expect(screen.getByText('Contrato actualizado')).toBeInTheDocument();
+    expect(screen.queryByText(/\/mes$/)).not.toBeInTheDocument();
+  });
+
+  it('shows the plan and cost the client moved to on a plan change', () => {
+    mockUseClientHistory.mockReturnValue({
+      history: [
+        entry({
+          eventType: 'plan_changed',
+          metadata: {
+            planId: '5',
+            planName: 'Completo',
+            planPrice: 1800,
+            previousPlanId: '2',
+            previousPlanName: 'Ligero',
+            discount: 250,
+            previousDiscount: 100,
+          },
+        }),
+      ],
+      isLoading: false,
+    });
+
+    render(<ClientHistoryTab clientId="1" />);
+
+    expect(screen.getByText('Plan modificado')).toBeInTheDocument();
+    expect(screen.getByText('Completo')).toBeInTheDocument();
+    expect(screen.getByText('1.550/mes')).toBeInTheDocument();
+  });
+
   it('does not show the delivery calendar for an active client', () => {
     mockUseClientHistory.mockReturnValue({ history: [entry()], isLoading: false });
     render(<ClientHistoryTab clientId="1" sub={endedSub} isEnded={false} />);

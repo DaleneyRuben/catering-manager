@@ -2,18 +2,36 @@ import type { Transaction } from 'sequelize';
 import ClientHistory from '../../models/ClientHistory';
 import type { Actor } from '../../types/actor';
 
-// The plan fields are optional because plan_assigned covers two situations: a plan being put in
-// place, which records the plan and its price, and a later edit to the start date or duration,
-// which records only the new dates. Splitting them into two event types is tracked separately.
+// A plan being put in place: the plan and what the client pays for it, alongside the contract it
+// runs for. planName and planPrice are nullable rather than optional — they are null only when the
+// plan row is gone by the time the event is written.
 type PlanEventMetadata = {
   startDate: string | null;
   duration: number;
   contractEndDate: string | null;
-  planId?: number;
-  planName?: string | null;
-  planPrice?: number | null;
-  discount?: number;
+  planId: number;
+  planName: string | null;
+  planPrice: number | null;
+  discount: number;
   appointmentId?: number;
+};
+
+// A later edit to an existing contract. It carries no plan fields because it changes none.
+type ContractEventMetadata = {
+  startDate: string | null;
+  duration: number;
+  contractEndDate: string | null;
+};
+
+// A move in the commercial terms of a running subscription — the plan, the discount, or both.
+type PlanChangedMetadata = {
+  planId: number;
+  planName: string | null;
+  planPrice: number | null;
+  previousPlanId: number;
+  previousPlanName: string | null;
+  discount: number;
+  previousDiscount: number;
 };
 
 type RenewalDeletedMetadata = {
@@ -32,6 +50,8 @@ export type HistoryEvent =
       clientId: number;
       metadata: PlanEventMetadata;
     }
+  | { type: 'contract_updated'; clientId: number; metadata: ContractEventMetadata }
+  | { type: 'plan_changed'; clientId: number; metadata: PlanChangedMetadata }
   | { type: 'renewal_deleted'; clientId: number; metadata: RenewalDeletedMetadata }
   | { type: 'suspended'; clientId: number; metadata: { dates: string[] } }
   | { type: 'paused' | 'resumed' | 'finalized' | 'deleted'; clientId: number };

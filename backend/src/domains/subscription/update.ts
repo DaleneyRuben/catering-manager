@@ -1,4 +1,5 @@
 import { Transaction } from 'sequelize';
+import Plan from '../../models/Plan';
 import Subscription from '../../models/Subscription';
 import { withTransaction } from '../../database/with-transaction';
 import { UpdateSubscriptionDto } from '../../schemas/subscription.schema';
@@ -6,6 +7,42 @@ import type { Actor } from '../../types/actor';
 import { addDeliveryDays, subtractDeliveryDays, calcContractEndDate } from '../../utils/date';
 import { record } from '../client-history';
 import { finalizeOverlappingSubscriptions } from './finalize-overlapping';
+
+type PlanChange = {
+  planId: number;
+  planName: string | null;
+  planPrice: number | null;
+  previousPlanId: number;
+  previousPlanName: string | null;
+  discount: number;
+  previousDiscount: number;
+};
+
+// Resolved before the write it describes and inside the transaction: the previous plan and
+// discount are unreadable once the update lands.
+const resolvePlanChange = async (
+  subscription: Subscription,
+  data: UpdateSubscriptionDto,
+  transaction: Transaction,
+): Promise<PlanChange | null> => {
+  const planId = data.planId ?? subscription.planId;
+  const discount = data.discount ?? subscription.discount;
+  if (planId === subscription.planId && discount === subscription.discount) return null;
+
+  const previousPlan = await Plan.findByPk(subscription.planId, { transaction });
+  const plan =
+    planId === subscription.planId ? previousPlan : await Plan.findByPk(planId, { transaction });
+
+  return {
+    planId,
+    planName: plan?.name ?? null,
+    planPrice: plan?.price ?? null,
+    previousPlanId: subscription.planId,
+    previousPlanName: previousPlan?.name ?? null,
+    discount,
+    previousDiscount: subscription.discount,
+  };
+};
 
 export const update = async (
   clientId: number,
@@ -22,6 +59,21 @@ export const update = async (
   if (contractDate !== undefined) base.contractDate = contractDate;
 
   return withTransaction(transaction, async (t) => {
+    const planChange = await resolvePlanChange(subscription, data, t);
+
+    // The commercial terms can move alongside any of the branches below — one PATCH may carry both
+    // a new plan and new contract dates — so all three return through here.
+    const finish = async <T>(updated: T): Promise<T> => {
+      if (planChange) {
+        await record(
+          actor,
+          { type: 'plan_changed', clientId: subscription.clientId, metadata: planChange },
+          t,
+        );
+      }
+      return updated;
+    };
+
     if (startDate !== undefined || duration !== undefined) {
       const newStartDate = startDate ?? subscription.startDate;
       const newDuration = duration ?? subscription.duration;
@@ -54,7 +106,7 @@ export const update = async (
       await record(
         actor,
         {
-          type: 'plan_assigned',
+          type: 'contract_updated',
           clientId: subscription.clientId,
           metadata: {
             startDate: newStartDate,
@@ -65,7 +117,7 @@ export const update = async (
         t,
       );
 
-      return updated;
+      return finish(updated);
     }
 
     if (suspendedDates !== undefined) {
@@ -97,9 +149,9 @@ export const update = async (
         );
       }
 
-      return updated;
+      return finish(updated);
     }
 
-    return subscription.update(base, { transaction: t });
+    return finish(await subscription.update(base, { transaction: t }));
   });
 };

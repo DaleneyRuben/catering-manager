@@ -6,6 +6,7 @@ export const EVENT_LABELS: Record<HistoryEventType, string> = {
   plan_assigned: 'Plan asignado',
   plan_renewed: 'Plan renovado',
   plan_changed: 'Plan modificado',
+  contract_updated: 'Contrato actualizado',
   suspended: 'Días suspendidos',
   reactivated: 'Cliente reactivado',
   finalized: 'Plan finalizado',
