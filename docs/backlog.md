@@ -25,15 +25,23 @@ existing subscription and writes `terms_changed`; the gap is the UI.
 | 1.2 | Plan selector + duration in `ActivePlanCard`'s edit mode, sending `planId` on the PATCH | ⬜     |
 | 1.3 | End-to-end verification via Playwright; workaround retired                              | ⬜     |
 
-Open question, to resolve before 1.2: whether the admin enters the **total** duration (what
-`subscription/update.ts` recalculates the end date from) or the **remaining** days (how the
-change is actually thought about at the counter).
+Prompts: [design](./design-prompts/plan-change.md) ·
+[implementation](./implementation-prompts/plan-change-implementation.md).
+
+Resolved: the admin enters the **total** duration, not remaining days — `duración` already means
+total plan length in the wizard, `RenewalModal` and reactivation, and a second meaning for the word
+would appear only on the screen where a contract gets shortened. The card shows
+`Vence el {fecha} · {n} días restantes` live instead, so the number being negotiated is on screen
+without changing what the field means.
 
 ## 2. Finanzas
 
 `finance` domain owning `payments`, `expenses`, `expense_categories`. One screen: month selector,
 Ingresos / Egresos / Balance tiles, expenses by category, one chronological list of movements,
 "Registrar gasto". Admin + super_admin.
+
+Prompts: [design](./design-prompts/finanzas.md) ·
+[implementation](./implementation-prompts/finanzas-implementation.md).
 
 | #   | Item                                                                                        | Status |
 | --- | ------------------------------------------------------------------------------------------- | ------ |
