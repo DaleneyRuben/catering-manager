@@ -176,11 +176,6 @@ Three downloadable reports are currently implemented on the Reports page:
 
 All three reject weekend dates with a 400.
 
-Planned but not yet implemented:
-
-- **Plans expiring soon** — active clients whose contract end date falls within the next 5 kitchen business days (Sun–Thu). The dashboard shows today/tomorrow only.
-- **Clients by birth month** — filterable list grouped by birth month. The dashboard has a current-month birthday widget only.
-
 The reporting layer should remain extensible — additional reports may be added over time.
 
 ---
@@ -299,10 +294,6 @@ newContractEndDate = nextClientDeliveryDay(resumeDate) + (remainingDays - 1) bus
 ```
 
 Where `nextClientDeliveryDay` is the first Mon–Fri day strictly after `resumeDate`. This ensures the client receives their first meal the day after resuming (e.g., resumed on Monday → first delivery on Tuesday).
-
-**UI behavior while paused (Plan + Billing tab) (planned — not yet implemented):**
-
-The frontend should display `contractEndDate + 1 client business day` as a visual indicator only, never persisted — the backend computes and stores the real end date only at resume time. Currently the UI shows the stored `contractEndDate` unchanged while paused.
 
 **Maximum pause duration (planned — not yet implemented):**
 
