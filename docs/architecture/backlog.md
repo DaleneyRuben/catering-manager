@@ -98,6 +98,22 @@ its work becomes fiction.
       `login` had the `User` instance in hand and now re-reads it by id inside `recordLogin`, so a
       successful login costs one extra `findByPk`. Accepted — the alternative is passing a live
       Sequelize instance across a domain boundary, which is what item 7 wants less of, not more.
+- [x] **#137** — item 7: the ownership lint, all eight overrides, `.eslintrc.cjs` only. Generated
+      from one `TABLE_OWNERS` map rather than hand-written, so a catch-all bans every model's
+      writes in `src/domains/**` and one override per owner re-allows just its own — overrides are
+      last-match-wins for a rule, which is why they cannot be collapsed into a single entry.
+      **Two corrections to what this item assumed.** The `Client` override was not blocked: it
+      claimed the `pausedSince` writes in `subscription` would trip it, but all three are instance
+      writes (`client.update(…)`, not `Client.update(…)`), which the rule cannot match — so the
+      whole item landed at once and D1 was never a prerequisite. And restating airbnb-base's four
+      `no-restricted-syntax` selectors inside each override turned out to be load-bearing: a rule's
+      options replace rather than merge, so omitting them silently re-allowed `for..of` in every
+      domain file. Verified by removing them and watching the check go quiet.
+      Worth naming plainly: the rule catches **none** of the violations this backlog has found.
+      `groupToken` (#128), `pausedSince` (6.3) and `appointments` (6.7) are all instance writes.
+      Its value is stopping a new static-write violation, not finding existing ones. Tested by
+      linting invented source text against the real config (`src/__tests__/ownership-lint.test.ts`),
+      including a test that pins the instance-write gap so a future change to it is deliberate.
 - [x] **#131, #132, #134, #135** — item 6.5: every write function takes an optional `transaction`.
       Ten workflows across four PRs, behind the `withTransaction(transaction, work)` helper added
       in #131, which joins a caller's transaction or opens its own. The two this item named were
@@ -216,21 +232,6 @@ would not inherit it.
 
 ---
 
-## 7. Ownership lint 🟢
-
-After item 6, add `no-restricted-syntax` overrides — one per owning domain — rejecting
-`Model.create` / `.update` / `.destroy` / `.bulkCreate` outside the owner.
-
-The `Client` override is the one that cannot go in early: a rule keyed on the model cannot
-exempt a single column, so it stays blocked by the `pausedSince` writes in `subscription` until
-D1 lands (see 6.3). Every other model's override is unaffected.
-
-Known and accepted gap: instance writes (`sub.update({ ... })`) cannot be caught, because
-ESLint has no type information for a local variable. Narrowed by returning data rather than
-live Sequelize instances from domain APIs; otherwise it rests on review.
-
----
-
 ## Modelling debt
 
 Recorded so it is not rediscovered. None of it blocks items 1–7.
@@ -253,9 +254,13 @@ session; the #115 guard holds until then — now in one place (`subscription/_he
 #127 found it had been missed on the mark-paid path. That a one-column rule could be half-applied
 for two months is the clearest argument yet for fixing the model rather than the symptom.
 
-**Now blocking, not just debt.** The remaining half of item 6.3 and the `Client` half of item 7
-both wait on this — the import cycle in 6.3 is the same wrong-table problem showing up as a
-build error. Scheduling it is no longer optional if the backlog is to be finished and deleted.
+**Now blocking, not just debt.** The remaining half of item 6.3 waits on this — the import cycle
+in 6.3 is the same wrong-table problem showing up as a build error. Scheduling it is no longer
+optional if the backlog is to be finished and deleted.
+
+Item 7 was also listed here as waiting on D1, and did not: its `Client` override never fired on
+the `pausedSince` writes, because all three are instance writes. Item 7 shipped whole in #137, so
+6.3 is now the only thing D1 blocks — and nothing lints the `pausedSince` writes in the meantime.
 
 ### D2. `groupToken` as a `clients` column 🟡
 
