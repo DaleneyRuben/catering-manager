@@ -1,5 +1,4 @@
 import { Op, Transaction } from 'sequelize';
-import Appointment from '../../models/Appointment';
 import Plan from '../../models/Plan';
 import Subscription from '../../models/Subscription';
 import { withTransaction } from '../../database/with-transaction';
@@ -47,12 +46,10 @@ export const deleteUpcomingSubscription = async (
 
     const plan = await Plan.findByPk(subscription.planId, { transaction: t });
 
-    // An appointment that resolved into this renewal would otherwise point at a destroyed row.
-    // Only the link is cleared: the date stays as it was, so a past appointment is pruned on the
-    // next queue read rather than pushed back onto the nutritionist's list.
-    const appointment = await Appointment.findOne({ where: { subscriptionId }, transaction: t });
-    if (appointment) await appointment.update({ subscriptionId: null }, { transaction: t });
-
+    // An appointment that resolved into this renewal is unlinked by the foreign key, not here:
+    // appointments belongs to evaluation. Only the link is cleared, never the date, so a past
+    // appointment is pruned on the next queue read rather than pushed back onto the
+    // nutritionist's list.
     await subscription.destroy({ transaction: t });
 
     await record(

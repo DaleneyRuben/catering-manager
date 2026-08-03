@@ -16,6 +16,9 @@ class Appointment extends Model {
   @Column({ type: DataType.STRING, allowNull: false })
   declare time: string;
 
+  // ON DELETE SET NULL is load-bearing, not incidental: deleting a renewal that resolved an
+  // appointment has to clear this link, and subscription cannot write it — evaluation owns the
+  // table. See docs/adr/007-domain-ownership.md.
   @ForeignKey(() => Subscription)
   @Column({ type: DataType.INTEGER, allowNull: true, defaultValue: null })
   declare subscriptionId: number | null;
