@@ -8,9 +8,11 @@ The decision behind it — and the alternative we rejected — is recorded in
 [ADR-007](../adr/007-domain-ownership.md). The catering business rules live in
 [business-rules.md](../business-rules.md); this document is about code structure only.
 
-This document describes the **target**. The code does not fully match it yet — the outstanding
-work, in dependency order, is tracked in [backlog.md](./backlog.md). Where the two disagree,
-this document is the intent and the backlog says what is left to do about it.
+The code matches this document. Bringing it in line ran from #115 to #141 and was tracked at the
+time in a `backlog.md` alongside this file; that file was deleted once its last item landed, since
+a backlog that outlives its work becomes fiction. What each step found is in the merge commits,
+and anything worth keeping was folded into this document or the ADR. One item was deliberately
+not done — see [Known debt](#known-debt).
 
 ---
 
@@ -119,16 +121,16 @@ a catering activity, which is why no such domain exists.
 
 Every table has exactly one owner. This table is the authority.
 
-| Table            | Owner            | Notes                                                                       |
-| ---------------- | ---------------- | --------------------------------------------------------------------------- |
-| `clients`        | `client`         | Includes `pausedSince` and `groupToken` — see Known debt                    |
-| `subscriptions`  | `subscription`   | The largest domain; correct, as subscriptions are the heart of the business |
-| `plans`          | `plan`           |                                                                             |
-| `menus`          | `menu`           | Owns the rolling weekly-window pruning rule                                 |
-| `appointments`   | `evaluation`     | Named for the workflow, not the entity — see `CONTEXT.md`                   |
-| `users`          | `user`           |                                                                             |
-| `login_events`   | `login-event`    | Owns User-Agent parsing                                                     |
-| `client_history` | `client-history` | Sole writer of every history event                                          |
+| Table            | Owner            | Notes                                                                                                                                                             |
+| ---------------- | ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `clients`        | `client`         | Includes `groupToken` — see Known debt                                                                                                                            |
+| `subscriptions`  | `subscription`   | The largest domain; correct, as subscriptions are the heart of the business. Includes `pausedSince`, moved off `clients` so a pause describes the plan it stopped |
+| `plans`          | `plan`           |                                                                                                                                                                   |
+| `menus`          | `menu`           | Owns the rolling weekly-window pruning rule                                                                                                                       |
+| `appointments`   | `evaluation`     | Named for the workflow, not the entity — see `CONTEXT.md`                                                                                                         |
+| `users`          | `user`           |                                                                                                                                                                   |
+| `login_events`   | `login-event`    | Owns User-Agent parsing                                                                                                                                           |
+| `client_history` | `client-history` | Sole writer of every history event                                                                                                                                |
 
 ### `client-history`
 
@@ -225,12 +227,10 @@ untouched; only the backend's internal organisation changed.
 
 ---
 
-## Target structure
+## Structure
 
-What `backend/src/` looks like once the [backlog](./backlog.md) is finished.
-
-Existing filenames are kept as they are — `+` marks a file that is new or moved in, so the
-tree can be checked against the repo today.
+What `backend/src/` looks like today. The `←` notes say where a file came from, for anyone who
+remembers the older layout.
 
 ```
 backend/src/
@@ -242,7 +242,6 @@ backend/src/
       derive-client-status.ts                 ← from utils/clientStatus.ts
       find-birthdays.ts                       ← from dashboard/
       set-delivery-group.ts                   ← from delivery/set-group.ts
-    + pause.ts  resume.ts                     ← deferred with the pausedSince debt below
       __tests__/  index.ts
 
     subscription/                             ← owning: subscriptions. Largest domain
@@ -253,6 +252,7 @@ backend/src/
       find-suspended-subscriptions-for-date.ts
       finalize-overlapping.ts                 ← promoted out of _helpers.ts
       finalize.ts  mark-paid.ts  remove.ts  extend-after-pause.ts   ← mark-paid from evaluation/
+      pause.ts  resume.ts                                           ← with the pausedSince column
       find-contract-ending.ts  find-subscription-counts.ts          ← from dashboard/
 
     client-history/                           ← owning: client_history. Was history/
@@ -278,8 +278,8 @@ client-level action, the other the table-level rule.
 
 Both take a subscription id rather than a client id. Picking _which_ subscription describes a
 client today is `getCurrentSubscription` in `client/_helpers.ts`, shared with `withStatus`;
-having `subscription` re-derive it would duplicate the selection rule to remove a write, which
-is the trade this backlog exists to avoid.
+having `subscription` re-derive it would duplicate the selection rule to remove a write — a
+trade this architecture never accepts.
 
 ### Why models stay in `models/`
 
@@ -297,9 +297,11 @@ makes ownership real is the write rule and the lint that enforces it, not the fo
 The same reasoning keeps `controllers/`, `routes/`, `schemas/` and `constants/` as layer
 folders: they are either shared leaf values or HTTP concerns that map to routes, not to domains.
 
-### What changes in the tree, and what does not
+### What the migration changed, and what it did not
 
-|                               | Before                              | After                                                        |
+"Before" is the codebase at #115, when this document was written.
+
+|                               | Before                              | Now                                                          |
 | ----------------------------- | ----------------------------------- | ------------------------------------------------------------ |
 | Domains                       | 14, incl. `dashboard` and `history` | **13** — `dashboard` dissolved, `history` → `client-history` |
 | Writers of `client_history`   | 8 sites, 3 domains                  | **1** — `client-history.record()`                            |
@@ -324,10 +326,10 @@ TanStack Query cache.
 `['menus']`, `users` → `['users']`. Zero cross-feature invalidations. This is recorded here
 so that nobody later "helpfully" centralises cache management into a shared hook.
 
-One exception exists: `Plan` is defined in `features/clients/types.ts` and imported by four
-files in `features/plans`, while `clients` imports components and hooks from `plans` — a
-circular dependency between features caused by one misplaced type. `Plan` belongs in
-`features/plans/types.ts`.
+There was one exception, now closed: `Plan` used to be defined in `features/clients/types.ts`
+and imported by four files in `features/plans`, while `clients` imported components and hooks
+from `plans` — a circular dependency between features caused by one misplaced type. It moved to
+`features/plans/types.ts`, and the arrow points one way.
 
 Cross-feature imports are otherwise legitimate and stay: `pages/` composing features is the
 point of `pages/`, and `evaluations` importing client types reflects a real domain
@@ -358,67 +360,43 @@ gap justifies. It is instead narrowed by design — **domain APIs should return 
 Sequelize instances.** A caller that never holds a model instance cannot write through one.
 This is direction for new code, not a retroactive rewrite.
 
+Worth knowing before you trust it: the static-write rule caught **none** of the four ownership
+violations this migration found — `groupToken`, `pausedSince`, `appointments` and the
+`client_history` writes were all instance writes. Its value is stopping the next violation, not
+finding the ones already there. `src/__tests__/ownership-lint.test.ts` lints invented source text
+against the real config, including a case that pins this gap, so narrowing it later is deliberate
+rather than accidental.
+
 ---
 
 ## Known debt
 
-Recorded so it is not rediscovered. None of it blocks the rules above.
+One item, left undone on purpose. Recorded so it is not rediscovered and re-argued.
 
-### `pausedSince` is on the wrong table
+### `groupToken` as a `clients` column — not doing this
 
-> This one is not hypothetical. It already produced a live bug: a sin-fecha renewal for an
-> already-paused client overwrote their real pause date, silently shortening their plan —
-> six delivery days in the reproduced case. Guarded in `subscription/create.ts`, which no
-> longer stamps `pausedSince` when the client is already paused (PR #115, merged).
->
-> **The root cause below is still open.** The guard treats one symptom at one call site;
-> any future code path that writes `pausedSince` can reintroduce the same bug, because the
-> data still cannot distinguish the two situations.
+A delivery group is a delivery concept stored as a client field. Two clients at one address are
+linked by writing the same random UUID into each of their `clients.groupToken` cells; the group
+exists only as that coincidence. #128 resolved the _ownership_ violation by moving the function
+into `client/set-delivery-group.ts`, not by moving the model — so `delivery` reads `groupToken`
+but owns no table, and is a view domain rather than an owning one.
 
-`pausedSince` is a column on `clients` (`models/Client.ts:41`), but a pause applies to a
-**plan**, not a person. The client still exists, still has an address; what stopped is
-delivery on one subscription.
+The better model is a `delivery_groups` table owned by `delivery`, with clients referencing it.
+**We considered it and decided against it** (August 2026), after the rest of this migration had
+landed. What it would buy:
 
-Worse, the column carries two different meanings — as its own comment in
-`domains/client/derive-client-status.ts:27` admits:
+- The dissolve rule gets simpler. Removing a member today means counting the survivors and, if
+  one is left, clearing their token too, because a group of one is not a group
+  (`client/set-delivery-group.ts`). With a real row you delete the row.
+- A group could carry its own data — one address for the stop, a gate code, a note for the
+  driver. A shared token can carry nothing.
 
-1. **A mid-plan pause.** A client 8 days into a 20-day plan travels; on resume they are owed
-   12 delivery days and the end date must be extended.
-2. **A "sin fecha" renewal.** A renewed plan with no start date chosen yet. It never started;
-   nothing is owed.
+Neither is a problem the product has. Weighed against a production migration and rewrites across
+`delivery/find-route`, `find-members`, `count-deliveries-today`, `_helpers` and `client/find-by-id`,
+the trade did not pay. Nothing is blocked by leaving it.
 
-Both write `pausedSince = <date>`; both display "Pausado". The resume code distinguishes them
-by _inferring_ from whether a start date exists (`client/update.ts:38-52`) rather than reading
-it from the data. That holds today and is fragile to a third case.
-
-Because a client accumulates many subscriptions, nothing records _which_ plan was paused —
-the code assumes "the current one."
-
-**Direction:** move `pausedSince` onto `subscriptions` and represent the two situations
-distinctly. This is a migration plus a rewrite of derived-status and pause/resume logic — it
-changes business rules and needs its own design work.
-
-It was recorded here as not affecting the ownership rules. That turned out to be wrong, and the
-correction is the sharpest evidence for the direction above. `subscription` still writes
-`pausedSince` in three places, and the `client.pause()` / `client.resume()` pair meant to absorb
-them **cannot be written while the column lives on `clients`**: `client/update.ts` imports
-`extendAfterPause` from `subscription`, so the call back the other way closes an import cycle
-that `import/no-cycle` rejects. Untangling it means moving pause/resume decisions into
-`subscription` — after which the wrapper pair is deleted by the migration that follows it. So
-the wrapper is skipped: those three writes stay put until the column moves. See item 6.3 in
-[backlog.md](./backlog.md).
-
-### `groupToken` as a `clients` column
-
-A delivery group is a delivery concept stored as a client field, which is why `delivery` wrote
-to `clients`. #128 resolved the ownership violation by moving the function, not the model — the
-concept still sits in the wrong table.
-A dedicated `delivery_groups` table owned by `delivery` is the better model and would make
-`delivery` an owning domain, but it is a migration and is not required by anything here.
-
-### `plan_changed` is declared but never emitted
-
-The event type exists; changing only the assigned plan on an existing subscription records no
-history entry. Noted in `business-rules.md`. Now that `client-history` is the sole writer, this
-is a union member and a `record` call — and it belongs with the `plan_assigned` split described
-under `client-history` above, since both concern what a plan-change event should carry.
+**What would change the answer:** the first feature that wants to store something about the stop
+rather than about each client in it. At that point the table is the cheap way to build the
+feature, not a refactor. Until then, `groupToken` stays where it is, and `delivery` stays a view
+domain — which rule 4 permits, because it holds a rule and not just a query: `countStops` in
+`delivery/_helpers.ts` is where "a group is one stop" lives.
