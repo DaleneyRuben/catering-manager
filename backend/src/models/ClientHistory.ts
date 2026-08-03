@@ -8,6 +8,7 @@ export type HistoryEventType =
   | 'plan_assigned'
   | 'plan_renewed'
   | 'plan_changed'
+  | 'contract_updated'
   | 'suspended'
   | 'reactivated'
   | 'finalized'
