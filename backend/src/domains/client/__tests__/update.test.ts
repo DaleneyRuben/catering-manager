@@ -1,4 +1,5 @@
 import Client from '../../../models/Client';
+import sequelize from '../../../database/sequelize';
 import { record } from '../../client-history';
 import { extendAfterPause } from '../../subscription';
 import { update } from '../update';
@@ -9,7 +10,7 @@ jest.mock('../../subscription');
 jest.mock('../../../models/Subscription');
 jest.mock('../../../database/sequelize', () => ({
   __esModule: true,
-  default: { query: jest.fn() },
+  default: { query: jest.fn(), transaction: jest.fn() },
 }));
 jest.mock('../../../utils/date', () => ({
   ...jest.requireActual('../../../utils/date'),
@@ -18,9 +19,14 @@ jest.mock('../../../utils/date', () => ({
 
 const mockClient = { id: 1, name: 'John Doe', pausedSince: null };
 const actor = { userId: 9, username: 'ada' };
+const transaction = { id: 'own' };
+const callerTransaction = { id: 'caller' } as never;
 
 describe('update', () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (sequelize.transaction as jest.Mock).mockImplementation((work) => work(transaction));
+  });
 
   it('records paused history event when pausing', async () => {
     const pausedSince = '2026-06-10T12:00:00Z';
@@ -35,7 +41,7 @@ describe('update', () => {
 
     await update(1, { pausedSince }, actor);
 
-    expect(record).toHaveBeenCalledWith(actor, { type: 'paused', clientId: 1 });
+    expect(record).toHaveBeenCalledWith(actor, { type: 'paused', clientId: 1 }, transaction);
   });
 
   it('records resumed history event when resuming', async () => {
@@ -50,7 +56,7 @@ describe('update', () => {
 
     await update(1, { pausedSince: null }, actor);
 
-    expect(record).toHaveBeenCalledWith(actor, { type: 'resumed', clientId: 1 });
+    expect(record).toHaveBeenCalledWith(actor, { type: 'resumed', clientId: 1 }, transaction);
   });
 
   it('records the acting user on the history event', async () => {
@@ -67,6 +73,7 @@ describe('update', () => {
 
     expect(record).toHaveBeenCalledWith(
       expect.objectContaining({ userId: 9, username: 'ada' }),
+      expect.anything(),
       expect.anything(),
     );
   });
@@ -90,7 +97,7 @@ describe('update', () => {
 
     await update(1, { pausedSince: null }, actor);
 
-    expect(extendAfterPause).toHaveBeenCalledWith(5, pausedSince);
+    expect(extendAfterPause).toHaveBeenCalledWith(5, pausedSince, transaction);
   });
 
   it('extends the paid subscription, not a newer pending unpaid renewal, when resuming', async () => {
@@ -119,8 +126,8 @@ describe('update', () => {
 
     await update(1, { pausedSince: null }, actor);
 
-    expect(extendAfterPause).toHaveBeenCalledWith(60, expect.any(Date));
-    expect(extendAfterPause).not.toHaveBeenCalledWith(66, expect.anything());
+    expect(extendAfterPause).toHaveBeenCalledWith(60, expect.any(Date), transaction);
+    expect(extendAfterPause).not.toHaveBeenCalledWith(66, expect.anything(), expect.anything());
   });
 
   it('extends the subscription covering today, not a queued future renewal, when resuming', async () => {
@@ -149,8 +156,8 @@ describe('update', () => {
 
     await update(1, { pausedSince: null }, actor);
 
-    expect(extendAfterPause).toHaveBeenCalledWith(5, expect.any(Date));
-    expect(extendAfterPause).not.toHaveBeenCalledWith(8, expect.anything());
+    expect(extendAfterPause).toHaveBeenCalledWith(5, expect.any(Date), transaction);
+    expect(extendAfterPause).not.toHaveBeenCalledWith(8, expect.anything(), expect.anything());
   });
 
   it('does not record history when non-pause fields are updated', async () => {
@@ -167,11 +174,60 @@ describe('update', () => {
     expect(record).not.toHaveBeenCalled();
   });
 
+  it('records the event, extends the plan and updates the client in one transaction', async () => {
+    const mockSub = { id: 5, startDate: '2026-06-01', duration: 10 };
+    const mockInstance = {
+      id: 1,
+      pausedSince: new Date('2026-06-03T15:00:00Z'),
+      subscriptions: [mockSub],
+      update: jest.fn().mockResolvedValue({ ...mockClient, pausedSince: null }),
+    };
+    (Client.findByPk as jest.Mock).mockResolvedValue(mockInstance);
+
+    await update(1, { pausedSince: null }, actor);
+
+    expect(sequelize.transaction).toHaveBeenCalledTimes(1);
+    expect(mockInstance.update).toHaveBeenCalledWith({ pausedSince: null }, { transaction });
+  });
+
+  it("joins the caller's transaction rather than opening its own", async () => {
+    const mockInstance = {
+      id: 1,
+      pausedSince: null,
+      subscriptions: [],
+      update: jest.fn().mockResolvedValue({ ...mockClient, name: 'Jane Doe' }),
+    };
+    (Client.findByPk as jest.Mock).mockResolvedValue(mockInstance);
+
+    await update(1, { name: 'Jane Doe' }, actor, callerTransaction);
+
+    expect(sequelize.transaction).not.toHaveBeenCalled();
+    expect(mockInstance.update).toHaveBeenCalledWith(
+      { name: 'Jane Doe' },
+      { transaction: callerTransaction },
+    );
+  });
+
+  it('leaves the client unchanged when extending the resumed plan fails', async () => {
+    const mockInstance = {
+      id: 1,
+      pausedSince: new Date('2026-06-03T15:00:00Z'),
+      subscriptions: [{ id: 5, startDate: '2026-06-01', duration: 10 }],
+      update: jest.fn().mockResolvedValue({ ...mockClient, pausedSince: null }),
+    };
+    (Client.findByPk as jest.Mock).mockResolvedValue(mockInstance);
+    (extendAfterPause as jest.Mock).mockRejectedValueOnce(new Error('db error'));
+
+    await expect(update(1, { pausedSince: null }, actor)).rejects.toThrow('db error');
+    expect(mockInstance.update).not.toHaveBeenCalled();
+  });
+
   it('returns null when client not found', async () => {
     (Client.findByPk as jest.Mock).mockResolvedValue(null);
 
     const result = await update(999, { pausedSince: null }, actor);
 
     expect(result).toBeNull();
+    expect(sequelize.transaction).not.toHaveBeenCalled();
   });
 });
