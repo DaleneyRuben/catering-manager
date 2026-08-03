@@ -228,7 +228,7 @@ describe('markPaid', () => {
     expect(Subscription.findAll).not.toHaveBeenCalled();
   });
 
-  it('sets pausedSince to today when confirming payment for a sin-fecha renewal', async () => {
+  it('pauses the renewal itself when confirming payment for a sin-fecha renewal', async () => {
     const mockClient = { update: jest.fn().mockResolvedValue({}) };
     const subscription = {
       id: 3,
@@ -247,40 +247,13 @@ describe('markPaid', () => {
 
     await markPaid(1, actor);
 
-    expect(mockClient.update).toHaveBeenCalledWith({ pausedSince: appToday() }, { transaction });
-  });
-
-  // Same rule as subscription/create.ts: an already-paused client keeps the date they actually
-  // paused on, because resume counts the days they are owed from it. Deferring the renewal
-  // behind a payment must not lose the guard.
-  it('keeps the original pausedSince when confirming a sin-fecha renewal for a paused client', async () => {
-    const mockClient = {
-      pausedSince: new Date('2026-01-10T12:00:00'),
-      update: jest.fn().mockResolvedValue({}),
-    };
-    const subscription = {
-      id: 3,
-      clientId: 1,
-      planId: 2,
-      startDate: null,
-      duration: 20,
-      contractEndDate: null,
-      discount: 500,
-      renewalType: 'renewal',
-      update: jest.fn().mockResolvedValue({}),
-    };
-    (Subscription.findOne as jest.Mock).mockResolvedValue(subscription);
-    (Client.findByPk as jest.Mock).mockResolvedValue(mockClient);
-    (Plan.findByPk as jest.Mock).mockResolvedValue({ id: 2, name: 'Completo', price: 5000 });
-
-    await markPaid(1, actor);
-
+    expect(subscription.update).toHaveBeenCalledWith({ pausedSince: appToday() }, { transaction });
     expect(mockClient.update).not.toHaveBeenCalled();
   });
 
-  // The pause guard above reads client.pausedSince. Read outside the transaction it would miss a
-  // pause the same workflow just wrote, and restamp a date the guard exists to protect.
-  it('reads the client inside the transaction so the pause guard sees uncommitted state', async () => {
+  // The old guard protected one shared column from being restamped. Each renewal now carries its
+  // own pause, so deferring one behind a payment cannot disturb a pause held on another plan.
+  it('pauses the renewal even when another plan of the same client is already paused', async () => {
     const subscription = {
       id: 3,
       clientId: 1,
@@ -298,10 +271,10 @@ describe('markPaid', () => {
 
     await markPaid(1, actor);
 
-    expect(Client.findByPk).toHaveBeenCalledWith(1, { transaction });
+    expect(subscription.update).toHaveBeenCalledWith({ pausedSince: appToday() }, { transaction });
   });
 
-  it('clears pausedSince when confirming payment for a reactivation', async () => {
+  it('clears the pause on the client other plans when confirming payment for a reactivation', async () => {
     const mockClient = { update: jest.fn().mockResolvedValue({}) };
     const subscription = {
       id: 3,
@@ -321,7 +294,11 @@ describe('markPaid', () => {
 
     await markPaid(1, actor);
 
-    expect(mockClient.update).toHaveBeenCalledWith({ pausedSince: null }, { transaction });
+    expect(Subscription.update).toHaveBeenCalledWith(
+      { pausedSince: null },
+      expect.objectContaining({ where: { clientId: 1 }, transaction }),
+    );
+    expect(mockClient.update).not.toHaveBeenCalled();
   });
 
   it('does not touch pausedSince when confirming payment for a plain plan_assigned subscription', async () => {

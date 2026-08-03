@@ -2,6 +2,8 @@ export { create } from './create';
 export { update } from './update';
 export { markPaid } from './mark-paid';
 export { finalize } from './finalize';
+export { pause } from './pause';
+export { resume } from './resume';
 export { extendAfterPause } from './extend-after-pause';
 export { remove } from './remove';
 export { deleteUpcomingSubscription } from './delete-upcoming-subscription';

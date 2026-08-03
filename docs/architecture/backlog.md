@@ -87,7 +87,7 @@ its work becomes fiction.
       what #127 found had already gone wrong once. `delivery` is now a pure view domain. The
       endpoint already lived on the client controller (`PUT /api/clients/:id/group`), so that
       import now points at the domain owning the table. The `pausedSince` half is **deferred to
-      D1** — see 6.3 below for the import cycle that makes the intermediate step not worth
+      D1** — see the D1 entry below for the import cycle that made the intermediate step not worth
       building.
 - [x] **#130** — item 6.4: `auth` no longer writes `users`. The device snapshot write moved to
       `user/record-login.ts` as `recordLogin(id, device)`, which takes the device but not the
@@ -137,6 +137,22 @@ its work becomes fiction.
       `frontend/src/features/clients/utils/startDate.ts`. Noted while in there and left alone:
       `frontend/.env` sets `BYPASS_WEEKEND`, but the frontend reads `VITE_BYPASS_WEEKEND` — Vite
       only exposes `VITE_`-prefixed vars, so the frontend half of the flag is inert. Dev-env only.
+- [x] **D1 + item 6.3** — `pausedSince` moved from `clients` to `subscriptions`. The column now
+      describes the plan it belongs to, so the two meanings it used to share stop colliding: a
+      mid-plan pause sits on the running plan, a "sin fecha" renewal on the renewal itself.
+      `subscription.pause()` / `resume()` own the write, the history event and the resume-time
+      extension, which dissolves 6.3's import cycle — `subscription` writing its own column is not
+      a cross-domain write, so the `client.pause()` wrapper the item planned was never needed.
+      Two live bugs fixed, both reproduced against a copy of production before and after: a
+      sin-fecha renewal took the client's still-running paid plan off the delivery route the day it
+      was registered (Diego Guzman, paid through 28/09, dropped from the route on 03/08 — 16
+      entregas to 15); and deleting that renewal left the client paused with nothing on screen
+      explaining it, escapable only via Reanudar, which extended the contract as compensation for a
+      pause that had withheld no meals. The #115 guard is deleted rather than moved — a brand-new
+      renewal row cannot collide with a pause held on a different row. Migration backfills each
+      existing pause onto the subscription `getCurrentSubscription` would have picked; production
+      had zero paused clients and no `paused`/`resumed` event ever recorded, so the backfill was
+      a no-op there by measurement, not by assumption.
 
 ---
 
@@ -144,39 +160,6 @@ its work becomes fiction.
 
 The core of ADR-007, and the only item that moves business logic. **Needs explicit approval
 before any code is written**, and should be split across several PRs rather than one.
-
-### 6.3 `client` owns `clients` — `pausedSince` half, blocked on D1
-
-The `groupToken` half landed in #128 as `client.setDeliveryGroup()`. What remains is the
-`pausedSince` write: **three statements across two files**, both in `subscription`.
-
-```
-subscription/_helpers.ts:42, :47   (applyRenewalPauseState — one clear, one stamp)
-subscription/update.ts:46          (cleared when a sin-fecha renewal is given a start date)
-```
-
-The count this item carried before — twelve statements across four files, naming
-`subscription/create.ts` and `evaluation/mark-paid.ts` — is stale twice over. #127 moved
-`markPaid` into `subscription` and collapsed both callers onto one helper, so its four
-`pausedSince` writes became the two in `_helpers.ts`; #128 removed the five `groupToken` ones.
-
-**Why the rest waits for D1.** The obvious fix — add `client.pause()` / `client.resume()` and
-call them from `subscription` — cannot be written today. `client/update.ts:6` already imports
-`extendAfterPause` from `subscription`, so an import back the other way closes a loop, and
-`import/no-cycle` (error, inherited from airbnb-base) rejects it. Confirmed on the #128 branch
-rather than assumed:
-
-```
-subscription/_helpers.ts
-  2:1  error  Dependency cycle via ../client:6=>./update:5=>../subscription:6
-```
-
-Breaking the loop means moving the pause/resume decisions — the history event and the
-resume-time contract extension — out of `client` and into `subscription`. That is most of what
-D1 does anyway, and D1 then deletes the `client.pause()` / `client.resume()` pair it would have
-created: once `pausedSince` is a column on `subscriptions`, `subscription` writing it is not a
-cross-domain write at all. The wrapper would ship with a known expiry date. Do D1 first; this
-item closes with it.
 
 ### 6.6 Split the two meanings of `plan_assigned`
 
@@ -235,32 +218,6 @@ would not inherit it.
 ## Modelling debt
 
 Recorded so it is not rediscovered. None of it blocks items 1–7.
-
-### D1. `pausedSince` is on the wrong table 🔴
-
-Root cause of #115. `pausedSince` is a column on `clients`, but a pause applies to a **plan**.
-Worse, one column carries two meanings — a mid-plan pause (where the date drives how many days
-are owed) and a "sin fecha" renewal awaiting a start date (where it is only a marker). The
-resume code tells them apart by _inferring_ from whether a start date exists
-(`client/update.ts:38-52`).
-
-A client also accumulates many subscriptions, so nothing records _which_ plan was paused; the
-code assumes "the current one". Both situations can hold at once — confirmed against the
-running app.
-
-**Direction:** move `pausedSince` onto `subscriptions` and represent the two situations
-distinctly. Migration + rewrite of derived status and pause/resume. Deserves its own design
-session; the #115 guard holds until then — now in one place (`subscription/_helpers.ts`), after
-#127 found it had been missed on the mark-paid path. That a one-column rule could be half-applied
-for two months is the clearest argument yet for fixing the model rather than the symptom.
-
-**Now blocking, not just debt.** The remaining half of item 6.3 waits on this — the import cycle
-in 6.3 is the same wrong-table problem showing up as a build error. Scheduling it is no longer
-optional if the backlog is to be finished and deleted.
-
-Item 7 was also listed here as waiting on D1, and did not: its `Client` override never fired on
-the `pausedSince` writes, because all three are instance writes. Item 7 shipped whole in #137, so
-6.3 is now the only thing D1 blocks — and nothing lints the `pausedSince` writes in the meantime.
 
 ### D2. `groupToken` as a `clients` column 🟡
 

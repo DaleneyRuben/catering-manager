@@ -248,7 +248,9 @@ describe('update', () => {
     expect(Subscription.findAll).not.toHaveBeenCalled();
   });
 
-  it('clears pausedSince inside the transaction when a startDate is assigned', async () => {
+  // Giving a sin-fecha renewal its start date un-pauses that renewal — and nothing else. The
+  // client record no longer carries a pause for this to have to reach across and clear.
+  it('clears its own pausedSince when a startDate is assigned', async () => {
     const client = { id: 1, update: jest.fn() };
     const mockInstance = {
       id: 3,
@@ -265,8 +267,11 @@ describe('update', () => {
 
     await update(1, 3, { startDate: '2026-07-03' }, actor);
 
-    expect(Client.findByPk).toHaveBeenCalledWith(1, { transaction });
-    expect(client.update).toHaveBeenCalledWith({ pausedSince: null }, { transaction });
+    expect(client.update).not.toHaveBeenCalled();
+    expect(mockInstance.update).toHaveBeenCalledWith(
+      expect.objectContaining({ pausedSince: null }),
+      { transaction },
+    );
   });
 
   it('writes the plan_assigned event only after the subscription it describes', async () => {

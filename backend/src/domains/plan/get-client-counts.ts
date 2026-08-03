@@ -10,7 +10,7 @@ export const getClientCounts = async (): Promise<{ planId: number; count: number
     `SELECT s."planId", COUNT(c.id) AS count
      FROM subscriptions s
      JOIN clients c ON c.id = s."clientId"
-     WHERE c."pausedSince" IS NULL
+     WHERE s."pausedSince" IS NULL
        AND s."startDate" <= :today
        AND s."contractEndDate" >= :today
        AND s."finalizedAt" IS NULL

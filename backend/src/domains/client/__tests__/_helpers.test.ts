@@ -44,11 +44,12 @@ describe('getPrimarySubscription', () => {
   });
 });
 
-const baseClient = { id: 1, name: 'John Doe', pausedSince: null };
+const baseClient = { id: 1, name: 'John Doe' };
 
 const sub = (over: Record<string, unknown>) => ({
   suspendedDates: [],
   finalizedAt: null,
+  pausedSince: null,
   ...over,
 });
 
@@ -140,5 +141,76 @@ describe('withStatus', () => {
 
   it('reports ended when the client has no subscription', () => {
     expect(withStatus({ ...baseClient, subscriptions: [] }).status).toBe('ended');
+  });
+
+  // The bug that moved pausedSince off the client: a sin-fecha renewal used to pause the client
+  // record, which suppressed every subscription they had — including the plan still running and
+  // still paid for. Scoped to the subscription, the paused renewal only describes itself.
+  it('stays active when a paused sin-fecha renewal sits behind a running plan', () => {
+    const running = sub({ id: 10, startDate: '2026-05-11', contractEndDate: '2026-08-01' });
+    const sinFecha = sub({
+      id: 11,
+      startDate: null,
+      contractEndDate: null,
+      pausedSince: new Date('2026-06-05'),
+    });
+
+    const result = withStatus({ ...baseClient, subscriptions: [sinFecha, running] });
+
+    expect(result.status).toBe('active');
+    expect((result.subscriptions as { id: number }[])[0].id).toBe(10);
+  });
+
+  it('reports paused once the running plan has ended and only the sin-fecha renewal is left', () => {
+    const ended = sub({ id: 10, startDate: '2026-04-01', contractEndDate: '2026-05-01' });
+    const sinFecha = sub({
+      id: 11,
+      startDate: null,
+      contractEndDate: null,
+      pausedSince: new Date('2026-06-05'),
+    });
+
+    const result = withStatus({ ...baseClient, subscriptions: [ended, sinFecha] });
+
+    expect(result.status).toBe('paused');
+  });
+
+  it('reports paused when the running plan itself is paused mid-plan', () => {
+    const running = sub({
+      id: 10,
+      startDate: '2026-05-11',
+      contractEndDate: '2026-08-01',
+      pausedSince: new Date('2026-06-04'),
+    });
+
+    const result = withStatus({ ...baseClient, subscriptions: [running] });
+
+    expect(result.status).toBe('paused');
+  });
+
+  // The client payload keeps a pausedSince field so the detail view can still offer
+  // Pausar/Reanudar, but it is now derived from the current subscription rather than stored.
+  it('exposes the current subscription pausedSince on the client payload', () => {
+    const pausedAt = new Date('2026-06-04');
+    const running = sub({
+      id: 10,
+      startDate: '2026-05-11',
+      contractEndDate: '2026-08-01',
+      pausedSince: pausedAt,
+    });
+
+    expect(withStatus({ ...baseClient, subscriptions: [running] }).pausedSince).toEqual(pausedAt);
+  });
+
+  it('reports a null pausedSince when the current subscription is not paused', () => {
+    const running = sub({ id: 10, startDate: '2026-05-11', contractEndDate: '2026-08-01' });
+    const sinFecha = sub({
+      id: 11,
+      startDate: null,
+      contractEndDate: null,
+      pausedSince: new Date('2026-06-05'),
+    });
+
+    expect(withStatus({ ...baseClient, subscriptions: [sinFecha, running] }).pausedSince).toBeNull();
   });
 });

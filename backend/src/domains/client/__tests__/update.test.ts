@@ -1,7 +1,7 @@
 import Client from '../../../models/Client';
 import sequelize from '../../../database/sequelize';
 import { record } from '../../client-history';
-import { extendAfterPause } from '../../subscription';
+import { pause, resume } from '../../subscription';
 import { update } from '../update';
 
 jest.mock('../../../models/Client');
@@ -17,10 +17,29 @@ jest.mock('../../../utils/date', () => ({
   appToday: jest.fn(() => '2026-06-05'),
 }));
 
-const mockClient = { id: 1, name: 'John Doe', pausedSince: null };
+const mockClient = { id: 1, name: 'John Doe' };
 const actor = { userId: 9, username: 'ada' };
 const transaction = { id: 'own' };
 const callerTransaction = { id: 'caller' } as never;
+const PAUSED_AT = '2026-06-10T12:00:00Z';
+
+const runningSub = (over: Record<string, unknown> = {}) => ({
+  id: 5,
+  paid: true,
+  startDate: '2026-06-01',
+  contractEndDate: '2026-06-12',
+  duration: 10,
+  finalizedAt: null,
+  pausedSince: null,
+  ...over,
+});
+
+const clientWith = (subscriptions: object[], over: Record<string, unknown> = {}) => ({
+  id: 1,
+  subscriptions,
+  update: jest.fn().mockResolvedValue({ ...mockClient }),
+  ...over,
+});
 
 describe('update', () => {
   beforeEach(() => {
@@ -28,198 +47,115 @@ describe('update', () => {
     (sequelize.transaction as jest.Mock).mockImplementation((work) => work(transaction));
   });
 
-  it('records paused history event when pausing', async () => {
-    const pausedSince = '2026-06-10T12:00:00Z';
-    const mockInstance = {
-      id: 1,
-      pausedSince: null,
-      subscriptions: [],
-      update: jest.fn().mockResolvedValue({ ...mockClient, pausedSince }),
-    };
-    (Client.findByPk as jest.Mock).mockResolvedValue(mockInstance);
-    (record as jest.Mock).mockResolvedValue(undefined);
+  // Pause state lives on the subscription now, so the client domain only decides WHICH plan the
+  // request refers to — the pause itself belongs to the domain that owns subscriptions.
+  it('pauses the current subscription rather than the client record', async () => {
+    const instance = clientWith([runningSub()]);
+    (Client.findByPk as jest.Mock).mockResolvedValue(instance);
 
-    await update(1, { pausedSince }, actor);
+    await update(1, { pausedSince: PAUSED_AT }, actor);
 
-    expect(record).toHaveBeenCalledWith(actor, { type: 'paused', clientId: 1 }, transaction);
-  });
-
-  it('records resumed history event when resuming', async () => {
-    const mockInstance = {
-      id: 1,
-      pausedSince: new Date('2026-06-01'),
-      subscriptions: [],
-      update: jest.fn().mockResolvedValue({ ...mockClient, pausedSince: null }),
-    };
-    (Client.findByPk as jest.Mock).mockResolvedValue(mockInstance);
-    (record as jest.Mock).mockResolvedValue(undefined);
-
-    await update(1, { pausedSince: null }, actor);
-
-    expect(record).toHaveBeenCalledWith(actor, { type: 'resumed', clientId: 1 }, transaction);
-  });
-
-  it('records the acting user on the history event', async () => {
-    const mockInstance = {
-      id: 1,
-      pausedSince: null,
-      subscriptions: [],
-      update: jest.fn().mockResolvedValue({ ...mockClient, pausedSince: '2026-06-10T12:00:00Z' }),
-    };
-    (Client.findByPk as jest.Mock).mockResolvedValue(mockInstance);
-    (record as jest.Mock).mockResolvedValue(undefined);
-
-    await update(1, { pausedSince: '2026-06-10T12:00:00Z' }, actor);
-
-    expect(record).toHaveBeenCalledWith(
-      expect.objectContaining({ userId: 9, username: 'ada' }),
-      expect.anything(),
+    expect(pause).toHaveBeenCalledWith(5, actor, transaction);
+    expect(instance.update).not.toHaveBeenCalledWith(
+      expect.objectContaining({ pausedSince: expect.anything() }),
       expect.anything(),
     );
   });
 
-  it('extends the subscription when resuming', async () => {
-    const pausedSince = new Date('2026-06-03T15:00:00Z');
-    const mockSub = {
-      id: 5,
-      startDate: '2026-06-01',
-      duration: 10,
-      contractEndDate: '2026-06-12',
-    };
-    const mockInstance = {
-      id: 1,
-      pausedSince,
-      subscriptions: [mockSub],
-      update: jest.fn().mockResolvedValue({ ...mockClient, pausedSince: null }),
-    };
-    (Client.findByPk as jest.Mock).mockResolvedValue(mockInstance);
-    (record as jest.Mock).mockResolvedValue(undefined);
+  it('resumes the current subscription', async () => {
+    const instance = clientWith([runningSub({ pausedSince: new Date('2026-06-03') })]);
+    (Client.findByPk as jest.Mock).mockResolvedValue(instance);
 
     await update(1, { pausedSince: null }, actor);
 
-    expect(extendAfterPause).toHaveBeenCalledWith(5, pausedSince, transaction);
+    expect(resume).toHaveBeenCalledWith(5, actor, transaction);
   });
 
-  it('extends the paid subscription, not a newer pending unpaid renewal, when resuming', async () => {
-    const paidSub = {
-      id: 60,
-      paid: true,
-      startDate: '2026-06-01',
-      duration: 10,
-      contractEndDate: '2026-06-12',
-    };
-    const unpaidSub = {
-      id: 66,
-      paid: false,
-      startDate: null,
-      duration: 20,
-      contractEndDate: null,
-    };
-    const mockInstance = {
-      id: 1,
-      pausedSince: new Date('2026-06-03T15:00:00Z'),
-      subscriptions: [unpaidSub, paidSub],
-      update: jest.fn().mockResolvedValue({ ...mockClient, pausedSince: null }),
-    };
-    (Client.findByPk as jest.Mock).mockResolvedValue(mockInstance);
-    (record as jest.Mock).mockResolvedValue(undefined);
+  it('pauses the paid subscription, not a newer pending unpaid renewal', async () => {
+    const paidSub = runningSub({ id: 60, paid: true });
+    const unpaidSub = runningSub({ id: 66, paid: false, startDate: null, contractEndDate: null });
+    (Client.findByPk as jest.Mock).mockResolvedValue(clientWith([unpaidSub, paidSub]));
+
+    await update(1, { pausedSince: PAUSED_AT }, actor);
+
+    expect(pause).toHaveBeenCalledWith(60, actor, transaction);
+  });
+
+  it('pauses the subscription covering today, not a queued future renewal', async () => {
+    const futureSub = runningSub({ id: 8, startDate: '2026-07-01', contractEndDate: '2026-07-15' });
+    const currentSub = runningSub({ id: 5 });
+    (Client.findByPk as jest.Mock).mockResolvedValue(clientWith([futureSub, currentSub]));
+
+    await update(1, { pausedSince: PAUSED_AT }, actor);
+
+    expect(pause).toHaveBeenCalledWith(5, actor, transaction);
+  });
+
+  it('does not pause again when the current subscription is already paused', async () => {
+    (Client.findByPk as jest.Mock).mockResolvedValue(
+      clientWith([runningSub({ pausedSince: new Date('2026-06-03') })]),
+    );
+
+    await update(1, { pausedSince: PAUSED_AT }, actor);
+
+    expect(pause).not.toHaveBeenCalled();
+  });
+
+  it('does not resume a subscription that is not paused', async () => {
+    (Client.findByPk as jest.Mock).mockResolvedValue(clientWith([runningSub()]));
 
     await update(1, { pausedSince: null }, actor);
 
-    expect(extendAfterPause).toHaveBeenCalledWith(60, expect.any(Date), transaction);
-    expect(extendAfterPause).not.toHaveBeenCalledWith(66, expect.anything(), expect.anything());
+    expect(resume).not.toHaveBeenCalled();
   });
 
-  it('extends the subscription covering today, not a queued future renewal, when resuming', async () => {
-    const futureSub = {
-      id: 8,
-      startDate: '2026-07-01',
-      duration: 10,
-      contractEndDate: '2026-07-15',
-      finalizedAt: null,
-    };
-    const pausedSub = {
-      id: 5,
-      startDate: '2026-06-01',
-      duration: 10,
-      contractEndDate: '2026-06-12',
-      finalizedAt: null,
-    };
-    const mockInstance = {
-      id: 1,
-      pausedSince: new Date('2026-06-03T15:00:00Z'),
-      subscriptions: [futureSub, pausedSub],
-      update: jest.fn().mockResolvedValue({ ...mockClient, pausedSince: null }),
-    };
-    (Client.findByPk as jest.Mock).mockResolvedValue(mockInstance);
-    (record as jest.Mock).mockResolvedValue(undefined);
+  it('does nothing when the client has no subscription to pause', async () => {
+    (Client.findByPk as jest.Mock).mockResolvedValue(clientWith([]));
 
-    await update(1, { pausedSince: null }, actor);
+    await update(1, { pausedSince: PAUSED_AT }, actor);
 
-    expect(extendAfterPause).toHaveBeenCalledWith(5, expect.any(Date), transaction);
-    expect(extendAfterPause).not.toHaveBeenCalledWith(8, expect.anything(), expect.anything());
+    expect(pause).not.toHaveBeenCalled();
   });
 
-  it('does not record history when non-pause fields are updated', async () => {
-    const mockInstance = {
-      id: 1,
-      pausedSince: null,
-      subscriptions: [],
-      update: jest.fn().mockResolvedValue({ ...mockClient, name: 'Jane Doe' }),
-    };
-    (Client.findByPk as jest.Mock).mockResolvedValue(mockInstance);
+  it('does not record history itself — the subscription domain owns the pause events', async () => {
+    (Client.findByPk as jest.Mock).mockResolvedValue(clientWith([runningSub()]));
 
-    await update(1, { name: 'Jane Doe' }, actor);
+    await update(1, { pausedSince: PAUSED_AT }, actor);
 
     expect(record).not.toHaveBeenCalled();
   });
 
-  it('records the event, extends the plan and updates the client in one transaction', async () => {
-    const mockSub = { id: 5, startDate: '2026-06-01', duration: 10 };
-    const mockInstance = {
-      id: 1,
-      pausedSince: new Date('2026-06-03T15:00:00Z'),
-      subscriptions: [mockSub],
-      update: jest.fn().mockResolvedValue({ ...mockClient, pausedSince: null }),
-    };
-    (Client.findByPk as jest.Mock).mockResolvedValue(mockInstance);
+  it('updates ordinary fields without touching the subscription', async () => {
+    const instance = clientWith([runningSub()]);
+    (Client.findByPk as jest.Mock).mockResolvedValue(instance);
 
-    await update(1, { pausedSince: null }, actor);
+    await update(1, { name: 'Jane Doe' }, actor);
 
-    expect(sequelize.transaction).toHaveBeenCalledTimes(1);
-    expect(mockInstance.update).toHaveBeenCalledWith({ pausedSince: null }, { transaction });
+    expect(pause).not.toHaveBeenCalled();
+    expect(resume).not.toHaveBeenCalled();
+    expect(instance.update).toHaveBeenCalledWith({ name: 'Jane Doe' }, { transaction });
   });
 
   it("joins the caller's transaction rather than opening its own", async () => {
-    const mockInstance = {
-      id: 1,
-      pausedSince: null,
-      subscriptions: [],
-      update: jest.fn().mockResolvedValue({ ...mockClient, name: 'Jane Doe' }),
-    };
-    (Client.findByPk as jest.Mock).mockResolvedValue(mockInstance);
+    const instance = clientWith([runningSub()]);
+    (Client.findByPk as jest.Mock).mockResolvedValue(instance);
 
     await update(1, { name: 'Jane Doe' }, actor, callerTransaction);
 
     expect(sequelize.transaction).not.toHaveBeenCalled();
-    expect(mockInstance.update).toHaveBeenCalledWith(
+    expect(instance.update).toHaveBeenCalledWith(
       { name: 'Jane Doe' },
       { transaction: callerTransaction },
     );
   });
 
-  it('leaves the client unchanged when extending the resumed plan fails', async () => {
-    const mockInstance = {
-      id: 1,
-      pausedSince: new Date('2026-06-03T15:00:00Z'),
-      subscriptions: [{ id: 5, startDate: '2026-06-01', duration: 10 }],
-      update: jest.fn().mockResolvedValue({ ...mockClient, pausedSince: null }),
-    };
-    (Client.findByPk as jest.Mock).mockResolvedValue(mockInstance);
-    (extendAfterPause as jest.Mock).mockRejectedValueOnce(new Error('db error'));
+  it('leaves the client unchanged when resuming the plan fails', async () => {
+    const instance = clientWith([runningSub({ pausedSince: new Date('2026-06-03') })]);
+    (Client.findByPk as jest.Mock).mockResolvedValue(instance);
+    (resume as jest.Mock).mockRejectedValueOnce(new Error('db error'));
 
     await expect(update(1, { pausedSince: null }, actor)).rejects.toThrow('db error');
-    expect(mockInstance.update).not.toHaveBeenCalled();
+    expect(instance.update).not.toHaveBeenCalled();
   });
 
   it('returns null when client not found', async () => {

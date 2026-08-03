@@ -1,5 +1,4 @@
 import { Transaction } from 'sequelize';
-import Client from '../../models/Client';
 import Subscription from '../../models/Subscription';
 import { withTransaction } from '../../database/with-transaction';
 import { UpdateSubscriptionDto } from '../../schemas/subscription.schema';
@@ -43,11 +42,10 @@ export const update = async (
       base.contractEndDate = newContractEndDate;
       base.suspendedDates = cleanedSuspendedDates;
 
-      // assigning a start date activates a sin-fecha paused client
+      // assigning a start date activates this sin-fecha renewal — and only this one
       if (startDate) {
         await finalizeOverlappingSubscriptions(clientId, startDate, subscription.id, t);
-        const client = await Client.findByPk(clientId, { transaction: t });
-        if (client) await client.update({ pausedSince: null }, { transaction: t });
+        base.pausedSince = null;
       }
 
       const updated = await subscription.update(base, { transaction: t });

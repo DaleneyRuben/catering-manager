@@ -1,5 +1,4 @@
 import { Transaction } from 'sequelize';
-import Client from '../../models/Client';
 import Plan from '../../models/Plan';
 import Subscription from '../../models/Subscription';
 import { withTransaction } from '../../database/with-transaction';
@@ -24,10 +23,12 @@ export const markPaid = async (clientId: number, actor: Actor, transaction?: Tra
       await finalizeOverlappingSubscriptions(clientId, subscription.startDate, subscription.id, t);
     }
     if (subscription.renewalType) {
-      // Read inside the transaction: applyRenewalPauseState branches on client.pausedSince, so a
-      // pause written earlier in the same workflow has to be visible or the guard restamps it.
-      const client = await Client.findByPk(clientId, { transaction: t });
-      await applyRenewalPauseState(client, subscription.renewalType, subscription.startDate, t);
+      await applyRenewalPauseState(
+        subscription,
+        subscription.renewalType,
+        subscription.startDate,
+        t,
+      );
     }
 
     const eventType = historyEventTypeFor(subscription.renewalType);

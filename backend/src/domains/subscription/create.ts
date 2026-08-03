@@ -86,7 +86,7 @@ export const create = async (
 
   if (paid) {
     await applyRenewalPauseState(
-      client,
+      subscription,
       data.renewalType ?? null,
       data.startDate ?? null,
       transaction,

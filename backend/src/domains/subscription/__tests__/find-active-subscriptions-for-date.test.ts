@@ -48,6 +48,8 @@ describe('findActiveSubscriptionsForDate', () => {
     expect(rows.map((r) => (r.client as { name: string }).name)).toEqual(['Active']);
   });
 
+  // The pause filter sits on the subscription, not on the client join: a paused sin-fecha
+  // renewal must not take the client's running plan off the route with it.
   it('queries with the date range, finalizedAt, paid, and pausedSince conditions', async () => {
     (Subscription.findAll as jest.Mock).mockResolvedValue([]);
 
@@ -58,8 +60,9 @@ describe('findActiveSubscriptionsForDate', () => {
     expect(call.where?.contractEndDate).toBeDefined();
     expect(call.where?.finalizedAt).toEqual({ [Symbol.for('is')]: null });
     expect(call.where?.paid).toBe(true);
+    expect(call.where?.pausedSince).toEqual({ [Symbol.for('is')]: null });
     const clientInclude = call.include?.find((i: { model: typeof Client }) => i.model === Client);
-    expect(clientInclude?.where).toMatchObject({ pausedSince: null });
+    expect(clientInclude?.where).toBeUndefined();
   });
 
   it('includes both Client and Plan models', async () => {

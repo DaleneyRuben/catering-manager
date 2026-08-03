@@ -5,46 +5,59 @@ import Subscription from '../../models/Subscription';
 import { appToday } from '../../utils/date';
 
 // Shared by findActiveSubscriptionsForDate and findSuspendedSubscriptionsForDate: subscriptions
-// whose date range covers `date`, for a non-paused client, excluding finalized ones. Suspension
-// on `date` is not filtered here — callers split the result by suspendedDates themselves.
+// whose date range covers `date`, unpaused and not finalized. Suspension on `date` is not
+// filtered here — callers split the result by suspendedDates themselves.
+//
+// The pause filter is on the subscription, not on the client join: a client may hold a paused
+// "sin fecha" renewal alongside the plan they are still being delivered, and only the renewal is
+// paused.
 export const findContractActiveSubscriptions = async (date: string): Promise<Subscription[]> =>
   Subscription.findAll({
     where: {
       startDate: { [Op.lte]: date },
       contractEndDate: { [Op.gte]: date },
       finalizedAt: { [Op.is]: null },
+      pausedSince: { [Op.is]: null },
       paid: true,
     },
-    include: [{ model: Client, where: { pausedSince: null } }, { model: Plan }],
+    include: [{ model: Client }, { model: Plan }],
     order: [['createdAt', 'ASC']],
   });
 
 type RenewalType = 'renewal' | 'reactivation' | null;
 
-type PausableClient = {
-  pausedSince: Date | string | null;
+type PausableSubscription = {
+  clientId: number;
   update: (data: object, options?: { transaction: Transaction }) => Promise<unknown>;
 };
 
-// A renewal moves the client's pause state, and the rule is the same whether the subscription is
-// paid at creation or marked paid later — so both create and markPaid call this rather than
-// restating it. They diverged once already: markPaid was missing the already-paused guard below.
+// A renewal decides the pause state of the plan it creates, and the rule is the same whether the
+// subscription is paid at creation or marked paid later — so both create and markPaid call this
+// rather than restating it.
 export const applyRenewalPauseState = async (
-  client: PausableClient | null,
+  subscription: PausableSubscription | null,
   renewalType: RenewalType,
   startDate: string | null,
   transaction?: Transaction,
 ) => {
-  if (!client) return;
+  if (!subscription) return;
   const options = transaction ? [{ transaction }] : [];
 
   if (renewalType === 'reactivation') {
-    await client.update({ pausedSince: null }, ...options);
-  } else if (renewalType === 'renewal' && !startDate && !client.pausedSince) {
-    // sin fecha renewal: pause the client until a start date is manually assigned.
-    // Skipped when already paused: resume counts the days still owed from pausedSince, so
-    // restamping it to today would silently shorten a mid-plan pause.
-    await client.update({ pausedSince: appToday() }, ...options);
+    // Returning after a break clears whatever pause ended the client's previous plan. The row
+    // being created here is already unpaused, so it needs no exclusion from the sweep.
+    await Subscription.update(
+      { pausedSince: null },
+      {
+        where: { clientId: subscription.clientId },
+        ...(transaction ? { transaction } : {}),
+      },
+    );
+  } else if (renewalType === 'renewal' && !startDate) {
+    // sin fecha renewal: this plan waits, paused, until a start date is assigned. No guard for an
+    // already-paused client is needed — a brand-new row cannot collide with a mid-plan pause held
+    // on a different one.
+    await subscription.update({ pausedSince: appToday() }, ...options);
   }
 };
 
