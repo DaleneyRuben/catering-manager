@@ -3,7 +3,7 @@ import { Card } from '@ui/Card';
 import { Skeleton } from '@ui/Skeleton';
 import { useClientHistory } from '@/features/clients/hooks/useClientHistory';
 import { formatDate } from '@/utils/format';
-import { EVENT_LABELS } from '@/features/clients/constants/historyEvents';
+import { resolveEventChange, resolveEventLabel } from '@/features/clients/utils/historyEvent';
 import { ClientHistorySummary } from '@/features/clients/components/detail/ClientHistorySummary';
 import { DeliveryCalendarCard } from '@/features/clients/components/detail/DeliveryCalendarCard';
 import { buildDeliveryCalendar } from '@/features/clients/utils/deliveryCalendar';
@@ -122,6 +122,9 @@ export function ClientHistoryTab({
                   entry.eventType === 'reactivated') &&
                 planName;
 
+              // what actually moved on this row — a price, a plan, or a contract's dates
+              const changeLine = resolveEventChange(entry);
+
               const suspendedDates = Array.isArray(meta?.dates) ? (meta.dates as string[]) : null;
               // a deleted renewal keeps its contract on record, muted: it never delivered
               const deletedRange =
@@ -150,7 +153,7 @@ export function ClientHistoryTab({
                     {formatEventDateTime(entry.occurredAt)}
                   </p>
                   <p className="text-[14px] font-semibold text-ink mt-[3px]">
-                    {EVENT_LABELS[entry.eventType]}
+                    {resolveEventLabel(entry)}
                   </p>
                   {entry.username && entry.eventType !== 'renewal_deleted' && (
                     <p className="text-[12px] text-faint mt-[2px]">por {entry.username}</p>
@@ -160,12 +163,20 @@ export function ClientHistoryTab({
                       <span className="px-[9px] py-[3px] rounded-[6px] text-[11px] font-mono bg-olive-800 text-olive-50">
                         {planName}
                       </span>
-                      {planPrice !== null && (
-                        <span className="font-mono text-[11px] text-faint">
-                          {(planPrice - discount).toLocaleString('es-BO')}/mes
-                        </span>
+                      {/* a row that moved something says what moved; the rest state the cost */}
+                      {changeLine ? (
+                        <span className="font-mono text-[11px] text-faint">{changeLine}</span>
+                      ) : (
+                        planPrice !== null && (
+                          <span className="font-mono text-[11px] text-faint">
+                            {(planPrice - discount).toLocaleString('es-BO')}/mes
+                          </span>
+                        )
                       )}
                     </div>
+                  )}
+                  {!showPlanDetails && changeLine && (
+                    <p className="font-mono text-[11px] text-faint mt-[7px]">{changeLine}</p>
                   )}
                   {entry.eventType === 'renewal_deleted' && planName && (
                     <div className="flex items-center gap-[9px] mt-[7px]">
