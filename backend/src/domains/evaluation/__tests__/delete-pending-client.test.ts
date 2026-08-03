@@ -8,6 +8,10 @@ jest.mock('../../../models/Appointment');
 jest.mock('../../../models/Subscription');
 jest.mock('../../client');
 jest.mock('../../subscription');
+jest.mock('../../../database/sequelize', () => ({
+  __esModule: true,
+  default: { transaction: jest.fn() },
+}));
 
 const actor = { userId: 9, username: 'ada' };
 

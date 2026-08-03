@@ -6,6 +6,10 @@ import { findActiveClientsWithPlansForDate } from '../find-active-clients-with-p
 jest.mock('../../../models/Client');
 jest.mock('../../../models/Plan');
 jest.mock('../../../models/Subscription');
+jest.mock('../../../database/sequelize', () => ({
+  __esModule: true,
+  default: { transaction: jest.fn() },
+}));
 
 const makeClient = (name: string) => ({ name });
 const makePlan = (meals: string[] = ['breakfast', 'lunch', 'dinner']) => ({ meals });

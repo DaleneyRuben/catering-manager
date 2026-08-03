@@ -6,6 +6,10 @@ import { discardPendingRenewal } from '../discard-pending-renewal';
 jest.mock('../../../models/Appointment');
 jest.mock('../../../models/Subscription');
 jest.mock('../../subscription');
+jest.mock('../../../database/sequelize', () => ({
+  __esModule: true,
+  default: { transaction: jest.fn() },
+}));
 
 describe('discardPendingRenewal', () => {
   beforeEach(() => jest.resetAllMocks());
