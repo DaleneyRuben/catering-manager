@@ -161,6 +161,10 @@ its work becomes fiction.
       the day the table was created, and the constraint was verified live in both dev and
       production before a line was changed. So the manual unlink was doing by hand what Postgres
       was already doing underneath it — the item was a deletion, not a migration.
+      (The rule has since changed: `20260803120000-cascade-appointment-on-subscription-delete.js`
+      moved the constraint to `ON DELETE CASCADE`, so a resolved cita is now deleted with its
+      subscription rather than unlinked from it. What this item settled — that the foreign key owns
+      the behaviour, not application code — is unchanged.)
       Worth naming why it was ever load-bearing: `subscriptions` was briefly paranoid
       (`20260726000000-add-deleted-at` → `20260728000000-remove-deleted-at`), and while it was,
       `destroy()` was an `UPDATE` that no `ON DELETE` rule can fire. The hand-written clear was
