@@ -98,6 +98,29 @@ its work becomes fiction.
       `login` had the `User` instance in hand and now re-reads it by id inside `recordLogin`, so a
       successful login costs one extra `findByPk`. Accepted — the alternative is passing a live
       Sequelize instance across a domain boundary, which is what item 7 wants less of, not more.
+- [x] **#131, #132, #134, #135** — item 6.5: every write function takes an optional `transaction`.
+      Ten workflows across four PRs, behind the `withTransaction(transaction, work)` helper added
+      in #131, which joins a caller's transaction or opens its own. The two this item named were
+      both where it said they were. **The finding worth keeping is that threading the writes was
+      the smaller half.** Four functions had a _read_ outside the transaction that decided what
+      the writes would do, so the transaction was honest about atomicity and still wrong about the
+      outcome: `client/set-delivery-group` (#132), `subscription/mark-paid` and
+      `subscription/delete-upcoming-subscription` (#134), `evaluation/deletePendingClient` and
+      `evaluation/discardPendingRenewal` (#135). The `mark-paid` one is the sharpest — it reads
+      `client.pausedSince` to decide whether a sin-fecha renewal may stamp a pause date, which is
+      the #115 guard; read outside the transaction it misses a pause written earlier in the same
+      workflow and restamps exactly the date it exists to protect. Two consequences accepted: the
+      two `evaluation` functions now open a transaction even on their no-op path, because the read
+      that picks the rows belongs inside it; and `auth/login` verifies the password _outside_ the
+      transaction, since `bcrypt.compare` is slow by design and holding a pooled connection across
+      it buys no atomicity. One thing found and not fixed — `delete-upcoming-subscription` writes
+      `appointments`, which `evaluation` owns — is now item 6.7.
+- [x] **#133** — the weekend-bypass flag, split out of 6.5 rather than carried inside it. The
+      start-date weekday rule ignored `BYPASS_WEEKEND` at four call sites; all four now route
+      through `checkIsWeekend`, and the frontend's three copies of the rule collapsed into
+      `frontend/src/features/clients/utils/startDate.ts`. Noted while in there and left alone:
+      `frontend/.env` sets `BYPASS_WEEKEND`, but the frontend reads `VITE_BYPASS_WEEKEND` — Vite
+      only exposes `VITE_`-prefixed vars, so the frontend half of the flag is inert. Dev-env only.
 
 ---
 
