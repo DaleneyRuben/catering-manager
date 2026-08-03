@@ -154,6 +154,21 @@ its work becomes fiction.
       had zero paused clients and no `paused`/`resumed` event ever recorded, so the backfill was
       a no-op there by measurement, not by assumption.
 
+- [x] **item 6.7** — `evaluation` is the only writer of `appointments`. The write in
+      `subscription/delete-upcoming-subscription.ts` was deleted outright, with no migration and no
+      wrapper: **the foreign key this item proposed adding already existed.**
+      `20260724190000-create-appointments.js` declared `subscriptionId` as `ON DELETE SET NULL` from
+      the day the table was created, and the constraint was verified live in both dev and
+      production before a line was changed. So the manual unlink was doing by hand what Postgres
+      was already doing underneath it — the item was a deletion, not a migration.
+      Worth naming why it was ever load-bearing: `subscriptions` was briefly paranoid
+      (`20260726000000-add-deleted-at` → `20260728000000-remove-deleted-at`), and while it was,
+      `destroy()` was an `UPDATE` that no `ON DELETE` rule can fire. The hand-written clear was
+      correct for that window and outlived it. Nothing else in the codebase touched `appointments`
+      from outside `evaluation`, so this was the **last cross-domain write in the codebase**. What
+      is left below is 6.6, which is a history-event decision rather than an ownership violation,
+      and the modelling debt.
+
 ---
 
 ## 6. Write ownership 🔴
@@ -172,46 +187,6 @@ Give the edit case its own event type, and emit `plan_changed` (debt D3) at the 
 both are decisions about what a plan-change event should carry. Changes what lands in
 `client_history`, so it needs a label in the frontend timeline; rows already written keep the
 old type.
-
-### 6.7 `evaluation` owns `appointments` — the renewal-deletion write, blocked on a cycle
-
-Found while threading transactions in 6.5, and flagged in #134 rather than fixed there. **One
-write, in `subscription`:**
-
-```
-subscription/delete-upcoming-subscription.ts:53-54   (find the appointment that resolved into
-                                                      this renewal, clear its subscriptionId)
-```
-
-Deleting a renewal registered ahead of time has to clear the link on the appointment that
-resolved into it, or the appointment points at a destroyed row. Only the link is cleared — the
-date stays as it was, so a past appointment is pruned on the next queue read rather than pushed
-back onto the Nutricionista's list. The rule is right; it is written in the wrong domain.
-
-**Why the obvious fix fails.** Both shapes of it are rejected by lint. Confirmed on a branch, not
-assumed. Adding `evaluation.unlinkSubscription()` and calling it closes a loop — `evaluation`
-already imports `subscription` in four files, because resolving a cita creates a subscription:
-
-```
-subscription/delete-upcoming-subscription.ts
-  9:1  error  Dependency cycle via ./convert-appointment:11=>../subscription:7  import/no-cycle
-```
-
-Reaching past the index at that one function dodges the cycle and lands on the other rule —
-`no-restricted-imports`: "Import another domain through its index only, never a function file
-directly."
-
-**Direction: the foreign key, not a wrapper.** `appointments.subscriptionId` declared
-`ON DELETE SET NULL` clears the link whenever a subscription is deleted, so neither domain writes
-the other's table and the violation dissolves rather than being fronted by an API. Same shape as
-D1 closing 6.3 — move the model so the cross-domain write stops existing, instead of wrapping it.
-A migration, so it wants its own scheduling. It changes nothing for `deletePendingClient` or
-`discardPendingRenewal`: both destroy the appointment row outright, so `SET NULL` never fires for
-them.
-
-Composing it in `subscription.controller.ts` is possible today and was rejected: it lifts the rule
-out of every domain into a route handler, where the next caller of `deleteUpcomingSubscription`
-would not inherit it.
 
 ---
 
