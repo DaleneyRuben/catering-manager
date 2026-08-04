@@ -252,6 +252,14 @@ describe('cambio de plan', () => {
     expect(priceInput()).toHaveValue(140);
   });
 
+  // a surcharge is as real as a discount — read mode has to show it, not a dash
+  it('shows a stored surcharge in read mode', () => {
+    render(<ActivePlanCard sub={{ ...running, discount: -710 }} onUpdateTerms={onUpdateTerms} />);
+
+    expect(cell('Recargo')).toBe('710');
+    expect(screen.queryByText('Descuento')).not.toBeInTheDocument();
+  });
+
   it('does not save while the duration is invalid', () => {
     openEdit();
     fireEvent.change(durationInput(), { target: { value: '0' } });
