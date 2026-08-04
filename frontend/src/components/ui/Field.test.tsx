@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react';
-import { Field, inputCls } from '@ui/Field';
+import { Field, inputCls, selectCls } from '@ui/Field';
 
 describe('Field', () => {
   it('renders the label and children', () => {
@@ -63,5 +63,16 @@ describe('inputCls', () => {
 
   it('shows the warn border when hasError is true', () => {
     expect(inputCls(true)).toContain('border-warn');
+  });
+});
+
+describe('selectCls', () => {
+  // base.css paints the design's own chevron 13px from the right edge; the value has to clear it
+  it('leaves room on the right for the chevron', () => {
+    expect(selectCls()).toContain('pr-9');
+  });
+
+  it('shows the warn border when hasError is true', () => {
+    expect(selectCls(true)).toContain('border-warn');
   });
 });
