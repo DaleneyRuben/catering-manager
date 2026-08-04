@@ -42,7 +42,7 @@ export function ClientDetailPage() {
     deleteClient,
     updateSuspensions,
     updateContract,
-    updateBilling,
+    updateSubscriptionTerms,
     updateInstructions,
     renew,
     deleteRenewal,
@@ -134,7 +134,7 @@ export function ClientDetailPage() {
           sub={sub}
           remaining={remaining}
           onUpdateContract={(draft) => updateContract(sub!.id, draft)}
-          onUpdateBilling={(discount) => updateBilling(sub!.id, discount)}
+          onUpdateTerms={(terms) => updateSubscriptionTerms(sub!.id, terms)}
           onUpdateInstructions={(si) => updateInstructions(sub!.id, si)}
         />
       )}

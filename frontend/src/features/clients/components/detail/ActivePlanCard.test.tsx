@@ -21,12 +21,12 @@ const sub: Subscription = {
   },
 };
 
-const onUpdateBilling = jest.fn().mockResolvedValue(undefined);
+const onUpdateTerms = jest.fn().mockResolvedValue(undefined);
 
 beforeEach(() => jest.clearAllMocks());
 
 it('renders plan name and total', () => {
-  render(<ActivePlanCard sub={sub} onUpdateBilling={onUpdateBilling} />);
+  render(<ActivePlanCard sub={sub} onUpdateTerms={onUpdateTerms} />);
   expect(screen.getByText('Completo')).toBeInTheDocument();
   expect(screen.getAllByText('140')).toHaveLength(2); // header + grid row (150 - 10)
 });
@@ -37,54 +37,54 @@ it('formats prices over 1000 with a dot thousands separator', () => {
     discount: 0,
     plan: { ...sub.plan, price: 1390 },
   };
-  render(<ActivePlanCard sub={bigSub} onUpdateBilling={onUpdateBilling} />);
+  render(<ActivePlanCard sub={bigSub} onUpdateTerms={onUpdateTerms} />);
   expect(screen.getAllByText('1.390')).toHaveLength(3);
 });
 
 it('renders meal pills', () => {
-  render(<ActivePlanCard sub={sub} onUpdateBilling={onUpdateBilling} />);
+  render(<ActivePlanCard sub={sub} onUpdateTerms={onUpdateTerms} />);
   expect(screen.getByText('Desayuno')).toBeInTheDocument();
   expect(screen.getByText('Almuerzo')).toBeInTheDocument();
 });
 
 it('shows price/discount/total in read mode', () => {
-  render(<ActivePlanCard sub={sub} onUpdateBilling={onUpdateBilling} />);
+  render(<ActivePlanCard sub={sub} onUpdateTerms={onUpdateTerms} />);
   expect(screen.getByText('150')).toBeInTheDocument();
   expect(screen.getByText('10')).toBeInTheDocument();
 });
 
 it('opens edit form when pencil is clicked', () => {
-  render(<ActivePlanCard sub={sub} onUpdateBilling={onUpdateBilling} />);
+  render(<ActivePlanCard sub={sub} onUpdateTerms={onUpdateTerms} />);
   fireEvent.click(screen.getByRole('button', { name: /editar/i }));
   expect(screen.getByDisplayValue('140')).toBeInTheDocument();
 });
 
-it('calls onUpdateBilling with derived discount on save', async () => {
-  render(<ActivePlanCard sub={sub} onUpdateBilling={onUpdateBilling} />);
+it('calls onUpdateTerms with the derived discount on save', async () => {
+  render(<ActivePlanCard sub={sub} onUpdateTerms={onUpdateTerms} />);
   fireEvent.click(screen.getByRole('button', { name: /editar/i }));
   const input = screen.getByDisplayValue('140');
   fireEvent.change(input, { target: { value: '120' } });
   fireEvent.click(screen.getByRole('button', { name: /guardar/i }));
-  await waitFor(() => expect(onUpdateBilling).toHaveBeenCalledWith(30)); // 150 - 120 = 30
+  await waitFor(() => expect(onUpdateTerms).toHaveBeenCalledWith({ discount: 30 })); // 150 - 120 = 30
 });
 
 it('cancels edit without saving', () => {
-  render(<ActivePlanCard sub={sub} onUpdateBilling={onUpdateBilling} />);
+  render(<ActivePlanCard sub={sub} onUpdateTerms={onUpdateTerms} />);
   fireEvent.click(screen.getByRole('button', { name: /editar/i }));
   fireEvent.click(screen.getByRole('button', { name: /cancelar/i }));
-  expect(onUpdateBilling).not.toHaveBeenCalled();
+  expect(onUpdateTerms).not.toHaveBeenCalled();
   expect(screen.queryByRole('button', { name: /guardar/i })).not.toBeInTheDocument();
 });
 
 it('renders the salad toggle with an icon tile when the plan includes salad', () => {
   const subWithSalad: Subscription = { ...sub, plan: { ...sub.plan, meals: ['salad'] } };
-  render(<ActivePlanCard sub={subWithSalad} onUpdateBilling={onUpdateBilling} />);
+  render(<ActivePlanCard sub={subWithSalad} onUpdateTerms={onUpdateTerms} />);
   const toggleLabel = screen.getByLabelText('Ensalada grande').closest('label')!;
   expect(toggleLabel.querySelector('svg')).toBeInTheDocument();
 });
 
 it('right-aligns the cancelar/guardar buttons', () => {
-  render(<ActivePlanCard sub={sub} onUpdateBilling={onUpdateBilling} />);
+  render(<ActivePlanCard sub={sub} onUpdateTerms={onUpdateTerms} />);
   fireEvent.click(screen.getByRole('button', { name: /editar/i }));
   const cancelBtn = screen.getByRole('button', { name: /cancelar/i });
   expect(cancelBtn.parentElement).toHaveClass('justify-end');

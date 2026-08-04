@@ -2,7 +2,12 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import api from '@/services/api';
 import { toVoid } from '@/utils/toVoid';
-import type { Client, RenewalPayload, Subscription } from '@/features/clients/types';
+import type {
+  Client,
+  RenewalPayload,
+  Subscription,
+  SubscriptionTermsDraft,
+} from '@/features/clients/types';
 import type { ClientUpdateDraft } from '@/features/clients/hooks/useClientList';
 
 export function useClient(id: string | number) {
@@ -125,12 +130,22 @@ export function useClient(id: string | number) {
     },
   });
 
-  const updateBillingMutation = useMutation({
-    mutationFn: ({ subscriptionId, discount }: { subscriptionId: string; discount: number }) =>
-      api.patch(`/clients/${id}/subscriptions/${subscriptionId}`, { discount }),
-    onSuccess: () => {
+  const updateSubscriptionTermsMutation = useMutation({
+    mutationFn: ({
+      subscriptionId,
+      discount,
+      planId,
+      duration,
+    }: { subscriptionId: string } & SubscriptionTermsDraft) =>
+      api.patch(`/clients/${id}/subscriptions/${subscriptionId}`, {
+        discount,
+        ...(planId !== undefined && { planId }),
+        ...(duration !== undefined && { duration }),
+      }),
+    onSuccess: (_data, variables) => {
       invalidateClient();
-      toast.success('Precio actualizado');
+      // the card omits an unchanged plan, so a planId in the payload is itself the plan change
+      toast.success(variables.planId !== undefined ? 'Plan actualizado' : 'Precio actualizado');
     },
   });
 
@@ -165,8 +180,11 @@ export function useClient(id: string | number) {
     ): Promise<void> => toVoid(updateContractMutation.mutateAsync({ subscriptionId, ...draft })),
     updateSuspensions: (subscriptionId: string, suspendedDates: string[]): Promise<void> =>
       toVoid(updateSuspensionsMutation.mutateAsync({ suspendedDates, subscriptionId })),
-    updateBilling: (subscriptionId: string, discount: number): Promise<void> =>
-      toVoid(updateBillingMutation.mutateAsync({ subscriptionId, discount })),
+    updateSubscriptionTerms: (
+      subscriptionId: string,
+      terms: SubscriptionTermsDraft,
+    ): Promise<void> =>
+      toVoid(updateSubscriptionTermsMutation.mutateAsync({ subscriptionId, ...terms })),
     updateInstructions: (
       subscriptionId: string,
       specialInstructions: Record<string, string>,

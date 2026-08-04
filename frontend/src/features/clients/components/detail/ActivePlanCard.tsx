@@ -6,15 +6,15 @@ import { IconButton } from '@ui/IconButton';
 import { Label } from '@ui/Label';
 import { inputCls } from '@ui/Field';
 import { MEAL_LABELS } from '@/constants/meals';
-import type { Subscription } from '@/features/clients/types';
+import type { Subscription, SubscriptionTermsDraft } from '@/features/clients/types';
 
 interface Props {
   sub: Subscription;
-  onUpdateBilling: (discount: number) => Promise<void>;
+  onUpdateTerms: (terms: SubscriptionTermsDraft) => Promise<void>;
   onUpdateInstructions: (specialInstructions: Record<string, string>) => Promise<void>;
 }
 
-export function ActivePlanCard({ sub, onUpdateBilling, onUpdateInstructions }: Props) {
+export function ActivePlanCard({ sub, onUpdateTerms, onUpdateInstructions }: Props) {
   const planPrice = Number(sub.plan.price);
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -27,7 +27,7 @@ export function ActivePlanCard({ sub, onUpdateBilling, onUpdateInstructions }: P
     if (Number.isNaN(enteredPrice)) return;
     setSaving(true);
     try {
-      await onUpdateBilling(derivedDiscount);
+      await onUpdateTerms({ discount: derivedDiscount });
       setEditing(false);
     } finally {
       setSaving(false);
