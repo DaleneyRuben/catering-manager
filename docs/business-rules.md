@@ -30,7 +30,7 @@ Each client has:
 - Contract end date (auto-calculated — see Plan Duration)
 - Start date
 - Assigned plan
-- Discount (negotiated per client — independent of the plan's base price)
+- Discount (negotiated per client — independent of the plan's base price; may be negative after a plan change, see Change of plan)
 - Total (plan price − discount; plan price is read from the assigned plan, not copied to the subscription)
 - Delivery group (`groupToken` — optional UUID shared with other clients at the same address)
 
@@ -294,8 +294,18 @@ duration alongside the price, and sends whichever of the three actually moved in
 remaining delivery days live, and — when the plan differs from the stored one — states that the
 change generates no charge and no refund.
 
-The discount survives a plan change: it is negotiated per client, so switching plan re-bases the
-total against the new plan's price rather than re-opening the discount.
+**The total the client pays is frozen while the plan is being changed**, which is what "no money
+changes hands" means in the data: the price field is not editable in that state, and the
+**discount absorbs the difference** against the new plan's price. A client paying 1.350 who moves
+to a plan listing 3.660 keeps paying 1.350 with a discount of 2.310. The admin then shortens the
+duration so that 1.350 covers fewer days of the pricier plan.
+
+Moving to a plan that lists **below** what the client already paid inverts the discount: paying
+1.350 on a plan listing 800 stores a discount of **−550**. `Subscription.discount` is a plain
+`INTEGER` with no lower bound, and `updateSubscriptionSchema` allows a negative value for exactly
+this case — `createSubscriptionSchema` does not, since nothing at creation time can produce one.
+The card labels a negative discount **Recargo** and shows it unsigned, because "Descuento: −550"
+describes the opposite of what happened.
 
 ### Pause / Resume
 

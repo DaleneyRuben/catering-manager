@@ -193,7 +193,9 @@ implementation has one vocabulary to start from.
   longer period. The system does not derive that duration; the admin enters it.
   Recorded as `terms_changed` (the plan moved) plus `dates_changed` (the duration moved with it).
   The control is the plan tab's "Plan y precio" card; it sends plan, duration and discount in one
-  PATCH to `subscription/update.ts`, and only the fields that actually moved.
+  PATCH to `subscription/update.ts`, and only the fields that actually moved. The paid total is
+  frozen and the **discount absorbs the difference** — negative (a _recargo_) when the new plan
+  lists below what the client already paid.
 - **Finalize-and-recreate** — _the retired workaround_, not a concept to preserve. Before the plan
   change control existed, admins ended the plan and created a second one. It recorded a client who
   left and came back (`plan_finalized` + `plan_assigned`) instead of one who changed their mind,
