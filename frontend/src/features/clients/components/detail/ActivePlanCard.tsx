@@ -268,10 +268,10 @@ export function ActivePlanCard({ sub, onUpdateTerms, onUpdateInstructions }: Pro
           </div>
           <div>
             <Label variant="field" className="mb-1">
-              Descuento
+              {sub.discount < 0 ? 'Recargo' : 'Descuento'}
             </Label>
             <p className="font-mono text-[16px] font-semibold text-warn">
-              {sub.discount > 0 ? sub.discount.toLocaleString('es-BO') : '—'}
+              {sub.discount !== 0 ? Math.abs(sub.discount).toLocaleString('es-BO') : '—'}
             </p>
           </div>
           <div>

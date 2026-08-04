@@ -36,12 +36,15 @@ export function useRenewalForm({
   const [paid, setPaid] = useState<boolean | undefined>(undefined);
 
   const newPlan = plans.find((p) => p.id === newPlanId);
+  // A negative discount is a surcharge left by a cambio de plan on the running contract. It does
+  // not carry into the next one — a renewal starts from the plan's own price.
+  const carriedDiscount = Math.max(0, sub?.discount ?? 0);
 
   // When plan changes, reset precio to (plan.price - previous discount) for same plan, or plan.price for a new plan
   useEffect(() => {
     if (!newPlan) return;
     const defaultPrecio =
-      newPlan.id === sub?.planId ? newPlan.price - (sub?.discount ?? 0) : newPlan.price;
+      newPlan.id === sub?.planId ? newPlan.price - carriedDiscount : newPlan.price;
     setPrecioStr(String(defaultPrecio));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [newPlanId]);
@@ -49,7 +52,7 @@ export function useRenewalForm({
   // Set initial precio on first render once plans load
   useEffect(() => {
     if (plans.length > 0 && precioStr === '' && newPlan) {
-      setPrecioStr(String(newPlan.price - (sub?.discount ?? 0)));
+      setPrecioStr(String(newPlan.price - carriedDiscount));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [plans.length]);
