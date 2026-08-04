@@ -182,7 +182,7 @@ implementation has one vocabulary to start from.
   today — the primary entry path, since delivery is paid daily and is the highest-frequency
   record in the system.
 
-## Plan change (cambio de plan) — designed, not yet built
+## Plan change (cambio de plan)
 
 - **Plan change** — replacing the assigned plan on a client's **running** subscription, typically
   about a week in, once they have tried the food. One subscription throughout: nothing is
@@ -192,14 +192,14 @@ implementation has one vocabulary to start from.
   the admin sets a new duration so the money already paid covers the new plan over a shorter or
   longer period. The system does not derive that duration; the admin enters it.
   Recorded as `terms_changed` (the plan moved) plus `dates_changed` (the duration moved with it).
-  The backend already accepts this — `subscription/update.ts` writes `terms_changed` for a new
-  `planId`. Only the UI control is missing.
-- **Finalize-and-recreate** — _the workaround to retire_, not a concept to preserve. With no plan
-  change control, admins today end the plan and create a second one. It records a client who left
-  and came back (`plan_finalized` + `plan_assigned`) instead of one who changed their mind, and it
-  leaves a second subscription that the dashboard and each plan's client count both count. Once
-  Finanzas exists it would also double-count the client's payment, which is why the plan change
-  control must ship **before** it.
+  The control is the plan tab's "Plan y precio" card; it sends plan, duration and discount in one
+  PATCH to `subscription/update.ts`, and only the fields that actually moved.
+- **Finalize-and-recreate** — _the retired workaround_, not a concept to preserve. Before the plan
+  change control existed, admins ended the plan and created a second one. It recorded a client who
+  left and came back (`plan_finalized` + `plan_assigned`) instead of one who changed their mind,
+  and it left a second subscription that the dashboard and each plan's client count both counted.
+  It would also have double-counted the client's payment in Finanzas, which is why the plan change
+  control shipped **before** it.
 
 ## Existing core terms (referenced by production)
 
