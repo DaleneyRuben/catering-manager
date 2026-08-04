@@ -143,6 +143,16 @@ describe('useRenewalForm', () => {
       act(() => result.current.setPrecioStr('1500'));
       expect(result.current.discount).toBe(0);
     });
+
+    // a surcharge belongs to the plan change that produced it, not to the next contract — and
+    // createSubscriptionSchema would reject it anyway
+    it('starts a renewal at the plan price when the current subscription carries a surcharge', () => {
+      const surcharged = { ...sub, discount: -710 };
+      const { result } = renderHook(() => useRenewalForm(makeOptions({ sub: surcharged })));
+
+      expect(result.current.precioStr).toBe('1200');
+      expect(result.current.discount).toBe(0);
+    });
   });
 
   describe('confirmLabel', () => {
