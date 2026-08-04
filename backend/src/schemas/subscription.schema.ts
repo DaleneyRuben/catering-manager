@@ -35,7 +35,9 @@ export const updateSubscriptionSchema = z.object({
   duration: z.number().int().min(1).optional(),
   contractEndDate: dateField.optional(),
   suspendedDates: z.array(dateField).optional(),
-  discount: z.number().int().min(0).optional(),
+  // negative on a cambio de plan: the paid total is frozen, so moving to a plan that lists below
+  // it turns the difference into a surcharge. Creation can never produce one.
+  discount: z.number().int().optional(),
   specialInstructions: z.record(z.string(), z.string()).optional(),
 });
 

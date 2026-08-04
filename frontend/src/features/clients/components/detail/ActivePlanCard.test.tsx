@@ -114,6 +114,7 @@ describe('cambio de plan', () => {
   const planSelect = () => screen.getByLabelText('Plan');
   const durationInput = () => screen.getByLabelText('Duración');
   const priceInput = () => screen.getByLabelText(/precio/i);
+  const cell = (label: string) => screen.getByText(label).nextElementSibling?.textContent;
 
   beforeEach(() => {
     jest.useFakeTimers().setSystemTime(new Date('2026-08-04T12:00:00'));
@@ -175,11 +176,9 @@ describe('cambio de plan', () => {
     fireEvent.change(planSelect(), { target: { value: '2' } });
 
     expect(screen.queryByRole('spinbutton', { name: /precio/i })).not.toBeInTheDocument();
-    expect(screen.getByText('Total')).toBeInTheDocument();
-    expect(screen.getAllByText('140')).toHaveLength(2); // frozen price + total
+    expect(cell('Precio')).toBe('140');
+    expect(cell('Total')).toBe('140');
   });
-
-  const cell = (label: string) => screen.getByText(label).nextElementSibling?.textContent;
 
   it('absorbs an upgrade into the discount, leaving the total alone', () => {
     openEdit({ ...running, discount: 0 });

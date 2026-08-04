@@ -28,11 +28,13 @@ export function ActivePlanCard({ sub, onUpdateTerms, onUpdateInstructions }: Pro
   const [durationStr, setDurationStr] = useState(String(sub.duration));
   const [priceStr, setPriceStr] = useState(String(storedPrice - sub.discount));
 
-  // the cap and the derived discount follow the selection, not the stored plan
+  // the derived discount follows the selection, not the stored plan
   const selectedPlan = plans.find((p) => p.id === planId);
   const planPrice = selectedPlan ? selectedPlan.price : storedPrice;
   const enteredPrice = priceStr !== '' ? Number(priceStr) : NaN;
-  const derivedDiscount = !Number.isNaN(enteredPrice) ? Math.max(0, planPrice - enteredPrice) : 0;
+  // negative when the client already paid more than the new plan lists — a surcharge, not a
+  // discount. Only a plan change can produce that, and only because the total is frozen.
+  const derivedDiscount = !Number.isNaN(enteredPrice) ? planPrice - enteredPrice : 0;
 
   const parsedDuration = parseInt(durationStr, 10);
   const validDuration = !Number.isNaN(parsedDuration) && parsedDuration > 0 ? parsedDuration : 0;
@@ -47,12 +49,9 @@ export function ActivePlanCard({ sub, onUpdateTerms, onUpdateInstructions }: Pro
 
   const planChanged = planId !== sub.planId;
 
-  const handlePlanChange = (nextId: string) => {
-    setPlanId(nextId);
-    // the discount is negotiated per client, so it survives the change — the total re-bases instead
-    const next = plans.find((p) => p.id === nextId);
-    if (next) setPriceStr(String(Math.max(0, next.price - derivedDiscount)));
-  };
+  // What the client pays never moves on a plan change — no charge on an upgrade, no refund on a
+  // downgrade. The price is left alone and the discount absorbs the difference; the admin settles
+  // it by changing the duration instead.
 
   const handleSave = async () => {
     if (Number.isNaN(enteredPrice) || validDuration === 0) return;
@@ -153,7 +152,7 @@ export function ActivePlanCard({ sub, onUpdateTerms, onUpdateInstructions }: Pro
               <select
                 id="plan"
                 value={planId}
-                onChange={(e) => handlePlanChange(e.target.value)}
+                onChange={(e) => setPlanId(e.target.value)}
                 className={selectCls()}
               >
                 {plans.map((p) => (
@@ -183,28 +182,38 @@ export function ActivePlanCard({ sub, onUpdateTerms, onUpdateInstructions }: Pro
           </div>
           <div className="grid grid-cols-3 gap-3 items-end">
             <div>
-              <Label variant="field" htmlFor="price" className="mb-1.5">
+              <Label variant="field" htmlFor={planChanged ? undefined : 'price'} className="mb-1.5">
                 Precio{' '}
-                <span className="normal-case tracking-normal text-placeholder">
-                  máx {planPrice.toLocaleString('es-BO')}
-                </span>
+                {!planChanged && (
+                  <span className="normal-case tracking-normal text-placeholder">
+                    máx {planPrice.toLocaleString('es-BO')}
+                  </span>
+                )}
               </Label>
-              <input
-                id="price"
-                type="number"
-                min={0}
-                max={planPrice}
-                value={priceStr}
-                onChange={(e) => setPriceStr(e.target.value)}
-                className={`${inputCls()} font-mono`}
-              />
+              {planChanged ? (
+                <p className="font-mono text-[15px] font-semibold text-ink py-2">
+                  {!Number.isNaN(enteredPrice) ? enteredPrice.toLocaleString('es-BO') : '—'}
+                </p>
+              ) : (
+                <input
+                  id="price"
+                  type="number"
+                  min={0}
+                  max={planPrice}
+                  value={priceStr}
+                  onChange={(e) => setPriceStr(e.target.value)}
+                  className={`${inputCls()} font-mono`}
+                />
+              )}
             </div>
             <div>
               <Label variant="field" className="mb-1.5">
-                Descuento
+                {derivedDiscount < 0 ? 'Recargo' : 'Descuento'}
               </Label>
               <p className="font-mono text-[15px] font-semibold text-warn py-2">
-                {!Number.isNaN(enteredPrice) ? derivedDiscount.toLocaleString('es-BO') : '—'}
+                {!Number.isNaN(enteredPrice)
+                  ? Math.abs(derivedDiscount).toLocaleString('es-BO')
+                  : '—'}
               </p>
             </div>
             <div>
