@@ -1,6 +1,16 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { ActivePlanCard } from '@/features/clients/components/detail/ActivePlanCard';
+import { usePlans } from '@/features/plans/hooks/usePlans';
 import type { Subscription } from '@/features/clients/types';
+
+jest.mock('@/features/plans/hooks/usePlans');
+
+const plans = [
+  { id: '1', name: 'Completo', price: 150, meals: ['breakfast', 'lunch'] },
+  { id: '2', name: 'Ligero', price: 100, meals: ['lunch'] },
+];
+
+(usePlans as jest.Mock).mockReturnValue({ plans, isLoading: false });
 
 const sub: Subscription = {
   id: '1',
@@ -23,7 +33,10 @@ const sub: Subscription = {
 
 const onUpdateTerms = jest.fn().mockResolvedValue(undefined);
 
-beforeEach(() => jest.clearAllMocks());
+beforeEach(() => {
+  jest.clearAllMocks();
+  (usePlans as jest.Mock).mockReturnValue({ plans, isLoading: false });
+});
 
 it('renders plan name and total', () => {
   render(<ActivePlanCard sub={sub} onUpdateTerms={onUpdateTerms} />);
@@ -81,6 +94,135 @@ it('renders the salad toggle with an icon tile when the plan includes salad', ()
   render(<ActivePlanCard sub={subWithSalad} onUpdateTerms={onUpdateTerms} />);
   const toggleLabel = screen.getByLabelText('Ensalada grande').closest('label')!;
   expect(toggleLabel.querySelector('svg')).toBeInTheDocument();
+});
+
+describe('cambio de plan', () => {
+  // startDate is a Monday; 20 delivery days from it lands on Fri 28/08, 18 of them still ahead
+  const running: Subscription = {
+    ...sub,
+    startDate: '2026-08-03',
+    contractEndDate: '2026-08-28',
+    duration: 20,
+  };
+
+  const openEdit = (s: Subscription = running) => {
+    render(<ActivePlanCard sub={s} onUpdateTerms={onUpdateTerms} />);
+    fireEvent.click(screen.getByRole('button', { name: /editar/i }));
+  };
+
+  const planSelect = () => screen.getByLabelText('Plan');
+  const durationInput = () => screen.getByLabelText('Duración');
+  const priceInput = () => screen.getByLabelText(/precio/i);
+
+  beforeEach(() => {
+    jest.useFakeTimers().setSystemTime(new Date('2026-08-04T12:00:00'));
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  it('labels the section Plan y precio', () => {
+    render(<ActivePlanCard sub={running} onUpdateTerms={onUpdateTerms} />);
+    expect(screen.getByText('Plan y precio')).toBeInTheDocument();
+  });
+
+  it('lists every plan with the assigned one selected', () => {
+    openEdit();
+    expect(planSelect()).toHaveValue('1');
+    expect(screen.getByRole('option', { name: 'Ligero' })).toBeInTheDocument();
+  });
+
+  it('preloads the duration from the subscription', () => {
+    openEdit();
+    expect(durationInput()).toHaveValue('20');
+  });
+
+  it('shows the stored end date and remaining days when the form opens', () => {
+    openEdit();
+    expect(screen.getByText(/vence el/i)).toHaveTextContent('Vence el 28/08/2026 · 18 días');
+  });
+
+  it('recalculates the end date and remaining days as the duration is typed', () => {
+    openEdit();
+    fireEvent.change(durationInput(), { target: { value: '12' } });
+    expect(screen.getByText(/vence el/i)).toHaveTextContent('Vence el 18/08/2026 · 10 días');
+  });
+
+  it('adds a delivery day per suspended date to the projected end date', () => {
+    openEdit({ ...running, suspendedDates: ['2026-08-10'] });
+    fireEvent.change(durationInput(), { target: { value: '12' } });
+    expect(screen.getByText(/vence el/i)).toHaveTextContent('Vence el 19/08/2026');
+  });
+
+  it('shows a dash instead of a stale date when the duration is emptied', () => {
+    openEdit();
+    fireEvent.change(durationInput(), { target: { value: '' } });
+    expect(screen.queryByText(/vence el/i)).not.toBeInTheDocument();
+    expect(screen.getByText('—')).toBeInTheDocument();
+  });
+
+  it('re-bases the price cap and total on the selected plan', () => {
+    openEdit();
+    fireEvent.change(planSelect(), { target: { value: '2' } });
+    expect(priceInput()).toHaveAttribute('max', '100');
+    expect(priceInput()).toHaveValue(90); // Ligero 100 − the client's 10 discount
+    expect(screen.getByText('máx 100')).toBeInTheDocument();
+  });
+
+  it('explains that a plan change moves no money, naming both plans', () => {
+    openEdit();
+    fireEvent.change(planSelect(), { target: { value: '2' } });
+    expect(screen.getByText('Completo → Ligero')).toBeInTheDocument();
+    expect(
+      screen.getByText(/no genera cobro ni devolución; ajusta la duración/i),
+    ).toBeInTheDocument();
+  });
+
+  it('hides the no-money note while the assigned plan is still selected', () => {
+    openEdit();
+    expect(screen.queryByText(/no genera cobro ni devolución/i)).not.toBeInTheDocument();
+  });
+
+  it('sends the plan and duration alongside the discount when both moved', async () => {
+    openEdit();
+    fireEvent.change(planSelect(), { target: { value: '2' } });
+    fireEvent.change(durationInput(), { target: { value: '12' } });
+    fireEvent.click(screen.getByRole('button', { name: /guardar/i }));
+
+    await waitFor(() =>
+      expect(onUpdateTerms).toHaveBeenCalledWith({ discount: 10, planId: '2', duration: 12 }),
+    );
+  });
+
+  // an untouched plan must not write a spurious terms_changed on the backend
+  it('omits the plan and duration when only the price moved', async () => {
+    openEdit();
+    fireEvent.change(priceInput(), { target: { value: '120' } });
+    fireEvent.click(screen.getByRole('button', { name: /guardar/i }));
+
+    await waitFor(() => expect(onUpdateTerms).toHaveBeenCalledWith({ discount: 30 }));
+  });
+
+  it('restores plan, duration and price on cancel', () => {
+    openEdit();
+    fireEvent.change(planSelect(), { target: { value: '2' } });
+    fireEvent.change(durationInput(), { target: { value: '12' } });
+    fireEvent.click(screen.getByRole('button', { name: /cancelar/i }));
+    fireEvent.click(screen.getByRole('button', { name: /editar/i }));
+
+    expect(planSelect()).toHaveValue('1');
+    expect(durationInput()).toHaveValue('20');
+    expect(priceInput()).toHaveValue(140);
+  });
+
+  it('does not save while the duration is invalid', () => {
+    openEdit();
+    fireEvent.change(durationInput(), { target: { value: '0' } });
+    fireEvent.click(screen.getByRole('button', { name: /guardar/i }));
+
+    expect(onUpdateTerms).not.toHaveBeenCalled();
+  });
 });
 
 it('right-aligns the cancelar/guardar buttons', () => {
