@@ -3,6 +3,7 @@ import {
   subtractBusinessDays,
   remainingDeliveryDays,
   businessDaysUntil,
+  projectedEndDate,
 } from '@/utils/businessDays';
 
 describe('addBusinessDays', () => {
@@ -28,6 +29,25 @@ describe('addBusinessDays', () => {
 
   it('adds 20 business days for a 4-week plan', () => {
     expect(addBusinessDays('2026-05-25', 20)).toBe('2026-06-22');
+  });
+});
+
+describe('projectedEndDate', () => {
+  it('counts the start date as delivery day 1', () => {
+    expect(projectedEndDate('2026-05-25', 1, 0)).toBe('2026-05-25');
+  });
+
+  it('mirrors the backend for a 20-day plan', () => {
+    expect(projectedEndDate('2026-05-25', 20, 0)).toBe('2026-06-19');
+  });
+
+  // the backend adds one delivery day per suspended date on top of the duration
+  it('adds one delivery day per suspended date', () => {
+    expect(projectedEndDate('2026-05-25', 20, 2)).toBe('2026-06-23');
+  });
+
+  it('skips the weekend when the suspensions push past a Friday', () => {
+    expect(projectedEndDate('2026-05-25', 5, 1)).toBe('2026-06-01');
   });
 });
 
