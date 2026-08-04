@@ -8,6 +8,7 @@ jest.mock('@/features/plans/hooks/usePlans');
 const plans = [
   { id: '1', name: 'Completo', price: 150, meals: ['breakfast', 'lunch'] },
   { id: '2', name: 'Ligero', price: 100, meals: ['lunch'] },
+  { id: '3', name: 'Premium', price: 300, meals: ['breakfast', 'lunch', 'dinner'] },
 ];
 
 (usePlans as jest.Mock).mockReturnValue({ plans, isLoading: false });
@@ -162,12 +163,48 @@ describe('cambio de plan', () => {
     expect(screen.getByText('—')).toBeInTheDocument();
   });
 
-  it('re-bases the price cap and total on the selected plan', () => {
+  it('caps the price at the plan price while the plan is untouched', () => {
+    openEdit();
+    expect(priceInput()).toHaveAttribute('max', '150');
+    expect(screen.getByText('máx 150')).toBeInTheDocument();
+  });
+
+  // a plan change moves no money in either direction, so the total the client pays is frozen
+  it('freezes what the client pays when the plan changes', () => {
     openEdit();
     fireEvent.change(planSelect(), { target: { value: '2' } });
-    expect(priceInput()).toHaveAttribute('max', '100');
-    expect(priceInput()).toHaveValue(90); // Ligero 100 − the client's 10 discount
-    expect(screen.getByText('máx 100')).toBeInTheDocument();
+
+    expect(screen.queryByRole('spinbutton', { name: /precio/i })).not.toBeInTheDocument();
+    expect(screen.getByText('Total')).toBeInTheDocument();
+    expect(screen.getAllByText('140')).toHaveLength(2); // frozen price + total
+  });
+
+  const cell = (label: string) => screen.getByText(label).nextElementSibling?.textContent;
+
+  it('absorbs an upgrade into the discount, leaving the total alone', () => {
+    openEdit({ ...running, discount: 0 });
+    fireEvent.change(planSelect(), { target: { value: '3' } }); // Premium 300, client pays 150
+
+    expect(cell('Descuento')).toBe('150'); // 300 − 150
+    expect(cell('Total')).toBe('150');
+  });
+
+  // paying more than the new plan lists is a surcharge, not a discount — the label has to say so
+  it('shows a surcharge when the new plan lists below what the client pays', () => {
+    openEdit();
+    fireEvent.change(planSelect(), { target: { value: '2' } }); // Ligero 100, client pays 140
+
+    expect(cell('Recargo')).toBe('40'); // 140 − 100
+    expect(screen.queryByText('Descuento')).not.toBeInTheDocument();
+    expect(cell('Total')).toBe('140');
+  });
+
+  it('sends the negative discount so the client keeps paying what they paid', async () => {
+    openEdit();
+    fireEvent.change(planSelect(), { target: { value: '2' } });
+    fireEvent.click(screen.getByRole('button', { name: /guardar/i }));
+
+    await waitFor(() => expect(onUpdateTerms).toHaveBeenCalledWith({ discount: -40, planId: '2' }));
   });
 
   it('explains that a plan change moves no money, naming both plans', () => {
@@ -191,7 +228,7 @@ describe('cambio de plan', () => {
     fireEvent.click(screen.getByRole('button', { name: /guardar/i }));
 
     await waitFor(() =>
-      expect(onUpdateTerms).toHaveBeenCalledWith({ discount: 10, planId: '2', duration: 12 }),
+      expect(onUpdateTerms).toHaveBeenCalledWith({ discount: -40, planId: '2', duration: 12 }),
     );
   });
 
