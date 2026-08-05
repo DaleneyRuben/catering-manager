@@ -26,7 +26,7 @@ owed, and capped every subscription at the plan price — so a contract longer t
 | 0.1 | `subscriptions.price` replaces `discount`; migration backfills `plan.price - discount`    | ✅     |
 | 0.2 | Price inputs uncapped; the gap against the plan reads Descuento or Recargo by sign        | ✅     |
 | 0.3 | `terms_changed` keys off price; history reads both the new and the legacy metadata shapes | ✅     |
-| 0.4 | End-to-end verification via Playwright                                                    | ⬜     |
+| 0.4 | End-to-end verification via Playwright                                                    | ✅     |
 
 ---
 
