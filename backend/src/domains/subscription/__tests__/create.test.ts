@@ -24,7 +24,7 @@ const mockSubscription = {
   id: 1,
   clientId: 1,
   planId: 2,
-  discount: 0,
+  price: 1200,
   contractDate: today,
   startDate,
   contractEndDate,
@@ -39,7 +39,7 @@ describe('create', () => {
 
     const result = await create(
       1,
-      { planId: 2, startDate, contractDate: today, duration: 20 },
+      { planId: 2, startDate, contractDate: today, duration: 20, price: 1200 },
       actor,
     );
 
@@ -47,20 +47,64 @@ describe('create', () => {
     expect(result).toMatchObject({ clientId: 1, planId: 2 });
   });
 
-  it('defaults discount to 0 when not provided', async () => {
+  it('persists the agreed price on the subscription row', async () => {
     (Client.findByPk as jest.Mock).mockResolvedValue({ id: 1 });
     (Subscription.create as jest.Mock).mockResolvedValue(mockSubscription);
 
-    await create(1, { planId: 2, startDate, contractDate: today, duration: 20 }, actor);
+    await create(
+      1,
+      { planId: 2, startDate, contractDate: today, duration: 20, price: 1200 },
+      actor,
+    );
 
-    expect(Subscription.create).toHaveBeenCalledWith(expect.objectContaining({ discount: 0 }));
+    expect(Subscription.create).toHaveBeenCalledWith(expect.objectContaining({ price: 1200 }));
+  });
+
+  // A plan's price is quoted for 20 delivery days. A longer contract is negotiated upward, so the
+  // agreed price is not capped by the plan it came from — the old discount-only model could not
+  // express this at all.
+  it('persists a price above the plan price for a longer contract', async () => {
+    (Client.findByPk as jest.Mock).mockResolvedValue({ id: 1 });
+    (Subscription.create as jest.Mock).mockResolvedValue({ ...mockSubscription, price: 1800 });
+    (Plan.findByPk as jest.Mock).mockResolvedValue({ id: 2, name: 'Completo', price: 1200 });
+
+    await create(
+      1,
+      { planId: 2, startDate, contractDate: today, duration: 30, price: 1800 },
+      actor,
+    );
+
+    expect(Subscription.create).toHaveBeenCalledWith(expect.objectContaining({ price: 1800 }));
+  });
+
+  it('records the agreed price in the history metadata', async () => {
+    (Client.findByPk as jest.Mock).mockResolvedValue({ id: 1 });
+    (Subscription.create as jest.Mock).mockResolvedValue(mockSubscription);
+    (record as jest.Mock).mockResolvedValue(undefined);
+    (Plan.findByPk as jest.Mock).mockResolvedValue({ id: 2, name: 'Completo', price: 5000 });
+
+    await create(
+      1,
+      { planId: 2, startDate, contractDate: today, duration: 20, price: 1200 },
+      actor,
+    );
+
+    expect(record).toHaveBeenCalledWith(
+      actor,
+      expect.objectContaining({ metadata: expect.objectContaining({ price: 1200 }) }),
+      undefined,
+    );
   });
 
   it('defaults paid to true when not provided', async () => {
     (Client.findByPk as jest.Mock).mockResolvedValue({ id: 1 });
     (Subscription.create as jest.Mock).mockResolvedValue(mockSubscription);
 
-    await create(1, { planId: 2, startDate, contractDate: today, duration: 20 }, actor);
+    await create(
+      1,
+      { planId: 2, startDate, contractDate: today, duration: 20, price: 1200 },
+      actor,
+    );
 
     expect(Subscription.create).toHaveBeenCalledWith(expect.objectContaining({ paid: true }));
   });
@@ -71,7 +115,7 @@ describe('create', () => {
 
     await create(
       1,
-      { planId: 2, startDate, contractDate: today, duration: 20, paid: false },
+      { planId: 2, startDate, contractDate: today, duration: 20, price: 1200, paid: false },
       actor,
     );
 
@@ -83,7 +127,7 @@ describe('create', () => {
 
     const result = await create(
       999,
-      { planId: 2, startDate, contractDate: today, duration: 20 },
+      { planId: 2, startDate, contractDate: today, duration: 20, price: 1200 },
       actor,
     );
 
@@ -99,7 +143,7 @@ describe('create', () => {
       contractEndDate: null,
     });
 
-    await create(1, { planId: 2, contractDate: today, duration: 20 }, actor);
+    await create(1, { planId: 2, contractDate: today, duration: 20, price: 1200 }, actor);
 
     expect(Subscription.create).toHaveBeenCalledWith(
       expect.objectContaining({ startDate: null, contractEndDate: null }),
@@ -112,7 +156,11 @@ describe('create', () => {
     (record as jest.Mock).mockResolvedValue(undefined);
     (Plan.findByPk as jest.Mock).mockResolvedValue({ id: 2, name: 'Completo', price: 5000 });
 
-    await create(1, { planId: 2, startDate, contractDate: today, duration: 20 }, actor);
+    await create(
+      1,
+      { planId: 2, startDate, contractDate: today, duration: 20, price: 1200 },
+      actor,
+    );
 
     expect(record).toHaveBeenCalledWith(
       actor,
@@ -127,7 +175,11 @@ describe('create', () => {
     (record as jest.Mock).mockResolvedValue(undefined);
     (Plan.findByPk as jest.Mock).mockResolvedValue({ id: 2, name: 'Completo', price: 5000 });
 
-    await create(1, { planId: 2, startDate, contractDate: today, duration: 20 }, actor);
+    await create(
+      1,
+      { planId: 2, startDate, contractDate: today, duration: 20, price: 1200 },
+      actor,
+    );
 
     expect(record).toHaveBeenCalledWith(
       expect.objectContaining({ userId: 9, username: 'ada' }),
@@ -143,7 +195,7 @@ describe('create', () => {
 
     await create(
       1,
-      { planId: 2, startDate, contractDate: today, duration: 20, paid: false },
+      { planId: 2, startDate, contractDate: today, duration: 20, price: 1200, paid: false },
       actor,
     );
 
@@ -163,6 +215,7 @@ describe('create', () => {
         startDate,
         contractDate: today,
         duration: 20,
+        price: 1200,
         renewalType: 'renewal',
       },
       actor,
@@ -188,6 +241,7 @@ describe('create', () => {
         startDate,
         contractDate: today,
         duration: 20,
+        price: 1200,
         renewalType: 'reactivation',
       },
       actor,
@@ -215,7 +269,7 @@ describe('create', () => {
 
     await create(
       1,
-      { planId: 2, contractDate: today, duration: 20, renewalType: 'renewal' },
+      { planId: 2, contractDate: today, duration: 20, price: 1200, renewalType: 'renewal' },
       actor,
     );
 
@@ -239,7 +293,7 @@ describe('create', () => {
 
     await create(
       1,
-      { planId: 2, contractDate: today, duration: 20, renewalType: 'renewal' },
+      { planId: 2, contractDate: today, duration: 20, price: 1200, renewalType: 'renewal' },
       actor,
     );
 
@@ -258,6 +312,7 @@ describe('create', () => {
         startDate,
         contractDate: today,
         duration: 20,
+        price: 1200,
         renewalType: 'reactivation',
       },
       actor,
@@ -273,7 +328,11 @@ describe('create', () => {
     (Subscription.create as jest.Mock).mockResolvedValue(mockSubscription);
     (record as jest.Mock).mockResolvedValue(undefined);
 
-    await create(1, { planId: 2, startDate, contractDate: today, duration: 20 }, actor);
+    await create(
+      1,
+      { planId: 2, startDate, contractDate: today, duration: 20, price: 1200 },
+      actor,
+    );
 
     expect(Subscription.create).toHaveBeenCalledWith(
       expect.objectContaining({ renewalType: null }),
@@ -288,7 +347,7 @@ describe('create', () => {
 
     await create(
       1,
-      { planId: 2, startDate, contractDate: today, duration: 20, appointmentId: 4 },
+      { planId: 2, startDate, contractDate: today, duration: 20, price: 1200, appointmentId: 4 },
       actor,
     );
 
@@ -300,7 +359,11 @@ describe('create', () => {
     (Subscription.create as jest.Mock).mockResolvedValue(mockSubscription);
     (record as jest.Mock).mockResolvedValue(undefined);
 
-    await create(1, { planId: 2, startDate, contractDate: today, duration: 20 }, actor);
+    await create(
+      1,
+      { planId: 2, startDate, contractDate: today, duration: 20, price: 1200 },
+      actor,
+    );
 
     expect(Subscription.create).toHaveBeenCalledWith(
       expect.objectContaining({ appointmentId: null }),
@@ -315,7 +378,7 @@ describe('create', () => {
 
     await create(
       1,
-      { planId: 2, startDate, contractDate: today, duration: 20, appointmentId: 4 },
+      { planId: 2, startDate, contractDate: today, duration: 20, price: 1200, appointmentId: 4 },
       actor,
     );
 
@@ -332,7 +395,11 @@ describe('create', () => {
     (record as jest.Mock).mockResolvedValue(undefined);
     (Plan.findByPk as jest.Mock).mockResolvedValue({ id: 2, name: 'Completo', price: 5000 });
 
-    await create(1, { planId: 2, startDate, contractDate: today, duration: 20 }, actor);
+    await create(
+      1,
+      { planId: 2, startDate, contractDate: today, duration: 20, price: 1200 },
+      actor,
+    );
 
     const call = (record as jest.Mock).mock.calls[0][1];
     expect(call.metadata).not.toHaveProperty('appointmentId');
@@ -350,6 +417,7 @@ describe('create', () => {
         startDate,
         contractDate: today,
         duration: 20,
+        price: 1200,
         renewalType: 'renewal',
         paid: false,
       },
@@ -371,6 +439,7 @@ describe('create', () => {
         startDate,
         contractDate: today,
         duration: 20,
+        price: 1200,
         renewalType: 'reactivation',
         paid: false,
       },
@@ -396,6 +465,7 @@ describe('create', () => {
         planId: 2,
         contractDate: today,
         duration: 20,
+        price: 1200,
         renewalType: 'renewal',
         paid: false,
       },
@@ -417,6 +487,7 @@ describe('create', () => {
         startDate,
         contractDate: today,
         duration: 20,
+        price: 1200,
         renewalType: 'reactivation',
         paid: false,
       },
@@ -440,6 +511,7 @@ describe('create with an upcoming subscription already registered', () => {
           startDate,
           contractDate: today,
           duration: 20,
+          price: 1200,
           renewalType: 'renewal',
         },
         actor,
@@ -452,7 +524,7 @@ describe('create with an upcoming subscription already registered', () => {
     (Subscription.findOne as jest.Mock).mockResolvedValue({ id: 5, startDate: null });
 
     await expect(
-      create(1, { planId: 2, startDate, contractDate: today, duration: 20 }, actor),
+      create(1, { planId: 2, startDate, contractDate: today, duration: 20, price: 1200 }, actor),
     ).rejects.toThrow();
 
     expect(Subscription.create).not.toHaveBeenCalled();
@@ -463,7 +535,11 @@ describe('create with an upcoming subscription already registered', () => {
     (Subscription.findOne as jest.Mock).mockResolvedValue(null);
     (Subscription.create as jest.Mock).mockResolvedValue(mockSubscription);
 
-    await create(1, { planId: 2, startDate, contractDate: today, duration: 20 }, actor);
+    await create(
+      1,
+      { planId: 2, startDate, contractDate: today, duration: 20, price: 1200 },
+      actor,
+    );
 
     expect(Subscription.findOne).toHaveBeenCalledWith({
       where: {
@@ -481,7 +557,7 @@ describe('create with an upcoming subscription already registered', () => {
 
     const result = await create(
       1,
-      { planId: 2, startDate, contractDate: today, duration: 20 },
+      { planId: 2, startDate, contractDate: today, duration: 20, price: 1200 },
       actor,
     );
 
@@ -503,6 +579,7 @@ describe('create with overlapping prior subscriptions', () => {
         startDate: '2026-07-03',
         contractDate: today,
         duration: 20,
+        price: 1200,
         renewalType: 'renewal',
       },
       actor,
@@ -521,7 +598,7 @@ describe('create with overlapping prior subscriptions', () => {
 
     await create(
       1,
-      { planId: 2, startDate: '2026-07-03', contractDate: today, duration: 20 },
+      { planId: 2, startDate: '2026-07-03', contractDate: today, duration: 20, price: 1200 },
       actor,
     );
 
@@ -545,7 +622,7 @@ describe('create with overlapping prior subscriptions', () => {
 
     await create(
       1,
-      { planId: 2, contractDate: today, duration: 20, renewalType: 'renewal' },
+      { planId: 2, contractDate: today, duration: 20, price: 1200, renewalType: 'renewal' },
       actor,
     );
 
@@ -563,6 +640,7 @@ describe('create with overlapping prior subscriptions', () => {
         startDate: '2026-07-03',
         contractDate: today,
         duration: 20,
+        price: 1200,
         renewalType: 'renewal',
         paid: false,
       },
@@ -590,6 +668,7 @@ describe('create with a transaction', () => {
         startDate: '2026-07-03',
         contractDate: today,
         duration: 20,
+        price: 1200,
         renewalType: 'renewal',
       },
       actor,

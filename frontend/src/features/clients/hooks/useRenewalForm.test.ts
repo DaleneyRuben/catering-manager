@@ -12,7 +12,7 @@ const sub: Subscription = {
   contractDate: '2026-06-01',
   startDate: '2026-06-02',
   contractEndDate: '2026-06-26',
-  discount: 0,
+  price: 1200,
   duration: 20,
   suspendedDates: [],
   finalizedAt: null,
@@ -131,17 +131,19 @@ describe('useRenewalForm', () => {
     });
   });
 
-  describe('discount calculation', () => {
-    it('discount is plan.price minus precio', () => {
+  describe('gap against the plan price', () => {
+    it('is positive when the client pays under the plan price', () => {
       const { result } = renderHook(() => useRenewalForm(makeOptions()));
       act(() => result.current.setPrecioStr('1000'));
       expect(result.current.discount).toBe(200);
     });
 
-    it('discount is clamped to 0 when precio exceeds plan price', () => {
+    // A plan's price is quoted for 20 delivery days, so a longer renewal costs more than the plan.
+    // The gap goes negative and reads as a surcharge; it is no longer clamped at zero.
+    it('goes negative when a longer contract costs more than the plan', () => {
       const { result } = renderHook(() => useRenewalForm(makeOptions()));
       act(() => result.current.setPrecioStr('1500'));
-      expect(result.current.discount).toBe(0);
+      expect(result.current.discount).toBe(-300);
     });
   });
 
@@ -170,7 +172,7 @@ describe('useRenewalForm', () => {
         expect.objectContaining({
           planId: 'plan-1',
           duration: 20,
-          discount: 0,
+          price: 1200,
           renewalType: 'renewal',
           startDate: '2026-06-29',
         }),

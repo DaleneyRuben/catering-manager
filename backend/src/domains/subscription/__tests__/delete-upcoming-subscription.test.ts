@@ -37,7 +37,7 @@ const upcoming = () => ({
   startDate,
   contractEndDate: addDeliveryDays(startDate, 19),
   duration: 20,
-  discount: 0,
+  price: 1200,
   finalizedAt: null,
   destroy: jest.fn().mockResolvedValue({}),
 });

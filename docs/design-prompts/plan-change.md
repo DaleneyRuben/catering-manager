@@ -27,7 +27,7 @@ Opened by the same pencil `IconButton` already on the card. Section label change
 - **Plan** — a select listing every plan by name, current plan preselected. Same select styling as the rest of the app (`inputCls()`).
 - **Duración** — number input, suffix "días", preloaded with the subscription's current duration.
 
-**Row 2** — the existing three-column Precio / Descuento / Total block, unchanged in structure. Note that **Precio's `max` is the selected plan's price**, so switching plan re-bases it: the field currently caps at the current plan's price, and must follow the selection rather than the stored plan.
+**Row 2** — the existing three-column Precio / Descuento / Total block, unchanged in structure. Note that **switching the plan must not touch Precio**: a plan change moves no money, so the agreed price is what the client already paid and stays exactly where it is. Only the label of the middle column follows the new plan — the gap against its price flips between **Descuento** and **Recargo**. The field has no `max`; a price above the plan's is a valid surcharge for a longer contract.
 
 **Row 3 — the consequence line.** Always visible while editing, recalculated on every keystroke in either row:
 

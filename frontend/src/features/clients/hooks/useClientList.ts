@@ -22,7 +22,7 @@ export interface SubscriptionCreateDraft {
   startDate: string;
   contractDate: string;
   duration: number;
-  discount: number;
+  price: number;
   specialInstructions?: Record<string, string>;
 }
 

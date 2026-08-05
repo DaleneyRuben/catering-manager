@@ -128,7 +128,7 @@ implementation has one vocabulary to start from.
   concept of accrual anywhere in the model.
 - **Payment** (`payment`) — money arriving. Carries its own amount and date, because a plan's
   price may change after the money was received and the register must keep what was actually
-  paid. A payment for a subscription is created when that subscription is marked paid, so
+  paid — the one exception being a correction to that price, which the payment follows. A payment for a subscription is created when that subscription is marked paid, so
   subscription revenue has exactly one source and the ledger can never disagree with the
   Clientes screen.
   ⚠ Distinct from **`Subscription.paid`**, which is an _activation gate_, not a payment: while
@@ -170,7 +170,12 @@ implementation has one vocabulary to start from.
   launch were already `paid: true` and generate no Payment.
 - **Mutability** — Expenses are typed by hand and are freely editable and soft-deleted
   (`paranoid`, as `Client` already is), each recording who registered it. Payments are never typed
-  and are **neither editable nor deletable**: nothing on one is a human's to revise.
+  and are **never deletable, and never editable from the Finanzas screen**: nothing on one is a
+  human's to revise directly. A Payment's amount moves in exactly one circumstance — the agreed
+  price on its subscription was corrected — and it moves automatically, in that same transaction.
+  Within one subscription's life a price edit is always a correction, never a renegotiation (that
+  is what the next renewal is for) and never a plan change (which moves no money by rule), so the
+  register follows it rather than keeping a figure the business never received.
 - **Client profitability** — _rejected_. With no client-specific expenses, every client costs the
   same per delivery day, so a per-client margin ranking would only restate which discounts were
   granted. Per-client expense tagging is rejected outright: tagging the ~5% of costs that could be
@@ -191,6 +196,7 @@ implementation has one vocabulary to start from.
   upgrade and receives no refund on a downgrade. The difference is settled in **delivery days**:
   the admin sets a new duration so the money already paid covers the new plan over a shorter or
   longer period. The system does not derive that duration; the admin enters it.
+  The agreed price rides through untouched — it is what the client already paid.
   Recorded as `terms_changed` (the plan moved) plus `dates_changed` (the duration moved with it).
   The backend already accepts this — `subscription/update.ts` writes `terms_changed` for a new
   `planId`. Only the UI control is missing.
@@ -202,6 +208,16 @@ implementation has one vocabulary to start from.
   control must ship **before** it.
 
 ## Existing core terms (referenced by production)
+
+- **Agreed price** (`subscription.price`) — what a client pays for one contract, negotiated and
+  frozen on the subscription when it is agreed. _Avoid_: deriving it from the plan on read, which
+  let a plan's price edit rewrite what every existing client owed, and capped every subscription at
+  the plan price. A plan's price is quoted for **20 delivery days**; a longer contract costs more,
+  so the agreed price sits either side of it. The gap against the plan price is display only —
+  **Descuento** below, **Recargo** above.
+  ⚠ _Rejected term_: **discount**. It was a stored unsigned column and is now neither stored nor
+  signed-neutral; a "negative discount" is a surcharge, and naming it that way is what hid the
+  longer-contract case for so long.
 
 - **Active subscription (for a date)** — a subscription whose `startDate`–`contractEndDate`
   range covers the date, not finalized, client not paused, and the date not in the

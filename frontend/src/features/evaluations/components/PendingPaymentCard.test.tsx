@@ -28,7 +28,7 @@ const client: PendingPaymentClient = {
       contractDate: '2026-06-23',
       startDate: '2026-06-23',
       contractEndDate: '2026-07-18',
-      discount: 100,
+      price: 1350,
       duration: 20,
       suspendedDates: [],
       finalizedAt: null,

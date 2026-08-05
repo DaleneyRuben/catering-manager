@@ -29,7 +29,7 @@ export function StepPlan({ register, control, errors, plans, setValue, isLoading
   const startDate = useWatch({ control, name: 'startDate' });
   const duration = useWatch({ control, name: 'duration' });
   const planId = useWatch({ control, name: 'planId' });
-  const discount = useWatch({ control, name: 'discount' });
+  const price = useWatch({ control, name: 'price' });
   const specialInstructions = useWatch({ control, name: 'specialInstructions' });
   const selectedPlan = plans.find((p) => p.id === planId);
 
@@ -69,7 +69,7 @@ export function StepPlan({ register, control, errors, plans, setValue, isLoading
         origen={origen}
       />
 
-      <BillingRow setValue={setValue} price={selectedPlan?.price} discount={discount} />
+      <BillingRow setValue={setValue} planPrice={selectedPlan?.price} price={price} />
 
       {selectedPlan?.meals.includes('salad') && (
         <WizardSectionCard

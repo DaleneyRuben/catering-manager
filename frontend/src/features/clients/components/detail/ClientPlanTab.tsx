@@ -10,7 +10,7 @@ interface Props {
   sub: Subscription | undefined;
   remaining: number;
   onUpdateContract: (draft: import('./ContractCard').ContractDraft) => Promise<void>;
-  onUpdateBilling: (discount: number) => Promise<void>;
+  onUpdateBilling: (price: number) => Promise<void>;
   onUpdateInstructions: (specialInstructions: Record<string, string>) => Promise<void>;
 }
 

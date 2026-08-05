@@ -62,7 +62,7 @@ export function NewClientPage() {
       contractDate: format(startOfToday(), 'yyyy-MM-dd'),
       startDate: '',
       duration: 20,
-      discount: 0,
+      price: 0,
       specialInstructions: {},
     },
   });
@@ -104,7 +104,7 @@ export function NewClientPage() {
       contractDate: data.contractDate,
       startDate: data.startDate,
       duration: data.duration,
-      discount: data.discount,
+      price: data.price,
       ...(Object.keys(data.specialInstructions).length > 0
         ? { specialInstructions: data.specialInstructions }
         : {}),

@@ -75,7 +75,7 @@ export function ClientTable({
                 const sub = c.subscriptions[0];
                 const queuedRenewal = findQueuedRenewal(c.subscriptions);
                 const { status } = c;
-                const price = sub ? Number(sub.plan.price) - sub.discount : 0;
+                const price = sub ? Number(sub.price) : 0;
                 return (
                   <tr
                     key={c.id}

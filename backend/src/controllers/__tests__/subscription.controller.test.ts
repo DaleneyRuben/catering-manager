@@ -33,6 +33,7 @@ const validPayload = {
   startDate: '2026-05-26',
   contractDate: '2026-05-23',
   duration: 20,
+  price: 1200,
 };
 
 describe('POST /api/clients/:clientId/subscriptions', () => {
