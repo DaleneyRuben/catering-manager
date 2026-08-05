@@ -8,9 +8,25 @@ design behind it is in [CONTEXT.md](../CONTEXT.md), [business-rules.md](./busine
 domain-ownership work (#115–#141) and was removed the same way — a backlog that outlives its
 work becomes fiction, and anything worth keeping belongs in the documents above, not here.
 
-Order matters: **Finanzas cannot ship before the plan-change control.** Until it exists, admins
+Order matters: **the price model ships first, then the plan-change control, then Finanzas.** Until it exists, admins
 simulate a plan change by finalizing the plan and creating a new one, which would record two paid
 subscriptions for a client who paid once, and double-count their payment in the register.
+
+---
+
+## 0. Subscription price model
+
+Prerequisite to both sections below. The subscription total was derived on read as
+`plan.price - discount`, which let a plan's price edit retroactively rewrite what existing clients
+owed, and capped every subscription at the plan price — so a contract longer than the plan's quoted
+20 days could not be charged at all. Finanzas would have recorded that understated figure as income.
+
+| #   | Item                                                                                      | Status |
+| --- | ----------------------------------------------------------------------------------------- | ------ |
+| 0.1 | `subscriptions.price` replaces `discount`; migration backfills `plan.price - discount`    | ✅     |
+| 0.2 | Price inputs uncapped; the gap against the plan reads Descuento or Recargo by sign        | ✅     |
+| 0.3 | `terms_changed` keys off price; history reads both the new and the legacy metadata shapes | ✅     |
+| 0.4 | End-to-end verification via Playwright                                                    | ⬜     |
 
 ---
 
@@ -72,6 +88,5 @@ Recorded so they are not re-proposed. Full reasoning in `CONTEXT.md`.
 - Per-client expense tagging and client profitability reporting
 - Payment method (efectivo/transferencia) on an expense
 - Manual income entry — all income is subscription revenue
-- Converting `Subscription.discount` from `INTEGER` to `DECIMAL(10,2)`, so cents work the same
-  way everywhere. A real inconsistency, but it touches every subscription and every price
-  calculation, for a problem that has never occurred.
+- A proportional price calculator. A plan's price is quoted for 20 delivery days, but a longer
+  contract is priced by negotiation, not by dividing and multiplying. The admin enters the price.
