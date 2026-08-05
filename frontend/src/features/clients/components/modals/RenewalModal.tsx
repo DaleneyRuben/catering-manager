@@ -89,7 +89,7 @@ export function RenewalModal({
                   {sub.plan.name}
                 </span>
                 <span className="font-mono text-[11px] text-faint">
-                  {(sub.plan.price - (sub.discount ?? 0)).toLocaleString('es-BO')}/mes
+                  {Number(sub.price).toLocaleString('es-BO')}/mes
                 </span>
               </div>
             )}
@@ -231,7 +231,6 @@ export function RenewalModal({
               id="renewal-precio"
               type="number"
               min={0}
-              max={form.newPlan?.price}
               value={form.precioStr}
               onChange={(e) => form.setPrecioStr(e.target.value)}
               disabled={!form.newPlan}
@@ -240,10 +239,10 @@ export function RenewalModal({
             />
           </div>
           <div>
-            <p className={plainLabelCls}>Descuento</p>
+            <p className={plainLabelCls}>{form.discount < 0 ? 'Recargo' : 'Descuento'}</p>
             <p className="font-mono text-[14px] text-warn py-[9px]">
               {form.newPlan && form.precioNum !== undefined
-                ? form.discount.toLocaleString('es-BO')
+                ? Math.abs(form.discount).toLocaleString('es-BO')
                 : '—'}
             </p>
           </div>

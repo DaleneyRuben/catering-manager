@@ -34,7 +34,7 @@ export function ClientOverviewTab({ client, sub, remaining }: Props) {
                 </div>
                 <div className="text-right shrink-0 whitespace-nowrap">
                   <span className="font-mono font-semibold text-[21px] text-ink">
-                    {(Number(sub.plan.price) - sub.discount).toLocaleString('es-BO')}
+                    {Number(sub.price).toLocaleString('es-BO')}
                   </span>
                   <span className="font-mono text-[11px] text-faint"> /mes</span>
                 </div>

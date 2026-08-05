@@ -10,7 +10,7 @@ const sub: Subscription = {
   startDate: '2026-01-02',
   contractEndDate: '2026-03-01',
   duration: 40,
-  discount: 10,
+  price: 140,
   suspendedDates: [],
   finalizedAt: null,
   plan: {
@@ -28,13 +28,13 @@ beforeEach(() => jest.clearAllMocks());
 it('renders plan name and total', () => {
   render(<ActivePlanCard sub={sub} onUpdateBilling={onUpdateBilling} />);
   expect(screen.getByText('Completo')).toBeInTheDocument();
-  expect(screen.getAllByText('140')).toHaveLength(2); // header + grid row (150 - 10)
+  expect(screen.getAllByText('140')).toHaveLength(2); // header + grid row
 });
 
 it('formats prices over 1000 with a dot thousands separator', () => {
   const bigSub: Subscription = {
     ...sub,
-    discount: 0,
+    price: 1390,
     plan: { ...sub.plan, price: 1390 },
   };
   render(<ActivePlanCard sub={bigSub} onUpdateBilling={onUpdateBilling} />);
@@ -47,10 +47,26 @@ it('renders meal pills', () => {
   expect(screen.getByText('Almuerzo')).toBeInTheDocument();
 });
 
-it('shows price/discount/total in read mode', () => {
+it('shows the plan price, the gap against it and the total in read mode', () => {
   render(<ActivePlanCard sub={sub} onUpdateBilling={onUpdateBilling} />);
   expect(screen.getByText('150')).toBeInTheDocument();
+  expect(screen.getByText('Descuento')).toBeInTheDocument();
   expect(screen.getByText('10')).toBeInTheDocument();
+});
+
+// A plan's price is quoted for 20 delivery days, so a longer contract legitimately costs more
+// than the plan it came from — something the old discount-only model could not represent.
+it('calls the gap a surcharge when the agreed price is above the plan price', () => {
+  const longer: Subscription = { ...sub, price: 220, duration: 30 };
+  render(<ActivePlanCard sub={longer} onUpdateBilling={onUpdateBilling} />);
+  expect(screen.getByText('Recargo')).toBeInTheDocument();
+  expect(screen.getByText('70')).toBeInTheDocument();
+});
+
+it('does not cap the price input at the plan price', () => {
+  render(<ActivePlanCard sub={sub} onUpdateBilling={onUpdateBilling} />);
+  fireEvent.click(screen.getByRole('button', { name: /editar/i }));
+  expect(screen.getByDisplayValue('140')).not.toHaveAttribute('max');
 });
 
 it('opens edit form when pencil is clicked', () => {
@@ -59,13 +75,21 @@ it('opens edit form when pencil is clicked', () => {
   expect(screen.getByDisplayValue('140')).toBeInTheDocument();
 });
 
-it('calls onUpdateBilling with derived discount on save', async () => {
+it('calls onUpdateBilling with the agreed price on save', async () => {
   render(<ActivePlanCard sub={sub} onUpdateBilling={onUpdateBilling} />);
   fireEvent.click(screen.getByRole('button', { name: /editar/i }));
   const input = screen.getByDisplayValue('140');
   fireEvent.change(input, { target: { value: '120' } });
   fireEvent.click(screen.getByRole('button', { name: /guardar/i }));
-  await waitFor(() => expect(onUpdateBilling).toHaveBeenCalledWith(30)); // 150 - 120 = 30
+  await waitFor(() => expect(onUpdateBilling).toHaveBeenCalledWith(120));
+});
+
+it('saves a price above the plan price rather than clamping it', async () => {
+  render(<ActivePlanCard sub={sub} onUpdateBilling={onUpdateBilling} />);
+  fireEvent.click(screen.getByRole('button', { name: /editar/i }));
+  fireEvent.change(screen.getByDisplayValue('140'), { target: { value: '220' } });
+  fireEvent.click(screen.getByRole('button', { name: /guardar/i }));
+  await waitFor(() => expect(onUpdateBilling).toHaveBeenCalledWith(220));
 });
 
 it('cancels edit without saving', () => {

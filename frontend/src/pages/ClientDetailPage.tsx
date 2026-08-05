@@ -134,7 +134,7 @@ export function ClientDetailPage() {
           sub={sub}
           remaining={remaining}
           onUpdateContract={(draft) => updateContract(sub!.id, draft)}
-          onUpdateBilling={(discount) => updateBilling(sub!.id, discount)}
+          onUpdateBilling={(price) => updateBilling(sub!.id, price)}
           onUpdateInstructions={(si) => updateInstructions(sub!.id, si)}
         />
       )}

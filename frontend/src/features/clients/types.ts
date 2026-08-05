@@ -8,7 +8,7 @@ export interface Subscription {
   contractDate: string;
   startDate: string | null;
   contractEndDate: string | null;
-  discount: number;
+  price: number;
   duration: number;
   suspendedDates: string[];
   finalizedAt: string | null;
@@ -60,7 +60,7 @@ export interface RenewalPayload {
   contractDate: string;
   startDate?: string | null;
   duration: number;
-  discount: number;
+  price: number;
   renewalType: 'renewal' | 'reactivation';
   paid?: boolean;
 }
@@ -79,7 +79,7 @@ export interface NewClientFormValues {
   contractDate: string;
   startDate: string;
   duration: number;
-  discount: number;
+  price: number;
   specialInstructions: Record<string, string>;
 }
 

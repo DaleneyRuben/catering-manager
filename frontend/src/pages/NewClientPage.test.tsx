@@ -224,7 +224,7 @@ describe('NewClientPage', () => {
     );
   });
 
-  it('subscription POST defaults discount to 0', async () => {
+  it('subscription POST defaults the price to the selected plan price', async () => {
     await navigateToStep3();
     await userEvent.click(screen.getByRole('button', { name: /completo/i }));
     fireEvent.change(screen.getByLabelText(/fecha de inicio/i), {
@@ -236,17 +236,16 @@ describe('NewClientPage', () => {
     expect(mockPost).toHaveBeenNthCalledWith(
       2,
       '/clients/1/subscriptions',
-      expect.objectContaining({ discount: 0 }),
+      expect.objectContaining({ price: 480 }),
     );
   });
 
-  it('subscription POST sends calculated discount when precio is entered', async () => {
+  it('subscription POST sends the agreed price when precio is entered', async () => {
     await navigateToStep3();
     await userEvent.click(screen.getByRole('button', { name: /completo/i }));
     fireEvent.change(screen.getByLabelText(/fecha de inicio/i), {
       target: { value: '2026-06-01' },
     });
-    // plan price 480, precio 380 → discount = 100
     fireEvent.change(screen.getByLabelText(/precio final/i), { target: { value: '380' } });
     await userEvent.click(screen.getByRole('button', { name: /siguiente/i }));
     await userEvent.click(screen.getByRole('button', { name: /crear/i }));
@@ -254,7 +253,7 @@ describe('NewClientPage', () => {
     expect(mockPost).toHaveBeenNthCalledWith(
       2,
       '/clients/1/subscriptions',
-      expect.objectContaining({ discount: 100 }),
+      expect.objectContaining({ price: 380 }),
     );
   });
 
