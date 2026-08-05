@@ -15,20 +15,23 @@ type PlanChange = {
   planPrice: number | null;
   previousPlanId: number;
   previousPlanName: string | null;
-  discount: number;
-  previousDiscount: number;
+  price: number;
+  previousPrice: number;
 };
 
-// Resolved before the write it describes and inside the transaction: the previous plan and
-// discount are unreadable once the update lands.
+// Resolved before the write it describes and inside the transaction: the previous plan and price
+// are unreadable once the update lands.
 const resolvePlanChange = async (
   subscription: Subscription,
   data: UpdateSubscriptionDto,
   transaction: Transaction,
 ): Promise<PlanChange | null> => {
   const planId = data.planId ?? subscription.planId;
-  const discount = data.discount ?? subscription.discount;
-  if (planId === subscription.planId && discount === subscription.discount) return null;
+  // pg returns DECIMAL as a string, so the stored price needs coercing before either the
+  // comparison below or the metadata can treat it as a number
+  const previousPrice = Number(subscription.price);
+  const price = data.price ?? previousPrice;
+  if (planId === subscription.planId && price === previousPrice) return null;
 
   const previousPlan = await Plan.findByPk(subscription.planId, { transaction });
   const plan =
@@ -40,8 +43,8 @@ const resolvePlanChange = async (
     planPrice: plan?.price ?? null,
     previousPlanId: subscription.planId,
     previousPlanName: previousPlan?.name ?? null,
-    discount,
-    previousDiscount: subscription.discount,
+    price,
+    previousPrice,
   };
 };
 

@@ -46,7 +46,7 @@ export const markPaid = async (clientId: number, actor: Actor, transaction?: Tra
           startDate: subscription.startDate,
           duration: subscription.duration,
           contractEndDate: subscription.contractEndDate,
-          discount: subscription.discount,
+          price: subscription.price,
           ...(subscription.appointmentId ? { appointmentId: subscription.appointmentId } : {}),
         },
       },

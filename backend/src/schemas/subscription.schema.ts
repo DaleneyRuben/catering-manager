@@ -15,7 +15,9 @@ export const createSubscriptionSchema = z.object({
   startDate: weekdayDateField.nullable().optional(),
   contractDate: dateField,
   duration: z.number().int().min(1),
-  discount: z.number().int().min(0).optional(),
+  // Bounded only by zero — a contract longer than the plan's quoted 20 days costs more than the
+  // plan, so capping this at plan.price would reject legitimate subscriptions.
+  price: z.number().min(0),
   renewalType: z.enum(['renewal', 'reactivation']).optional(),
   specialInstructions: z.record(z.string(), z.string()).optional(),
   paid: z.boolean().optional(),
@@ -35,7 +37,7 @@ export const updateSubscriptionSchema = z.object({
   duration: z.number().int().min(1).optional(),
   contractEndDate: dateField.optional(),
   suspendedDates: z.array(dateField).optional(),
-  discount: z.number().int().min(0).optional(),
+  price: z.number().min(0).optional(),
   specialInstructions: z.record(z.string(), z.string()).optional(),
 });
 
