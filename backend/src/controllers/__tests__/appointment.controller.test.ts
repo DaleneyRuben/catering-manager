@@ -13,6 +13,7 @@ import {
   updateAppointment,
 } from '../../domains/evaluation';
 import { encodeId } from '../../utils/sqids';
+import { appToday } from '../../utils/date';
 
 jest.mock('../../domains/evaluation');
 jest.mock('../../database/sequelize', () => ({ __esModule: true, default: { query: jest.fn() } }));
@@ -27,12 +28,16 @@ jest.mock('../../middleware/auth', () => ({
 const id1 = encodeId(1);
 const id999 = encodeId(999);
 
+// createAppointmentSchema rejects a past date, so a hardcoded one turns the suite red on whatever
+// day it goes by. Scheduling for today keeps these tests about the controller.
+const scheduledDate = appToday();
+
 beforeEach(() => jest.clearAllMocks());
 
 const validPayload = {
   name: 'Ana Pérez',
   phone: '71234567',
-  date: '2026-08-03',
+  date: scheduledDate,
   time: '09:00',
 };
 
@@ -80,18 +85,18 @@ describe('POST /api/appointments', () => {
       clientId: 5,
       name: 'Fernando Daleney',
       phone: '76637732',
-      date: '2026-08-03',
+      date: scheduledDate,
       time: '09:00',
     });
 
     const res = await request(app)
       .post('/api/appointments')
-      .send({ clientId: encodeId(5), date: '2026-08-03', time: '09:00' });
+      .send({ clientId: encodeId(5), date: scheduledDate, time: '09:00' });
 
     expect(res.status).toBe(201);
     expect(createAppointment).toHaveBeenCalledWith({
       clientId: 5,
-      date: '2026-08-03',
+      date: scheduledDate,
       time: '09:00',
     });
   });
@@ -101,7 +106,7 @@ describe('POST /api/appointments', () => {
 
     const res = await request(app)
       .post('/api/appointments')
-      .send({ clientId: encodeId(999), date: '2026-08-03', time: '09:00' });
+      .send({ clientId: encodeId(999), date: scheduledDate, time: '09:00' });
 
     expect(res.status).toBe(404);
   });
