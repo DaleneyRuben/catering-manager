@@ -27,7 +27,7 @@ export function useRenewalForm({
 }: Options) {
   const [newPlanId, setNewPlanId] = useState(sub?.planId ?? plans[0]?.id ?? '');
   const [durationStr, setDurationStr] = useState('20');
-  // precio = what the client actually pays; discount = plan.price - precio (auto-calculated)
+  // precio = the agreed total for this contract; the plan supplies only its starting value
   const [precioStr, setPrecioStr] = useState('');
   const [startMode, setStartMode] = useState<StartMode>(isReactivation ? 'pick' : 'atEnd');
   const [pickedDate, setPickedDate] = useState('');
@@ -36,15 +36,17 @@ export function useRenewalForm({
   const [paid, setPaid] = useState<boolean | undefined>(undefined);
 
   const newPlan = plans.find((p) => p.id === newPlanId);
-  // A negative discount is a surcharge left by a cambio de plan on the running contract. It does
-  // not carry into the next one — a renewal starts from the plan's own price.
-  const carriedDiscount = Math.max(0, sub?.discount ?? 0);
+  // A surcharge left by a cambio de plan does not carry into the next contract — a renewal
+  // starts from the plan's own price, never higher. A discount does carry, since it is still
+  // the price already agreed for this plan.
+  const carriedPrice = sub ? Math.min(Number(sub.price), sub.plan.price) : undefined;
 
-  // When plan changes, reset precio to (plan.price - previous discount) for same plan, or plan.price for a new plan
+  // Reselecting the client's current plan restores what they pay today; any other plan starts
+  // from that plan's own price for the admin to negotiate from.
   useEffect(() => {
     if (!newPlan) return;
     const defaultPrecio =
-      newPlan.id === sub?.planId ? newPlan.price - carriedDiscount : newPlan.price;
+      newPlan.id === sub?.planId ? (carriedPrice ?? newPlan.price) : newPlan.price;
     setPrecioStr(String(defaultPrecio));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [newPlanId]);
@@ -52,7 +54,9 @@ export function useRenewalForm({
   // Set initial precio on first render once plans load
   useEffect(() => {
     if (plans.length > 0 && precioStr === '' && newPlan) {
-      setPrecioStr(String(newPlan.price - carriedDiscount));
+      setPrecioStr(
+        String(newPlan.id === sub?.planId ? (carriedPrice ?? newPlan.price) : newPlan.price),
+      );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [plans.length]);
@@ -60,7 +64,9 @@ export function useRenewalForm({
   const duration = parseInt(durationStr, 10);
   const validDuration = !Number.isNaN(duration) && duration > 0 ? duration : null;
   const precioNum = precioStr !== '' ? Number(precioStr) : undefined;
-  const discount = newPlan && precioNum !== undefined ? Math.max(0, newPlan.price - precioNum) : 0;
+  // Positive when the client pays less than the plan's quoted price, negative when a longer
+  // contract costs more than it. Display only — the agreed total is what gets stored.
+  const discount = newPlan && precioNum !== undefined ? newPlan.price - precioNum : 0;
   const total = precioNum ?? 0;
 
   const tomorrow = format(addDays(new Date(), 1), 'yyyy-MM-dd');
@@ -94,7 +100,7 @@ export function useRenewalForm({
         contractDate: format(new Date(), 'yyyy-MM-dd'),
         startDate: newStart,
         duration: validDuration!,
-        discount,
+        price: total,
         renewalType: isReactivation ? 'reactivation' : 'renewal',
         ...(showPaidToggle ? { paid } : {}),
       });

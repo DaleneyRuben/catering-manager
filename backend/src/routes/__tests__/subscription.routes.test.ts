@@ -24,7 +24,7 @@ beforeEach(() => {
 });
 
 describe('POST /api/clients/:clientId/subscriptions role guard', () => {
-  const validBody = { planId: encodeId(1), duration: 20, contractDate: '2026-07-25' };
+  const validBody = { planId: encodeId(1), duration: 20, price: 1200, contractDate: '2026-07-25' };
 
   it('rejects nutritionist with 403 now that resolve-renewal creates subscriptions server-side', async () => {
     const res = await request(app)

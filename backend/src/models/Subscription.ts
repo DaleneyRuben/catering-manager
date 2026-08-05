@@ -22,8 +22,11 @@ class Subscription extends Model {
   @BelongsTo(() => Plan)
   declare plan: Plan;
 
-  @Column({ type: DataType.INTEGER, allowNull: false, defaultValue: 0 })
-  declare discount: number;
+  // The agreed total for this contract, frozen when it was agreed. Not derived from the plan:
+  // a plan's price is quoted for 20 delivery days and a longer contract is negotiated upward, so
+  // this may sit either side of plan.price. The plan supplies only the default the admin edits.
+  @Column({ type: DataType.DECIMAL(10, 2), allowNull: false })
+  declare price: number;
 
   @Column({ type: DataType.INTEGER, allowNull: false, defaultValue: 20 })
   declare duration: number;

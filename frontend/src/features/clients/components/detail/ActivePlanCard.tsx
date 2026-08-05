@@ -21,20 +21,21 @@ interface Props {
 
 export function ActivePlanCard({ sub, onUpdateTerms, onUpdateInstructions }: Props) {
   const { plans } = usePlans();
-  const storedPrice = Number(sub.plan.price);
+  const assignedPlanPrice = Number(sub.plan.price);
+  const storedGap = assignedPlanPrice - Number(sub.price);
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [planId, setPlanId] = useState(sub.planId);
   const [durationStr, setDurationStr] = useState(String(sub.duration));
-  const [priceStr, setPriceStr] = useState(String(storedPrice - sub.discount));
+  const [priceStr, setPriceStr] = useState(String(Number(sub.price)));
 
-  // the derived discount follows the selection, not the stored plan
+  // the previewed gap follows the selection, not the stored plan
   const selectedPlan = plans.find((p) => p.id === planId);
-  const planPrice = selectedPlan ? selectedPlan.price : storedPrice;
+  const planPrice = selectedPlan ? selectedPlan.price : assignedPlanPrice;
   const enteredPrice = priceStr !== '' ? Number(priceStr) : NaN;
   // negative when the client already paid more than the new plan lists — a surcharge, not a
   // discount. Only a plan change can produce that, and only because the total is frozen.
-  const derivedDiscount = !Number.isNaN(enteredPrice) ? planPrice - enteredPrice : 0;
+  const gap = !Number.isNaN(enteredPrice) ? planPrice - enteredPrice : 0;
 
   const parsedDuration = parseInt(durationStr, 10);
   const validDuration = !Number.isNaN(parsedDuration) && parsedDuration > 0 ? parsedDuration : 0;
@@ -50,15 +51,14 @@ export function ActivePlanCard({ sub, onUpdateTerms, onUpdateInstructions }: Pro
   const planChanged = planId !== sub.planId;
 
   // What the client pays never moves on a plan change — no charge on an upgrade, no refund on a
-  // downgrade. The price is left alone and the discount absorbs the difference; the admin settles
-  // it by changing the duration instead.
-
+  // downgrade. The price is left alone and the gap absorbs the difference; the admin settles it
+  // by changing the duration instead.
   const handleSave = async () => {
     if (Number.isNaN(enteredPrice) || validDuration === 0) return;
     setSaving(true);
     try {
       await onUpdateTerms({
-        discount: derivedDiscount,
+        price: enteredPrice,
         // sent only when they moved, so an untouched plan writes no terms_changed
         ...(planChanged && { planId }),
         ...(validDuration !== sub.duration && { duration: validDuration }),
@@ -72,7 +72,7 @@ export function ActivePlanCard({ sub, onUpdateTerms, onUpdateInstructions }: Pro
   const handleCancel = () => {
     setPlanId(sub.planId);
     setDurationStr(String(sub.duration));
-    setPriceStr(String(storedPrice - sub.discount));
+    setPriceStr(String(Number(sub.price)));
     setEditing(false);
   };
 
@@ -88,7 +88,7 @@ export function ActivePlanCard({ sub, onUpdateTerms, onUpdateInstructions }: Pro
         <div className="ml-auto text-right">
           <Label variant="field">Total mensual</Label>
           <p className="font-serif text-[40px] font-semibold leading-[1.05] text-olive-700 tabular-nums">
-            {(storedPrice - sub.discount).toLocaleString('es-BO')}
+            {Number(sub.price).toLocaleString('es-BO')}
           </p>
         </div>
       </div>
@@ -183,12 +183,7 @@ export function ActivePlanCard({ sub, onUpdateTerms, onUpdateInstructions }: Pro
           <div className="grid grid-cols-3 gap-3 items-end">
             <div>
               <Label variant="field" htmlFor={planChanged ? undefined : 'price'} className="mb-1.5">
-                Precio{' '}
-                {!planChanged && (
-                  <span className="normal-case tracking-normal text-placeholder">
-                    máx {planPrice.toLocaleString('es-BO')}
-                  </span>
-                )}
+                Precio
               </Label>
               {planChanged ? (
                 <p className="font-mono text-[15px] font-semibold text-ink py-2">
@@ -199,7 +194,6 @@ export function ActivePlanCard({ sub, onUpdateTerms, onUpdateInstructions }: Pro
                   id="price"
                   type="number"
                   min={0}
-                  max={planPrice}
                   value={priceStr}
                   onChange={(e) => setPriceStr(e.target.value)}
                   className={`${inputCls()} font-mono`}
@@ -208,12 +202,10 @@ export function ActivePlanCard({ sub, onUpdateTerms, onUpdateInstructions }: Pro
             </div>
             <div>
               <Label variant="field" className="mb-1.5">
-                {derivedDiscount < 0 ? 'Recargo' : 'Descuento'}
+                {gap < 0 ? 'Recargo' : 'Descuento'}
               </Label>
               <p className="font-mono text-[15px] font-semibold text-warn py-2">
-                {!Number.isNaN(enteredPrice)
-                  ? Math.abs(derivedDiscount).toLocaleString('es-BO')
-                  : '—'}
+                {!Number.isNaN(enteredPrice) ? Math.abs(gap).toLocaleString('es-BO') : '—'}
               </p>
             </div>
             <div>
@@ -263,15 +255,15 @@ export function ActivePlanCard({ sub, onUpdateTerms, onUpdateInstructions }: Pro
               Precio
             </Label>
             <p className="font-mono text-[16px] font-semibold text-ink">
-              {storedPrice.toLocaleString('es-BO')}
+              {assignedPlanPrice.toLocaleString('es-BO')}
             </p>
           </div>
           <div>
             <Label variant="field" className="mb-1">
-              {sub.discount < 0 ? 'Recargo' : 'Descuento'}
+              {storedGap < 0 ? 'Recargo' : 'Descuento'}
             </Label>
             <p className="font-mono text-[16px] font-semibold text-warn">
-              {sub.discount !== 0 ? Math.abs(sub.discount).toLocaleString('es-BO') : '—'}
+              {storedGap !== 0 ? Math.abs(storedGap).toLocaleString('es-BO') : '—'}
             </p>
           </div>
           <div>
@@ -279,7 +271,7 @@ export function ActivePlanCard({ sub, onUpdateTerms, onUpdateInstructions }: Pro
               Total
             </Label>
             <p className="font-mono text-[16px] font-semibold text-olive-700">
-              {(storedPrice - sub.discount).toLocaleString('es-BO')}
+              {Number(sub.price).toLocaleString('es-BO')}
             </p>
           </div>
         </div>

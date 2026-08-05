@@ -30,8 +30,7 @@ Each client has:
 - Contract end date (auto-calculated — see Plan Duration)
 - Start date
 - Assigned plan
-- Discount (negotiated per client — independent of the plan's base price; may be negative after a plan change, see Change of plan)
-- Total (plan price − discount; plan price is read from the assigned plan, not copied to the subscription)
+- Price (`price` — the agreed total for this contract, negotiated per client and stored on the subscription)
 - Delivery group (`groupToken` — optional UUID shared with other clients at the same address)
 
 ### Delivery groups
@@ -54,7 +53,9 @@ Each plan has:
 - **Price** — base price of the plan (a fixed monetary amount)
 - **Meals** — which meal types are included (see below)
 
-Plans do **not** have a description or discount field. Discounts are set per client at the subscription level (see Client above).
+A plan's price is quoted for **20 delivery days** — one working month. This is a convention, not a stored field: nothing in the system divides or multiplies by it. A contract of a different length is priced by negotiation, not proportionally (see Price below).
+
+Plans do **not** have a description or discount field. What a client actually pays is set per client at the subscription level (see Client above).
 
 Meal types (stored as English keys in the DB, displayed in Spanish in the UI):
 
@@ -70,6 +71,28 @@ Meal types (stored as English keys in the DB, displayed in Spanish in the UI):
 | `extra`           | Extra       |
 
 A plan can include any combination of meal types.
+
+---
+
+## Price
+
+What a client pays is **negotiated per contract and stored on the subscription** as `price`, a
+`DECIMAL(10,2)`. It is never derived from the plan on read.
+
+- **The plan supplies a starting point, not the answer.** Selecting a plan pre-fills the field with
+  that plan's price; the admin then edits it. A later change to the plan's own price does not move
+  what any existing client pays.
+- **It is bounded only by zero.** A plan's price is quoted for 20 delivery days, so a longer
+  contract legitimately costs _more_ than the plan it came from. The UI shows the difference against
+  the plan price as **Descuento** when the client pays less and **Recargo** when they pay more —
+  both display-only, derived from `plan.price - subscription.price`.
+- **Longer contracts are priced by negotiation, not proportionally.** The system never computes a
+  price from a duration; the admin enters both.
+- **It stays put through a plan change.** See Change of plan.
+- Editing it on an existing subscription records `terms_changed` (see History).
+
+There is no discount field. One stored number — the agreed total — is the single source of truth
+for what a client pays.
 
 ---
 
@@ -258,7 +281,7 @@ Clients may renew immediately after a plan ends, or return months later after st
 
 - Start date must be tomorrow at the earliest — "today" is not a valid option. The user selects a future date from a calendar.
 - Duration is defined by the user in days (no default).
-- A discount may be applied at reactivation time.
+- The price is agreed at reactivation time.
 - The new `contractEndDate` is recalculated from the new start date and duration.
 
 ### Renewal
@@ -268,7 +291,7 @@ When an active plan reaches its end date, the client may renew. Renewal rules:
 - Start date options: a future date selected from a calendar, or no date defined — in which case the client enters the new subscription in **paused** state until manually activated.
 - "Today" is not a valid start date for renewals.
 - Duration is defined by the user in days (no default).
-- A discount may be applied at renewal time.
+- The price is agreed at renewal time.
 - The new `contractEndDate` is calculated from the start date and duration.
 
 A Nutricionista can also perform a renewal or reactivation through Evaluaciones' appointment-driven renewal flow, subject to the same rules above, with one addition: a paid/unpaid choice not present in the Admin-initiated flow (see Evaluaciones (Appointments)).
@@ -280,6 +303,8 @@ tried the food. This is a change to the **existing** subscription, never a new o
 
 - The assigned plan is replaced on the running subscription. No second subscription is created,
   no plan is finalized, and the client's contract continues.
+- **The agreed price does not move.** It is what the client already paid, so it rides through the
+  change untouched; only the plan and the duration change.
 - **No money changes hands, in either direction.** An upgrade is not charged a difference and a
   downgrade is not refunded. The difference is settled in **delivery days**: the admin sets a new
   duration so the amount already paid covers the new plan over a shorter (upgrade) or longer
@@ -295,17 +320,17 @@ remaining delivery days live, and — when the plan differs from the stored one 
 change generates no charge and no refund.
 
 **The total the client pays is frozen while the plan is being changed**, which is what "no money
-changes hands" means in the data: the price field is not editable in that state, and the
-**discount absorbs the difference** against the new plan's price. A client paying 1.350 who moves
-to a plan listing 3.660 keeps paying 1.350 with a discount of 2.310. The admin then shortens the
-duration so that 1.350 covers fewer days of the pricier plan.
+changes hands" means in the data: the price field is not editable in that state, and the gap
+against the new plan's price is shown as **Descuento** or **Recargo**, derived exactly as in
+[Price](#price) (`plan.price - subscription.price`) — nothing extra is stored for it. A client
+paying 1.350 who moves to a plan listing 3.660 keeps paying 1.350; the card shows a Descuento of
+2.310 against the new plan. The admin then shortens the duration so that 1.350 covers fewer days
+of the pricier plan.
 
-Moving to a plan that lists **below** what the client already paid inverts the discount: paying
-1.350 on a plan listing 800 stores a discount of **−550**. `Subscription.discount` is a plain
-`INTEGER` with no lower bound, and `updateSubscriptionSchema` allows a negative value for exactly
-this case — `createSubscriptionSchema` does not, since nothing at creation time can produce one.
-The card labels a negative discount **Recargo** and shows it unsigned, because "Descuento: −550"
-describes the opposite of what happened.
+Moving to a plan that lists **below** what the client already paid inverts the gap: paying 1.350
+on a plan listing 800 shows a Recargo of 550, unsigned, because "Descuento: 550" would describe the
+opposite of what happened. The price itself never goes negative — it is bounded only by zero, same
+as any other price edit.
 
 ### Pause / Resume
 
@@ -372,21 +397,27 @@ The internal Sun–Thu kitchen schedule is never shown to the client.
 
 For each client, the system tracks these events. Every key is `<subject>_<verb>` — the stored values live in one place per side (`backend/src/constants/history.constants.ts` and `frontend/src/features/clients/constants/historyEvents.ts`) and are never written as literals outside the tests that pin them.
 
-- Plan assignment (`plan_assigned`) — on subscription creation only (metadata: the plan, its price at that moment, start date, duration, end date, and discount).
+- Plan assignment (`plan_assigned`) — on subscription creation only (metadata: the plan, its price at that moment, start date, duration, end date, and the agreed price).
 - Renewal (`plan_renewed`) and reactivation (`plan_reactivated`).
 - Dates change (`dates_changed`) — whenever the start date or duration of an existing subscription changes, including when a "sin fecha" renewal is given its start date (metadata: the new dates and duration, and nothing about the plan, which the edit does not touch).
-- Terms change (`terms_changed`) — whenever the assigned plan or the discount of an existing subscription changes (metadata: previous and new plan, the new plan's price, and previous and new discount). Both fields are covered by one event because both change what the client pays. It fires only when a value actually differs from the stored one, so re-submitting the same plan records nothing.
+- Terms change (`terms_changed`) — whenever the assigned plan or the price of an existing subscription changes (metadata: previous and new plan, the new plan's list price, and previous and new agreed price). Both fields are covered by one event because both change what the client pays. It fires only when a value actually differs from the stored one, so re-submitting the same plan records nothing. The agreed price is recorded on both sides even when only the plan moved, so the timeline can show the total beside a plan change.
 - Pause (`plan_paused`), resume (`plan_resumed`), suspension (`days_suspended` — with the newly suspended dates), finalization (`plan_finalized`), and client deletion (`client_deleted`).
 
 History entries are append-only — past records are never overwritten when a plan changes. Entries written before `dates_changed` existed are `plan_assigned` rows carrying only dates; they are left as they are and keep their original label.
 
-A plan change and a discount edit both write `terms_changed`, and both reach it through the same control — the plan tab's "Plan y precio" card (see Change of plan). A plan change usually arrives paired with `dates_changed`, since the duration moves with it.
+A plan change and a price edit both write `terms_changed`, and both reach it through the same control — the plan tab's "Plan y precio" card (see Change of plan). A plan change usually arrives paired with `dates_changed`, since the duration moves with it.
 
 Every history event, regardless of type or who triggered it (Admin or Nutricionista), records the acting user's id and username. A `plan_assigned`, `plan_renewed`, or `plan_reactivated` event originating from Evaluaciones additionally carries the originating appointment's id in its metadata, so provenance survives even if the appointment record itself is later pruned (see Evaluaciones (Appointments)).
 
 ### How an event is labelled
 
-The Spanish label on a timeline row is derived when the page renders, never stored, so relabelling costs no migration. Most keys map to one fixed label (`plan_paused` → "Plan pausado"). `terms_changed` is the exception: it produces **"Precio modificado"**, **"Plan modificado"** or **"Plan y precio modificados"**, chosen by comparing the previous and new values the row already carries. Rows also show what moved — `antes 1.450 · ahora 1.300/mes` for a price, `antes Ligero · ahora Completo` for a plan. When the plan moved, the old total is not shown: the previous plan's price is not recorded, so it cannot be reconstructed.
+The Spanish label on a timeline row is derived when the page renders, never stored, so relabelling costs no migration. Most keys map to one fixed label (`plan_paused` → "Plan pausado"). `terms_changed` is the exception: it produces **"Precio modificado"**, **"Plan modificado"** or **"Plan y precio modificados"**, chosen by comparing the previous and new values the row already carries. Rows also show what moved:
+
+- Price alone — `antes 1.450 · ahora 1.300/mes`.
+- Plan alone — `antes Ligero · ahora Completo · 1.450/mes`. A plan change moves no money, so the total is the same on both sides and is stated once.
+- Both — `antes Ligero 1.450 · ahora Completo 1.700/mes`.
+
+Rows written before the subscription carried its own price record a discount off the plan's price instead. History is append-only, so both shapes are read forever: on those older rows the total before a plan change cannot be reconstructed (the previous plan's price was never recorded), and the plan move is shown alone, exactly as it always was.
 
 ---
 

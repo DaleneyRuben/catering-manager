@@ -64,7 +64,7 @@ export const deleteUpcomingSubscription = async (
           startDate: subscription.startDate,
           contractEndDate: subscription.contractEndDate,
           duration: subscription.duration,
-          discount: subscription.discount,
+          price: Number(subscription.price),
           // the history row names the moment the renewal was registered, which is what ties it to
           // the plan_renewed entry above it — that entry is never modified
           registeredAt: subscription.createdAt,

@@ -13,7 +13,7 @@ type PlanEventMetadata = {
   planId: number;
   planName: string | null;
   planPrice: number | null;
-  discount: number;
+  price: number;
   appointmentId?: number;
 };
 
@@ -24,15 +24,17 @@ type ContractEventMetadata = {
   contractEndDate: string | null;
 };
 
-// A move in the commercial terms of a running subscription — the plan, the discount, or both.
+// A move in the commercial terms of a running subscription — the plan, the price, or both. The
+// price is carried on both sides even when only the plan moved, so the timeline can show the
+// total beside a plan change instead of omitting it.
 type PlanChangedMetadata = {
   planId: number;
   planName: string | null;
   planPrice: number | null;
   previousPlanId: number;
   previousPlanName: string | null;
-  discount: number;
-  previousDiscount: number;
+  price: number;
+  previousPrice: number;
 };
 
 type RenewalDeletedMetadata = {
@@ -41,7 +43,7 @@ type RenewalDeletedMetadata = {
   startDate: string | null;
   contractEndDate: string | null;
   duration: number;
-  discount: number;
+  price: number;
   registeredAt: Date;
 };
 

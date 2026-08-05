@@ -133,12 +133,12 @@ export function useClient(id: string | number) {
   const updateSubscriptionTermsMutation = useMutation({
     mutationFn: ({
       subscriptionId,
-      discount,
+      price,
       planId,
       duration,
     }: { subscriptionId: string } & SubscriptionTermsDraft) =>
       api.patch(`/clients/${id}/subscriptions/${subscriptionId}`, {
-        discount,
+        price,
         ...(planId !== undefined && { planId }),
         ...(duration !== undefined && { duration }),
       }),

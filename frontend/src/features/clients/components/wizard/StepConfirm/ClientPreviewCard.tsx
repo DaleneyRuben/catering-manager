@@ -28,7 +28,8 @@ export function ClientPreviewCard({ formValues, restrictions, plans }: Props) {
     formValues.startDate && formValues.duration > 0
       ? formatDate(addBusinessDays(formValues.startDate, formValues.duration - 1)) // duration - 1 because startDate counts as day 1
       : '—';
-  const total = (selectedPlan?.price ?? 0) - (formValues.discount || 0);
+  const total = formValues.price || 0;
+  const gap = (selectedPlan?.price ?? 0) - total;
   const fmt = (n: number) => n.toLocaleString('es-BO');
   const sexLabel = SEX_LABELS[formValues.sex] || formValues.sex || '—';
   const alergList = restrictions.restrictions.length
@@ -63,7 +64,7 @@ export function ClientPreviewCard({ formValues, restrictions, plans }: Props) {
       rows: [
         { k: 'Plan', v: selectedPlan?.name ?? '—' },
         { k: 'Precio sin descuento', v: selectedPlan ? fmt(selectedPlan.price) : '—' },
-        { k: 'Descuento', v: fmt(formValues.discount || 0) },
+        { k: gap < 0 ? 'Recargo' : 'Descuento', v: fmt(Math.abs(gap)) },
         {
           k: 'Inicio del contrato',
           v: formValues.startDate ? formatDate(formValues.startDate) : '—',

@@ -221,7 +221,7 @@ describe('nutritionist-only resolve-renewal route role guard', () => {
     const res = await request(app)
       .post('/api/appointments/abc123/resolve-renewal')
       .set(headersForRole(ROLES.NUTRITIONIST))
-      .send({ planId: 'abc', contractDate: '2026-07-24', duration: 20 });
+      .send({ planId: 'abc', contractDate: '2026-07-24', duration: 20, price: 1200 });
 
     expect(res.status).toBe(201);
   });
@@ -230,7 +230,7 @@ describe('nutritionist-only resolve-renewal route role guard', () => {
     const res = await request(app)
       .post('/api/appointments/abc123/resolve-renewal')
       .set(headersForRole(ROLES.ADMIN))
-      .send({ planId: 'abc', contractDate: '2026-07-24', duration: 20 });
+      .send({ planId: 'abc', contractDate: '2026-07-24', duration: 20, price: 1200 });
 
     expect(res.status).toBe(403);
   });
@@ -239,7 +239,7 @@ describe('nutritionist-only resolve-renewal route role guard', () => {
     const res = await request(app)
       .post('/api/appointments/abc123/resolve-renewal')
       .set(headersForRole(ROLES.SUPER_ADMIN))
-      .send({ planId: 'abc', contractDate: '2026-07-24', duration: 20 });
+      .send({ planId: 'abc', contractDate: '2026-07-24', duration: 20, price: 1200 });
 
     expect(res.status).toBe(403);
   });

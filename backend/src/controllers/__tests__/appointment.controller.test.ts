@@ -306,6 +306,7 @@ describe('POST /api/appointments/:id/convert', () => {
     planId: encodeId(2),
     contractDate: '2026-07-24',
     duration: 20,
+    price: 1200,
     paid: true,
   };
 
@@ -363,6 +364,7 @@ describe('POST /api/appointments/:id/resolve-renewal', () => {
     planId: encodeId(2),
     contractDate: '2026-07-24',
     duration: 20,
+    price: 1200,
   };
 
   it('returns 201 with the created subscription', async () => {

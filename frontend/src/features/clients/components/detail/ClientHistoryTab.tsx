@@ -4,7 +4,11 @@ import { Skeleton } from '@ui/Skeleton';
 import { useClientHistory } from '@/features/clients/hooks/useClientHistory';
 import { formatDate } from '@/utils/format';
 import { HISTORY_EVENTS, PLAN_CHIP_EVENTS } from '@/features/clients/constants/historyEvents';
-import { resolveEventChange, resolveEventLabel } from '@/features/clients/utils/historyEvent';
+import {
+  resolveEventChange,
+  resolveEventLabel,
+  resolveEventTotal,
+} from '@/features/clients/utils/historyEvent';
 import { ClientHistorySummary } from '@/features/clients/components/detail/ClientHistorySummary';
 import { DeliveryCalendarCard } from '@/features/clients/components/detail/DeliveryCalendarCard';
 import { buildDeliveryCalendar } from '@/features/clients/utils/deliveryCalendar';
@@ -113,9 +117,7 @@ export function ClientHistoryTab({
             {history.map((entry, i) => {
               const meta = entry.metadata;
               const planName = typeof meta?.planName === 'string' ? meta.planName : null;
-              const planPrice =
-                meta?.planPrice !== null ? parseFloat(String(meta.planPrice)) : null;
-              const discount = typeof meta?.discount === 'number' ? meta.discount : 0;
+              const total = resolveEventTotal(entry);
               const showPlanDetails = PLAN_CHIP_EVENTS.includes(entry.eventType) && planName;
 
               // what actually moved on this row — a price, a plan, or a contract's dates
@@ -164,9 +166,9 @@ export function ClientHistoryTab({
                       {changeLine ? (
                         <span className="font-mono text-[11px] text-faint">{changeLine}</span>
                       ) : (
-                        planPrice !== null && (
+                        total !== null && (
                           <span className="font-mono text-[11px] text-faint">
-                            {(planPrice - discount).toLocaleString('es-BO')}/mes
+                            {total.toLocaleString('es-BO')}/mes
                           </span>
                         )
                       )}

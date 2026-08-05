@@ -8,7 +8,7 @@ export interface Subscription {
   contractDate: string;
   startDate: string | null;
   contractEndDate: string | null;
-  discount: number;
+  price: number;
   duration: number;
   suspendedDates: string[];
   finalizedAt: string | null;
@@ -20,7 +20,7 @@ export interface Subscription {
 // What the plan card can move in one edit. `planId` and `duration` are omitted when they did not
 // change, so an untouched plan never writes a spurious terms_changed on the backend.
 export interface SubscriptionTermsDraft {
-  discount: number;
+  price: number;
   planId?: string;
   duration?: number;
 }
@@ -68,7 +68,7 @@ export interface RenewalPayload {
   contractDate: string;
   startDate?: string | null;
   duration: number;
-  discount: number;
+  price: number;
   renewalType: 'renewal' | 'reactivation';
   paid?: boolean;
 }
@@ -87,7 +87,7 @@ export interface NewClientFormValues {
   contractDate: string;
   startDate: string;
   duration: number;
-  discount: number;
+  price: number;
   specialInstructions: Record<string, string>;
 }
 

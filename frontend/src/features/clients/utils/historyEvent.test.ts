@@ -1,6 +1,10 @@
 import { HISTORY_EVENTS } from '@/features/clients/constants/historyEvents';
 import type { ClientHistoryEntry } from '@/features/clients/types';
-import { resolveEventLabel, resolveEventChange } from '@/features/clients/utils/historyEvent';
+import {
+  resolveEventLabel,
+  resolveEventChange,
+  resolveEventTotal,
+} from '@/features/clients/utils/historyEvent';
 
 const entry = (overrides: Partial<ClientHistoryEntry> = {}): ClientHistoryEntry => ({
   id: '1',
@@ -13,6 +17,141 @@ const entry = (overrides: Partial<ClientHistoryEntry> = {}): ClientHistoryEntry 
 });
 
 const planChange = (metadata: Record<string, unknown>) => entry({ metadata });
+
+// Rows written before the subscription carried its own price record discount/previousDiscount
+// instead. History is append-only, so both shapes are read forever.
+describe('resolveEventLabel on rows carrying the subscription price', () => {
+  it('names a price move by the price', () => {
+    expect(
+      resolveEventLabel(
+        planChange({
+          planId: '2',
+          planName: 'Reductor',
+          planPrice: 1450,
+          previousPlanId: '2',
+          previousPlanName: 'Reductor',
+          price: 1300,
+          previousPrice: 1450,
+        }),
+      ),
+    ).toBe('Precio modificado');
+  });
+
+  // A plan change moves no money, so the price is identical on both sides and only the plan moved.
+  it('names a plan move by the plan when the price rode through unchanged', () => {
+    expect(
+      resolveEventLabel(
+        planChange({
+          planId: '5',
+          planName: 'Completo',
+          planPrice: 1800,
+          previousPlanId: '2',
+          previousPlanName: 'Ligero',
+          price: 1450,
+          previousPrice: 1450,
+        }),
+      ),
+    ).toBe('Plan modificado');
+  });
+
+  it('names both when the plan and the price moved together', () => {
+    expect(
+      resolveEventLabel(
+        planChange({
+          planId: '5',
+          planName: 'Completo',
+          planPrice: 1800,
+          previousPlanId: '2',
+          previousPlanName: 'Ligero',
+          price: 1700,
+          previousPrice: 1450,
+        }),
+      ),
+    ).toBe('Plan y precio modificados');
+  });
+});
+
+describe('resolveEventChange on rows carrying the subscription price', () => {
+  it('reads both totals straight off the row instead of reconstructing them', () => {
+    expect(
+      resolveEventChange(
+        planChange({
+          planId: '2',
+          planName: 'Reductor',
+          planPrice: 1450,
+          previousPlanId: '2',
+          previousPlanName: 'Reductor',
+          price: 1300,
+          previousPrice: 1450,
+        }),
+      ),
+    ).toBe('antes 1.450 · ahora 1.300/mes');
+  });
+
+  // The previous total used to be unreconstructible after a plan move, so it was omitted. With the
+  // price stored on the subscription it survives the change and can be shown alongside.
+  it('shows the unchanged total beside a plan that moved', () => {
+    expect(
+      resolveEventChange(
+        planChange({
+          planId: '5',
+          planName: 'Completo',
+          planPrice: 1800,
+          previousPlanId: '2',
+          previousPlanName: 'Ligero',
+          price: 1450,
+          previousPrice: 1450,
+        }),
+      ),
+    ).toBe('antes Ligero · ahora Completo · 1.450/mes');
+  });
+
+  it('shows both plans and both totals when the plan and the price moved together', () => {
+    expect(
+      resolveEventChange(
+        planChange({
+          planId: '5',
+          planName: 'Completo',
+          planPrice: 1800,
+          previousPlanId: '2',
+          previousPlanName: 'Ligero',
+          price: 1700,
+          previousPrice: 1450,
+        }),
+      ),
+    ).toBe('antes Ligero 1.450 · ahora Completo 1.700/mes');
+  });
+});
+
+describe('resolveEventTotal', () => {
+  it('reads the agreed total straight off a row that carries it', () => {
+    expect(
+      resolveEventTotal(
+        entry({
+          eventType: HISTORY_EVENTS.PLAN_ASSIGNED,
+          metadata: { planName: 'Completo', planPrice: 1800, price: 1450 },
+        }),
+      ),
+    ).toBe(1450);
+  });
+
+  it('reconstructs the total from the plan price and discount on a legacy row', () => {
+    expect(
+      resolveEventTotal(
+        entry({
+          eventType: HISTORY_EVENTS.PLAN_ASSIGNED,
+          metadata: { planName: 'Completo', planPrice: 1800, discount: 350 },
+        }),
+      ),
+    ).toBe(1450);
+  });
+
+  it('says nothing when the row records no price at all', () => {
+    expect(
+      resolveEventTotal(entry({ eventType: HISTORY_EVENTS.PLAN_ASSIGNED, metadata: {} })),
+    ).toBeNull();
+  });
+});
 
 describe('resolveEventLabel', () => {
   it('names a price move by the price, not by the plan', () => {

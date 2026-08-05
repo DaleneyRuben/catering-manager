@@ -17,7 +17,7 @@ const makeSub = (overrides = {}) => ({
   contractDate: '2026-05-01',
   startDate: '2026-05-01',
   contractEndDate: '2026-06-05',
-  discount: 0,
+  price: 480,
   plan: { id: 1, name: 'Completo', meals: [], price: 480 },
   ...overrides,
 });
@@ -110,7 +110,9 @@ describe('ClientsPage', () => {
     mockGetPaginated.mockResolvedValue(
       paginatedResponse([
         makeClient({
-          subscriptions: [makeSub({ plan: { id: 1, name: 'Completo', meals: [], price: 1450 } })],
+          subscriptions: [
+            makeSub({ price: 1450, plan: { id: 1, name: 'Completo', meals: [], price: 1450 } }),
+          ],
         }),
       ]),
     );

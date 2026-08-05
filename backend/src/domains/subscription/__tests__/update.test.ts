@@ -359,11 +359,14 @@ describe('update', () => {
     expect(record).not.toHaveBeenCalled();
   });
 
+  // A plan change moves no money in either direction, so the price rides through untouched and
+  // only the plan half of the event differs. The total is still recorded on both sides, which is
+  // what lets the timeline show it beside a plan that moved.
   it('records a terms_changed event when the assigned plan changes', async () => {
     const mockInstance = {
       clientId: 1,
       planId: 2,
-      discount: 100,
+      price: 1200,
       startDate: '2026-05-26',
       duration: 20,
       contractEndDate: addDeliveryDays('2026-05-26', 19),
@@ -388,8 +391,8 @@ describe('update', () => {
           planPrice: 1800,
           previousPlanId: 2,
           previousPlanName: 'Ligero',
-          discount: 100,
-          previousDiscount: 100,
+          price: 1200,
+          previousPrice: 1200,
         },
       },
       transaction,
@@ -402,7 +405,7 @@ describe('update', () => {
     const mockInstance = {
       clientId: 1,
       planId: 2,
-      discount: 100,
+      price: 100,
       startDate: '2026-05-26',
       duration: 20,
       contractEndDate: addDeliveryDays('2026-05-26', 19),
@@ -452,21 +455,21 @@ describe('update', () => {
           planPrice: 1800,
           previousPlanId: 2,
           previousPlanName: 'Ligero',
-          discount: 100,
-          previousDiscount: 100,
+          price: 100,
+          previousPrice: 100,
         },
       },
       transaction,
     );
   });
 
-  // The discount is what the client actually pays, so moving it is a change to the commercial
-  // terms even when the plan behind it stays put.
-  it('records a terms_changed event when only the discount changes', async () => {
+  // The price is what the client actually pays, so moving it is a change to the commercial terms
+  // even when the plan behind it stays put.
+  it('records a terms_changed event when only the price changes', async () => {
     const mockInstance = {
       clientId: 1,
       planId: 2,
-      discount: 100,
+      price: 1100,
       startDate: '2026-05-26',
       duration: 20,
       contractEndDate: addDeliveryDays('2026-05-26', 19),
@@ -476,7 +479,7 @@ describe('update', () => {
     (Subscription.findOne as jest.Mock).mockResolvedValue(mockInstance);
     (Plan.findByPk as jest.Mock).mockResolvedValue({ id: 2, name: 'Ligero', price: 1200 });
 
-    await update(1, 1, { discount: 250 }, actor);
+    await update(1, 1, { price: 950 }, actor);
 
     expect(record).toHaveBeenCalledWith(
       actor,
@@ -489,8 +492,8 @@ describe('update', () => {
           planPrice: 1200,
           previousPlanId: 2,
           previousPlanName: 'Ligero',
-          discount: 250,
-          previousDiscount: 100,
+          price: 950,
+          previousPrice: 1100,
         },
       },
       transaction,
@@ -499,22 +502,39 @@ describe('update', () => {
     expect(Plan.findByPk).toHaveBeenCalledTimes(1);
   });
 
-  it('does not record terms_changed when neither the plan nor the discount moves', async () => {
+  it('records a terms_changed event when a price rises above the plan price', async () => {
     const mockInstance = {
       clientId: 1,
       planId: 2,
-      discount: 100,
+      price: 1200,
+      suspendedDates: [],
+      update: jest.fn().mockResolvedValue({}),
+    };
+    (Subscription.findOne as jest.Mock).mockResolvedValue(mockInstance);
+    (Plan.findByPk as jest.Mock).mockResolvedValue({ id: 2, name: 'Ligero', price: 1200 });
+
+    await update(1, 1, { price: 1800 }, actor);
+
+    expect(record).toHaveBeenCalledWith(
+      actor,
+      expect.objectContaining({
+        metadata: expect.objectContaining({ price: 1800, previousPrice: 1200 }),
+      }),
+      transaction,
+    );
+  });
+
+  it('does not record terms_changed when neither the plan nor the price moves', async () => {
+    const mockInstance = {
+      clientId: 1,
+      planId: 2,
+      price: 1200,
       suspendedDates: [],
       update: jest.fn().mockResolvedValue({}),
     };
     (Subscription.findOne as jest.Mock).mockResolvedValue(mockInstance);
 
-    await update(
-      1,
-      1,
-      { planId: 2, discount: 100, specialInstructions: { lunch: 'GRANDE' } },
-      actor,
-    );
+    await update(1, 1, { planId: 2, price: 1200, specialInstructions: { lunch: 'GRANDE' } }, actor);
 
     expect(record).not.toHaveBeenCalled();
   });
@@ -523,14 +543,14 @@ describe('update', () => {
     const mockInstance = {
       clientId: 1,
       planId: 2,
-      discount: 100,
+      price: 1200,
       suspendedDates: [],
       update: jest.fn().mockResolvedValue({}),
     };
     (Subscription.findOne as jest.Mock).mockResolvedValue(mockInstance);
     (Plan.findByPk as jest.Mock).mockResolvedValue({ id: 2, name: 'Ligero', price: 1200 });
 
-    await update(1, 1, { discount: 250 }, actor);
+    await update(1, 1, { price: 950 }, actor);
 
     const [updateOrder] = mockInstance.update.mock.invocationCallOrder;
     const [recordOrder] = (record as jest.Mock).mock.invocationCallOrder;

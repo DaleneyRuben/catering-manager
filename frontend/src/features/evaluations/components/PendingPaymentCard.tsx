@@ -11,7 +11,7 @@ interface Props {
 export function PendingPaymentCard({ client, onMarkPaid, onDelete }: Props) {
   const subscription = client.subscriptions[0];
   const { plan } = subscription;
-  const total = plan.price - subscription.discount;
+  const total = Number(subscription.price);
 
   return (
     <div className="bg-paper border border-rule rounded-[14px] overflow-hidden flex flex-col hover:shadow-[var(--shadow-card-hover)] hover:border-olive-200 transition-all">

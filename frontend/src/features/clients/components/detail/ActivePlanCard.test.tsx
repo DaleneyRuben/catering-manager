@@ -21,7 +21,7 @@ const sub: Subscription = {
   startDate: '2026-01-02',
   contractEndDate: '2026-03-01',
   duration: 40,
-  discount: 10,
+  price: 140,
   suspendedDates: [],
   finalizedAt: null,
   plan: {
@@ -42,13 +42,13 @@ beforeEach(() => {
 it('renders plan name and total', () => {
   render(<ActivePlanCard sub={sub} onUpdateTerms={onUpdateTerms} />);
   expect(screen.getByText('Completo')).toBeInTheDocument();
-  expect(screen.getAllByText('140')).toHaveLength(2); // header + grid row (150 - 10)
+  expect(screen.getAllByText('140')).toHaveLength(2); // header + grid row
 });
 
 it('formats prices over 1000 with a dot thousands separator', () => {
   const bigSub: Subscription = {
     ...sub,
-    discount: 0,
+    price: 1390,
     plan: { ...sub.plan, price: 1390 },
   };
   render(<ActivePlanCard sub={bigSub} onUpdateTerms={onUpdateTerms} />);
@@ -61,10 +61,26 @@ it('renders meal pills', () => {
   expect(screen.getByText('Almuerzo')).toBeInTheDocument();
 });
 
-it('shows price/discount/total in read mode', () => {
+it('shows the plan price, the gap against it and the total in read mode', () => {
   render(<ActivePlanCard sub={sub} onUpdateTerms={onUpdateTerms} />);
   expect(screen.getByText('150')).toBeInTheDocument();
+  expect(screen.getByText('Descuento')).toBeInTheDocument();
   expect(screen.getByText('10')).toBeInTheDocument();
+});
+
+// A plan's price is quoted for 20 delivery days, so a longer contract legitimately costs more
+// than the plan it came from — something the old discount-only model could not represent.
+it('calls the gap a surcharge when the agreed price is above the plan price', () => {
+  const longer: Subscription = { ...sub, price: 220, duration: 30 };
+  render(<ActivePlanCard sub={longer} onUpdateTerms={onUpdateTerms} />);
+  expect(screen.getByText('Recargo')).toBeInTheDocument();
+  expect(screen.getByText('70')).toBeInTheDocument();
+});
+
+it('does not cap the price input at the plan price', () => {
+  render(<ActivePlanCard sub={sub} onUpdateTerms={onUpdateTerms} />);
+  fireEvent.click(screen.getByRole('button', { name: /editar/i }));
+  expect(screen.getByDisplayValue('140')).not.toHaveAttribute('max');
 });
 
 it('opens edit form when pencil is clicked', () => {
@@ -73,13 +89,21 @@ it('opens edit form when pencil is clicked', () => {
   expect(screen.getByDisplayValue('140')).toBeInTheDocument();
 });
 
-it('calls onUpdateTerms with the derived discount on save', async () => {
+it('calls onUpdateTerms with the agreed price on save', async () => {
   render(<ActivePlanCard sub={sub} onUpdateTerms={onUpdateTerms} />);
   fireEvent.click(screen.getByRole('button', { name: /editar/i }));
   const input = screen.getByDisplayValue('140');
   fireEvent.change(input, { target: { value: '120' } });
   fireEvent.click(screen.getByRole('button', { name: /guardar/i }));
-  await waitFor(() => expect(onUpdateTerms).toHaveBeenCalledWith({ discount: 30 })); // 150 - 120 = 30
+  await waitFor(() => expect(onUpdateTerms).toHaveBeenCalledWith({ price: 120 }));
+});
+
+it('saves a price above the plan price rather than clamping it', async () => {
+  render(<ActivePlanCard sub={sub} onUpdateTerms={onUpdateTerms} />);
+  fireEvent.click(screen.getByRole('button', { name: /editar/i }));
+  fireEvent.change(screen.getByDisplayValue('140'), { target: { value: '220' } });
+  fireEvent.click(screen.getByRole('button', { name: /guardar/i }));
+  await waitFor(() => expect(onUpdateTerms).toHaveBeenCalledWith({ price: 220 }));
 });
 
 it('cancels edit without saving', () => {
@@ -164,10 +188,9 @@ describe('cambio de plan', () => {
     expect(screen.getByText('—')).toBeInTheDocument();
   });
 
-  it('caps the price at the plan price while the plan is untouched', () => {
+  it('does not cap the price input at the plan price while the plan is untouched', () => {
     openEdit();
-    expect(priceInput()).toHaveAttribute('max', '150');
-    expect(screen.getByText('máx 150')).toBeInTheDocument();
+    expect(priceInput()).not.toHaveAttribute('max');
   });
 
   // a plan change moves no money in either direction, so the total the client pays is frozen
@@ -180,8 +203,8 @@ describe('cambio de plan', () => {
     expect(cell('Total')).toBe('140');
   });
 
-  it('absorbs an upgrade into the discount, leaving the total alone', () => {
-    openEdit({ ...running, discount: 0 });
+  it('absorbs an upgrade into the gap, leaving the total alone', () => {
+    openEdit({ ...running, price: 150 });
     fireEvent.change(planSelect(), { target: { value: '3' } }); // Premium 300, client pays 150
 
     expect(cell('Descuento')).toBe('150'); // 300 − 150
@@ -198,12 +221,12 @@ describe('cambio de plan', () => {
     expect(cell('Total')).toBe('140');
   });
 
-  it('sends the negative discount so the client keeps paying what they paid', async () => {
+  it('sends the frozen price so the client keeps paying what they paid', async () => {
     openEdit();
     fireEvent.change(planSelect(), { target: { value: '2' } });
     fireEvent.click(screen.getByRole('button', { name: /guardar/i }));
 
-    await waitFor(() => expect(onUpdateTerms).toHaveBeenCalledWith({ discount: -40, planId: '2' }));
+    await waitFor(() => expect(onUpdateTerms).toHaveBeenCalledWith({ price: 140, planId: '2' }));
   });
 
   it('explains that a plan change moves no money, naming both plans', () => {
@@ -220,14 +243,14 @@ describe('cambio de plan', () => {
     expect(screen.queryByText(/no genera cobro ni devolución/i)).not.toBeInTheDocument();
   });
 
-  it('sends the plan and duration alongside the discount when both moved', async () => {
+  it('sends the plan and duration alongside the frozen price when both moved', async () => {
     openEdit();
     fireEvent.change(planSelect(), { target: { value: '2' } });
     fireEvent.change(durationInput(), { target: { value: '12' } });
     fireEvent.click(screen.getByRole('button', { name: /guardar/i }));
 
     await waitFor(() =>
-      expect(onUpdateTerms).toHaveBeenCalledWith({ discount: -40, planId: '2', duration: 12 }),
+      expect(onUpdateTerms).toHaveBeenCalledWith({ price: 140, planId: '2', duration: 12 }),
     );
   });
 
@@ -237,7 +260,7 @@ describe('cambio de plan', () => {
     fireEvent.change(priceInput(), { target: { value: '120' } });
     fireEvent.click(screen.getByRole('button', { name: /guardar/i }));
 
-    await waitFor(() => expect(onUpdateTerms).toHaveBeenCalledWith({ discount: 30 }));
+    await waitFor(() => expect(onUpdateTerms).toHaveBeenCalledWith({ price: 120 }));
   });
 
   it('restores plan, duration and price on cancel', () => {
@@ -254,7 +277,7 @@ describe('cambio de plan', () => {
 
   // a surcharge is as real as a discount — read mode has to show it, not a dash
   it('shows a stored surcharge in read mode', () => {
-    render(<ActivePlanCard sub={{ ...running, discount: -710 }} onUpdateTerms={onUpdateTerms} />);
+    render(<ActivePlanCard sub={{ ...running, price: 860 }} onUpdateTerms={onUpdateTerms} />);
 
     expect(cell('Recargo')).toBe('710');
     expect(screen.queryByText('Descuento')).not.toBeInTheDocument();

@@ -45,7 +45,7 @@ describe('markPaid', () => {
       startDate: '2026-07-27',
       duration: 20,
       contractEndDate: '2026-08-21',
-      discount: 500,
+      price: 1200,
       update: jest.fn().mockResolvedValue({}),
     };
     (Subscription.findOne as jest.Mock).mockResolvedValue(subscription);
@@ -70,7 +70,7 @@ describe('markPaid', () => {
           startDate: '2026-07-27',
           duration: 20,
           contractEndDate: '2026-08-21',
-          discount: 500,
+          price: 1200,
         },
       },
       transaction,
@@ -86,7 +86,7 @@ describe('markPaid', () => {
       startDate: '2026-07-27',
       duration: 20,
       contractEndDate: '2026-08-21',
-      discount: 500,
+      price: 1200,
       renewalType: 'renewal',
       update: jest.fn().mockResolvedValue({}),
     };
@@ -110,7 +110,7 @@ describe('markPaid', () => {
       startDate: '2026-07-27',
       duration: 20,
       contractEndDate: '2026-08-21',
-      discount: 500,
+      price: 1200,
       renewalType: 'reactivation',
       update: jest.fn().mockResolvedValue({}),
     };
@@ -134,7 +134,7 @@ describe('markPaid', () => {
       startDate: '2026-07-27',
       duration: 20,
       contractEndDate: '2026-08-21',
-      discount: 500,
+      price: 1200,
       appointmentId: 4,
       update: jest.fn().mockResolvedValue({}),
     };
@@ -158,7 +158,7 @@ describe('markPaid', () => {
       startDate: '2026-07-27',
       duration: 20,
       contractEndDate: '2026-08-21',
-      discount: 500,
+      price: 1200,
       appointmentId: null,
       update: jest.fn().mockResolvedValue({}),
     };
@@ -180,7 +180,7 @@ describe('markPaid', () => {
       startDate: '2026-07-27',
       duration: 20,
       contractEndDate: '2026-08-21',
-      discount: 500,
+      price: 1200,
       renewalType: 'renewal',
       update: jest.fn().mockResolvedValue({}),
     };
@@ -216,7 +216,7 @@ describe('markPaid', () => {
       startDate: null,
       duration: 20,
       contractEndDate: null,
-      discount: 500,
+      price: 1200,
       renewalType: 'renewal',
       update: jest.fn().mockResolvedValue({}),
     };
@@ -238,7 +238,7 @@ describe('markPaid', () => {
       startDate: null,
       duration: 20,
       contractEndDate: null,
-      discount: 500,
+      price: 1200,
       renewalType: 'renewal',
       update: jest.fn().mockResolvedValue({}),
     };
@@ -262,7 +262,7 @@ describe('markPaid', () => {
       startDate: null,
       duration: 20,
       contractEndDate: null,
-      discount: 500,
+      price: 1200,
       renewalType: 'renewal',
       update: jest.fn().mockResolvedValue({}),
     };
@@ -284,7 +284,7 @@ describe('markPaid', () => {
       startDate: '2026-07-27',
       duration: 20,
       contractEndDate: '2026-08-21',
-      discount: 500,
+      price: 1200,
       renewalType: 'reactivation',
       update: jest.fn().mockResolvedValue({}),
     };
@@ -310,7 +310,7 @@ describe('markPaid', () => {
       startDate: '2026-07-27',
       duration: 20,
       contractEndDate: '2026-08-21',
-      discount: 500,
+      price: 1200,
       renewalType: null,
       update: jest.fn().mockResolvedValue({}),
     };
@@ -331,7 +331,7 @@ describe('markPaid', () => {
       startDate: '2026-07-27',
       duration: 20,
       contractEndDate: '2026-08-21',
-      discount: 500,
+      price: 1200,
       renewalType: 'renewal',
       update: jest.fn().mockResolvedValue({}),
     };
@@ -353,7 +353,7 @@ describe('markPaid', () => {
       startDate: '2026-07-27',
       duration: 20,
       contractEndDate: '2026-08-21',
-      discount: 500,
+      price: 1200,
       update: jest.fn().mockResolvedValue({}),
     };
     (Subscription.findOne as jest.Mock).mockResolvedValue(subscription);
@@ -378,7 +378,7 @@ describe('markPaid', () => {
       startDate: '2026-07-27',
       duration: 20,
       contractEndDate: '2026-08-21',
-      discount: 500,
+      price: 1200,
       update: jest.fn().mockRejectedValue(new Error('db error')),
     };
     (Subscription.findOne as jest.Mock).mockResolvedValue(subscription);
