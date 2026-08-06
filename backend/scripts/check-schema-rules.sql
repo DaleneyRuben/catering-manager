@@ -31,4 +31,59 @@ BEGIN
   END IF;
 END $$;
 
+DO $$
+DECLARE
+  action char;
+  tbl text;
+BEGIN
+  -- User is hard-deleted (domains/user/remove.ts calls destroy()), so registeredBy must be
+  -- ON DELETE SET NULL rather than the CASCADE used by login_events.userId — otherwise deleting
+  -- a user would erase a whole month of expenses/payments along with who entered them.
+  -- 'n' = SET NULL.
+  FOREACH tbl IN ARRAY ARRAY['expenses', 'payments']
+  LOOP
+    SELECT confdeltype INTO action
+    FROM pg_constraint
+    WHERE conrelid = tbl::regclass
+      AND contype = 'f'
+      AND conkey = ARRAY[(
+        SELECT attnum FROM pg_attribute
+        WHERE attrelid = tbl::regclass AND attname = 'registeredBy'
+      )]::smallint[];
+
+    IF action IS NULL THEN
+      RAISE EXCEPTION '%."registeredBy" has no foreign key to users', tbl;
+    END IF;
+
+    IF action <> 'n' THEN
+      RAISE EXCEPTION '%."registeredBy" must be ON DELETE SET NULL, found confdeltype=%', tbl, action;
+    END IF;
+  END LOOP;
+END $$;
+
+DO $$
+DECLARE
+  action char;
+BEGIN
+  -- subscription/delete-upcoming-subscription.ts hard-deletes a renewal without checking `paid`,
+  -- so a payment must survive its subscription being deleted rather than disappear with it.
+  SELECT confdeltype INTO action
+  FROM pg_constraint
+  WHERE conrelid = 'payments'::regclass
+    AND contype = 'f'
+    AND conkey = ARRAY[(
+      SELECT attnum FROM pg_attribute
+      WHERE attrelid = 'payments'::regclass AND attname = 'subscriptionId'
+    )]::smallint[];
+
+  IF action IS NULL THEN
+    RAISE EXCEPTION 'payments."subscriptionId" has no foreign key to subscriptions';
+  END IF;
+
+  IF action <> 'n' THEN
+    RAISE EXCEPTION
+      'payments."subscriptionId" must be ON DELETE SET NULL, found confdeltype=%', action;
+  END IF;
+END $$;
+
 \echo 'schema rules OK'
