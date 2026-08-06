@@ -17,6 +17,11 @@ const OWNERSHIP: ReadonlyArray<readonly [model: string, owner: string]> = [
   ['User', 'user'],
   ['LoginEvent', 'login-event'],
   ['ClientHistory', 'client-history'],
+  // finance owns three tables. Overrides are last-match-wins, so a config generating one override
+  // per model would leave only the last of these writable from finance.
+  ['Payment', 'finance'],
+  ['Expense', 'finance'],
+  ['ExpenseCategory', 'finance'],
 ];
 
 // Every domain has an index.ts by construction, so these paths survive files being renamed.
