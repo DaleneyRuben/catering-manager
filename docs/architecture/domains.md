@@ -117,20 +117,23 @@ a catering activity, which is why no such domain exists.
 
 ---
 
-## Owning domains (8)
+## Owning domains (9)
 
 Every table has exactly one owner. This table is the authority.
 
-| Table            | Owner            | Notes                                                                                                                                                             |
-| ---------------- | ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `clients`        | `client`         | Includes `groupToken` — see Known debt                                                                                                                            |
-| `subscriptions`  | `subscription`   | The largest domain; correct, as subscriptions are the heart of the business. Includes `pausedSince`, moved off `clients` so a pause describes the plan it stopped |
-| `plans`          | `plan`           |                                                                                                                                                                   |
-| `menus`          | `menu`           | Owns the rolling weekly-window pruning rule                                                                                                                       |
-| `appointments`   | `evaluation`     | Named for the workflow, not the entity — see `CONTEXT.md`                                                                                                         |
-| `users`          | `user`           |                                                                                                                                                                   |
-| `login_events`   | `login-event`    | Owns User-Agent parsing                                                                                                                                           |
-| `client_history` | `client-history` | Sole writer of every history event                                                                                                                                |
+| Table                | Owner            | Notes                                                                                                                                                             |
+| -------------------- | ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `clients`            | `client`         | Includes `groupToken` — see Known debt                                                                                                                            |
+| `subscriptions`      | `subscription`   | The largest domain; correct, as subscriptions are the heart of the business. Includes `pausedSince`, moved off `clients` so a pause describes the plan it stopped |
+| `plans`              | `plan`           |                                                                                                                                                                   |
+| `menus`              | `menu`           | Owns the rolling weekly-window pruning rule                                                                                                                       |
+| `appointments`       | `evaluation`     | Named for the workflow, not the entity — see `CONTEXT.md`                                                                                                         |
+| `users`              | `user`           |                                                                                                                                                                   |
+| `login_events`       | `login-event`    | Owns User-Agent parsing                                                                                                                                           |
+| `client_history`     | `client-history` | Sole writer of every history event                                                                                                                                |
+| `payments`           | `finance`        | Born inside `subscription`'s transaction via `recordPayment`/`adjustPayment` (ADR-007 rule 1, ADR-008) — `subscription` never writes this table directly          |
+| `expenses`           | `finance`        |                                                                                                                                                                   |
+| `expense_categories` | `finance`        | Deactivated, never destroyed, so a removed category doesn't move a past month's totals                                                                            |
 
 ### `client-history`
 
