@@ -63,7 +63,7 @@ Prompts: [design](./design-prompts/finanzas.md) ·
 | #   | Item                                                                                                     | Status |
 | --- | -------------------------------------------------------------------------------------------------------- | ------ |
 | 2.1 | Design signed off — ADR-008 and the Finanzas section of `CONTEXT.md`                                     | ✅     |
-| 2.2 | Migrations: `payments`, `expenses`, `expense_categories` (seeded with the eight categories)              | ⬜     |
+| 2.2 | Migrations: `payments`, `expenses`, `expense_categories` (seeded with the eight categories)              | ✅     |
 | 2.3 | `finance` domain — `recordPayment`, expense CRUD, category CRUD, monthly aggregates                      | ⬜     |
 | 2.4 | `subscription.create` (paid) and `subscription.markPaid` call `finance.recordPayment`                    | ⬜     |
 | 2.5 | `finance.adjustPayment`, called from `subscription.update` when a paid subscription's price is corrected | ⬜     |
