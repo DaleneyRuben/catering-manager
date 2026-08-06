@@ -95,7 +95,7 @@ describe('findMonthSummary', () => {
 
     await findMonthSummary('2026-08');
 
-    const sums = mockedQuery.mock.calls.filter(([sql]: [string]) => sql.includes('SUM(')); // eslint-disable-line
+    const sums = mockedQuery.mock.calls.filter(([sql]: [string]) => sql.includes('SUM('));
     expect(sums).toHaveLength(3);
   });
 

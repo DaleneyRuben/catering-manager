@@ -6,3 +6,7 @@ export { deleteExpense } from './delete-expense';
 export { findCategories } from './find-categories';
 export { createCategory } from './create-category';
 export { deactivateCategory } from './deactivate-category';
+export { findMonthSummary } from './find-month-summary';
+export type { MonthSummary } from './find-month-summary';
+export { findMovements } from './find-movements';
+export type { Movement } from './find-movements';
