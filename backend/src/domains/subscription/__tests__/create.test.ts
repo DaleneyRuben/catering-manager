@@ -4,13 +4,21 @@ import Subscription from '../../../models/Subscription';
 import Client from '../../../models/Client';
 import Plan from '../../../models/Plan';
 import { record } from '../../client-history';
+import { recordPayment } from '../../finance';
 import { create } from '../create';
 import { addDeliveryDays, appToday, subtractDeliveryDays } from '../../../utils/date';
 
 jest.mock('../../../models/Subscription');
 jest.mock('../../../models/Client');
 jest.mock('../../client-history');
+jest.mock('../../finance');
 jest.mock('../../../models/Plan');
+// Automocking a module still loads it to derive its shape, and the finance index reaches
+// sequelize through its aggregate queries — which would open a real connection here.
+jest.mock('../../../database/sequelize', () => ({
+  __esModule: true,
+  default: { query: jest.fn(), transaction: jest.fn() },
+}));
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -200,6 +208,56 @@ describe('create', () => {
     );
 
     expect(record).not.toHaveBeenCalled();
+  });
+
+  // Income is the agreed total stored on the row, never recomputed from the plan: a later edit to
+  // the plan's price would otherwise rewrite a closed month.
+  it('records a payment for the agreed price when creating a paid subscription', async () => {
+    (Client.findByPk as jest.Mock).mockResolvedValue({ id: 1 });
+    (Subscription.create as jest.Mock).mockResolvedValue(mockSubscription);
+    (Plan.findByPk as jest.Mock).mockResolvedValue({ id: 2, name: 'Completo', price: 5000 });
+
+    await create(
+      1,
+      { planId: 2, startDate, contractDate: today, duration: 20, price: 1200 },
+      actor,
+    );
+
+    expect(recordPayment).toHaveBeenCalledWith(
+      { clientId: 1, subscriptionId: 1, amount: 1200 },
+      actor,
+      undefined,
+    );
+  });
+
+  // The one mistake that would quietly inflate every month: money has not arrived yet.
+  it('records no payment when creating an unpaid subscription', async () => {
+    (Client.findByPk as jest.Mock).mockResolvedValue({ id: 1 });
+    (Subscription.create as jest.Mock).mockResolvedValue({ ...mockSubscription, paid: false });
+
+    await create(
+      1,
+      { planId: 2, startDate, contractDate: today, duration: 20, price: 1200, paid: false },
+      actor,
+    );
+
+    expect(recordPayment).not.toHaveBeenCalled();
+  });
+
+  it("passes the caller's transaction to recordPayment", async () => {
+    const transaction = { id: 'caller' } as never;
+    (Client.findByPk as jest.Mock).mockResolvedValue({ id: 1 });
+    (Subscription.create as jest.Mock).mockResolvedValue(mockSubscription);
+    (Plan.findByPk as jest.Mock).mockResolvedValue({ id: 2, name: 'Completo', price: 5000 });
+
+    await create(
+      1,
+      { planId: 2, startDate, contractDate: today, duration: 20, price: 1200 },
+      actor,
+      transaction,
+    );
+
+    expect(recordPayment).toHaveBeenCalledWith(expect.anything(), actor, transaction);
   });
 
   it('logs plan_renewed history event when renewalType is renewal', async () => {
