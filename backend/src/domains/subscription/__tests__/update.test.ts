@@ -399,6 +399,70 @@ describe('update', () => {
     );
   });
 
+  // A cambio de plan sends both halves in one PATCH: the new plan, and the duration the admin
+  // shortened or lengthened to settle the difference in delivery days instead of money.
+  it('records both terms_changed and dates_changed when the plan and duration move together', async () => {
+    const mockInstance = {
+      clientId: 1,
+      planId: 2,
+      price: 100,
+      startDate: '2026-05-26',
+      duration: 20,
+      contractEndDate: addDeliveryDays('2026-05-26', 19),
+      suspendedDates: ['2026-06-02'],
+      update: jest.fn().mockResolvedValue({}),
+    };
+    (Subscription.findOne as jest.Mock).mockResolvedValue(mockInstance);
+    (Plan.findByPk as jest.Mock)
+      .mockResolvedValueOnce({ id: 2, name: 'Ligero', price: 1200 })
+      .mockResolvedValueOnce({ id: 5, name: 'Completo', price: 1800 });
+
+    await update(1, 1, { planId: 5, duration: 12 }, actor);
+
+    // the one suspended day still extends the recalculated end date
+    const expectedEnd = addDeliveryDays(addDeliveryDays('2026-05-26', 11), 1);
+
+    expect(mockInstance.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        planId: 5,
+        duration: 12,
+        contractEndDate: expectedEnd,
+        suspendedDates: ['2026-06-02'],
+      }),
+      { transaction },
+    );
+    expect(record).toHaveBeenCalledWith(
+      actor,
+      {
+        type: HISTORY_EVENTS.DATES_CHANGED,
+        clientId: 1,
+        metadata: {
+          startDate: '2026-05-26',
+          duration: 12,
+          contractEndDate: expectedEnd,
+        },
+      },
+      transaction,
+    );
+    expect(record).toHaveBeenCalledWith(
+      actor,
+      {
+        type: HISTORY_EVENTS.TERMS_CHANGED,
+        clientId: 1,
+        metadata: {
+          planId: 5,
+          planName: 'Completo',
+          planPrice: 1800,
+          previousPlanId: 2,
+          previousPlanName: 'Ligero',
+          price: 100,
+          previousPrice: 100,
+        },
+      },
+      transaction,
+    );
+  });
+
   // The price is what the client actually pays, so moving it is a change to the commercial terms
   // even when the plan behind it stays put.
   it('records a terms_changed event when only the price changes', async () => {

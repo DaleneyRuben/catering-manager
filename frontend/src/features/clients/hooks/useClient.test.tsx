@@ -1,11 +1,14 @@
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import api from '@/services/api';
 import { useClient } from '@/features/clients/hooks/useClient';
 
 jest.mock('@/services/api', () => ({
   default: { get: jest.fn(), patch: jest.fn(), post: jest.fn(), delete: jest.fn() },
 }));
+jest.mock('sonner', () => ({ toast: { success: jest.fn() } }));
+const mockToast = toast.success as jest.Mock;
 const mockGet = api.get as jest.Mock;
 const mockPatch = api.patch as jest.Mock;
 const mockPost = api.post as jest.Mock;
@@ -123,7 +126,7 @@ describe('useClient', () => {
       contractDate: '2026-07-25',
       startDate: '2026-07-27',
       duration: 20,
-      discount: 0,
+      price: 0,
       renewalType: 'renewal',
     });
 
@@ -151,6 +154,55 @@ describe('useClient', () => {
 
     expect(mockPatch).toHaveBeenCalledWith('/clients/1/subscriptions/sub9', {
       startDate: '2026-08-03',
+    });
+  });
+
+  describe('updateSubscriptionTerms', () => {
+    const renderReady = async () => {
+      mockGet.mockResolvedValue(client1);
+      mockPatch.mockResolvedValue({});
+      const { result } = renderHook(() => useClient('1'), { wrapper: makeWrapper() });
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
+      return result;
+    };
+
+    it('patches the price alone when neither plan nor duration moved', async () => {
+      const result = await renderReady();
+
+      await result.current.updateSubscriptionTerms('sub9', { price: 300 });
+
+      expect(mockPatch).toHaveBeenCalledWith('/clients/1/subscriptions/sub9', { price: 300 });
+      expect(mockToast).toHaveBeenCalledWith('Precio actualizado');
+    });
+
+    it('patches plan and duration alongside the price on a plan change', async () => {
+      const result = await renderReady();
+
+      await result.current.updateSubscriptionTerms('sub9', {
+        price: 0,
+        planId: 'plan5',
+        duration: 12,
+      });
+
+      expect(mockPatch).toHaveBeenCalledWith('/clients/1/subscriptions/sub9', {
+        price: 0,
+        planId: 'plan5',
+        duration: 12,
+      });
+      expect(mockToast).toHaveBeenCalledWith('Plan actualizado');
+    });
+
+    // the duration can move on its own — that is not a plan change, so the toast must not claim one
+    it('keeps the price toast when only the duration moved', async () => {
+      const result = await renderReady();
+
+      await result.current.updateSubscriptionTerms('sub9', { price: 300, duration: 15 });
+
+      expect(mockPatch).toHaveBeenCalledWith('/clients/1/subscriptions/sub9', {
+        price: 300,
+        duration: 15,
+      });
+      expect(mockToast).toHaveBeenCalledWith('Precio actualizado');
     });
   });
 });

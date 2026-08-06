@@ -36,13 +36,17 @@ export function useRenewalForm({
   const [paid, setPaid] = useState<boolean | undefined>(undefined);
 
   const newPlan = plans.find((p) => p.id === newPlanId);
+  // A surcharge left by a cambio de plan does not carry into the next contract — a renewal
+  // starts from the plan's own price, never higher. A discount does carry, since it is still
+  // the price already agreed for this plan.
+  const carriedPrice = sub ? Math.min(Number(sub.price), sub.plan.price) : undefined;
 
   // Reselecting the client's current plan restores what they pay today; any other plan starts
   // from that plan's own price for the admin to negotiate from.
   useEffect(() => {
     if (!newPlan) return;
     const defaultPrecio =
-      newPlan.id === sub?.planId ? (sub?.price ?? newPlan.price) : newPlan.price;
+      newPlan.id === sub?.planId ? (carriedPrice ?? newPlan.price) : newPlan.price;
     setPrecioStr(String(defaultPrecio));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [newPlanId]);
@@ -51,7 +55,7 @@ export function useRenewalForm({
   useEffect(() => {
     if (plans.length > 0 && precioStr === '' && newPlan) {
       setPrecioStr(
-        String(newPlan.id === sub?.planId ? (sub?.price ?? newPlan.price) : newPlan.price),
+        String(newPlan.id === sub?.planId ? (carriedPrice ?? newPlan.price) : newPlan.price),
       );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

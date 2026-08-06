@@ -3,8 +3,9 @@ export const inputCls = (hasError?: boolean) =>
     hasError ? 'border-warn focus:border-warn' : 'border-rule focus:border-olive-600'
   }`;
 
+// pr-9 clears the chevron base.css paints 13px from the right edge
 export const selectCls = (hasError?: boolean) =>
-  `w-full border rounded-[9px] px-[14px] py-[11px] text-[14px] bg-white focus:outline-none transition-colors cursor-pointer ${
+  `w-full border rounded-[9px] pl-[14px] pr-9 py-[11px] text-[14px] bg-white focus:outline-none transition-colors cursor-pointer ${
     hasError ? 'border-warn focus:border-warn' : 'border-rule focus:border-olive-600'
   }`;
 

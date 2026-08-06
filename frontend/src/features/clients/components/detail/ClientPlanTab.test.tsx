@@ -49,7 +49,7 @@ it('shows "Sin suscripción activa" when no subscription', () => {
       sub={undefined}
       remaining={0}
       onUpdateContract={jest.fn()}
-      onUpdateBilling={jest.fn()}
+      onUpdateTerms={jest.fn()}
       onUpdateInstructions={jest.fn()}
     />,
   );
@@ -64,7 +64,7 @@ it('renders plan content when subscription exists', () => {
         sub={sub}
         remaining={15}
         onUpdateContract={jest.fn()}
-        onUpdateBilling={jest.fn()}
+        onUpdateTerms={jest.fn()}
         onUpdateInstructions={jest.fn()}
       />,
     ),
@@ -80,7 +80,7 @@ it('no longer renders suspensions or group management (moved to the Entregas tab
         sub={sub}
         remaining={15}
         onUpdateContract={jest.fn()}
-        onUpdateBilling={jest.fn()}
+        onUpdateTerms={jest.fn()}
         onUpdateInstructions={jest.fn()}
       />,
     ),

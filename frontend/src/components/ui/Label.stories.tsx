@@ -23,3 +23,18 @@ export const Variants: Story = {
     </>
   ),
 };
+
+export const BoundToAControl: Story = {
+  render: () => (
+    <div>
+      <Label htmlFor="duration" className="mb-1.5">
+        Duración
+      </Label>
+      <input
+        id="duration"
+        defaultValue="20"
+        className="border border-rule rounded-[9px] px-[14px] py-[11px] text-[14px]"
+      />
+    </div>
+  ),
+};

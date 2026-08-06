@@ -15,6 +15,21 @@ describe('Label', () => {
     expect(el).not.toHaveClass('font-mono');
   });
 
+  it('renders a real label bound to its control when given htmlFor', () => {
+    render(
+      <>
+        <Label htmlFor="duration">Duración</Label>
+        <input id="duration" defaultValue="20" />
+      </>,
+    );
+    expect(screen.getByLabelText('Duración')).toHaveValue('20');
+  });
+
+  it('stays a paragraph when no control is named', () => {
+    render(<Label>Total</Label>);
+    expect(screen.getByText('Total').tagName).toBe('P');
+  });
+
   it('merges extra className', () => {
     render(<Label className="mb-3">Facturación</Label>);
     expect(screen.getByText('Facturación')).toHaveClass('mb-3');

@@ -5,7 +5,7 @@ import { Card } from '@ui/Card';
 import { DatePickerInput } from '@ui/DatePickerInput';
 import { IconButton } from '@ui/IconButton';
 import { Label } from '@ui/Label';
-import { addBusinessDays } from '@/utils/businessDays';
+import { projectedEndDate } from '@/utils/businessDays';
 import { formatDate } from '@/utils/format';
 import type { Subscription } from '@/features/clients/types';
 
@@ -32,7 +32,7 @@ export function ContractCard({ sub, remaining, onUpdateContract }: Props) {
   const validDuration = !Number.isNaN(parsedDuration) && parsedDuration > 0 ? parsedDuration : 0;
   const previewEndDate =
     startDate && validDuration > 0
-      ? addBusinessDays(startDate, validDuration - 1 + sub.suspendedDates.length) // duration - 1 because startDate counts as day 1; add suspensions
+      ? projectedEndDate(startDate, validDuration, sub.suspendedDates.length)
       : sub.contractEndDate;
 
   const handleSave = async () => {

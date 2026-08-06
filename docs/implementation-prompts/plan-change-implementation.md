@@ -30,10 +30,12 @@ Test first: assert the PATCH body for each combination, and both toast strings.
 
 `frontend/src/features/clients/components/detail/ActivePlanCard.tsx`. Test first, in `ActivePlanCard.test.tsx`.
 
+Take the visual detail from `design/prototypes/ClienteDetalle.dc.html` (the plan tab's "Plan y precio" block), not from the design prompt — the prototype is the source of truth and carries specifics the prompt omits: the `máx {n}` hint on the Precio label, the no-money note as a bordered tile with an info icon rather than a plain line, and the 1.35fr/1fr split on row 1. Every colour it uses already has a token.
+
 - Plans come from the existing `usePlans()` hook (`@/features/plans/hooks/usePlans`) — it already coerces `price` to a number, which this card needs. Don't refetch plans by hand.
 - Local state gains the selected plan id and the duration; `planPrice` must derive from the **selected** plan, not `sub.plan`, so the Precio input's `max` and the derived discount re-base when the selection changes.
-- The consequence line uses the existing `remainingDeliveryDays(startDate, endDate, today)` from `@/utils/businessDays`. The projected end date is `addDeliveryDays(startDate, duration - 1)` — note the **`- 1`**: duration counts the start day itself, matching `calcContractEndDate` on the backend. There is no frontend `addDeliveryDays`; add one to `@/utils/businessDays` (test first) next to the helper that already lives there rather than starting a second date module.
-- Suspended days extend the real end date but must **not** be modelled in the preview — the backend re-adds them on save. Preview from `startDate` + duration only, and don't try to reproduce the suspension arithmetic in two places.
+- The consequence line uses the existing `remainingDeliveryDays(startDate, endDate, today)` from `@/utils/businessDays`. The projected end date is `addBusinessDays(startDate, duration - 1 + suspendedDates.length)` — note the **`- 1`**: duration counts the start day itself, matching `calcContractEndDate` on the backend. `addBusinessDays` already lives in `@/utils/businessDays` and is line-for-line the backend's `addDeliveryDays`; reuse it rather than adding a second helper alongside it.
+- **Suspended days belong in the preview.** The backend adds one delivery day per suspended date on top of `calcContractEndDate` (`subscription/update.ts`), so a preview built from `startDate` + duration alone is short by exactly the suspension count — and contradicts the Contrato card sitting beside it on the same tab, which already computes it correctly (`ContractCard.tsx:32`). Extract that formula into a shared helper in `@/utils/businessDays` (test first) and have both cards call it, so the two previews cannot drift.
 - Cancel restores plan, duration and price to the stored values.
 - `handleSave` sends all three; skip fields that didn't change so an untouched plan never writes a spurious `terms_changed`.
 

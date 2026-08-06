@@ -18,6 +18,17 @@ export function subtractBusinessDays(dateString: string, days: number): string {
   return format(result, 'yyyy-MM-dd');
 }
 
+// Mirrors the backend: calcContractEndDate (startDate counts as day 1, hence duration - 1) plus
+// one delivery day per suspended date. Both cards on the plan tab preview from here so they agree
+// with each other and with what the PATCH actually saves.
+export function projectedEndDate(
+  startDate: string,
+  duration: number,
+  suspendedCount: number,
+): string {
+  return addBusinessDays(startDate, duration - 1 + suspendedCount);
+}
+
 export function remainingDeliveryDays(startDate: Date, endDate: Date, today = new Date()): number {
   if (startDate > today) {
     // plan hasn't started: startDate counts as delivery day 1

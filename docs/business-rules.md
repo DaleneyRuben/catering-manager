@@ -296,7 +296,7 @@ When an active plan reaches its end date, the client may renew. Renewal rules:
 
 A Nutricionista can also perform a renewal or reactivation through Evaluaciones' appointment-driven renewal flow, subject to the same rules above, with one addition: a paid/unpaid choice not present in the Admin-initiated flow (see Evaluaciones (Appointments)).
 
-### Change of plan (planned — not yet implemented)
+### Change of plan
 
 A client may switch to a different plan mid-contract — typically about a week in, once they have
 tried the food. This is a change to the **existing** subscription, never a new one.
@@ -313,15 +313,24 @@ tried the food. This is a change to the **existing** subscription, never a new o
 - The change records `terms_changed` (the plan moved) and, since the duration moves with it,
   `dates_changed` — see History.
 
-The backend already supports this: `subscription/update.ts` accepts a new `planId` and writes
-`terms_changed` with the previous and new plan. **What is missing is the UI control** — no screen
-sends a plan for an existing subscription today (see the note at the end of History).
+The control is the plan tab's **Plan y precio** card: its edit mode carries the plan and the
+duration alongside the price, and sends whichever of the three actually moved in one PATCH to
+`subscription/update.ts`. While editing, the card shows the resulting contract end date and
+remaining delivery days live, and — when the plan differs from the stored one — states that the
+change generates no charge and no refund.
 
-Until that control exists, admins simulate a plan change by finalizing the plan and creating a new
-one. That workaround is wrong and must be retired with this feature: it records the client as
-having ended their plan and started another (`plan_finalized` + `plan_assigned`) rather than having
-modified it, and it leaves a second subscription row that is counted by the dashboard and by each
-plan's client count.
+**The total the client pays is frozen while the plan is being changed**, which is what "no money
+changes hands" means in the data: the price field is not editable in that state, and the gap
+against the new plan's price is shown as **Descuento** or **Recargo**, derived exactly as in
+[Price](#price) (`plan.price - subscription.price`) — nothing extra is stored for it. A client
+paying 1.350 who moves to a plan listing 3.660 keeps paying 1.350; the card shows a Descuento of
+2.310 against the new plan. The admin then shortens the duration so that 1.350 covers fewer days
+of the pricier plan.
+
+Moving to a plan that lists **below** what the client already paid inverts the gap: paying 1.350
+on a plan listing 800 shows a Recargo of 550, unsigned, because "Descuento: 550" would describe the
+opposite of what happened. The price itself never goes negative — it is bounded only by zero, same
+as any other price edit.
 
 ### Pause / Resume
 
@@ -396,7 +405,7 @@ For each client, the system tracks these events. Every key is `<subject>_<verb>`
 
 History entries are append-only — past records are never overwritten when a plan changes. Entries written before `dates_changed` existed are `plan_assigned` rows carrying only dates; they are left as they are and keep their original label.
 
-No screen currently sends a new plan for an existing subscription, so in practice `terms_changed` is written today only for price edits — the plan half is reachable through the API alone until a plan-change control exists.
+A plan change and a price edit both write `terms_changed`, and both reach it through the same control — the plan tab's "Plan y precio" card (see Change of plan). A plan change usually arrives paired with `dates_changed`, since the duration moves with it.
 
 Every history event, regardless of type or who triggered it (Admin or Nutricionista), records the acting user's id and username. A `plan_assigned`, `plan_renewed`, or `plan_reactivated` event originating from Evaluaciones additionally carries the originating appointment's id in its metadata, so provenance survives even if the appointment record itself is later pruned (see Evaluaciones (Appointments)).
 

@@ -8,9 +8,10 @@ design behind it is in [CONTEXT.md](../CONTEXT.md), [business-rules.md](./busine
 domain-ownership work (#115–#141) and was removed the same way — a backlog that outlives its
 work becomes fiction, and anything worth keeping belongs in the documents above, not here.
 
-Order matters: **the price model ships first, then the plan-change control, then Finanzas.** Until it exists, admins
-simulate a plan change by finalizing the plan and creating a new one, which would record two paid
-subscriptions for a client who paid once, and double-count their payment in the register.
+Order matters: **the price model ships first, then the plan-change control, then Finanzas.** With
+the control in place (section 1), a plan change stays on one subscription, so the register cannot
+double-count a client who paid once — the finalize-and-recreate workaround that would have caused
+it is retired.
 
 ---
 
@@ -38,8 +39,8 @@ existing subscription and writes `terms_changed`; the gap is the UI.
 | #   | Item                                                                                    | Status |
 | --- | --------------------------------------------------------------------------------------- | ------ |
 | 1.1 | Design signed off — business rule written into `business-rules.md` (Change of plan)     | ✅     |
-| 1.2 | Plan selector + duration in `ActivePlanCard`'s edit mode, sending `planId` on the PATCH | ⬜     |
-| 1.3 | End-to-end verification via Playwright; workaround retired                              | ⬜     |
+| 1.2 | Plan selector + duration in `ActivePlanCard`'s edit mode, sending `planId` on the PATCH | ✅     |
+| 1.3 | End-to-end verification via Playwright; workaround retired                              | ✅     |
 
 Prompts: [design](./design-prompts/plan-change.md) ·
 [implementation](./implementation-prompts/plan-change-implementation.md).

@@ -50,3 +50,29 @@ describe('subscription schema startDate', () => {
     expect(result.success).toBe(false);
   });
 });
+
+describe('subscription schema discount', () => {
+  // A cambio de plan freezes what the client pays and lets the discount absorb the difference.
+  // Moving to a plan that lists below the paid total makes that difference a surcharge.
+  it('accepts a negative discount on an update', async () => {
+    const { updateSubscriptionSchema } = await import('../subscription.schema');
+
+    const result = updateSubscriptionSchema.safeParse({ discount: -550 });
+
+    expect(result.success).toBe(true);
+  });
+
+  // nothing at creation time can produce a surcharge — the client pays the plan minus a discount
+  it('rejects a negative discount at creation', async () => {
+    const { createSubscriptionSchema } = await import('../subscription.schema');
+
+    const result = createSubscriptionSchema.safeParse({
+      planId: 'abc',
+      contractDate: '2026-08-03',
+      duration: 20,
+      discount: -550,
+    });
+
+    expect(result.success).toBe(false);
+  });
+});

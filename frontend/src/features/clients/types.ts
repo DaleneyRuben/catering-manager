@@ -17,6 +17,14 @@ export interface Subscription {
   paid: boolean;
 }
 
+// What the plan card can move in one edit. `planId` and `duration` are omitted when they did not
+// change, so an untouched plan never writes a spurious terms_changed on the backend.
+export interface SubscriptionTermsDraft {
+  price: number;
+  planId?: string;
+  duration?: number;
+}
+
 export interface GroupMember {
   id: string;
   name: string;
