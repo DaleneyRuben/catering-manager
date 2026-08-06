@@ -3,3 +3,6 @@ export { adjustPayment } from './adjust-payment';
 export { createExpense } from './create-expense';
 export { updateExpense } from './update-expense';
 export { deleteExpense } from './delete-expense';
+export { findCategories } from './find-categories';
+export { createCategory } from './create-category';
+export { deactivateCategory } from './deactivate-category';
