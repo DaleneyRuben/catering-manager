@@ -60,14 +60,15 @@ Ingresos / Egresos / Balance tiles, expenses by category, one chronological list
 Prompts: [design](./design-prompts/finanzas.md) ·
 [implementation](./implementation-prompts/finanzas-implementation.md).
 
-| #   | Item                                                                                        | Status |
-| --- | ------------------------------------------------------------------------------------------- | ------ |
-| 2.1 | Design signed off — ADR-008 and the Finanzas section of `CONTEXT.md`                        | ✅     |
-| 2.2 | Migrations: `payments`, `expenses`, `expense_categories` (seeded with the eight categories) | ⬜     |
-| 2.3 | `finance` domain — `recordPayment`, expense CRUD, category CRUD, monthly aggregates         | ⬜     |
-| 2.4 | `subscription.create` (paid) and `subscription.markPaid` call `finance.recordPayment`       | ⬜     |
-| 2.5 | Finanzas screen + sidebar entry under Administración                                        | ⬜     |
-| 2.6 | Duplicate-an-expense action — the primary entry path, since delivery is paid daily          | ⬜     |
+| #   | Item                                                                                                     | Status |
+| --- | -------------------------------------------------------------------------------------------------------- | ------ |
+| 2.1 | Design signed off — ADR-008 and the Finanzas section of `CONTEXT.md`                                     | ✅     |
+| 2.2 | Migrations: `payments`, `expenses`, `expense_categories` (seeded with the eight categories)              | ⬜     |
+| 2.3 | `finance` domain — `recordPayment`, expense CRUD, category CRUD, monthly aggregates                      | ⬜     |
+| 2.4 | `subscription.create` (paid) and `subscription.markPaid` call `finance.recordPayment`                    | ⬜     |
+| 2.5 | `finance.adjustPayment`, called from `subscription.update` when a paid subscription's price is corrected | ⬜     |
+| 2.6 | Finanzas screen + sidebar entry under Administración                                                     | ⬜     |
+| 2.7 | Duplicate-an-expense action — the primary entry path, since delivery is paid daily                       | ⬜     |
 
 ---
 
