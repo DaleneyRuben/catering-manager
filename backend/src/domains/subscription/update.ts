@@ -7,6 +7,7 @@ import { UpdateSubscriptionDto } from '../../schemas/subscription.schema';
 import type { Actor } from '../../types/actor';
 import { addDeliveryDays, subtractDeliveryDays, calcContractEndDate } from '../../utils/date';
 import { record } from '../client-history';
+import { adjustPayment } from '../finance';
 import { finalizeOverlappingSubscriptions } from './finalize-overlapping';
 
 type PlanChange = {
@@ -78,6 +79,13 @@ export const update = async (
           },
           t,
         );
+
+        // A price edit is always a correction, so the register follows it (ADR-008). The plan
+        // moving on its own changes no money by rule and must leave the payment where it is.
+        // An unpaid subscription has no payment yet, and adjustPayment no-ops on it.
+        if (planChange.price !== planChange.previousPrice) {
+          await adjustPayment(subscription.id, planChange.price, t);
+        }
       }
       return updated;
     };
