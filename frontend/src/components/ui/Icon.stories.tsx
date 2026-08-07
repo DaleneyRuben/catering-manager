@@ -40,6 +40,10 @@ const ICON_NAMES = [
   'chevron-down',
   'dollar-sign',
   'clock',
+  'arrow-down',
+  'chevron-left',
+  'chevron-right',
+  'wallet',
 ];
 
 const meta: Meta<typeof Icon> = {

@@ -104,4 +104,24 @@ describe('Icon', () => {
     const { container } = render(<Icon name="clock" />);
     expect(container.querySelectorAll('circle').length).toBeGreaterThanOrEqual(1);
   });
+
+  it('renders an svg for arrow-down', () => {
+    const { container } = render(<Icon name="arrow-down" />);
+    expect(container.querySelector('svg')).toBeInTheDocument();
+  });
+
+  it('renders an svg for chevron-left', () => {
+    const { container } = render(<Icon name="chevron-left" />);
+    expect(container.querySelector('svg')).toBeInTheDocument();
+  });
+
+  it('renders an svg for chevron-right', () => {
+    const { container } = render(<Icon name="chevron-right" />);
+    expect(container.querySelector('svg')).toBeInTheDocument();
+  });
+
+  it('renders an svg for wallet', () => {
+    const { container } = render(<Icon name="wallet" />);
+    expect(container.querySelector('svg')).toBeInTheDocument();
+  });
 });
