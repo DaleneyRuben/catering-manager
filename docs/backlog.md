@@ -107,16 +107,16 @@ The screen cannot be built without these; they land first.
 
 | #    | Item                                                                                                                                                                                         | Status |
 | ---- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
-| 3.9  | **Row actions always visible** — the hover-only Editar/Duplicar/Eliminar becomes one 28px ⋯ menu per expense row. The clearest defect in v1: invisible on touch, tabbed blind by keyboard    | ☐      |
+| 3.9  | **Row actions always visible** — the hover-only Editar/Duplicar/Eliminar becomes one 28px ⋯ menu per expense row. The clearest defect in v1: invisible on touch, tabbed blind by keyboard    | ✅     |
 | 3.10 | Layout: the two-column body becomes stacked full-width bands — Gastos por categoría above, Movimientos below                                                                                 | ☐      |
 | 3.11 | Filter bar in the Movimientos header: search · segmented direction · category select, with active filters as removable chips and "Limpiar todo"                                              | ☐      |
 | 3.12 | Count + subtotal at the right of that row; label reads NETO DEL MES with no filter active and equals the Balance tile                                                                        | ☐      |
 | 3.13 | Filter interaction rules: "Ingresos" replaces the category select with a muted note and clears the category; picking any category sets direction to Gastos; filters survive a month change   | ☐      |
 | 3.14 | Two distinct empty states — "Ningún movimiento coincide" (names the real month count, offers Limpiar filtros) vs "Aún no hay movimientos" (teaches where income comes from)                  | ☐      |
-| 3.15 | Income/expense contrast: directional glyph tile + tinted income row background, replacing the 7px dot                                                                                        | ☐      |
-| 3.16 | Income row links to the client's profile — **the client's name is the link**, not a chevron, so it reads as a property of the row's subject and not a fourth action                          | ☐      |
-| 3.17 | A soft-deleted client keeps counting: name muted, no link, mono "CLIENTE ARCHIVADO" tag. No dead link, no dead end                                                                           | ☐      |
-| 3.18 | Who-chip: 26px initials between tag and amount, **click/tap** (not hover) opens "REGISTRADO POR / nombre / el dd/mm"                                                                         | ☐      |
+| 3.15 | Income/expense contrast: directional glyph tile + tinted income row background, replacing the 7px dot                                                                                        | ✅     |
+| 3.16 | Income row links to the client's profile — **the client's name is the link**, not a chevron, so it reads as a property of the row's subject and not a fourth action                          | ✅     |
+| 3.17 | A soft-deleted client keeps counting: name muted, no link, mono "CLIENTE ARCHIVADO" tag. No dead link, no dead end                                                                           | ✅     |
+| 3.18 | Who-chip: 26px initials between tag and amount, **click/tap** (not hover) opens "REGISTRADO POR / nombre / el dd/mm"                                                                         | ✅     |
 | 3.19 | Category cells become filter buttons (active = olive + bold, clicking again clears); responsive `auto-fill` grid; ARCHIVADA sub-label                                                        | ☐      |
 | 3.20 | "Administrar categorías" modal: add row, ACTIVAS/ARCHIVADAS sections with usage lines, inline Renombrar, Archivar, Restaurar                                                                 | ☐      |
 | 3.21 | Archiving a category with expenses this month confirms with the arithmetic stated plainly, not a vague warning. The word is **Archivar**, never Eliminar                                     | ☐      |
