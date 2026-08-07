@@ -18,7 +18,10 @@ export interface EditableExpense {
 interface Props {
   categories: ExpenseCategory[];
   today: string;
+  // Revises the row itself.
   expense?: EditableExpense;
+  // Seeds the same fields but creates a new row dated today — the daily-delivery path.
+  duplicateOf?: EditableExpense;
   // Pre-selects the category the admin used last, so the daily entry is a number and Enter.
   defaultCategoryId?: string;
   onSubmit: (input: ExpenseInput) => Promise<unknown>;
@@ -30,6 +33,7 @@ export function ExpenseModal({
   categories,
   today,
   expense,
+  duplicateOf,
   defaultCategoryId,
   onSubmit,
   onClose,
@@ -38,12 +42,16 @@ export function ExpenseModal({
   const isEdit = expense !== undefined;
   const amountRef = useRef<HTMLInputElement>(null);
 
-  const [amount, setAmount] = useState(expense ? String(expense.amount) : '');
+  // Both modes seed from a row, but only an edit inherits its date: a duplicate is today's
+  // expense, which is the whole reason the action exists.
+  const source = expense ?? duplicateOf;
+
+  const [amount, setAmount] = useState(source ? String(source.amount) : '');
   const [categoryId, setCategoryId] = useState(
-    expense?.categoryId ?? defaultCategoryId ?? categories[0]?.id ?? '',
+    source?.categoryId ?? defaultCategoryId ?? categories[0]?.id ?? '',
   );
   const [spentAt, setSpentAt] = useState(expense?.spentAt ?? today);
-  const [description, setDescription] = useState(expense?.description ?? '');
+  const [description, setDescription] = useState(source?.description ?? '');
 
   useEffect(() => {
     amountRef.current?.focus();

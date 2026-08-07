@@ -7,6 +7,7 @@ import type { Movement } from '@/features/finance/types';
 interface Props {
   movements: Movement[];
   onEdit: (movement: Movement) => void;
+  onDuplicate: (movement: Movement) => void;
   onDelete: (movement: Movement) => void;
 }
 
@@ -30,6 +31,7 @@ function EmptyState() {
 function MovementRow({
   movement,
   onEdit,
+  onDuplicate,
   onDelete,
 }: { movement: Movement } & Omit<Props, 'movements'>) {
   const isIncome = movement.kind === 'income';
@@ -71,6 +73,15 @@ function MovementRow({
             onClick={() => onEdit(movement)}
             className={actionCls}
           />
+          {/* The daily delivery payment and the rent instalments are entered this way, so it
+              earns a place on the row rather than an overflow menu. */}
+          <IconButton
+            icon="copy"
+            label="Duplicar"
+            size={15}
+            onClick={() => onDuplicate(movement)}
+            className={actionCls}
+          />
           <IconButton
             icon="trash"
             label="Eliminar"
@@ -93,7 +104,7 @@ function MovementRow({
   );
 }
 
-export function MovementsList({ movements, onEdit, onDelete }: Props) {
+export function MovementsList({ movements, onEdit, onDuplicate, onDelete }: Props) {
   return (
     <div className="bg-paper border border-rule rounded-[13px] overflow-hidden">
       <div className="flex items-baseline justify-between gap-3 px-6 pt-5 pb-3.5 border-b border-cream-2">
@@ -111,6 +122,7 @@ export function MovementsList({ movements, onEdit, onDelete }: Props) {
             key={`${movement.kind}-${movement.id}`}
             movement={movement}
             onEdit={onEdit}
+            onDuplicate={onDuplicate}
             onDelete={onDelete}
           />
         ))

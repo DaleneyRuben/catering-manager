@@ -48,11 +48,17 @@ const toEditable = (
       }
     : undefined;
 
+// One expense form serves three intents: a blank one, a revision of a row, and a copy of a row
+// dated today.
+type FormState =
+  | { mode: 'create' }
+  | { mode: 'edit'; expense: EditableExpense }
+  | { mode: 'duplicate'; expense: EditableExpense };
+
 export function FinancePage() {
   const currentMonth = format(new Date(), 'yyyy-MM');
   const [month, setMonth] = useState(currentMonth);
-  const [editing, setEditing] = useState<EditableExpense | null>(null);
-  const [isCreating, setIsCreating] = useState(false);
+  const [form, setForm] = useState<FormState | null>(null);
   const [pendingDelete, setPendingDelete] = useState<Movement | null>(null);
   const [lastCategoryId, setLastCategoryId] = useState<string | undefined>();
 
@@ -62,14 +68,12 @@ export function FinancePage() {
 
   const categoryIdByName = (name: string) => categories.find((c) => c.name === name)?.id;
 
-  const closeForm = () => {
-    setIsCreating(false);
-    setEditing(null);
-  };
+  const closeForm = () => setForm(null);
 
+  // A duplicate creates; only an edit revises the row it came from.
   const handleSubmit = async (input: ExpenseInput) => {
-    if (editing) {
-      await update(editing.id, input);
+    if (form?.mode === 'edit') {
+      await update(form.expense.id, input);
       toast.success('Gasto actualizado');
     } else {
       await create(input);
@@ -77,6 +81,11 @@ export function FinancePage() {
     }
     setLastCategoryId(input.categoryId);
     closeForm();
+  };
+
+  const openFor = (mode: 'edit' | 'duplicate') => (movement: Movement) => {
+    const expense = toEditable(movement, categoryIdByName(movement.label));
+    if (expense) setForm({ mode, expense });
   };
 
   const handleDelete = async () => {
@@ -87,7 +96,6 @@ export function FinancePage() {
 
   const incomeCount = overview?.movements.filter((m) => m.kind === 'income').length ?? 0;
   const expenseCount = overview?.movements.filter((m) => m.kind === 'expense').length ?? 0;
-  const isFormOpen = isCreating || editing !== null;
 
   return (
     <div className="px-4 py-5 lg:px-[44px] lg:pt-[34px] lg:pb-[48px]">
@@ -102,7 +110,7 @@ export function FinancePage() {
         />
         {/* There is no "Registrar ingreso": all income is subscription revenue, written when an
             admin marks a subscription paid (ADR-008). */}
-        <Button leftIcon="plus" onClick={() => setIsCreating(true)}>
+        <Button leftIcon="plus" onClick={() => setForm({ mode: 'create' })}>
           Registrar gasto
         </Button>
       </div>
@@ -123,20 +131,20 @@ export function FinancePage() {
             <CategoryBreakdown categories={overview.byCategory} />
             <MovementsList
               movements={overview.movements}
-              onEdit={(movement) =>
-                setEditing(toEditable(movement, categoryIdByName(movement.label)) ?? null)
-              }
+              onEdit={openFor('edit')}
+              onDuplicate={openFor('duplicate')}
               onDelete={setPendingDelete}
             />
           </div>
         </div>
       )}
 
-      {isFormOpen && (
+      {form && (
         <ExpenseModal
           categories={categories}
           today={format(new Date(), 'yyyy-MM-dd')}
-          expense={editing ?? undefined}
+          expense={form.mode === 'edit' ? form.expense : undefined}
+          duplicateOf={form.mode === 'duplicate' ? form.expense : undefined}
           defaultCategoryId={lastCategoryId}
           onSubmit={handleSubmit}
           onClose={closeForm}

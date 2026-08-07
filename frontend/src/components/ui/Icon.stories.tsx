@@ -44,6 +44,7 @@ const ICON_NAMES = [
   'chevron-left',
   'chevron-right',
   'wallet',
+  'copy',
 ];
 
 const meta: Meta<typeof Icon> = {

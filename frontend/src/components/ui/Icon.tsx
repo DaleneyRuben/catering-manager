@@ -411,6 +411,13 @@ export function Icon({ name, size = 16, stroke = 1.5, className }: IconProps) {
           <path d="M7 15h3" />
         </svg>
       );
+    case 'copy':
+      return (
+        <svg {...props}>
+          <rect x="9" y="9" width="11" height="11" rx="1.5" />
+          <path d="M4 15V5.5A1.5 1.5 0 0 1 5.5 4H15" />
+        </svg>
+      );
     case 'logout':
       return (
         <svg {...props}>
