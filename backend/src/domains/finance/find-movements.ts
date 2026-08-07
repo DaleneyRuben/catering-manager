@@ -67,6 +67,10 @@ export const findMovements = async (
     ...(scope.includeExpense ? [expenseSelect(scope.expenseWhere)] : []),
   ];
 
+  // Asking for income in one category leaves no half standing — the set is empty by definition, so
+  // it answers empty rather than assembling a query with nothing to select from.
+  if (branches.length === 0) return [];
+
   const rows = await sequelize.query<MovementRow>(
     `${branches.join('\n    UNION ALL')}
      ORDER BY date DESC, id DESC`,

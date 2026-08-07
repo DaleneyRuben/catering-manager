@@ -37,6 +37,9 @@ export const findMovementsSubtotal = async (
     ...(scope.includeExpense ? [expenseSource(scope.expenseWhere)] : []),
   ];
 
+  // Mirrors findMovements: no half standing means an empty set, not a query with nothing in it.
+  if (branches.length === 0) return { count: 0, subtotal: 0 };
+
   const rows = await sequelize.query<SubtotalRow>(
     `SELECT COUNT(*) AS count, COALESCE(SUM(signed), 0) AS subtotal
      FROM (${branches.join('\n    UNION ALL')}) movements`,
