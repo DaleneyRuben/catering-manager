@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { FinancePage } from '@/pages/FinancePage';
 import { useFinance } from '@/features/finance/hooks/useFinance';
@@ -9,7 +9,9 @@ jest.mock('@/features/finance/hooks/useFinance');
 jest.mock('@/features/finance/hooks/useExpenses');
 
 const mockedUseFinance = useFinance as jest.MockedFunction<typeof useFinance>;
-const mockedUseCategories = useExpenseCategories as jest.MockedFunction<typeof useExpenseCategories>;
+const mockedUseCategories = useExpenseCategories as jest.MockedFunction<
+  typeof useExpenseCategories
+>;
 const mockedUseMutations = useExpenseMutations as jest.MockedFunction<typeof useExpenseMutations>;
 
 const overview: FinanceOverview = {
@@ -92,7 +94,9 @@ describe('FinancePage', () => {
     await userEvent.type(screen.getByLabelText(/monto/i), '200');
     await userEvent.click(screen.getByRole('button', { name: 'Guardar' }));
 
-    await waitFor(() => expect(update).toHaveBeenCalledWith('E1', expect.objectContaining({ amount: 200 })));
+    await waitFor(() =>
+      expect(update).toHaveBeenCalledWith('E1', expect.objectContaining({ amount: 200 })),
+    );
   });
 
   // Deleting moves the month's totals, so it is never a single click.
@@ -102,8 +106,9 @@ describe('FinancePage', () => {
     await userEvent.click(screen.getByRole('button', { name: /eliminar/i }));
     expect(remove).not.toHaveBeenCalled();
 
-    expect(screen.getByText('Eliminar gasto')).toBeInTheDocument();
-    await userEvent.click(screen.getByRole('button', { name: /^eliminar$/i, hidden: false }));
+    const dialog = screen.getByRole('dialog');
+    expect(within(dialog).getByText('Eliminar gasto')).toBeInTheDocument();
+    await userEvent.click(within(dialog).getByRole('button', { name: /^eliminar$/i }));
 
     await waitFor(() => expect(remove).toHaveBeenCalledWith('E1'));
   });

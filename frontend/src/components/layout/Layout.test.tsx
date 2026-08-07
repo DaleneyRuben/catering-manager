@@ -113,7 +113,8 @@ describe('Layout', () => {
     expect(screen.getByText('Catering · con altura')).toBeInTheDocument();
   });
 
-  it('renders the Gestión, Cocina and Logística section labels for the admin role', () => {
+  // Administración reaches an admin through Finanzas alone — Usuarios and Health stay super_admin.
+  it('renders all four section labels for the admin role', () => {
     render(
       <MemoryRouter>
         <Layout>
@@ -124,7 +125,33 @@ describe('Layout', () => {
     expect(screen.getByText('Gestión')).toBeInTheDocument();
     expect(screen.getByText('Cocina')).toBeInTheDocument();
     expect(screen.getByText('Logística')).toBeInTheDocument();
-    expect(screen.queryByText('Administración')).not.toBeInTheDocument();
+    expect(screen.getByText('Administración')).toBeInTheDocument();
+  });
+
+  it('shows Finanzas to an admin but not Usuarios or Health', () => {
+    render(
+      <MemoryRouter>
+        <Layout>
+          <span />
+        </Layout>
+      </MemoryRouter>,
+    );
+    expect(screen.getByText('Finanzas')).toBeInTheDocument();
+    expect(screen.queryByText('Usuarios')).not.toBeInTheDocument();
+    expect(screen.queryByText('Health')).not.toBeInTheDocument();
+  });
+
+  it('places Finanzas above Usuarios for a super_admin', () => {
+    mockUserRole('super_admin');
+    render(
+      <MemoryRouter>
+        <Layout>
+          <span />
+        </Layout>
+      </MemoryRouter>,
+    );
+    const labels = screen.getAllByRole('link').map((link) => link.textContent);
+    expect(labels.indexOf('Finanzas')).toBeLessThan(labels.indexOf('Usuarios'));
   });
 
   it('groups nav items under their sections in order', () => {
@@ -149,6 +176,8 @@ describe('Layout', () => {
       'Informes',
       'Logística',
       'Entregas',
+      'Administración',
+      'Finanzas',
     ]);
   });
 
