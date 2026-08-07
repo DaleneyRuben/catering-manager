@@ -7,6 +7,7 @@ import type { Actor } from '../../types/actor';
 import { appToday, calcContractEndDate } from '../../utils/date';
 import { ConflictError } from '../../utils/errors';
 import { record } from '../client-history';
+import { recordPayment } from '../finance';
 import { finalizeOverlappingSubscriptions } from './finalize-overlapping';
 import { applyRenewalPauseState, findUpcomingSubscription, historyEventTypeFor } from './_helpers';
 
@@ -80,6 +81,14 @@ export const create = async (
           ...(data.appointmentId ? { appointmentId: data.appointmentId } : {}),
         },
       },
+      transaction,
+    );
+
+    // The agreed total already stored on the row — never recomputed from the plan, whose price
+    // may be edited later without touching what this client paid (ADR-008).
+    await recordPayment(
+      { clientId, subscriptionId: subscription.id, amount: data.price },
+      actor,
       transaction,
     );
   }

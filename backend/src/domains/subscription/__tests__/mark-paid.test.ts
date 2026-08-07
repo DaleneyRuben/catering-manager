@@ -5,6 +5,7 @@ import Plan from '../../../models/Plan';
 import Subscription from '../../../models/Subscription';
 import sequelize from '../../../database/sequelize';
 import { record } from '../../client-history';
+import { recordPayment } from '../../finance';
 import { markPaid } from '../mark-paid';
 import { appToday, subtractDeliveryDays } from '../../../utils/date';
 
@@ -12,6 +13,7 @@ jest.mock('../../../models/Subscription');
 jest.mock('../../../models/Client');
 jest.mock('../../../models/Plan');
 jest.mock('../../client-history');
+jest.mock('../../finance');
 jest.mock('../../../database/sequelize', () => ({
   __esModule: true,
   default: { query: jest.fn(), transaction: jest.fn() },
@@ -76,6 +78,39 @@ describe('markPaid', () => {
       transaction,
     );
     expect(result).toBe(subscription);
+  });
+
+  // Confirming payment is the moment money arrives for a subscription created unpaid, so this is
+  // the second and last place a payment is born (ADR-008).
+  it('records a payment for the subscription price inside its own transaction', async () => {
+    const subscription = {
+      id: 3,
+      clientId: 1,
+      planId: 2,
+      startDate: '2026-07-27',
+      duration: 20,
+      contractEndDate: '2026-08-21',
+      price: 1200,
+      update: jest.fn().mockResolvedValue({}),
+    };
+    (Subscription.findOne as jest.Mock).mockResolvedValue(subscription);
+    (Plan.findByPk as jest.Mock).mockResolvedValue({ id: 2, name: 'Completo', price: 5000 });
+
+    await markPaid(1, actor);
+
+    expect(recordPayment).toHaveBeenCalledWith(
+      { clientId: 1, subscriptionId: 3, amount: 1200 },
+      actor,
+      transaction,
+    );
+  });
+
+  it('records no payment when the client has no unpaid subscription', async () => {
+    (Subscription.findOne as jest.Mock).mockResolvedValue(null);
+
+    await markPaid(1, actor);
+
+    expect(recordPayment).not.toHaveBeenCalled();
   });
 
   it('logs a plan_renewed history event when the subscription renewalType is renewal', async () => {

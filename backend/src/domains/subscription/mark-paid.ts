@@ -4,6 +4,7 @@ import Subscription from '../../models/Subscription';
 import { withTransaction } from '../../database/with-transaction';
 import type { Actor } from '../../types/actor';
 import { record } from '../client-history';
+import { recordPayment } from '../finance';
 import { finalizeOverlappingSubscriptions } from './finalize-overlapping';
 import { applyRenewalPauseState, historyEventTypeFor } from './_helpers';
 
@@ -50,6 +51,14 @@ export const markPaid = async (clientId: number, actor: Actor, transaction?: Tra
           ...(subscription.appointmentId ? { appointmentId: subscription.appointmentId } : {}),
         },
       },
+      t,
+    );
+
+    // Deferred with the history write above: this is the moment the money actually arrived, so
+    // it is the payment's date under cash basis (ADR-008).
+    await recordPayment(
+      { clientId, subscriptionId: subscription.id, amount: subscription.price },
+      actor,
       t,
     );
   });
