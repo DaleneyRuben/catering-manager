@@ -29,6 +29,11 @@ const overview: FinanceOverview = {
       amount: 1550,
       label: 'Marcela Ríos',
       description: null,
+      clientId: 'C9',
+      clientArchived: false,
+      categoryId: null,
+      registeredByName: 'Daleney',
+      registeredAt: '2026-08-05T09:30:00.000Z',
     },
     {
       kind: 'expense',
@@ -37,6 +42,11 @@ const overview: FinanceOverview = {
       amount: 180,
       label: 'Transporte',
       description: 'Reparto del día',
+      clientId: null,
+      clientArchived: false,
+      categoryId: 'C1',
+      registeredByName: 'Gilian',
+      registeredAt: '2026-08-04T18:05:00.000Z',
     },
   ],
 };

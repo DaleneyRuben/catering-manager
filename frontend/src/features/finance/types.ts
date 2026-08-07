@@ -12,6 +12,16 @@ export interface Movement {
   // Client name for income, category name for an expense.
   label: string;
   description: string | null;
+  // Set on income only — an expense is not attached to anyone. The row links to this client
+  // unless they have been archived, in which case the name is marked and leads nowhere.
+  clientId: string | null;
+  clientArchived: boolean;
+  // Set on expenses only; the row's category tag filters the list by it.
+  categoryId: string | null;
+  // Provenance. Null when the user who registered the row has since been deleted.
+  registeredByName: string | null;
+  // When the row was entered, which is not the day it is dated when an expense is backdated.
+  registeredAt: string;
 }
 
 export interface FinanceOverview {

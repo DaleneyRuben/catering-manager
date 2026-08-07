@@ -6,9 +6,10 @@ import {
   findEarliestMonth,
   findMonthSummary,
   findMovements,
+  findMovementsSubtotal,
   updateExpense as updateFinanceExpense,
 } from '../domains/finance';
-import { monthSchema } from '../schemas/finance.schema';
+import { monthSchema, movementFiltersSchema } from '../schemas/finance.schema';
 import { appToday } from '../utils/date';
 import { sendError, sendSuccess } from '../utils/response';
 import { decodeId } from '../utils/sqids';
@@ -26,9 +27,18 @@ const getOverview = async (req: Request, res: Response, next: NextFunction) => {
       return;
     }
 
-    const [summary, movements, earliest] = await Promise.all([
+    const filters = movementFiltersSchema.safeParse(req.query);
+    if (!filters.success) {
+      sendError(res, filters.error.issues[0].message, 400);
+      return;
+    }
+
+    // The three tiles are the month's truth and never see the filters — a "Balance" of one
+    // category is not a balance of anything. Only the list and its subtotal narrow.
+    const [summary, movements, subtotal, earliest] = await Promise.all([
       findMonthSummary(parsed.data),
-      findMovements(parsed.data),
+      findMovements(parsed.data, filters.data),
+      findMovementsSubtotal(parsed.data, filters.data),
       findEarliestMonth(),
     ]);
 
@@ -38,6 +48,7 @@ const getOverview = async (req: Request, res: Response, next: NextFunction) => {
       earliestMonth: earliest ?? currentMonth(),
       ...summary,
       movements,
+      ...subtotal,
     });
   } catch (err) {
     next(err);
