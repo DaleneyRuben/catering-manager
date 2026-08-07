@@ -35,7 +35,9 @@ describe('useCategoryCatalog', () => {
     const { result } = renderHook(() => useCategoryCatalog('2026-08'), { wrapper: makeWrapper() });
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
-    expect(mockApi.get).toHaveBeenCalledWith('/finance/categories?includeArchived=true&month=2026-08');
+    expect(mockApi.get).toHaveBeenCalledWith(
+      '/finance/categories?includeArchived=true&month=2026-08',
+    );
     expect(result.current.categories).toEqual(catalog);
   });
 
