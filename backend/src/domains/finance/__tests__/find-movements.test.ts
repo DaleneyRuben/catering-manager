@@ -207,6 +207,15 @@ describe('findMovements', () => {
       expect(mockedQuery.mock.calls[0][1].replacements.q).toBe('%50\\%%');
     });
 
+    // Asking for income in one category is a contradiction: income carries no category. The set is
+    // empty by definition, so it answers empty rather than building a query with no halves left.
+    it('returns nothing without querying when a category is asked of income', async () => {
+      const result = await findMovements('2026-08', { direction: 'income', categoryId: 4 });
+
+      expect(result).toEqual([]);
+      expect(mockedQuery).not.toHaveBeenCalled();
+    });
+
     it('combines a category and a search term rather than replacing one with the other', async () => {
       await findMovements('2026-08', { categoryId: 4, q: 'verduleria' });
 

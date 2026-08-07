@@ -48,6 +48,14 @@ describe('findMovementsSubtotal', () => {
     expect(sql).not.toContain('FROM payments');
   });
 
+  // Mirrors findMovements: the contradictory pair has an empty answer, not a query with no halves.
+  it('returns zeroes without querying when a category is asked of income', async () => {
+    const result = await findMovementsSubtotal('2026-08', { direction: 'income', categoryId: 4 });
+
+    expect(result).toEqual({ count: 0, subtotal: 0 });
+    expect(mockedQuery).not.toHaveBeenCalled();
+  });
+
   it('counts only payments when the direction is income', async () => {
     await findMovementsSubtotal('2026-08', { direction: 'income' });
 
