@@ -29,6 +29,28 @@ export const movementFiltersSchema = z.object({
   q: z.string().trim().min(1).optional(),
 });
 
+const categoryNameField = z.string().trim().min(1, 'name is required');
+
+export const createCategorySchema = z.object({ name: categoryNameField });
+
+// Rename, archive and restore are one PATCH because they are one row's state, and the modal can
+// send a rename and a restore together. An empty body changes nothing, so it is a bad request
+// rather than a silent 200.
+export const updateCategorySchema = z
+  .object({
+    name: categoryNameField.optional(),
+    active: z.boolean().optional(),
+  })
+  .refine((v) => v.name !== undefined || v.active !== undefined, 'nothing to update');
+
+export const categoryQuerySchema = z.object({
+  month: monthSchema.optional(),
+  includeArchived: z
+    .enum(['true', 'false'])
+    .optional()
+    .transform((v) => v === 'true'),
+});
+
 export const createExpenseSchema = z.object({
   amount: amountField,
   categoryId: z.string().transform((v) => decodeId(v)),
@@ -48,3 +70,5 @@ export const updateExpenseSchema = z.object({
 
 export type CreateExpenseDto = z.infer<typeof createExpenseSchema>;
 export type UpdateExpenseDto = z.infer<typeof updateExpenseSchema>;
+export type CreateCategoryDto = z.infer<typeof createCategorySchema>;
+export type UpdateCategoryDto = z.infer<typeof updateCategorySchema>;
