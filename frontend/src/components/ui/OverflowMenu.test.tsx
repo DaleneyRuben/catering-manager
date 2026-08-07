@@ -50,7 +50,9 @@ it('takes a label of its own when "más acciones" would not say which row', () =
 it('drops the border and shrinks in the bare variant', () => {
   render(<OverflowMenu items={items} variant="bare" />);
   const trigger = screen.getByRole('button', { name: /más acciones/i });
-  expect(trigger).toHaveClass('w-7', 'h-7');
+  // Written in px, not in Tailwind's rem scale: the app's root font-size is 14px, so w-7 renders
+  // 24.5px and the trigger quietly comes out under the size the design calls for.
+  expect(trigger).toHaveClass('w-[28px]', 'h-[28px]');
   expect(trigger).not.toHaveClass('border');
 });
 

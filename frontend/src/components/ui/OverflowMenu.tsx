@@ -21,7 +21,7 @@ interface Props {
 const TRIGGER_CLS: Record<NonNullable<Props['variant']>, string> = {
   bordered:
     'w-[38px] h-[38px] rounded-[9px] border border-rule bg-paper hover:border-rule-2 text-muted hover:text-ink-2',
-  bare: 'w-7 h-7 rounded-[7px] text-muted hover:bg-movement-action-hover hover:text-ink',
+  bare: 'w-[28px] h-[28px] rounded-[7px] text-muted hover:bg-movement-action-hover hover:text-ink',
 };
 
 export function OverflowMenu({ items, label = 'Más acciones', variant = 'bordered' }: Props) {

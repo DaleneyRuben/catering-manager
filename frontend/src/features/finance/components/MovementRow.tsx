@@ -64,7 +64,7 @@ export function MovementRow({ movement, isLast, onEdit, onDuplicate, onDelete }:
   return (
     <div
       data-testid={`movement-${movement.id}`}
-      className={`relative flex items-center gap-3.5 px-6 py-[11px] transition-colors hover:bg-row-hover ${
+      className={`relative flex items-center gap-4 px-6 py-[11px] transition-colors hover:bg-row-hover ${
         isIncome ? 'bg-income-row-bg' : ''
       } ${isLast ? 'rounded-b-[12px]' : 'border-b border-cream-2'}`}
     >
@@ -107,7 +107,7 @@ export function MovementRow({ movement, isLast, onEdit, onDuplicate, onDelete }:
       {/* Nothing on an income row is a human's to revise, and a disabled control would only invite
           the question (ADR-008) — so the slot is held open rather than filled. */}
       {isIncome ? (
-        <span className="w-7 shrink-0" />
+        <span className="w-[28px] shrink-0" />
       ) : (
         <OverflowMenu
           variant="bare"
