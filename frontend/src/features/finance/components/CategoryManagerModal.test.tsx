@@ -68,6 +68,15 @@ describe('CategoryManagerModal', () => {
     expect(mockCatalog).toHaveBeenCalledWith('2026-07');
   });
 
+  // "Activas · 0" while the catalog is in flight would read as a list that lost its categories.
+  it('waits for the catalog rather than counting an empty one', () => {
+    mockCatalog.mockReturnValue({ categories: [], isLoading: true });
+    render(<CategoryManagerModal month="2026-07" byCategory={byCategory} onClose={onClose} />);
+
+    expect(screen.queryByText(/Activas ·/)).not.toBeInTheDocument();
+    expect(screen.getByText('Cargando categorías…')).toBeInTheDocument();
+  });
+
   it('splits the catalog into active and archived, each counted', () => {
     setup();
 
