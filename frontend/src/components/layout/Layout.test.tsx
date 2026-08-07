@@ -177,6 +177,8 @@ describe('Layout', () => {
       'Informes',
       'Logística',
       'Entregas',
+      'Administración',
+      'Finanzas',
     ]);
   });
 
