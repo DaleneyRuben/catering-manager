@@ -93,15 +93,15 @@ The screen cannot be built without these; they land first.
 
 | #   | Item                                                                                                                                                                                                                      | Status |
 | --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
-| 3.0 | **Decided: Finanzas is admin + super_admin.** The UI gate (`Layout.tsx`, route guard) moves to match the API, which already answers an `admin` token — and 3.18's who-chip earns its place                                | ☐      |
-| 3.1 | Movement rows gain identity: `clientId` + a soft-deleted flag on income, `categoryId` on expenses — the link target and the category-tag filter both need them                                                            | ☐      |
-| 3.2 | Movement rows gain provenance: `registeredBy` name (already stored on both `payments` and `expenses`, never read) — a read only, no new writes                                                                            | ☐      |
-| 3.3 | `GET /finance` accepts `direction`, `categoryId` and `q`; returns the filtered rows plus a **filtered `SUM` and count**. Never a JS reduction over the page — `pg` returns `DECIMAL` as a string                          | ☐      |
-| 3.4 | The three tiles stay unfiltered in the same response — they are the month's truth, and only the list responds                                                                                                             | ☐      |
-| 3.5 | `find-month-summary`'s `byCategory` gains `active`, so a category spent this month but since archived still renders, tagged ARCHIVADA                                                                                     | ☐      |
-| 3.6 | Category reads gain usage counts (this month + all-time) and can include archived — the modal states usage per row before anyone archives                                                                                 | ☐      |
-| 3.7 | `renameCategory` and `reactivateCategory` domain functions (`createCategory` and `deactivateCategory` already exist)                                                                                                      | ☐      |
-| 3.8 | Category routes: `POST /finance/categories`, `PATCH /finance/categories/:id` (rename · archive · restore). Creating a duplicate name folds into the existing category, accent- and case-insensitive, rather than erroring | ☐      |
+| 3.0 | **Decided: Finanzas is admin + super_admin.** The UI gate (`Layout.tsx`, route guard) moves to match the API, which already answers an `admin` token — and 3.18's who-chip earns its place                                | ✅     |
+| 3.1 | Movement rows gain identity: `clientId` + a soft-deleted flag on income, `categoryId` on expenses — the link target and the category-tag filter both need them                                                            | ✅     |
+| 3.2 | Movement rows gain provenance: `registeredBy` name (already stored on both `payments` and `expenses`, never read) — a read only, no new writes                                                                            | ✅     |
+| 3.3 | `GET /finance` accepts `direction`, `categoryId` and `q`; returns the filtered rows plus a **filtered `SUM` and count**. Never a JS reduction over the page — `pg` returns `DECIMAL` as a string                          | ✅     |
+| 3.4 | The three tiles stay unfiltered in the same response — they are the month's truth, and only the list responds                                                                                                             | ✅     |
+| 3.5 | `find-month-summary`'s `byCategory` gains `active`, so a category spent this month but since archived still renders, tagged ARCHIVADA                                                                                     | ✅     |
+| 3.6 | Category reads gain usage counts (this month + all-time) and can include archived — the modal states usage per row before anyone archives                                                                                 | ✅     |
+| 3.7 | `renameCategory` and `reactivateCategory` domain functions (`createCategory` and `deactivateCategory` already exist)                                                                                                      | ✅     |
+| 3.8 | Category routes: `POST /finance/categories`, `PATCH /finance/categories/:id` (rename · archive · restore). Creating a duplicate name folds into the existing category, accent- and case-insensitive, rather than erroring | ✅     |
 
 ### 3b. Frontend
 
@@ -140,6 +140,16 @@ The screen cannot be built without these; they land first.
 - **The chip order is computed server-side** (3.24), as an `ORDER BY` over the usage counts 3.6
   already gathers. The expense form and the category modal then cannot disagree about which
   category is most used.
+- **Creating a category folds onto an archived one and restores it** (3.8). Asking for a category
+  by name is asking to file against it, so handing back an archived row the form cannot offer
+  would read as the button doing nothing. A fold answers `200` rather than `201` — nothing was
+  created — and either way returns the category for "+ Nueva" to select.
+- **Renaming never folds; a taken name is a `409`** (3.8). Merging two categories would have to
+  move every expense filed against one of them, which is a different operation from correcting a
+  label. A category matching only itself is not a collision, so recasing its own name is allowed.
+- **Category usage counts scope to a `month` query param** (3.6), defaulting to the current month.
+  The modal passes the month on screen, so "usado 4 veces este mes" describes the register the
+  user is actually looking at rather than today's calendar month.
 
 ### Notes for whoever implements it
 

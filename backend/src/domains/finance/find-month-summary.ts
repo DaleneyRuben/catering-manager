@@ -3,13 +3,13 @@ import sequelize from '../../database/sequelize';
 import { monthBounds } from './_helpers';
 
 type TotalRow = { total: string };
-type CategoryRow = { categoryId: number; categoryName: string; total: string };
+type CategoryRow = { categoryId: number; categoryName: string; total: string; active: boolean };
 
 export type MonthSummary = {
   income: number;
   expenses: number;
   balance: number;
-  byCategory: { categoryId: number; categoryName: string; total: number }[];
+  byCategory: { categoryId: number; categoryName: string; total: number; active: boolean }[];
 };
 
 // Cash basis: both sides are filtered by the day the money moved, never the period it relates to.
@@ -33,12 +33,15 @@ export const findMonthSummary = async (month: string): Promise<MonthSummary> => 
       { replacements, type: QueryTypes.SELECT },
     ),
     sequelize.query<CategoryRow>(
-      `SELECT c.id AS "categoryId", c.name AS "categoryName", SUM(e.amount) AS total
+      // active travels with the line rather than being looked up separately: a category archived
+      // after this month was spent still owns the money, and the breakdown marks it ARCHIVADA
+      // instead of dropping the line and losing the total.
+      `SELECT c.id AS "categoryId", c.name AS "categoryName", SUM(e.amount) AS total, c.active
        FROM expenses e
        JOIN expense_categories c ON c.id = e."categoryId"
        WHERE e."deletedAt" IS NULL
          AND e."spentAt" BETWEEN :start AND :end
-       GROUP BY c.id, c.name
+       GROUP BY c.id, c.name, c.active
        ORDER BY total DESC`,
       { replacements, type: QueryTypes.SELECT },
     ),
@@ -55,6 +58,7 @@ export const findMonthSummary = async (month: string): Promise<MonthSummary> => 
       categoryId: row.categoryId,
       categoryName: row.categoryName,
       total: Number(row.total),
+      active: row.active,
     })),
   };
 };
