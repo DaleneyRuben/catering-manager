@@ -1,9 +1,6 @@
 import { Op } from 'sequelize';
 import Client from '../../models/Client';
-
-// Escapes LIKE metacharacters so a query like "%" or "_" is matched literally
-// instead of acting as a wildcard.
-const escapeLikePattern = (value: string) => value.replace(/[\\%_]/g, '\\$&');
+import { escapeLikePattern } from '../../utils/search';
 
 export const search = (query: string) => {
   const pattern = `%${escapeLikePattern(query)}%`;

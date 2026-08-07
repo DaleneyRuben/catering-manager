@@ -10,4 +10,7 @@ export { findMonthSummary } from './find-month-summary';
 export type { MonthSummary } from './find-month-summary';
 export { findMovements } from './find-movements';
 export type { Movement } from './find-movements';
+export type { MovementFilters } from './find-movements';
+export { findMovementsSubtotal } from './find-movements-subtotal';
+export type { MovementSubtotal } from './find-movements-subtotal';
 export { findEarliestMonth } from './find-earliest-month';

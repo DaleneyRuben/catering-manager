@@ -142,6 +142,89 @@ describe('findMovements', () => {
     expect(mockedQuery.mock.calls[0][0]).toContain('ORDER BY date DESC');
   });
 
+  describe('filters', () => {
+    it('returns both halves of the stream when nothing is filtered', async () => {
+      await findMovements('2026-08');
+
+      const sql = mockedQuery.mock.calls[0][0];
+      expect(sql).toContain('FROM payments');
+      expect(sql).toContain('FROM expenses');
+      expect(sql).toContain('UNION ALL');
+    });
+
+    it('drops the expense half when the direction is income', async () => {
+      await findMovements('2026-08', { direction: 'income' });
+
+      const sql = mockedQuery.mock.calls[0][0];
+      expect(sql).toContain('FROM payments');
+      expect(sql).not.toContain('FROM expenses');
+      expect(sql).not.toContain('UNION ALL');
+    });
+
+    it('drops the income half when the direction is expense', async () => {
+      await findMovements('2026-08', { direction: 'expense' });
+
+      const sql = mockedQuery.mock.calls[0][0];
+      expect(sql).toContain('FROM expenses');
+      expect(sql).not.toContain('FROM payments');
+    });
+
+    it('narrows expenses to one category', async () => {
+      await findMovements('2026-08', { categoryId: 4 });
+
+      expect(mockedQuery.mock.calls[0][0]).toContain('e."categoryId" = :categoryId');
+      expect(mockedQuery.mock.calls[0][1].replacements.categoryId).toBe(4);
+    });
+
+    // Income carries no category, so asking for one is an expenses-only question. The UI keeps the
+    // two controls consistent; the query must not answer with payments regardless.
+    it('drops the income half entirely when a category is filtered', async () => {
+      await findMovements('2026-08', { categoryId: 4 });
+
+      expect(mockedQuery.mock.calls[0][0]).not.toContain('FROM payments');
+    });
+
+    it("searches an expense's description and an income row's client name", async () => {
+      await findMovements('2026-08', { q: 'verduleria' });
+
+      const sql = mockedQuery.mock.calls[0][0];
+      expect(sql).toContain('c.name');
+      expect(sql).toContain('e.description');
+      expect(sql).toContain('LIKE :q');
+    });
+
+    // translate() rather than the unaccent extension: no migration, nothing to install.
+    it('folds accents on both sides of the comparison', async () => {
+      await findMovements('2026-08', { q: 'Verdulería' });
+
+      expect(mockedQuery.mock.calls[0][0]).toContain("translate(lower(");
+      expect(mockedQuery.mock.calls[0][1].replacements.q).toBe('%verduleria%');
+    });
+
+    it('escapes LIKE wildcards in the search term', async () => {
+      await findMovements('2026-08', { q: '50%' });
+
+      expect(mockedQuery.mock.calls[0][1].replacements.q).toBe('%50\\%%');
+    });
+
+    // Asking for income in one category is a contradiction: income carries no category. The set is
+    // empty by definition, so it answers empty rather than building a query with no halves left.
+    it('returns nothing without querying when a category is asked of income', async () => {
+      const result = await findMovements('2026-08', { direction: 'income', categoryId: 4 });
+
+      expect(result).toEqual([]);
+      expect(mockedQuery).not.toHaveBeenCalled();
+    });
+
+    it('combines a category and a search term rather than replacing one with the other', async () => {
+      await findMovements('2026-08', { categoryId: 4, q: 'verduleria' });
+
+      const sql = mockedQuery.mock.calls[0][0];
+      expect(sql).toContain('e."categoryId" = :categoryId');
+      expect(sql).toContain('LIKE :q');
+    });
+  });
+
   it('excludes soft-deleted expenses', async () => {
     await findMovements('2026-08');
 
