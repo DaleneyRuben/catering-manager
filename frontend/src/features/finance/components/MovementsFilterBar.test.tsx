@@ -44,6 +44,13 @@ describe('MovementsFilterBar', () => {
     expect(onQueryChange).toHaveBeenCalledWith('v');
   });
 
+  // The box carries no visible label, so the placeholder is what names it.
+  it('names the search box on its face', () => {
+    render(<MovementsFilterBar {...props()} />);
+
+    expect(screen.getByPlaceholderText('Buscar')).toBeInTheDocument();
+  });
+
   it('offers no way to clear an empty search field', () => {
     render(<MovementsFilterBar {...props()} />);
 

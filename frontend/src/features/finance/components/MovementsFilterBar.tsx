@@ -87,6 +87,9 @@ export function MovementsFilterBar({
             value={filters.q}
             onChange={(e) => onQueryChange(e.target.value)}
             onKeyDown={blurOnEnter}
+            // §2's "no placeholders" is about the expense form, where the label already names the
+            // field. This box has no visible label at all, so the word is what identifies it.
+            placeholder="Buscar"
             aria-label="Buscar por descripción o cliente"
             className={`${CONTROL_CLS} w-full pl-8 pr-[30px]`}
           />
