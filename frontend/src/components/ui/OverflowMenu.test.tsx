@@ -40,6 +40,20 @@ it('applies danger text color to items with variant alert', () => {
   expect(deleteBtn).toHaveClass('text-danger');
 });
 
+it('takes a label of its own when "más acciones" would not say which row', () => {
+  render(<OverflowMenu items={items} label="Acciones del gasto" />);
+  expect(screen.getByRole('button', { name: 'Acciones del gasto' })).toBeInTheDocument();
+});
+
+// A bordered 38px trigger reads as a control in a page header and as clutter once it repeats on
+// every row of a list, so the bare variant drops the border and shrinks to 28px.
+it('drops the border and shrinks in the bare variant', () => {
+  render(<OverflowMenu items={items} variant="bare" />);
+  const trigger = screen.getByRole('button', { name: /más acciones/i });
+  expect(trigger).toHaveClass('w-7', 'h-7');
+  expect(trigger).not.toHaveClass('border');
+});
+
 it('closes the menu when clicking outside', () => {
   render(
     <div>
