@@ -124,7 +124,7 @@ export function AppRouter() {
                 <Route
                   path="/finanzas"
                   element={
-                    <ProtectedRoute allowedRoles={[...ADMIN_ROLES]}>
+                    <ProtectedRoute allowedRoles={[ROLES.SUPER_ADMIN]}>
                       <FinancePage />
                     </ProtectedRoute>
                   }

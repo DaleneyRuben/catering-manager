@@ -113,8 +113,7 @@ describe('Layout', () => {
     expect(screen.getByText('Catering · con altura')).toBeInTheDocument();
   });
 
-  // Administración reaches an admin through Finanzas alone — Usuarios and Health stay super_admin.
-  it('renders all four section labels for the admin role', () => {
+  it('renders the Gestión, Cocina and Logística section labels for the admin role', () => {
     render(
       <MemoryRouter>
         <Layout>
@@ -125,10 +124,12 @@ describe('Layout', () => {
     expect(screen.getByText('Gestión')).toBeInTheDocument();
     expect(screen.getByText('Cocina')).toBeInTheDocument();
     expect(screen.getByText('Logística')).toBeInTheDocument();
-    expect(screen.getByText('Administración')).toBeInTheDocument();
+    expect(screen.queryByText('Administración')).not.toBeInTheDocument();
   });
 
-  it('shows Finanzas to an admin but not Usuarios or Health', () => {
+  // Every item under Administración — Finanzas included — is super_admin only, so an admin never
+  // sees the section at all.
+  it('hides Finanzas from an admin', () => {
     render(
       <MemoryRouter>
         <Layout>
@@ -136,7 +137,7 @@ describe('Layout', () => {
         </Layout>
       </MemoryRouter>,
     );
-    expect(screen.getByText('Finanzas')).toBeInTheDocument();
+    expect(screen.queryByText('Finanzas')).not.toBeInTheDocument();
     expect(screen.queryByText('Usuarios')).not.toBeInTheDocument();
     expect(screen.queryByText('Health')).not.toBeInTheDocument();
   });
@@ -176,8 +177,6 @@ describe('Layout', () => {
       'Informes',
       'Logística',
       'Entregas',
-      'Administración',
-      'Finanzas',
     ]);
   });
 

@@ -4,9 +4,9 @@
 knowledge of the codebase is assumed. Read section 1 first — three rules there explain almost every
 surprise this screen produces, and without them you will file bugs that are actually design.
 
-**What you need:** a running instance (backend on :4000, frontend on :3000, local Postgres), and an
-`admin` or `super_admin` login. The screen lives at `/finanzas`, in the sidebar under
-**Administración**.
+**What you need:** a running instance (backend on :4000, frontend on :3000, local Postgres), and a
+`super_admin` login — no other role can reach this screen, including `admin` (see §7). It lives at
+`/finanzas`, in the sidebar under **Administración**.
 
 Reference material, if you want the reasoning behind a rule:
 [ADR-008](./adr/008-finance-owns-payments.md) · [design](./design-prompts/finanzas.md) ·
@@ -239,18 +239,19 @@ repeated decimal addition produces.
 
 ## 7. Roles and access
 
-Only **admin** and **super_admin** may see Finanzas. Test with a `kitchen`, `delivery` or
-`nutritionist` login:
+**Only `super_admin` sees Finanzas.** Every other role — including a plain `admin` — has no
+sidebar item and cannot reach the screen. Test with an `admin` login and again with `kitchen`,
+`delivery` or `nutritionist`:
 
-| Check                                             | Expect                                                                                                   |
-| ------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
-| Sidebar                                           | No **Finanzas** item. For kitchen/delivery/nutritionist there should be no Administración section at all |
-| Navigate directly to `/finanzas`                  | Redirected to `/sin-acceso`                                                                              |
-| API `GET /api/finance` with their token           | `403`                                                                                                    |
-| API `POST /api/finance/expenses` with their token | `403`                                                                                                    |
+| Check                            | Expect                                                                                            |
+| -------------------------------- | ------------------------------------------------------------------------------------------------- |
+| Sidebar                          | No **Finanzas** item, and no Administración section at all — every item in it is super_admin only |
+| Navigate directly to `/finanzas` | Redirected to `/sin-acceso`                                                                       |
 
-A plain **admin** (not super*admin) \_should* see the Administración section — containing Finanzas
-only, since Usuarios and Health remain super_admin. That is not a bug; it is new with this feature.
+**One caveat, deliberate:** the **API is still open to `admin`** — `GET /api/finance` returns data
+for an admin token even though the screen is unreachable in the browser. The restriction is a
+navigation decision, not a security boundary. An admin calling the endpoint directly and getting
+`200` is expected, not a finding. `kitchen`, `delivery` and `nutritionist` do get `403`.
 
 ---
 
