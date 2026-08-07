@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event';
 import { WhoChip } from '@/features/finance/components/WhoChip';
 
 const setup = (name: string | null = 'Gilian Roca') =>
-  render(<WhoChip name={name} at="2026-08-04T18:05:00.000Z" />);
+  render(<WhoChip name={name} registeredAt="2026-08-04T18:05:00.000Z" />);
 
 describe('WhoChip', () => {
   it('stands for whoever registered the movement by their initials', () => {
@@ -43,7 +43,7 @@ describe('WhoChip', () => {
   it('closes when the click lands outside it', async () => {
     render(
       <div>
-        <WhoChip name="Gilian Roca" at="2026-08-04T18:05:00.000Z" />
+        <WhoChip name="Gilian Roca" registeredAt="2026-08-04T18:05:00.000Z" />
         <span data-testid="elsewhere">elsewhere</span>
       </div>,
     );

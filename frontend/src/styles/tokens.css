@@ -199,6 +199,15 @@
   --color-cat-bar-track: #eceadf;
   --color-movement-tag-bg: #f0eee4;
   --color-movement-action-hover: #e9e6d8;
+  --color-income-icon-bg: #e0e9cc;
+  --color-income-row-bg: #f5f8ed;
+  --color-income-tag-bg: #eaf0dc;
+  --color-income-link: #2f5e1a;
+  --color-archived-tag-border: #e0ddcf;
+  --color-who-chip-bg: #f7f6ef;
+  --color-who-chip-bg-open: #e9eedd;
+  --color-who-chip-border: #e2dfd0;
+  --color-who-chip-text: #8a8f7b;
 
   /* Fonts */
   --font-sans: 'Manrope', system-ui, sans-serif;
