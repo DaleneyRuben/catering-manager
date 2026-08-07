@@ -2,8 +2,7 @@ import { Op } from 'sequelize';
 import Appointment from '../../models/Appointment';
 import Subscription from '../../models/Subscription';
 import { appToday } from '../../utils/date';
-
-const escapeLikePattern = (value: string) => value.replace(/[\\%_]/g, '\\$&');
+import { escapeLikePattern } from '../../utils/search';
 
 export interface FindHistoryFilters {
   status?: 'pagado' | 'no_pagado';

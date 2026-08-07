@@ -5,11 +5,8 @@ import Subscription from '../../models/Subscription';
 import { appToday, addDeliveryDays } from '../../utils/date';
 import { EXPIRY_THRESHOLD_DAYS } from '../../constants/subscription.constants';
 import { CLIENT_STATUS } from '../../constants/client.constants';
+import { escapeLikePattern } from '../../utils/search';
 import { withStatus } from './_helpers';
-
-// Escapes LIKE metacharacters so a query like "%" or "_" is matched literally
-// instead of acting as a wildcard.
-const escapeLikePattern = (value: string) => value.replace(/[\\%_]/g, '\\$&');
 
 export interface FindAllFilters {
   status?: string;
