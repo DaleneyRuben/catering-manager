@@ -18,6 +18,17 @@ export const monthSchema = z
   .regex(/^\d{4}-\d{2}$/, 'must be YYYY-MM')
   .refine((v) => v <= appToday().slice(0, 7), 'month cannot be in the future');
 
+// The movements list narrows; the three tiles never do. A category implies expenses, so the two
+// controls cannot contradict each other (see movementScope in the finance domain).
+export const movementFiltersSchema = z.object({
+  direction: z.enum(['income', 'expense']).optional(),
+  categoryId: z
+    .string()
+    .transform((v) => decodeId(v))
+    .optional(),
+  q: z.string().trim().min(1).optional(),
+});
+
 export const createExpenseSchema = z.object({
   amount: amountField,
   categoryId: z.string().transform((v) => decodeId(v)),
