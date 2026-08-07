@@ -5,6 +5,7 @@ import clientRoutes from './client.routes';
 import dashboardRoutes from './dashboard.routes';
 import deliveryRoutes from './delivery.routes';
 import evaluationRoutes from './evaluation.routes';
+import financeRoutes from './finance.routes';
 import healthRoutes from './health.routes';
 import menuRoutes from './menu.routes';
 import planRoutes from './plan.routes';
@@ -36,6 +37,7 @@ router.use(
   evaluationRoutes,
 );
 router.use('/dashboard', requireAuth, requireRole(ROLES.SUPER_ADMIN, ROLES.ADMIN), dashboardRoutes);
+router.use('/finance', requireAuth, requireRole(ROLES.SUPER_ADMIN, ROLES.ADMIN), financeRoutes);
 router.use(
   '/delivery',
   requireAuth,

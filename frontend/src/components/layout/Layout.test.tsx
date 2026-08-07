@@ -127,6 +127,34 @@ describe('Layout', () => {
     expect(screen.queryByText('Administración')).not.toBeInTheDocument();
   });
 
+  // Every item under Administración — Finanzas included — is super_admin only, so an admin never
+  // sees the section at all.
+  it('hides Finanzas from an admin', () => {
+    render(
+      <MemoryRouter>
+        <Layout>
+          <span />
+        </Layout>
+      </MemoryRouter>,
+    );
+    expect(screen.queryByText('Finanzas')).not.toBeInTheDocument();
+    expect(screen.queryByText('Usuarios')).not.toBeInTheDocument();
+    expect(screen.queryByText('Health')).not.toBeInTheDocument();
+  });
+
+  it('places Finanzas above Usuarios for a super_admin', () => {
+    mockUserRole('super_admin');
+    render(
+      <MemoryRouter>
+        <Layout>
+          <span />
+        </Layout>
+      </MemoryRouter>,
+    );
+    const labels = screen.getAllByRole('link').map((link) => link.textContent);
+    expect(labels.indexOf('Finanzas')).toBeLessThan(labels.indexOf('Usuarios'));
+  });
+
   it('groups nav items under their sections in order', () => {
     render(
       <MemoryRouter>

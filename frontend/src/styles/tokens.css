@@ -189,6 +189,17 @@
   --color-menu-sticky-bg: #f8f8f2;
   --color-menu-dish-text: #2a3122;
 
+  /* Finanzas */
+  --color-balance-up-bg: #f1f5e8;
+  --color-balance-up-border: #d5e2bb;
+  --color-balance-down-bg: #faf0eb;
+  --color-balance-down-border: #eed6cb;
+  --color-expense-icon-bg: #f4e3dc;
+  --color-expense-dot: #d9a68e;
+  --color-cat-bar-track: #eceadf;
+  --color-movement-tag-bg: #f0eee4;
+  --color-movement-action-hover: #e9e6d8;
+
   /* Fonts */
   --font-sans: 'Manrope', system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, monospace;

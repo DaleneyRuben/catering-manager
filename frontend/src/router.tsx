@@ -12,6 +12,7 @@ import { EvaluationRenewalPage } from '@/pages/EvaluationRenewalPage';
 import { MenuImportPage } from '@/pages/MenuImportPage';
 import { ProductionPage } from '@/pages/ProductionPage';
 import { ReportsPage } from '@/pages/ReportsPage';
+import { FinancePage } from '@/pages/FinancePage';
 import { HealthPage } from '@/pages/HealthPage';
 import { UsersPage } from '@/pages/UsersPage';
 import { DeliveryPage } from '@/pages/DeliveryPage';
@@ -117,6 +118,14 @@ export function AppRouter() {
                   element={
                     <ProtectedRoute allowedRoles={[...DELIVERY_ROLES]}>
                       <DeliveryPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/finanzas"
+                  element={
+                    <ProtectedRoute allowedRoles={[ROLES.SUPER_ADMIN]}>
+                      <FinancePage />
                     </ProtectedRoute>
                   }
                 />

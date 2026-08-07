@@ -10,3 +10,4 @@ export { findMonthSummary } from './find-month-summary';
 export type { MonthSummary } from './find-month-summary';
 export { findMovements } from './find-movements';
 export type { Movement } from './find-movements';
+export { findEarliestMonth } from './find-earliest-month';

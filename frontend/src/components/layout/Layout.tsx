@@ -60,6 +60,7 @@ const NAV_SECTIONS: NavSection[] = [
     label: 'Administración',
     separated: true,
     items: [
+      { to: '/finanzas', label: 'Finanzas', icon: 'wallet', allowedRoles: [ROLES.SUPER_ADMIN] },
       { to: '/usuarios', label: 'Usuarios', icon: 'user-plus', allowedRoles: [ROLES.SUPER_ADMIN] },
       { to: '/health', label: 'Health', icon: 'stethoscope', allowedRoles: [ROLES.SUPER_ADMIN] },
     ],
