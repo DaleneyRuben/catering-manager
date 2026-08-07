@@ -9,11 +9,19 @@ jest.mock('../../../database/sequelize', () => ({
 const mockedQuery = sequelize.query as jest.Mock;
 
 // pg returns DECIMAL as a string — the shape every one of these queries actually comes back in.
-const stubQueries = ({ income = '0', expenses = '0', byCategory = [] as unknown[] } = {}) => {
+// COUNT comes back a string too, for the same reason: it is a bigint.
+const stubQueries = ({
+  income = '0',
+  expenses = '0',
+  incomeCount = '0',
+  expenseCount = '0',
+  byCategory = [] as unknown[],
+} = {}) => {
   mockedQuery.mockImplementation((sql: string) => {
-    if (sql.includes('FROM payments')) return Promise.resolve([{ total: income }]);
+    if (sql.includes('FROM payments'))
+      return Promise.resolve([{ total: income, count: incomeCount }]);
     if (sql.includes('GROUP BY')) return Promise.resolve(byCategory);
-    return Promise.resolve([{ total: expenses }]);
+    return Promise.resolve([{ total: expenses, count: expenseCount }]);
   });
 };
 
@@ -50,7 +58,38 @@ describe('findMonthSummary', () => {
 
     const result = await findMonthSummary('2026-08');
 
-    expect(result).toEqual({ income: 0, expenses: 0, balance: 0, byCategory: [] });
+    expect(result).toEqual({
+      income: 0,
+      expenses: 0,
+      balance: 0,
+      incomeCount: 0,
+      expenseCount: 0,
+      byCategory: [],
+    });
+  });
+
+  // The tiles caption how many payments and how many gastos the month holds. That is the month's
+  // truth and must not move when the list below is filtered, so it is counted here — beside the
+  // totals it belongs to — rather than by measuring the filtered rows the list happens to show.
+  it('counts the movements on each side of the month', async () => {
+    stubQueries({ incomeCount: '17', expenseCount: '4' });
+
+    const result = await findMonthSummary('2026-08');
+
+    expect(result.incomeCount).toBe(17);
+    expect(result.expenseCount).toBe(4);
+  });
+
+  it('counts in sql alongside each total', async () => {
+    stubQueries();
+
+    await findMonthSummary('2026-08');
+
+    const counted = mockedQuery.mock.calls
+      .map(([sql]: [string]) => sql)
+      .filter((sql: string) => sql.includes('COUNT(*)'));
+
+    expect(counted).toHaveLength(2);
   });
 
   it('returns the per-category breakdown with numeric totals', async () => {
