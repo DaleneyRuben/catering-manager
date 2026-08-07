@@ -32,17 +32,14 @@ function FinanceSkeleton() {
   );
 }
 
-// An expense movement carries the category in `label`; the modal needs its id, which the
-// breakdown already lists by name for this month.
-const toEditable = (
-  movement: Movement,
-  categoryId: string | undefined,
-): EditableExpense | undefined =>
-  categoryId
+// The row states the category it was filed against, so the form opens on that one rather than on
+// whichever category currently answers to the same name.
+const toEditable = (movement: Movement): EditableExpense | undefined =>
+  movement.categoryId
     ? {
         id: movement.id,
         amount: movement.amount,
-        categoryId,
+        categoryId: movement.categoryId,
         spentAt: movement.date,
         description: movement.description,
       }
@@ -66,8 +63,6 @@ export function FinancePage() {
   const { categories } = useExpenseCategories();
   const { create, update, remove, isSaving } = useExpenseMutations();
 
-  const categoryIdByName = (name: string) => categories.find((c) => c.name === name)?.id;
-
   const closeForm = () => setForm(null);
 
   // A duplicate creates; only an edit revises the row it came from.
@@ -84,7 +79,7 @@ export function FinancePage() {
   };
 
   const openFor = (mode: 'edit' | 'duplicate') => (movement: Movement) => {
-    const expense = toEditable(movement, categoryIdByName(movement.label));
+    const expense = toEditable(movement);
     if (expense) setForm({ mode, expense });
   };
 
