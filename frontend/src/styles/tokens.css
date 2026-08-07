@@ -84,6 +84,7 @@
   --shadow-glow-offline: 0 0 0 3px rgba(205, 160, 26, 0.16);
   --shadow-dot-today: 0 0 0 4px rgba(108, 193, 24, 0.22);
   --shadow-tooltip: 0 10px 26px rgba(20, 40, 6, 0.28);
+  --shadow-segment: 0 1px 2px rgba(20, 40, 6, 0.1);
 
   /* Toast */
   --color-toast-error-border: #f0b8a0;
@@ -208,6 +209,10 @@
   --color-who-chip-bg-open: #e9eedd;
   --color-who-chip-border: #e2dfd0;
   --color-who-chip-text: #8a8f7b;
+  --color-filter-chip-bg: #e9eedd;
+  --color-filter-chip-hover: #dde6c9;
+  --color-filter-chip-text: #2f4a16;
+  --color-filter-note-bg: #f4f2e9;
 
   /* Fonts */
   --font-sans: 'Manrope', system-ui, sans-serif;

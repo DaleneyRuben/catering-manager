@@ -2,13 +2,17 @@ import { QueryTypes } from 'sequelize';
 import sequelize from '../../database/sequelize';
 import { monthBounds } from './_helpers';
 
-type TotalRow = { total: string };
+type TotalRow = { total: string; count: string };
 type CategoryRow = { categoryId: number; categoryName: string; total: string; active: boolean };
 
 export type MonthSummary = {
   income: number;
   expenses: number;
   balance: number;
+  // How many movements each side holds. Captioned on the tiles, which state the month's truth and
+  // never narrow — so they are counted here rather than by measuring the filtered list.
+  incomeCount: number;
+  expenseCount: number;
   byCategory: { categoryId: number; categoryName: string; total: number; active: boolean }[];
 };
 
@@ -20,13 +24,13 @@ export const findMonthSummary = async (month: string): Promise<MonthSummary> => 
 
   const [incomeRows, expenseRows, categoryRows] = await Promise.all([
     sequelize.query<TotalRow>(
-      `SELECT COALESCE(SUM(amount), 0) AS total
+      `SELECT COALESCE(SUM(amount), 0) AS total, COUNT(*) AS count
        FROM payments
        WHERE "paidAt" BETWEEN :start AND :end`,
       { replacements, type: QueryTypes.SELECT },
     ),
     sequelize.query<TotalRow>(
-      `SELECT COALESCE(SUM(amount), 0) AS total
+      `SELECT COALESCE(SUM(amount), 0) AS total, COUNT(*) AS count
        FROM expenses
        WHERE "deletedAt" IS NULL
          AND "spentAt" BETWEEN :start AND :end`,
@@ -54,6 +58,8 @@ export const findMonthSummary = async (month: string): Promise<MonthSummary> => 
     income,
     expenses,
     balance: income - expenses,
+    incomeCount: Number(incomeRows[0].count),
+    expenseCount: Number(expenseRows[0].count),
     byCategory: categoryRows.map((row) => ({
       categoryId: row.categoryId,
       categoryName: row.categoryName,

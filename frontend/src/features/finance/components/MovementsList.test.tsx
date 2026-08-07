@@ -2,6 +2,7 @@ import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { MovementsList } from '@/features/finance/components/MovementsList';
+import type { FilterBarProps } from '@/features/finance/components/MovementsFilterBar';
 import type { Movement } from '@/features/finance/types';
 
 const movements: Movement[] = [
@@ -33,6 +34,20 @@ const movements: Movement[] = [
   },
 ];
 
+const onClearAll = jest.fn();
+
+const filters: FilterBarProps = {
+  filters: { q: '', direction: 'all', categoryId: '' },
+  categories: [{ id: 'K1', name: 'Transporte', active: true }],
+  byCategory: [],
+  count: 2,
+  subtotal: 1370,
+  onQueryChange: jest.fn(),
+  onDirectionChange: jest.fn(),
+  onCategoryChange: jest.fn(),
+  onClearAll,
+};
+
 const setup = (props: Partial<React.ComponentProps<typeof MovementsList>> = {}) => {
   const onEdit = jest.fn();
   const onDelete = jest.fn();
@@ -41,6 +56,9 @@ const setup = (props: Partial<React.ComponentProps<typeof MovementsList>> = {}) 
     <MemoryRouter>
       <MovementsList
         movements={movements}
+        filters={filters}
+        month="2026-08"
+        monthCount={2}
         onEdit={onEdit}
         onDelete={onDelete}
         onDuplicate={onDuplicate}
@@ -50,6 +68,8 @@ const setup = (props: Partial<React.ComponentProps<typeof MovementsList>> = {}) 
   );
   return { onEdit, onDelete, onDuplicate };
 };
+
+beforeEach(() => jest.clearAllMocks());
 
 describe('MovementsList', () => {
   it('heads the list and states its order', () => {
@@ -94,9 +114,53 @@ describe('MovementsList', () => {
   });
 
   it('reads as nothing yet rather than as an error when the month is empty', () => {
-    setup({ movements: [] });
+    setup({ movements: [], monthCount: 0, filters: { ...filters, count: 0, subtotal: 0 } });
 
     expect(screen.getByText('Aún no hay movimientos')).toBeInTheDocument();
     expect(screen.queryByTestId('movement-P1')).not.toBeInTheDocument();
+  });
+
+  it('teaches where income comes from on an empty month', () => {
+    setup({ movements: [], monthCount: 0, filters: { ...filters, count: 0, subtotal: 0 } });
+
+    expect(
+      screen.getByText(/los ingresos aparecen al marcar una suscripción como pagada/i),
+    ).toBeInTheDocument();
+  });
+
+  // An empty month and a filter that matched nothing are different statements. Saying "aún no hay
+  // movimientos" over a month holding twelve of them would read as data loss.
+  it('says the filter matched nothing, and how much the month really holds', () => {
+    setup({
+      movements: [],
+      monthCount: 12,
+      filters: {
+        ...filters,
+        count: 0,
+        subtotal: 0,
+        filters: { q: '', direction: 'income', categoryId: '' },
+      },
+    });
+
+    expect(screen.getByText('Ningún movimiento coincide')).toBeInTheDocument();
+    expect(screen.queryByText('Aún no hay movimientos')).not.toBeInTheDocument();
+    expect(screen.getByText(/hay 12 movimientos en agosto 2026/i)).toBeInTheDocument();
+  });
+
+  it('offers a way out of a filter that matched nothing', async () => {
+    setup({
+      movements: [],
+      monthCount: 12,
+      filters: {
+        ...filters,
+        count: 0,
+        subtotal: 0,
+        filters: { q: '', direction: 'income', categoryId: '' },
+      },
+    });
+
+    await userEvent.click(screen.getByRole('button', { name: 'Limpiar filtros' }));
+
+    expect(onClearAll).toHaveBeenCalled();
   });
 });
