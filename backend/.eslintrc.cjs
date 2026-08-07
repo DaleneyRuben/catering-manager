@@ -15,6 +15,9 @@ const TABLE_OWNERS = {
   User: 'user',
   LoginEvent: 'login-event',
   ClientHistory: 'client-history',
+  Payment: 'finance',
+  Expense: 'finance',
+  ExpenseCategory: 'finance',
 };
 
 const WRITE_METHODS = ['create', 'update', 'destroy', 'bulkCreate'];
@@ -44,21 +47,28 @@ const AIRBNB_RESTRICTED_SYNTAX = [
   },
 ];
 
-const foreignWriteBans = (ownedModel) =>
+const foreignWriteBans = (ownedModels) =>
   Object.entries(TABLE_OWNERS)
-    .filter(([model]) => model !== ownedModel)
+    .filter(([model]) => !ownedModels.includes(model))
     .map(([model, owner]) => ({
       selector: `CallExpression[callee.object.name='${model}'][callee.property.name=/^(${WRITE_METHODS.join('|')})$/]`,
       message: `${model} is owned by the ${owner} domain — call its public function instead of writing the model here. Reading it is fine.`,
     }));
 
-// One override per owning domain, each allowing only its own model. Overrides are last-match-wins
+// A domain may own more than one table (finance owns three), so the models are grouped by owner
+// first: one override per domain listing every model it owns, never one override per model.
+const modelsByOwner = Object.entries(TABLE_OWNERS).reduce((acc, [model, owner]) => {
+  acc[owner] = [...(acc[owner] ?? []), model];
+  return acc;
+}, {});
+
+// One override per owning domain, each allowing only its own models. Overrides are last-match-wins
 // for a given rule, so these must come after the catch-all and cannot be merged into it.
 const ownershipOverrides = [
-  { files: ['src/domains/**/*.ts'], owns: null },
-  ...Object.entries(TABLE_OWNERS).map(([model, owner]) => ({
+  { files: ['src/domains/**/*.ts'], owns: [] },
+  ...Object.entries(modelsByOwner).map(([owner, models]) => ({
     files: [`src/domains/${owner}/**/*.ts`],
-    owns: model,
+    owns: models,
   })),
 ].map(({ files, owns }) => ({
   files,
