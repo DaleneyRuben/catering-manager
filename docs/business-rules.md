@@ -426,7 +426,7 @@ Rows written before the subscription carried its own price record a discount off
 The system has five roles (`super_admin`, `admin`, `kitchen`, `delivery`, `nutritionist`). Role controls what a user can see and do:
 
 - **super_admin** — full access including user management (Usuarios) and the Health view; both are super_admin-only.
-- **admin** — full access to clients, plans, menus, production, deliveries, reports, and the dashboard; no user management or Health view.
+- **admin** — full access to clients, plans, menus, production, deliveries, reports, Finanzas, and the dashboard; no user management or Health view.
 - **kitchen** — can view the kitchen report and menu; cannot access the kitchen report download on the Reports page (that card is hidden for this role).
 - **delivery** — delivery route view only.
 - **nutritionist** — Evaluaciones only: resolves appointments (conversions for new clients, and renewals/reactivations for existing clients — see Evaluaciones (Appointments)); no access to Clientes, Planes, menus, production, deliveries, reports, dashboard, user management, or Health.
