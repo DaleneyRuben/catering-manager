@@ -116,6 +116,20 @@ describe('useMovementFilters', () => {
     expect(result.current.queryFilters.q).toBe('verd');
   });
 
+  // Long enough to type a whole word through: the shared 300ms default fires mid-word and the list
+  // empties out under the fingers before the rest of the term lands.
+  it('waits out a pause between words, not just between keystrokes', () => {
+    const { result } = renderHook(() => useMovementFilters());
+
+    act(() => result.current.setQuery('trans'));
+
+    act(() => jest.advanceTimersByTime(400));
+    expect(result.current.queryFilters.q).toBe('');
+
+    act(() => jest.advanceTimersByTime(200));
+    expect(result.current.queryFilters.q).toBe('trans');
+  });
+
   it('passes the other filters through to the query immediately', () => {
     const { result } = renderHook(() => useMovementFilters());
 
