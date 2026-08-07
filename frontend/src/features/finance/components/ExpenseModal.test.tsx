@@ -119,6 +119,58 @@ describe('ExpenseModal', () => {
     expect(screen.getByText('Registrar gasto')).toBeInTheDocument();
   });
 
+  describe('duplicating an expense', () => {
+    const source = {
+      id: 'E1',
+      amount: 180,
+      categoryId: 'CAT2',
+      spentAt: '2026-07-30',
+      description: 'Reparto del día',
+    };
+
+    it('carries the amount, category and description across', () => {
+      setup({ duplicateOf: source });
+
+      expect(screen.getByLabelText(/monto/i)).toHaveValue('180');
+      expect(screen.getByLabelText(/categoría/i)).toHaveValue('CAT2');
+      expect(screen.getByLabelText(/descripción/i)).toHaveValue('Reparto del día');
+    });
+
+    // The daily delivery payment is the reason this exists: same expense, today's date.
+    it('dates the copy today rather than carrying the original date', () => {
+      setup({ duplicateOf: source });
+
+      expect(screen.getByLabelText(/fecha/i)).toHaveValue('2026-08-06');
+    });
+
+    // A duplicate creates; it never edits the row it was copied from.
+    it('stays in create mode', async () => {
+      const { onSubmit } = setup({ duplicateOf: source });
+
+      expect(screen.getByText('Registrar gasto')).toBeInTheDocument();
+      expect(screen.queryByText('Editar gasto')).not.toBeInTheDocument();
+
+      await userEvent.click(screen.getByRole('button', { name: 'Registrar' }));
+
+      expect(onSubmit).toHaveBeenCalledWith({
+        amount: 180,
+        categoryId: 'CAT2',
+        spentAt: '2026-08-06',
+        description: 'Reparto del día',
+      });
+    });
+
+    it('is still editable before confirming', async () => {
+      const { onSubmit } = setup({ duplicateOf: source });
+
+      await userEvent.clear(screen.getByLabelText(/monto/i));
+      await userEvent.type(screen.getByLabelText(/monto/i), '220');
+      await userEvent.click(screen.getByRole('button', { name: 'Registrar' }));
+
+      expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({ amount: 220 }));
+    });
+  });
+
   it('closes without submitting', async () => {
     const { onClose, onSubmit } = setup();
 

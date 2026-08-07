@@ -25,8 +25,17 @@ const movements: Movement[] = [
 const setup = (props: Partial<React.ComponentProps<typeof MovementsList>> = {}) => {
   const onEdit = jest.fn();
   const onDelete = jest.fn();
-  render(<MovementsList movements={movements} onEdit={onEdit} onDelete={onDelete} {...props} />);
-  return { onEdit, onDelete };
+  const onDuplicate = jest.fn();
+  render(
+    <MovementsList
+      movements={movements}
+      onEdit={onEdit}
+      onDelete={onDelete}
+      onDuplicate={onDuplicate}
+      {...props}
+    />,
+  );
+  return { onEdit, onDelete, onDuplicate };
 };
 
 describe('MovementsList', () => {
@@ -63,6 +72,26 @@ describe('MovementsList', () => {
 
     expect(onEdit).toHaveBeenCalledWith(movements[1]);
     expect(onDelete).toHaveBeenCalledWith(movements[1]);
+  });
+
+  // Duplicar is the primary entry path — delivery is paid daily — so it sits on the row itself
+  // rather than behind an overflow menu.
+  it('offers duplicate on an expense', async () => {
+    const { onDuplicate } = setup();
+    const row = screen.getByTestId('movement-E1');
+
+    await userEvent.click(within(row).getByRole('button', { name: /duplicar/i }));
+
+    expect(onDuplicate).toHaveBeenCalledWith(movements[1]);
+  });
+
+  it('orders the expense actions as edit, duplicate, delete', () => {
+    setup();
+
+    const labels = within(screen.getByTestId('movement-E1'))
+      .getAllByRole('button')
+      .map((button) => button.getAttribute('aria-label'));
+    expect(labels).toEqual(['Editar', 'Duplicar', 'Eliminar']);
   });
 
   // Nothing on an income row is a human's to revise, and a disabled control would only invite

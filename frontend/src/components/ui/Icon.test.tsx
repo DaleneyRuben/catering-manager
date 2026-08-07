@@ -124,4 +124,9 @@ describe('Icon', () => {
     const { container } = render(<Icon name="wallet" />);
     expect(container.querySelector('svg')).toBeInTheDocument();
   });
+
+  it('renders an svg for copy', () => {
+    const { container } = render(<Icon name="copy" />);
+    expect(container.querySelector('svg')).toBeInTheDocument();
+  });
 });

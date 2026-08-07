@@ -99,6 +99,23 @@ describe('FinancePage', () => {
     );
   });
 
+  // Duplicar is the daily path: the same expense, dated today, created rather than edited.
+  it('duplicates an expense into a new one dated today', async () => {
+    render(<FinancePage />);
+
+    await userEvent.click(screen.getByRole('button', { name: /duplicar/i }));
+
+    expect(screen.getByLabelText(/monto/i)).toHaveValue('180');
+    await userEvent.click(screen.getByRole('button', { name: 'Registrar' }));
+
+    await waitFor(() =>
+      expect(create).toHaveBeenCalledWith(
+        expect.objectContaining({ amount: 180, description: 'Reparto del día' }),
+      ),
+    );
+    expect(update).not.toHaveBeenCalled();
+  });
+
   // Deleting moves the month's totals, so it is never a single click.
   it('confirms before deleting an expense', async () => {
     render(<FinancePage />);
