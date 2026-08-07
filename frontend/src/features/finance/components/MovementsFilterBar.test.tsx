@@ -44,11 +44,14 @@ describe('MovementsFilterBar', () => {
     expect(onQueryChange).toHaveBeenCalledWith('v');
   });
 
-  // The box carries no visible label, so the placeholder is what names it.
-  it('names the search box on its face', () => {
+  // The search matches a gasto's description and an income row's client name — never the category,
+  // which the select and the breakdown cells are for. An expense with no description borrows its
+  // category as a title, so the word is on screen and inviting a search that cannot find it. The
+  // box states its own reach rather than leaving that to be discovered.
+  it('states on its face what the search box reaches', () => {
     render(<MovementsFilterBar {...props()} />);
 
-    expect(screen.getByPlaceholderText('Buscar')).toBeInTheDocument();
+    expect(screen.getByPlaceholderText('Buscar por descripción o cliente')).toBeInTheDocument();
   });
 
   it('offers no way to clear an empty search field', () => {

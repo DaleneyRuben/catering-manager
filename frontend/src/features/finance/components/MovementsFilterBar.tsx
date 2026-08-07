@@ -87,9 +87,14 @@ export function MovementsFilterBar({
             value={filters.q}
             onChange={(e) => onQueryChange(e.target.value)}
             onKeyDown={blurOnEnter}
-            // §2's "no placeholders" is about the expense form, where the label already names the
-            // field. This box has no visible label at all, so the word is what identifies it.
-            placeholder="Buscar"
+            // The search reaches a gasto's description and an income row's client name, never the
+            // category — that is what the select and the breakdown cells are for. An expense with
+            // no description borrows its category as a title, so the word sits on screen inviting
+            // a search that cannot find it; the box states its own reach instead.
+            //
+            // A tooltip would be the other way to say this, and the wrong one: hover is exactly the
+            // affordance v2 removes from this screen, because a touch device never produces it.
+            placeholder="Buscar por descripción o cliente"
             aria-label="Buscar por descripción o cliente"
             className={`${CONTROL_CLS} w-full pl-8 pr-[30px]`}
           />
