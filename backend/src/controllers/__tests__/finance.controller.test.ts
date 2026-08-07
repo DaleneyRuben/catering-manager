@@ -1,15 +1,20 @@
 import request from 'supertest';
 import app from '../../app';
 import {
+  createCategory,
   createExpense,
+  deactivateCategory,
   deleteExpense,
   findCategories,
   findEarliestMonth,
   findMonthSummary,
   findMovements,
   findMovementsSubtotal,
+  reactivateCategory,
+  renameCategory,
   updateExpense,
 } from '../../domains/finance';
+import { ConflictError } from '../../utils/errors';
 import { encodeId } from '../../utils/sqids';
 
 jest.mock('../../domains/finance');
@@ -167,16 +172,179 @@ describe('GET /api/finance', () => {
 });
 
 describe('GET /api/finance/categories', () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (findCategories as jest.Mock).mockResolvedValue([
+      { id: 1, name: 'Insumos', active: true, usageThisMonth: 4, usageAllTime: 31 },
+    ]);
+  });
 
   it('returns the active category catalog', async () => {
-    (findCategories as jest.Mock).mockResolvedValue([{ id: 1, name: 'Insumos', active: true }]);
-
     const res = await request(app).get('/api/finance/categories');
 
     expect(res.status).toBe(200);
     expect(res.body.data[0]).toMatchObject({ name: 'Insumos' });
     expect(res.body.data[0].id).toBe(encodeId(1));
+  });
+
+  it('returns the usage counts the modal states before anyone archives', async () => {
+    const res = await request(app).get('/api/finance/categories');
+
+    expect(res.body.data[0]).toMatchObject({ usageThisMonth: 4, usageAllTime: 31 });
+  });
+
+  it('reads only active categories by default', async () => {
+    await request(app).get('/api/finance/categories');
+
+    expect(findCategories).toHaveBeenCalledWith(
+      expect.objectContaining({ includeInactive: false }),
+    );
+  });
+
+  // The modal's ARCHIVADAS section is the only reader that wants them, so it asks.
+  it('includes archived categories when asked', async () => {
+    await request(app).get('/api/finance/categories?includeArchived=true');
+
+    expect(findCategories).toHaveBeenCalledWith(expect.objectContaining({ includeInactive: true }));
+  });
+
+  it('counts usage against the month asked for', async () => {
+    await request(app).get('/api/finance/categories?month=2026-07');
+
+    expect(findCategories).toHaveBeenCalledWith(expect.objectContaining({ month: '2026-07' }));
+  });
+
+  it('rejects a month that is not YYYY-MM', async () => {
+    const res = await request(app).get('/api/finance/categories?month=julio');
+
+    expect(res.status).toBe(400);
+    expect(findCategories).not.toHaveBeenCalled();
+  });
+});
+
+describe('POST /api/finance/categories', () => {
+  beforeEach(() => jest.clearAllMocks());
+
+  it('creates the category and returns it', async () => {
+    (createCategory as jest.Mock).mockResolvedValue({
+      category: { id: 9, name: 'Mantenimiento', active: true },
+      created: true,
+    });
+
+    const res = await request(app).post('/api/finance/categories').send({ name: 'Mantenimiento' });
+
+    expect(res.status).toBe(201);
+    expect(createCategory).toHaveBeenCalledWith('Mantenimiento');
+    expect(res.body.data.id).toBe(encodeId(9));
+  });
+
+  // Nothing was created, so the answer is not 201 — but it is the category the user meant, which
+  // is what "+ Nueva" needs back in order to select it.
+  it('answers 200 with the existing category when the name folds', async () => {
+    (createCategory as jest.Mock).mockResolvedValue({
+      category: { id: 3, name: 'Insumos', active: true },
+      created: false,
+    });
+
+    const res = await request(app).post('/api/finance/categories').send({ name: 'insumos' });
+
+    expect(res.status).toBe(200);
+    expect(res.body.data.id).toBe(encodeId(3));
+  });
+
+  it('rejects an empty name', async () => {
+    const res = await request(app).post('/api/finance/categories').send({ name: '   ' });
+
+    expect(res.status).toBe(400);
+    expect(createCategory).not.toHaveBeenCalled();
+  });
+
+  it('trims the name before storing it', async () => {
+    (createCategory as jest.Mock).mockResolvedValue({ category: { id: 9 }, created: true });
+
+    await request(app).post('/api/finance/categories').send({ name: '  Mantenimiento  ' });
+
+    expect(createCategory).toHaveBeenCalledWith('Mantenimiento');
+  });
+});
+
+describe('PATCH /api/finance/categories/:id', () => {
+  beforeEach(() => jest.clearAllMocks());
+
+  it('renames the category', async () => {
+    (renameCategory as jest.Mock).mockResolvedValue({ id: 3, name: 'Insumos secos' });
+
+    const res = await request(app)
+      .patch(`/api/finance/categories/${encodeId(3)}`)
+      .send({ name: 'Insumos secos' });
+
+    expect(res.status).toBe(200);
+    expect(renameCategory).toHaveBeenCalledWith(3, 'Insumos secos');
+  });
+
+  // Archivar, never Eliminar: the expenses already filed against it keep naming it.
+  it('archives the category', async () => {
+    (deactivateCategory as jest.Mock).mockResolvedValue({ id: 3, active: false });
+
+    const res = await request(app)
+      .patch(`/api/finance/categories/${encodeId(3)}`)
+      .send({ active: false });
+
+    expect(res.status).toBe(200);
+    expect(deactivateCategory).toHaveBeenCalledWith(3);
+  });
+
+  it('restores the category', async () => {
+    (reactivateCategory as jest.Mock).mockResolvedValue({ id: 3, active: true });
+
+    const res = await request(app)
+      .patch(`/api/finance/categories/${encodeId(3)}`)
+      .send({ active: true });
+
+    expect(res.status).toBe(200);
+    expect(reactivateCategory).toHaveBeenCalledWith(3);
+  });
+
+  it('renames and restores in one request', async () => {
+    (renameCategory as jest.Mock).mockResolvedValue({ id: 3, name: 'Eventos' });
+    (reactivateCategory as jest.Mock).mockResolvedValue({ id: 3, name: 'Eventos', active: true });
+
+    const res = await request(app)
+      .patch(`/api/finance/categories/${encodeId(3)}`)
+      .send({ name: 'Eventos', active: true });
+
+    expect(res.status).toBe(200);
+    expect(renameCategory).toHaveBeenCalledWith(3, 'Eventos');
+    expect(reactivateCategory).toHaveBeenCalledWith(3);
+    expect(res.body.data).toMatchObject({ active: true });
+  });
+
+  it('returns 409 when the new name is already taken', async () => {
+    (renameCategory as jest.Mock).mockRejectedValue(new ConflictError('Category name taken'));
+
+    const res = await request(app)
+      .patch(`/api/finance/categories/${encodeId(3)}`)
+      .send({ name: 'Transporte' });
+
+    expect(res.status).toBe(409);
+  });
+
+  it('returns 404 when the category does not exist', async () => {
+    (renameCategory as jest.Mock).mockResolvedValue(null);
+
+    const res = await request(app)
+      .patch(`/api/finance/categories/${encodeId(99)}`)
+      .send({ name: 'Insumos secos' });
+
+    expect(res.status).toBe(404);
+  });
+
+  it('rejects a request that changes nothing', async () => {
+    const res = await request(app).patch(`/api/finance/categories/${encodeId(3)}`).send({});
+
+    expect(res.status).toBe(400);
+    expect(renameCategory).not.toHaveBeenCalled();
+    expect(deactivateCategory).not.toHaveBeenCalled();
   });
 });
 
