@@ -29,9 +29,10 @@ export function useMovementFilters() {
   const pickCategory = useCallback(
     (categoryId: string) =>
       setFilters((f) => {
-        // Picking the category already showing is the way back out of it. The direction stays
-        // where it is: it is what the user has been reading.
-        if (f.categoryId === categoryId) return { ...f, categoryId: '' };
+        // Picking the category already showing — or "Todas las categorías" from the select — is
+        // the way back out of it. The direction stays where it is: it is what the user has been
+        // reading, and dragging it to Gastos on the way out would be a filter nobody asked for.
+        if (!categoryId || f.categoryId === categoryId) return { ...f, categoryId: '' };
         return { ...f, categoryId, direction: 'expense' };
       }),
     [],

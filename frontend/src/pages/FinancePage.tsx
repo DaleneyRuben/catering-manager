@@ -6,6 +6,7 @@ import { Button } from '@ui/Button';
 import { Skeleton } from '@ui/Skeleton';
 import { ConfirmModal } from '@ui/ConfirmModal';
 import { useFinance } from '@/features/finance/hooks/useFinance';
+import { useMovementFilters } from '@/features/finance/hooks/useMovementFilters';
 import { useExpenseCategories, useExpenseMutations } from '@/features/finance/hooks/useExpenses';
 import { MonthSelector } from '@/features/finance/components/MonthSelector';
 import { FinanceTiles } from '@/features/finance/components/FinanceTiles';
@@ -24,10 +25,8 @@ function FinanceSkeleton() {
           <Skeleton key={key} className="h-[148px] rounded-[13px]" />
         ))}
       </div>
-      <div className="grid grid-cols-[minmax(300px,1fr)_1.55fr] gap-[22px] items-start max-lg:grid-cols-1">
-        <Skeleton className="h-[280px] rounded-[13px]" />
-        <Skeleton className="h-[420px] rounded-[13px]" />
-      </div>
+      <Skeleton className="h-[190px] rounded-[13px]" />
+      <Skeleton className="h-[460px] rounded-[13px]" />
     </div>
   );
 }
@@ -59,7 +58,12 @@ export function FinancePage() {
   const [pendingDelete, setPendingDelete] = useState<Movement | null>(null);
   const [lastCategoryId, setLastCategoryId] = useState<string | undefined>();
 
-  const { overview, isLoading } = useFinance(month);
+  // Filters live above the month so paging back and forth keeps them: reading one category across
+  // months is exactly why someone narrows the list.
+  const { filters, queryFilters, setQuery, setDirection, pickCategory, clearAll } =
+    useMovementFilters();
+
+  const { overview, isLoading } = useFinance(month, queryFilters);
   const { categories } = useExpenseCategories();
   const { create, update, remove, isSaving } = useExpenseMutations();
 
@@ -89,9 +93,6 @@ export function FinancePage() {
     toast.success('Gasto eliminado');
   };
 
-  const incomeCount = overview?.movements.filter((m) => m.kind === 'income').length ?? 0;
-  const expenseCount = overview?.movements.filter((m) => m.kind === 'expense').length ?? 0;
-
   return (
     <div className="px-4 py-5 lg:px-[44px] lg:pt-[34px] lg:pb-[48px]">
       <PageHeader label="Administración" title="Finanzas" />
@@ -119,18 +120,35 @@ export function FinancePage() {
             expenses={overview.expenses}
             balance={overview.balance}
             month={overview.month}
-            incomeCount={incomeCount}
-            expenseCount={expenseCount}
+            incomeCount={overview.incomeCount}
+            expenseCount={overview.expenseCount}
           />
-          <div className="grid grid-cols-[minmax(300px,1fr)_1.55fr] gap-[22px] items-start max-lg:grid-cols-1">
-            <CategoryBreakdown categories={overview.byCategory} />
-            <MovementsList
-              movements={overview.movements}
-              onEdit={openFor('edit')}
-              onDuplicate={openFor('duplicate')}
-              onDelete={setPendingDelete}
-            />
-          </div>
+          {/* Stacked full-width bands rather than two columns: with a full month of movements the
+              breakdown column sat mostly empty, and with an empty month the list column did. */}
+          <CategoryBreakdown
+            categories={overview.byCategory}
+            activeCategoryId={filters.categoryId}
+            onPick={pickCategory}
+          />
+          <MovementsList
+            movements={overview.movements}
+            month={overview.month}
+            monthCount={overview.incomeCount + overview.expenseCount}
+            filters={{
+              filters,
+              categories,
+              byCategory: overview.byCategory,
+              count: overview.count,
+              subtotal: overview.subtotal,
+              onQueryChange: setQuery,
+              onDirectionChange: setDirection,
+              onCategoryChange: pickCategory,
+              onClearAll: clearAll,
+            }}
+            onEdit={openFor('edit')}
+            onDuplicate={openFor('duplicate')}
+            onDelete={setPendingDelete}
+          />
         </div>
       )}
 

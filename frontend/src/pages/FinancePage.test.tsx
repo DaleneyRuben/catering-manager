@@ -21,7 +21,11 @@ const overview: FinanceOverview = {
   income: 34800,
   expenses: 21450,
   balance: 13350,
-  byCategory: [{ categoryId: 'C1', categoryName: 'Insumos', total: 7300 }],
+  incomeCount: 1,
+  expenseCount: 1,
+  count: 2,
+  subtotal: 1370,
+  byCategory: [{ categoryId: 'C1', categoryName: 'Insumos', total: 7300, active: true }],
   movements: [
     {
       kind: 'income',
@@ -86,7 +90,7 @@ describe('FinancePage', () => {
     expect(screen.getByRole('heading', { name: 'Finanzas' })).toBeInTheDocument();
     expect(screen.getByText('34.800')).toBeInTheDocument();
     expect(screen.getByText('Marcela Ríos')).toBeInTheDocument();
-    expect(screen.getByText('Insumos')).toBeInTheDocument();
+    expect(screen.getByTestId('category-name')).toHaveTextContent('Insumos');
   });
 
   it('asks the hook for the month the selector moves to', async () => {
@@ -94,7 +98,69 @@ describe('FinancePage', () => {
 
     await userEvent.click(screen.getByRole('button', { name: /mes anterior/i }));
 
-    await waitFor(() => expect(mockedUseFinance).toHaveBeenLastCalledWith('2026-07'));
+    await waitFor(() =>
+      expect(mockedUseFinance).toHaveBeenLastCalledWith('2026-07', expect.anything()),
+    );
+  });
+
+  it('asks the hook for the movements a filter narrows to', async () => {
+    renderPage();
+
+    await userEvent.click(screen.getByRole('button', { name: 'Gastos' }));
+
+    await waitFor(() =>
+      expect(mockedUseFinance).toHaveBeenLastCalledWith(
+        '2026-08',
+        expect.objectContaining({ direction: 'expense' }),
+      ),
+    );
+  });
+
+  // Reading one category across months is exactly why someone narrows the list, so paging the
+  // month must not throw the filter away.
+  it('keeps the filters through a month change', async () => {
+    renderPage();
+
+    await userEvent.click(screen.getByRole('button', { name: 'Gastos' }));
+    await userEvent.click(screen.getByRole('button', { name: /mes anterior/i }));
+
+    await waitFor(() =>
+      expect(mockedUseFinance).toHaveBeenLastCalledWith(
+        '2026-07',
+        expect.objectContaining({ direction: 'expense' }),
+      ),
+    );
+  });
+
+  // Clicking a cost in the breakdown is the fastest way to ask what it was made of.
+  it('narrows the list to a category picked from the breakdown', async () => {
+    renderPage();
+
+    await userEvent.click(screen.getByRole('button', { name: /insumos/i }));
+
+    await waitFor(() =>
+      expect(mockedUseFinance).toHaveBeenLastCalledWith(
+        '2026-08',
+        expect.objectContaining({ categoryId: 'C1', direction: 'expense' }),
+      ),
+    );
+  });
+
+  // The tiles are the month's truth: a "Balance" of one category is not a balance of anything, so
+  // they read the month's own counts rather than measuring the rows the list happens to show.
+  it('keeps the tiles on the month while the list is filtered', async () => {
+    mockedUseFinance.mockReturnValue({
+      overview: { ...overview, movements: [], count: 0, subtotal: 0 },
+      isLoading: false,
+      error: null,
+    });
+
+    renderPage();
+
+    expect(screen.getByText('34.800')).toBeInTheDocument();
+    expect(screen.getByText('1 pago')).toBeInTheDocument();
+    expect(screen.getByText('1 gasto')).toBeInTheDocument();
+    expect(screen.getByText('2 movimientos')).toBeInTheDocument();
   });
 
   it('registers an expense', async () => {
