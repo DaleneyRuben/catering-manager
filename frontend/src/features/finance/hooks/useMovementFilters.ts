@@ -4,6 +4,8 @@ import type { MovementFilters } from '@/features/finance/types';
 
 const NONE: MovementFilters = { q: '', direction: 'all', categoryId: '' };
 
+const SEARCH_DEBOUNCE_MS = 550;
+
 // The two controls can contradict each other — income carries no category — so the rules that keep
 // them consistent live here rather than in the bar that renders them, and the same rules apply
 // however the filter was set: from the select, from a category cell, or from a row's tag.
@@ -42,7 +44,10 @@ export function useMovementFilters() {
 
   // Typed straight into the controls, held back from the request: the register is fetched whole,
   // and one round trip per keystroke of "verdulería" is ten of them.
-  const debouncedQuery = useDebounce(filters.q);
+  //
+  // Longer than the shared 300ms default, which fires between words rather than after them: the
+  // list emptied out mid-term and the empty state flashed up while the user was still typing.
+  const debouncedQuery = useDebounce(filters.q, SEARCH_DEBOUNCE_MS);
 
   const queryFilters = useMemo<MovementFilters>(
     () => ({ ...filters, q: debouncedQuery }),
