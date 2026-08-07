@@ -73,6 +73,18 @@ describe('useMovementFilters', () => {
     expect(result.current.filters.direction).toBe('expense');
   });
 
+  // "Todas las categorías" is the select's way of saying no category, and it must not drag the
+  // direction to Gastos on its way out.
+  it('clears the category without narrowing the direction', () => {
+    const { result } = renderHook(() => useMovementFilters());
+
+    act(() => result.current.pickCategory('AB12CD'));
+    act(() => result.current.setDirection('all'));
+    act(() => result.current.pickCategory(''));
+
+    expect(result.current.filters).toEqual({ q: '', direction: 'all', categoryId: '' });
+  });
+
   it('clears everything at once', () => {
     const { result } = renderHook(() => useMovementFilters());
 
