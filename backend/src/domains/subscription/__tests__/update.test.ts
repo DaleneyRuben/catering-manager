@@ -5,12 +5,14 @@ import Client from '../../../models/Client';
 import Plan from '../../../models/Plan';
 import sequelize from '../../../database/sequelize';
 import { record } from '../../client-history';
+import { adjustPayment } from '../../finance';
 import { update } from '../update';
 import { addDeliveryDays, subtractDeliveryDays } from '../../../utils/date';
 
 jest.mock('../../../models/Subscription');
 jest.mock('../../../models/Client');
 jest.mock('../../client-history');
+jest.mock('../../finance');
 jest.mock('../../../models/Plan');
 jest.mock('../../../database/sequelize', () => ({
   __esModule: true,
@@ -593,5 +595,81 @@ describe('update', () => {
       transaction: callerTransaction,
     });
     expect(record).toHaveBeenCalledWith(actor, expect.anything(), callerTransaction);
+  });
+
+  // Within one subscription's life a price edit is always a correction — a renegotiation is the
+  // next renewal, a plan change moves no money — so the register follows it (ADR-008).
+  it('adjusts the payment when the agreed price is corrected', async () => {
+    const mockInstance = {
+      id: 7,
+      clientId: 1,
+      planId: 2,
+      price: 1100,
+      suspendedDates: [],
+      update: jest.fn().mockResolvedValue({}),
+    };
+    (Subscription.findOne as jest.Mock).mockResolvedValue(mockInstance);
+    (Plan.findByPk as jest.Mock).mockResolvedValue({ id: 2, name: 'Ligero', price: 1200 });
+
+    await update(1, 1, { price: 950 }, actor);
+
+    expect(adjustPayment).toHaveBeenCalledWith(7, 950, transaction);
+  });
+
+  // The one that would quietly move a closed month: a plan change moves no money by rule, so the
+  // register must not follow it.
+  it('leaves the payment alone when only the plan moves', async () => {
+    const mockInstance = {
+      id: 7,
+      clientId: 1,
+      planId: 2,
+      price: 1200,
+      suspendedDates: [],
+      update: jest.fn().mockResolvedValue({}),
+    };
+    (Subscription.findOne as jest.Mock).mockResolvedValue(mockInstance);
+    (Plan.findByPk as jest.Mock).mockResolvedValue({ id: 3, name: 'Completo', price: 1800 });
+
+    await update(1, 1, { planId: 3 }, actor);
+
+    expect(record).toHaveBeenCalledWith(
+      actor,
+      expect.objectContaining({ type: HISTORY_EVENTS.TERMS_CHANGED }),
+      transaction,
+    );
+    expect(adjustPayment).not.toHaveBeenCalled();
+  });
+
+  it('leaves the payment alone when neither the plan nor the price moves', async () => {
+    const mockInstance = {
+      id: 7,
+      clientId: 1,
+      planId: 2,
+      price: 1200,
+      suspendedDates: [],
+      update: jest.fn().mockResolvedValue({}),
+    };
+    (Subscription.findOne as jest.Mock).mockResolvedValue(mockInstance);
+
+    await update(1, 1, { planId: 2, price: 1200 }, actor);
+
+    expect(adjustPayment).not.toHaveBeenCalled();
+  });
+
+  it("passes the caller's transaction to adjustPayment", async () => {
+    const mockInstance = {
+      id: 7,
+      clientId: 1,
+      planId: 2,
+      price: 1100,
+      suspendedDates: [],
+      update: jest.fn().mockResolvedValue({}),
+    };
+    (Subscription.findOne as jest.Mock).mockResolvedValue(mockInstance);
+    (Plan.findByPk as jest.Mock).mockResolvedValue({ id: 2, name: 'Ligero', price: 1200 });
+
+    await update(1, 1, { price: 950 }, actor, callerTransaction);
+
+    expect(adjustPayment).toHaveBeenCalledWith(7, 950, callerTransaction);
   });
 });
