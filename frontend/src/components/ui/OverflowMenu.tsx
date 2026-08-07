@@ -10,11 +10,24 @@ interface MenuItem {
 
 interface Props {
   items: MenuItem[];
+  // "Más acciones" is enough on a page header, where there is only one. On a list row it says
+  // nothing about which row, so the caller names it.
+  label?: string;
+  variant?: 'bordered' | 'bare';
 }
 
-export function OverflowMenu({ items }: Props) {
+// Bordered reads as a control of its own; repeated down a list it reads as clutter, so the bare
+// variant carries no border and only takes on a background once it is open or hovered.
+const TRIGGER_CLS: Record<NonNullable<Props['variant']>, string> = {
+  bordered:
+    'w-[38px] h-[38px] rounded-[9px] border border-rule bg-paper hover:border-rule-2 text-muted hover:text-ink-2',
+  bare: 'w-[28px] h-[28px] rounded-[7px] text-muted hover:bg-movement-action-hover hover:text-ink',
+};
+
+export function OverflowMenu({ items, label = 'Más acciones', variant = 'bordered' }: Props) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+  const bare = variant === 'bare';
 
   useEffect(() => {
     if (!open) return undefined;
@@ -30,11 +43,13 @@ export function OverflowMenu({ items }: Props) {
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="w-[38px] h-[38px] flex items-center justify-center rounded-[9px] border border-rule bg-paper hover:border-rule-2 transition-colors text-muted hover:text-ink-2"
-        aria-label="Más acciones"
+        className={`flex items-center justify-center transition-colors ${TRIGGER_CLS[variant]} ${
+          bare && open ? 'bg-movement-action-hover text-ink' : ''
+        }`}
+        aria-label={label}
         aria-expanded={open}
       >
-        <Icon name="more-vertical" size={16} />
+        <Icon name={bare ? 'more-horizontal' : 'more-vertical'} size={bare ? 15 : 16} />
       </button>
 
       {open && (

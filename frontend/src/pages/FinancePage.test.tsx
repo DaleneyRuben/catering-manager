@@ -1,5 +1,6 @@
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { MemoryRouter } from 'react-router-dom';
 import { FinancePage } from '@/pages/FinancePage';
 import { useFinance } from '@/features/finance/hooks/useFinance';
 import { useExpenseCategories, useExpenseMutations } from '@/features/finance/hooks/useExpenses';
@@ -68,9 +69,19 @@ beforeEach(() => {
   mockedUseMutations.mockReturnValue({ create, update, remove, isSaving: false });
 });
 
+const renderPage = () =>
+  render(
+    <MemoryRouter>
+      <FinancePage />
+    </MemoryRouter>,
+  );
+
+const openRowActions = () =>
+  userEvent.click(screen.getByRole('button', { name: /acciones del gasto/i }));
+
 describe('FinancePage', () => {
   it('renders the register for the current month', () => {
-    render(<FinancePage />);
+    renderPage();
 
     expect(screen.getByRole('heading', { name: 'Finanzas' })).toBeInTheDocument();
     expect(screen.getByText('34.800')).toBeInTheDocument();
@@ -79,7 +90,7 @@ describe('FinancePage', () => {
   });
 
   it('asks the hook for the month the selector moves to', async () => {
-    render(<FinancePage />);
+    renderPage();
 
     await userEvent.click(screen.getByRole('button', { name: /mes anterior/i }));
 
@@ -87,7 +98,7 @@ describe('FinancePage', () => {
   });
 
   it('registers an expense', async () => {
-    render(<FinancePage />);
+    renderPage();
 
     await userEvent.click(screen.getByRole('button', { name: /registrar gasto/i }));
     await userEvent.type(screen.getByLabelText(/monto/i), '180');
@@ -97,9 +108,10 @@ describe('FinancePage', () => {
   });
 
   it('edits an expense from its row', async () => {
-    render(<FinancePage />);
+    renderPage();
 
-    await userEvent.click(screen.getByRole('button', { name: /editar/i }));
+    await openRowActions();
+    await userEvent.click(screen.getByText('Editar'));
     await userEvent.clear(screen.getByLabelText(/monto/i));
     await userEvent.type(screen.getByLabelText(/monto/i), '200');
     await userEvent.click(screen.getByRole('button', { name: 'Guardar' }));
@@ -109,11 +121,26 @@ describe('FinancePage', () => {
     );
   });
 
+  // The row states which category it was filed against; matching its label back against the
+  // catalog would pick a different one the moment two categories are renamed into each other.
+  it('opens the form on the category the row was actually filed against', async () => {
+    renderPage();
+
+    await openRowActions();
+    await userEvent.click(screen.getByText('Editar'));
+    await userEvent.click(screen.getByRole('button', { name: 'Guardar' }));
+
+    await waitFor(() =>
+      expect(update).toHaveBeenCalledWith('E1', expect.objectContaining({ categoryId: 'C1' })),
+    );
+  });
+
   // Duplicar is the daily path: the same expense, dated today, created rather than edited.
   it('duplicates an expense into a new one dated today', async () => {
-    render(<FinancePage />);
+    renderPage();
 
-    await userEvent.click(screen.getByRole('button', { name: /duplicar/i }));
+    await openRowActions();
+    await userEvent.click(screen.getByText('Duplicar con la fecha de hoy'));
 
     expect(screen.getByLabelText(/monto/i)).toHaveValue('180');
     await userEvent.click(screen.getByRole('button', { name: 'Registrar' }));
@@ -128,9 +155,10 @@ describe('FinancePage', () => {
 
   // Deleting moves the month's totals, so it is never a single click.
   it('confirms before deleting an expense', async () => {
-    render(<FinancePage />);
+    renderPage();
 
-    await userEvent.click(screen.getByRole('button', { name: /eliminar/i }));
+    await openRowActions();
+    await userEvent.click(screen.getByText('Eliminar'));
     expect(remove).not.toHaveBeenCalled();
 
     const dialog = screen.getByRole('dialog');
@@ -143,7 +171,7 @@ describe('FinancePage', () => {
   // All income is subscription revenue, created by marking a subscription paid — the asymmetry
   // with expenses is deliberate (ADR-008).
   it('offers no way to register income', () => {
-    render(<FinancePage />);
+    renderPage();
 
     expect(screen.queryByRole('button', { name: /registrar ingreso/i })).not.toBeInTheDocument();
   });
@@ -151,7 +179,7 @@ describe('FinancePage', () => {
   it('shows a skeleton while the month loads', () => {
     mockedUseFinance.mockReturnValue({ overview: null, isLoading: true, error: null });
 
-    render(<FinancePage />);
+    renderPage();
 
     expect(screen.getByTestId('finance-skeleton')).toBeInTheDocument();
   });
