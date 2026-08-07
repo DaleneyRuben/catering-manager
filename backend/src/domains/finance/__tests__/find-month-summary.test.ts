@@ -56,17 +56,44 @@ describe('findMonthSummary', () => {
   it('returns the per-category breakdown with numeric totals', async () => {
     stubQueries({
       byCategory: [
-        { categoryId: 1, categoryName: 'Insumos', total: '800.00' },
-        { categoryId: 2, categoryName: 'Transporte', total: '400.50' },
+        { categoryId: 1, categoryName: 'Insumos', total: '800.00', active: true },
+        { categoryId: 2, categoryName: 'Transporte', total: '400.50', active: true },
       ],
     });
 
     const result = await findMonthSummary('2026-08');
 
     expect(result.byCategory).toEqual([
-      { categoryId: 1, categoryName: 'Insumos', total: 800 },
-      { categoryId: 2, categoryName: 'Transporte', total: 400.5 },
+      { categoryId: 1, categoryName: 'Insumos', total: 800, active: true },
+      { categoryId: 2, categoryName: 'Transporte', total: 400.5, active: true },
     ]);
+  });
+
+  // A category archived after the month closed still owns that month's spending, so the breakdown
+  // keeps the line and flags it rather than dropping money out of the chart.
+  it('reports a category archived since the month was spent', async () => {
+    stubQueries({
+      byCategory: [{ categoryId: 5, categoryName: 'Eventos', total: '300.00', active: false }],
+    });
+
+    const result = await findMonthSummary('2026-08');
+
+    expect(result.byCategory).toEqual([
+      { categoryId: 5, categoryName: 'Eventos', total: 300, active: false },
+    ]);
+  });
+
+  it('groups by the category active flag so it can be selected', async () => {
+    stubQueries();
+
+    await findMonthSummary('2026-08');
+
+    const grouped = mockedQuery.mock.calls
+      .map(([sql]: [string]) => sql)
+      .find((sql: string) => sql.includes('GROUP BY'));
+
+    expect(grouped).toContain('c.active');
+    expect(grouped).toContain('GROUP BY c.id, c.name, c.active');
   });
 
   it('bounds every query by the first and last day of the month', async () => {
