@@ -7,6 +7,7 @@ import {
   findEarliestMonth,
   findMonthSummary,
   findMovements,
+  findMovementsSubtotal,
   updateExpense,
 } from '../../domains/finance';
 import { encodeId } from '../../utils/sqids';
@@ -57,6 +58,7 @@ const stubOverview = () => {
   (findMonthSummary as jest.Mock).mockResolvedValue(mockSummary);
   (findMovements as jest.Mock).mockResolvedValue(mockMovements);
   (findEarliestMonth as jest.Mock).mockResolvedValue('2026-07');
+  (findMovementsSubtotal as jest.Mock).mockResolvedValue({ count: 18, subtotal: -4140 });
 };
 
 describe('GET /api/finance', () => {
@@ -85,7 +87,57 @@ describe('GET /api/finance', () => {
 
     expect(res.body.data.month).toBe('2026-08');
     expect(findMonthSummary).toHaveBeenCalledWith('2026-08');
-    expect(findMovements).toHaveBeenCalledWith('2026-08');
+    expect(findMovements).toHaveBeenCalledWith('2026-08', {});
+  });
+
+  it('returns the filtered count and subtotal alongside the rows', async () => {
+    stubOverview();
+
+    const res = await request(app).get('/api/finance?month=2026-08');
+
+    expect(res.body.data).toMatchObject({ count: 18, subtotal: -4140 });
+  });
+
+  it('passes direction, category and search through to the query', async () => {
+    stubOverview();
+
+    await request(app).get(
+      `/api/finance?month=2026-08&direction=expense&categoryId=${encodeId(4)}&q=verduleria`,
+    );
+
+    expect(findMovements).toHaveBeenCalledWith('2026-08', {
+      direction: 'expense',
+      categoryId: 4,
+      q: 'verduleria',
+    });
+  });
+
+  // The subtotal has to see exactly what the list sees, or the figure under the rows describes a
+  // different set from the rows themselves.
+  it('scopes the subtotal to the same filters as the rows', async () => {
+    stubOverview();
+
+    await request(app).get('/api/finance?month=2026-08&direction=expense');
+
+    expect(findMovementsSubtotal).toHaveBeenCalledWith('2026-08', { direction: 'expense' });
+  });
+
+  // The month's truth does not move because someone narrowed a list — a "Balance" of one category
+  // is not a balance of anything.
+  it('leaves the three tiles unfiltered', async () => {
+    stubOverview();
+
+    const res = await request(app).get('/api/finance?month=2026-08&direction=expense&q=verduleria');
+
+    expect(findMonthSummary).toHaveBeenCalledWith('2026-08');
+    expect(res.body.data).toMatchObject({ income: 4050, expenses: 1200.5, balance: 2849.5 });
+  });
+
+  it('rejects a direction that is neither income nor expense', async () => {
+    const res = await request(app).get('/api/finance?month=2026-08&direction=sideways');
+
+    expect(res.status).toBe(400);
+    expect(findMovements).not.toHaveBeenCalled();
   });
 
   // With nothing recorded yet the selector has nothing to page back to, so the current month is
