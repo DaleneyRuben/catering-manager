@@ -60,7 +60,9 @@ const NAV_SECTIONS: NavSection[] = [
     label: 'Administración',
     separated: true,
     items: [
-      { to: '/finanzas', label: 'Finanzas', icon: 'wallet', allowedRoles: [ROLES.SUPER_ADMIN] },
+      // The only Administración item an admin reaches: they record the expenses, so they read the
+      // register. Usuarios and Health stay super_admin.
+      { to: '/finanzas', label: 'Finanzas', icon: 'wallet', allowedRoles: [...ADMIN_ROLES] },
       { to: '/usuarios', label: 'Usuarios', icon: 'user-plus', allowedRoles: [ROLES.SUPER_ADMIN] },
       { to: '/health', label: 'Health', icon: 'stethoscope', allowedRoles: [ROLES.SUPER_ADMIN] },
     ],
