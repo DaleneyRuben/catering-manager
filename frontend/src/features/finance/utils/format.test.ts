@@ -1,4 +1,9 @@
-import { formatMoney, formatMonthLabel, shiftMonth } from '@/features/finance/utils/format';
+import {
+  formatDayLabel,
+  formatMoney,
+  formatMonthLabel,
+  shiftMonth,
+} from '@/features/finance/utils/format';
 
 describe('formatMoney', () => {
   it('groups thousands in the Bolivian locale', () => {
@@ -24,6 +29,18 @@ describe('formatMonthLabel', () => {
 
   it('capitalises the month name', () => {
     expect(formatMonthLabel('2026-01')).toBe('Enero 2026');
+  });
+});
+
+// Reads inside a sentence ("Al 3 de agosto"), so the month stays lowercase and the year is left
+// out — the month it belongs to is already named beside it.
+describe('formatDayLabel', () => {
+  it('names the day and month in Spanish', () => {
+    expect(formatDayLabel('2026-08-03')).toBe('3 de agosto');
+  });
+
+  it('leaves the day unpadded', () => {
+    expect(formatDayLabel('2026-01-09')).toBe('9 de enero');
   });
 });
 
