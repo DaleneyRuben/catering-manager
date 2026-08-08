@@ -61,9 +61,17 @@ const buildZones = (clients: DeliveryClientRow[], date: string): DeliveryZoneRou
   ZONE_ORDER.map((zone) => {
     const inZone = clients.filter((c) => c.deliveryZone === zone);
 
+    const memberCount = (token: string) => inZone.filter((c) => c.groupToken === token).length;
+
+    // A shared token with one member left on the route is not a group: the token is only cleared
+    // when membership changes, so it survives the other members' contracts lapsing. One stop either
+    // way, and a group card of one reads as a rendering fault.
+    const isGrouped = (c: DeliveryClientRow) =>
+      Boolean(c.groupToken) && memberCount(c.groupToken!) > 1;
+
     const groupTokens: string[] = [];
     inZone.forEach((c) => {
-      if (c.groupToken && !groupTokens.includes(c.groupToken)) groupTokens.push(c.groupToken);
+      if (isGrouped(c) && !groupTokens.includes(c.groupToken!)) groupTokens.push(c.groupToken!);
     });
 
     const groups: DeliveryGroup[] = groupTokens.map((groupToken) => ({
@@ -75,7 +83,7 @@ const buildZones = (clients: DeliveryClientRow[], date: string): DeliveryZoneRou
     }));
 
     const singles = inZone
-      .filter((c) => !c.groupToken)
+      .filter((c) => !isGrouped(c))
       .map((c) => toPerson(c, date))
       .sort(byName);
 
