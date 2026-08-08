@@ -123,10 +123,10 @@ The screen cannot be built without these; they land first.
 | 3.22 | Expense form stripped: no placeholders, no "Enter para guardar" caption. **Both behaviours stay** — focus lands on Monto, Enter submits; the quieter affordance is a `↵` glyph in the button | ✅     |
 | 3.23 | Categoría becomes a wrapping chip row (one click, whole list visible) with a **+ Nueva** chip that creates and selects without leaving the form                                              | ✅     |
 | 3.24 | Chip order: most-used this month → most-used all-time → alphabetical, `Otros` pinned last. Alphabetical buried `Otros` and ranked `Alquiler` above `Insumos`                                 | ✅     |
-| 3.25 | Open-month marker: MES EN CURSO pill beside the stepper + "Al {fecha}" on the Balance tile, **absent entirely** on a closed month so paging back reads as settled                            | ☐      |
-| 3.26 | Saving an expense dated outside the shown month jumps the view to that month instead of filing it out of sight                                                                               | ☐      |
-| 3.27 | Responsive pass below 900px: tiles stack, category grid two-up, filter bar wraps with search on its own row. Consulting is the target; recording a gasto on a phone is not                   | ☐      |
-| 3.28 | End-to-end verification via Playwright                                                                                                                                                       | ☐      |
+| 3.25 | Open-month marker: MES EN CURSO pill beside the stepper + "Al {fecha}" on the Balance tile, **absent entirely** on a closed month so paging back reads as settled                            | ✅     |
+| 3.26 | Saving an expense dated outside the shown month jumps the view to that month instead of filing it out of sight                                                                               | ✅     |
+| 3.27 | Responsive pass below 900px: tiles stack, category grid two-up, filter bar wraps with search on its own row. Consulting is the target; recording a gasto on a phone is not                   | ✅     |
+| 3.28 | End-to-end verification via Playwright                                                                                                                                                       | ✅     |
 
 ### Decided
 
@@ -150,6 +150,14 @@ The screen cannot be built without these; they land first.
 - **Category usage counts scope to a `month` query param** (3.6), defaulting to the current month.
   The modal passes the month on screen, so "usado 4 veces este mes" describes the register the
   user is actually looking at rather than today's calendar month.
+- **Finanzas reflows at its own 900px breakpoint** (3.27), added as `--breakpoint-compact` in
+  `tokens.css` rather than reusing Tailwind's `lg` (1024px), which stacked the tiles while there
+  was still room for three, or `md` (768px), which left the filter bar cramped for 130px. The
+  utilities read `max-compact:` / `compact:` and the token is available to any other screen that
+  wants the same width.
+- **Saving an expense moves the view to the month it is dated in** (3.26), on an edit as much as on
+  a create: both can put the row outside the month on screen, and a row filed out of sight reads as
+  a save that did not happen.
 
 ### Notes for whoever implements it
 
