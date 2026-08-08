@@ -117,10 +117,18 @@ UI labels are neutral Spanish. Each entry: term (code identifier) — definition
   by a specific Nutricionista user — any user with this role sees and can act on the same
   shared queue. There is currently no concept of "my appointments" vs. someone else's.
 
-## Finanzas (money in and out) — designed, not yet built
+## Finanzas (money in and out)
 
-⚠ Nothing in this section exists in code yet. It records the language agreed during design so the
-implementation has one vocabulary to start from.
+Built. This section records the language agreed during design — including the terms deliberately
+rejected, which is why it stays after the fact. The rules the screen honours are in
+[docs/business-rules.md](./docs/business-rules.md) (Finanzas); the table ownership is in
+[ADR-008](./docs/adr/008-finance-owns-payments.md).
+
+The work — the subscription price model, the plan-change control, the register, and a second pass
+over it once it was in daily use — was tracked at the time in `docs/backlog.md`, deleted once its
+last item landed, since a backlog that outlives its work becomes fiction. What each step found is
+in the merge commits; anything worth keeping was folded into this document, `business-rules.md` or
+ADR-008.
 
 - **Cash basis** — every financial record is dated by **the day the money moved**, never by the
   period it relates to. A renewal paid in July for a plan running in August is July income. This
@@ -180,6 +188,14 @@ implementation has one vocabulary to start from.
   same per delivery day, so a per-client margin ranking would only restate which discounts were
   granted. Per-client expense tagging is rejected outright: tagging the ~5% of costs that could be
   attributed would produce a precise-looking number that is mostly fiction.
+- **Charts, trends and month-over-month comparison** — _rejected_, and re-confirmed on the second
+  pass over the screen once it was in daily use. The questions the register is asked are "what came
+  in", "what went out" and "what did we spend it on this month"; a trend line answers none of them
+  and would be the first thing on the screen nobody reads.
+- **Export to Excel or PDF** — _rejected_. The register is the place the numbers are read. Exporting
+  produces a second copy that is stale the moment an expense is edited, and nothing downstream
+  consumes one — unlike the kitchen and delivery reports, which exist because someone off-system
+  needs the file.
 - **Recurring expense** — _rejected as an automatic concept_. Nothing is ever generated on a
   schedule: this backend has no scheduled-job infrastructure (see docs/business-rules.md), and an
   auto-generated row would assert money left the business when it may not have, which contradicts
