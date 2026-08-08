@@ -286,6 +286,87 @@ describe('create', () => {
     );
   });
 
+  // Special instructions are standing dietary preferences, not per-contract terms: a renewal that
+  // dropped them would silently stop the kitchen preparing a client's large salad.
+  describe('special instructions on a renewal', () => {
+    // clearAllMocks does not drain a mockResolvedValueOnce queue, so an unconsumed value here would
+    // surface as a phantom upcoming subscription in whatever test runs next.
+    afterEach(() => (Subscription.findOne as jest.Mock).mockReset());
+
+    const withPrevious = (specialInstructions: Record<string, string> | null) => {
+      (Client.findByPk as jest.Mock).mockResolvedValue({ id: 1 });
+      (Subscription.create as jest.Mock).mockResolvedValue(mockSubscription);
+      (record as jest.Mock).mockResolvedValue(undefined);
+      (Plan.findByPk as jest.Mock).mockResolvedValue({ id: 2, name: 'Completo', price: 5000 });
+      // findUpcomingSubscription must stay empty or create() rejects the renewal outright; the
+      // second call is the lookup of the contract being renewed.
+      (Subscription.findOne as jest.Mock)
+        .mockResolvedValueOnce(null)
+        .mockResolvedValueOnce(specialInstructions === null ? null : { specialInstructions });
+    };
+
+    const renew = (extra: Record<string, unknown> = {}) =>
+      create(
+        1,
+        {
+          planId: 2,
+          startDate,
+          contractDate: today,
+          duration: 20,
+          price: 1200,
+          renewalType: 'renewal',
+          ...extra,
+        },
+        actor,
+      );
+
+    it('carries the previous contract instructions onto the new one', async () => {
+      withPrevious({ lunch: 'DAR GRANDES' });
+
+      await renew();
+
+      expect(Subscription.create).toHaveBeenCalledWith(
+        expect.objectContaining({ specialInstructions: { lunch: 'DAR GRANDES' } }),
+      );
+    });
+
+    // An explicit set wins: the nutricionista may be changing them as part of the renewal.
+    it('prefers instructions sent with the renewal', async () => {
+      withPrevious({ lunch: 'DAR GRANDES' });
+
+      await renew({ specialInstructions: { salad: 'SIN CEBOLLA' } });
+
+      expect(Subscription.create).toHaveBeenCalledWith(
+        expect.objectContaining({ specialInstructions: { salad: 'SIN CEBOLLA' } }),
+      );
+    });
+
+    it('leaves them unset when the previous contract had none', async () => {
+      withPrevious(null);
+
+      await renew();
+
+      expect(Subscription.create).toHaveBeenCalledWith(
+        expect.not.objectContaining({ specialInstructions: expect.anything() }),
+      );
+    });
+
+    // A brand-new client has nothing to inherit, and nothing should be looked up for one.
+    it('inherits nothing when there is no renewal type', async () => {
+      withPrevious({ lunch: 'DAR GRANDES' });
+
+      await create(
+        1,
+        { planId: 2, startDate, contractDate: today, duration: 20, price: 1200 },
+        actor,
+      );
+
+      expect(Subscription.create).toHaveBeenCalledWith(
+        expect.not.objectContaining({ specialInstructions: expect.anything() }),
+      );
+    });
+  });
+
   it('clears the pause on the client other subscriptions when renewalType is reactivation', async () => {
     const mockClient = { id: 1, update: jest.fn().mockResolvedValue({}) };
     (Client.findByPk as jest.Mock).mockResolvedValue(mockClient);
