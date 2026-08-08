@@ -169,6 +169,53 @@ describe('ExpenseModal', () => {
     expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({ categoryId: 'CAT1' }));
   });
 
+  // The remembered default is a convenience, not a record: once that category is archived it stops
+  // being offered, and a new expense must not be quietly filed against it.
+  it('forgets a remembered category that has since been archived', async () => {
+    const { onSubmit } = setup({
+      categories: [
+        { id: 'CAT1', name: 'Insumos', active: true },
+        { id: 'CAT9', name: 'Eventos', active: false },
+      ],
+      defaultCategoryId: 'CAT9',
+    });
+
+    expect(screen.queryByRole('button', { name: 'Eventos' })).not.toBeInTheDocument();
+
+    await userEvent.type(screen.getByLabelText(/monto/i), '180');
+    await userEvent.click(screen.getByRole('button', { name: 'Registrar' }));
+
+    expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({ categoryId: 'CAT1' }));
+  });
+
+  it('still opens on a remembered category that is offered', async () => {
+    const { onSubmit } = setup({ defaultCategoryId: 'CAT2' });
+
+    await userEvent.type(screen.getByLabelText(/monto/i), '180');
+    await userEvent.click(screen.getByRole('button', { name: 'Registrar' }));
+
+    expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({ categoryId: 'CAT2' }));
+  });
+
+  // An edit is different: the row was filed against that category, so it keeps naming it.
+  it('keeps an archived category on an expense already filed against it', () => {
+    setup({
+      categories: [
+        { id: 'CAT1', name: 'Insumos', active: true },
+        { id: 'CAT9', name: 'Eventos', active: false },
+      ],
+      expense: {
+        id: 'E1',
+        amount: 180,
+        categoryId: 'CAT9',
+        spentAt: '2026-08-04',
+        description: null,
+      },
+    });
+
+    expect(screen.getByRole('button', { name: 'Eventos' })).toHaveAttribute('aria-pressed', 'true');
+  });
+
   it('files the expense against the chip picked last', async () => {
     const { onSubmit } = setup();
 
