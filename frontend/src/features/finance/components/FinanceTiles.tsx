@@ -100,7 +100,9 @@ export function FinanceTiles({
         </div>
         <div className="font-mono text-[10.5px] leading-[1.7] text-muted text-right">
           <div>{formatMonthLabel(month)}</div>
-          <div className="text-faint">{incomeCount + expenseCount} movimientos</div>
+          <div className="text-faint">
+            {plural(incomeCount + expenseCount, 'movimiento', 'movimientos')}
+          </div>
           {asOf && <div className="text-open-month-text mt-1">Al {formatDayLabel(asOf)}</div>}
         </div>
       </div>
