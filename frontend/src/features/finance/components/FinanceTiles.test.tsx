@@ -50,6 +50,21 @@ describe('FinanceTiles', () => {
     expect(screen.getByText('55 movimientos')).toBeInTheDocument();
   });
 
+  // On the month still running the balance is a running total, so it says how far it counts.
+  it('dates the balance on an open month', () => {
+    setup({ asOf: '2026-08-03' });
+
+    expect(screen.getByText('Al 3 de agosto')).toBeInTheDocument();
+  });
+
+  // Absent entirely on a closed month — a settled total needs no cut-off, and a marker that only
+  // ever turns off would invite reading the month as unfinished.
+  it('leaves the date off a closed month', () => {
+    setup();
+
+    expect(screen.queryByText(/^Al /)).not.toBeInTheDocument();
+  });
+
   // The register records money that moved; nothing on it is owed, overdue or outstanding.
   it('never speaks of debt', () => {
     const { container } = setup({ balance: -4200 });
