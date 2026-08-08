@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { FinancePage } from '@/pages/FinancePage';
 import { useFinance } from '@/features/finance/hooks/useFinance';
-import { useExpenseCategories, useExpenseMutations } from '@/features/finance/hooks/useExpenses';
+import { useExpenseMutations } from '@/features/finance/hooks/useExpenses';
 import { useCategoryCatalog, useCategoryMutations } from '@/features/finance/hooks/useCategories';
 import type { FinanceOverview } from '@/features/finance/types';
 
@@ -12,9 +12,6 @@ jest.mock('@/features/finance/hooks/useExpenses');
 jest.mock('@/features/finance/hooks/useCategories');
 
 const mockedUseFinance = useFinance as jest.MockedFunction<typeof useFinance>;
-const mockedUseCategories = useExpenseCategories as jest.MockedFunction<
-  typeof useExpenseCategories
->;
 const mockedUseMutations = useExpenseMutations as jest.MockedFunction<typeof useExpenseMutations>;
 const mockedUseCatalog = useCategoryCatalog as jest.MockedFunction<typeof useCategoryCatalog>;
 const mockedUseCategoryMutations = useCategoryMutations as jest.MockedFunction<
@@ -69,16 +66,14 @@ const remove = jest.fn().mockResolvedValue(undefined);
 beforeEach(() => {
   jest.clearAllMocks();
   mockedUseFinance.mockReturnValue({ overview, isLoading: false, error: null });
-  mockedUseCategories.mockReturnValue({
-    categories: [
-      { id: 'C1', name: 'Insumos', active: true },
-      { id: 'C2', name: 'Transporte', active: true },
-    ],
-    isLoading: false,
-  });
   mockedUseMutations.mockReturnValue({ create, update, remove, isSaving: false });
+  // As the server sends it: ranked by use this month, so Transporte leads and nothing on this side
+  // re-sorts it (backlog 3.24).
   mockedUseCatalog.mockReturnValue({
-    categories: [{ id: 'C1', name: 'Insumos', active: true, usageThisMonth: 4, usageAllTime: 30 }],
+    categories: [
+      { id: 'C2', name: 'Transporte', active: true, usageThisMonth: 9, usageAllTime: 40 },
+      { id: 'C1', name: 'Insumos', active: true, usageThisMonth: 4, usageAllTime: 30 },
+    ],
     isLoading: false,
   });
   mockedUseCategoryMutations.mockReturnValue({
@@ -188,6 +183,26 @@ describe('FinancePage', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Registrar' }));
 
     await waitFor(() => expect(create).toHaveBeenCalled());
+  });
+
+  // One catalog serves the whole screen, read for the month on show: the chip order is the server's
+  // ranking of that month's use, so the form and the categories modal cannot disagree.
+  it('offers the expense form the catalog in the order the server ranked it', async () => {
+    renderPage();
+
+    await userEvent.click(screen.getByRole('button', { name: /registrar gasto/i }));
+
+    const chips = within(screen.getByRole('group', { name: 'Categoría' })).getAllByRole('button');
+    expect(chips.map((chip) => chip.textContent)).toEqual(['Transporte', 'Insumos', 'Nueva']);
+    expect(mockedUseCatalog).toHaveBeenCalledWith('2026-08');
+  });
+
+  it('reads the catalog for the month the selector moves to', async () => {
+    renderPage();
+
+    await userEvent.click(screen.getByRole('button', { name: /mes anterior/i }));
+
+    await waitFor(() => expect(mockedUseCatalog).toHaveBeenLastCalledWith('2026-07'));
   });
 
   it('edits an expense from its row', async () => {

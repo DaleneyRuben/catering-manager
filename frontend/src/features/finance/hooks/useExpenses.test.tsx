@@ -1,7 +1,7 @@
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import api from '@/services/api';
-import { useExpenseCategories, useExpenseMutations } from '@/features/finance/hooks/useExpenses';
+import { useExpenseMutations } from '@/features/finance/hooks/useExpenses';
 
 jest.mock('@/services/api', () => ({
   default: { get: jest.fn(), post: jest.fn(), patch: jest.fn(), delete: jest.fn() },
@@ -24,27 +24,8 @@ function makeWrapper() {
 
 beforeEach(() => jest.clearAllMocks());
 
-describe('useExpenseCategories', () => {
-  it('fetches the catalog from GET /finance/categories', async () => {
-    const categories = [{ id: 'AB12CD', name: 'Insumos', active: true }];
-    mockApi.get.mockResolvedValue(categories);
-
-    const { result } = renderHook(() => useExpenseCategories(), { wrapper: makeWrapper() });
-
-    await waitFor(() => expect(result.current.isLoading).toBe(false));
-    expect(mockApi.get).toHaveBeenCalledWith('/finance/categories');
-    expect(result.current.categories).toEqual(categories);
-  });
-
-  it('starts as an empty list rather than undefined', () => {
-    mockApi.get.mockResolvedValue([]);
-
-    const { result } = renderHook(() => useExpenseCategories(), { wrapper: makeWrapper() });
-
-    expect(result.current.categories).toEqual([]);
-  });
-});
-
+// The category catalog is read by useCategoryCatalog — one query for the whole screen, scoped to the
+// month on show. See useCategories.test.tsx.
 describe('useExpenseMutations', () => {
   const input = { amount: 120, categoryId: 'AB12CD', spentAt: '2026-08-04', description: null };
 

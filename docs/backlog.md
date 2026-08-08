@@ -120,9 +120,9 @@ The screen cannot be built without these; they land first.
 | 3.19 | Category cells become filter buttons (active = olive + bold, clicking again clears); responsive `auto-fill` grid; ARCHIVADA sub-label                                                        | ✅     |
 | 3.20 | "Administrar categorías" modal: add row, ACTIVAS/ARCHIVADAS sections with usage lines, inline Renombrar, Archivar, Restaurar                                                                 | ✅     |
 | 3.21 | Archiving a category with expenses this month confirms with the arithmetic stated plainly, not a vague warning. The word is **Archivar**, never Eliminar                                     | ✅     |
-| 3.22 | Expense form stripped: no placeholders, no "Enter para guardar" caption. **Both behaviours stay** — focus lands on Monto, Enter submits; the quieter affordance is a `↵` glyph in the button | ☐      |
-| 3.23 | Categoría becomes a wrapping chip row (one click, whole list visible) with a **+ Nueva** chip that creates and selects without leaving the form                                              | ☐      |
-| 3.24 | Chip order: most-used this month → most-used all-time → alphabetical, `Otros` pinned last. Alphabetical buried `Otros` and ranked `Alquiler` above `Insumos`                                 | ☐      |
+| 3.22 | Expense form stripped: no placeholders, no "Enter para guardar" caption. **Both behaviours stay** — focus lands on Monto, Enter submits; the quieter affordance is a `↵` glyph in the button | ✅     |
+| 3.23 | Categoría becomes a wrapping chip row (one click, whole list visible) with a **+ Nueva** chip that creates and selects without leaving the form                                              | ✅     |
+| 3.24 | Chip order: most-used this month → most-used all-time → alphabetical, `Otros` pinned last. Alphabetical buried `Otros` and ranked `Alquiler` above `Insumos`                                 | ✅     |
 | 3.25 | Open-month marker: MES EN CURSO pill beside the stepper + "Al {fecha}" on the Balance tile, **absent entirely** on a closed month so paging back reads as settled                            | ☐      |
 | 3.26 | Saving an expense dated outside the shown month jumps the view to that month instead of filing it out of sight                                                                               | ☐      |
 | 3.27 | Responsive pass below 900px: tiles stack, category grid two-up, filter bar wraps with search on its own row. Consulting is the target; recording a gasto on a phone is not                   | ☐      |
