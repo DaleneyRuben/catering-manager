@@ -13,5 +13,11 @@ export const formatMonthLabel = (month: string): string => {
   return label.charAt(0).toUpperCase() + label.slice(1);
 };
 
+// Reads inside a sentence ("Al 3 de agosto"), so it keeps the month lowercase and drops the year:
+// the month it qualifies is already named beside it. Midday, like monthDate, so a timezone behind
+// UTC cannot walk the date back a day.
+export const formatDayLabel = (date: string): string =>
+  format(parseISO(`${date}T12:00:00`), "d 'de' MMMM", { locale: es });
+
 export const shiftMonth = (month: string, delta: number): string =>
   format(addMonths(monthDate(month), delta), 'yyyy-MM');

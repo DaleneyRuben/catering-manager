@@ -163,4 +163,12 @@ describe('MovementsFilterBar', () => {
 
     expect(screen.getByText('1 movimiento')).toBeInTheDocument();
   });
+
+  // Below 900px the search box takes a row of its own rather than being squeezed between the
+  // heading and the segmented control (backlog 3.27).
+  it('gives the search its own row below the compact breakpoint', () => {
+    render(<MovementsFilterBar {...props()} />);
+
+    expect(screen.getByTestId('movements-search')).toHaveClass('max-compact:basis-full');
+  });
 });

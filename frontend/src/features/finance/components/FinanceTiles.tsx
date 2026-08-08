@@ -1,5 +1,5 @@
 import { Icon } from '@ui/Icon';
-import { formatMoney, formatMonthLabel } from '@/features/finance/utils/format';
+import { formatDayLabel, formatMoney, formatMonthLabel } from '@/features/finance/utils/format';
 
 interface Props {
   income: number;
@@ -8,6 +8,9 @@ interface Props {
   month: string;
   incomeCount: number;
   expenseCount: number;
+  // Set only while the month on screen is still running: the balance is a running total, so it
+  // states how far it counts. Left undefined on a closed month, where the total is final.
+  asOf?: string;
 }
 
 const plural = (count: number, one: string, many: string) => `${count} ${count === 1 ? one : many}`;
@@ -50,11 +53,15 @@ export function FinanceTiles({
   month,
   incomeCount,
   expenseCount,
+  asOf,
 }: Props) {
   const up = balance >= 0;
 
   return (
-    <div className="grid grid-cols-[1fr_1fr_2fr] gap-4 max-lg:grid-cols-1">
+    <div
+      data-testid="finance-tiles"
+      className="grid grid-cols-[1fr_1fr_2fr] gap-4 max-compact:grid-cols-1"
+    >
       <Tile
         icon="arrow-up"
         iconCls="bg-olive-100 text-olive-700"
@@ -82,7 +89,7 @@ export function FinanceTiles({
             Balance
           </div>
           <div
-            className={`font-serif font-semibold text-[66px] leading-[.85] tracking-[-.01em] ${
+            className={`font-serif font-semibold text-[66px] max-compact:text-[46px] leading-[.85] tracking-[-.01em] ${
               up ? 'text-olive-700' : 'text-danger'
             }`}
           >
@@ -93,7 +100,10 @@ export function FinanceTiles({
         </div>
         <div className="font-mono text-[10.5px] leading-[1.7] text-muted text-right">
           <div>{formatMonthLabel(month)}</div>
-          <div className="text-faint">{incomeCount + expenseCount} movimientos</div>
+          <div className="text-faint">
+            {plural(incomeCount + expenseCount, 'movimiento', 'movimientos')}
+          </div>
+          {asOf && <div className="text-open-month-text mt-1">Al {formatDayLabel(asOf)}</div>}
         </div>
       </div>
     </div>

@@ -16,13 +16,17 @@ import { MovementsList } from '@/features/finance/components/MovementsList';
 import { ExpenseModal } from '@/features/finance/components/ExpenseModal';
 import type { EditableExpense } from '@/features/finance/components/ExpenseModal';
 import { CategoryManagerModal } from '@/features/finance/components/CategoryManagerModal';
+import { OpenMonthPill } from '@/features/finance/components/OpenMonthPill';
 import { formatMoney, formatMonthLabel } from '@/features/finance/utils/format';
 import type { ExpenseInput, Movement } from '@/features/finance/types';
 
 function FinanceSkeleton() {
   return (
     <div data-testid="finance-skeleton" className="flex flex-col gap-6">
-      <div className="grid grid-cols-[1fr_1fr_2fr] gap-4 max-lg:grid-cols-1">
+      <div
+        data-testid="skeleton-tiles"
+        className="grid grid-cols-[1fr_1fr_2fr] gap-4 max-compact:grid-cols-1"
+      >
         {['income', 'expenses', 'balance'].map((key) => (
           <Skeleton key={key} className="h-[148px] rounded-[13px]" />
         ))}
@@ -54,7 +58,8 @@ type FormState =
   | { mode: 'duplicate'; expense: EditableExpense };
 
 export function FinancePage() {
-  const currentMonth = format(new Date(), 'yyyy-MM');
+  const today = format(new Date(), 'yyyy-MM-dd');
+  const currentMonth = today.slice(0, 7);
   const [month, setMonth] = useState(currentMonth);
   const [form, setForm] = useState<FormState | null>(null);
   const [pendingDelete, setPendingDelete] = useState<Movement | null>(null);
@@ -84,6 +89,9 @@ export function FinancePage() {
       toast.success('Gasto registrado');
     }
     setLastCategoryId(input.categoryId);
+    // Follow the row out of the month on screen rather than filing it out of sight: a gasto
+    // backdated into another month would otherwise land somewhere the user is not looking.
+    setMonth(input.spentAt.slice(0, 7));
     closeForm();
   };
 
@@ -99,16 +107,21 @@ export function FinancePage() {
   };
 
   return (
-    <div className="px-4 py-5 lg:px-[44px] lg:pt-[34px] lg:pb-[48px]">
+    <div className="px-4 py-5 compact:px-[44px] compact:pt-[34px] compact:pb-[48px]">
       <PageHeader label="Administración" title="Finanzas" />
 
       <div className="flex items-center justify-between gap-5 flex-wrap mb-5">
-        <MonthSelector
-          month={month}
-          earliestMonth={overview?.earliestMonth ?? currentMonth}
-          currentMonth={currentMonth}
-          onChange={setMonth}
-        />
+        <div className="flex items-center gap-3 flex-wrap">
+          <MonthSelector
+            month={month}
+            earliestMonth={overview?.earliestMonth ?? currentMonth}
+            currentMonth={currentMonth}
+            onChange={setMonth}
+          />
+          {/* Only on the month still running, and absent entirely otherwise — paging back should
+              read as settled, not as a marker that switched off. */}
+          {month === currentMonth && <OpenMonthPill />}
+        </div>
         {/* There is no "Registrar ingreso": all income is subscription revenue, written when an
             admin marks a subscription paid (ADR-008). */}
         <Button leftIcon="plus" onClick={() => setForm({ mode: 'create' })}>
@@ -127,6 +140,7 @@ export function FinancePage() {
             month={overview.month}
             incomeCount={overview.incomeCount}
             expenseCount={overview.expenseCount}
+            asOf={month === currentMonth ? today : undefined}
           />
           {/* Stacked full-width bands rather than two columns: with a full month of movements the
               breakdown column sat mostly empty, and with an empty month the list column did. */}
@@ -161,7 +175,7 @@ export function FinancePage() {
       {form && (
         <ExpenseModal
           categories={categories}
-          today={format(new Date(), 'yyyy-MM-dd')}
+          today={today}
           expense={form.mode === 'edit' ? form.expense : undefined}
           duplicateOf={form.mode === 'duplicate' ? form.expense : undefined}
           defaultCategoryId={lastCategoryId}
