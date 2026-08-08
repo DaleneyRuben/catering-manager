@@ -36,6 +36,7 @@ const ICON_NAMES = [
   'allergy',
   'stethoscope',
   'settings',
+  'list-plus',
   'leaf',
   'chevron-down',
   'dollar-sign',

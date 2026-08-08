@@ -14,6 +14,7 @@ import { CategoryBreakdown } from '@/features/finance/components/CategoryBreakdo
 import { MovementsList } from '@/features/finance/components/MovementsList';
 import { ExpenseModal } from '@/features/finance/components/ExpenseModal';
 import type { EditableExpense } from '@/features/finance/components/ExpenseModal';
+import { CategoryManagerModal } from '@/features/finance/components/CategoryManagerModal';
 import { formatMoney, formatMonthLabel } from '@/features/finance/utils/format';
 import type { ExpenseInput, Movement } from '@/features/finance/types';
 
@@ -56,6 +57,7 @@ export function FinancePage() {
   const [month, setMonth] = useState(currentMonth);
   const [form, setForm] = useState<FormState | null>(null);
   const [pendingDelete, setPendingDelete] = useState<Movement | null>(null);
+  const [isManagingCategories, setIsManagingCategories] = useState(false);
   const [lastCategoryId, setLastCategoryId] = useState<string | undefined>();
 
   // Filters live above the month so paging back and forth keeps them: reading one category across
@@ -129,6 +131,7 @@ export function FinancePage() {
             categories={overview.byCategory}
             activeCategoryId={filters.categoryId}
             onPick={pickCategory}
+            onManage={() => setIsManagingCategories(true)}
           />
           <MovementsList
             movements={overview.movements}
@@ -162,6 +165,16 @@ export function FinancePage() {
           onSubmit={handleSubmit}
           onClose={closeForm}
           isSaving={isSaving}
+        />
+      )}
+
+      {/* The month on screen goes with it: usage lines and the archive arithmetic describe the
+          register the user is looking at, not today's calendar month. */}
+      {isManagingCategories && overview && (
+        <CategoryManagerModal
+          month={month}
+          byCategory={overview.byCategory}
+          onClose={() => setIsManagingCategories(false)}
         />
       )}
 

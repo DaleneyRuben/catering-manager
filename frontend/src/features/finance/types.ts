@@ -61,6 +61,13 @@ export interface ExpenseCategory {
   active: boolean;
 }
 
+// What the management modal reads: the counts let a row state its own usage before anyone
+// archives it, and they are the order the server already sorted the catalog by.
+export interface ExpenseCategoryWithUsage extends ExpenseCategory {
+  usageThisMonth: number;
+  usageAllTime: number;
+}
+
 export interface ExpenseInput {
   amount: number;
   categoryId: string;

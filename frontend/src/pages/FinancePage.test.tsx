@@ -4,16 +4,22 @@ import { MemoryRouter } from 'react-router-dom';
 import { FinancePage } from '@/pages/FinancePage';
 import { useFinance } from '@/features/finance/hooks/useFinance';
 import { useExpenseCategories, useExpenseMutations } from '@/features/finance/hooks/useExpenses';
+import { useCategoryCatalog, useCategoryMutations } from '@/features/finance/hooks/useCategories';
 import type { FinanceOverview } from '@/features/finance/types';
 
 jest.mock('@/features/finance/hooks/useFinance');
 jest.mock('@/features/finance/hooks/useExpenses');
+jest.mock('@/features/finance/hooks/useCategories');
 
 const mockedUseFinance = useFinance as jest.MockedFunction<typeof useFinance>;
 const mockedUseCategories = useExpenseCategories as jest.MockedFunction<
   typeof useExpenseCategories
 >;
 const mockedUseMutations = useExpenseMutations as jest.MockedFunction<typeof useExpenseMutations>;
+const mockedUseCatalog = useCategoryCatalog as jest.MockedFunction<typeof useCategoryCatalog>;
+const mockedUseCategoryMutations = useCategoryMutations as jest.MockedFunction<
+  typeof useCategoryMutations
+>;
 
 const overview: FinanceOverview = {
   month: '2026-08',
@@ -71,6 +77,17 @@ beforeEach(() => {
     isLoading: false,
   });
   mockedUseMutations.mockReturnValue({ create, update, remove, isSaving: false });
+  mockedUseCatalog.mockReturnValue({
+    categories: [{ id: 'C1', name: 'Insumos', active: true, usageThisMonth: 4, usageAllTime: 30 }],
+    isLoading: false,
+  });
+  mockedUseCategoryMutations.mockReturnValue({
+    create: jest.fn().mockResolvedValue({ id: 'C3', name: 'Nueva', active: true }),
+    rename: jest.fn().mockResolvedValue(undefined),
+    archive: jest.fn().mockResolvedValue(undefined),
+    restore: jest.fn().mockResolvedValue(undefined),
+    isSaving: false,
+  });
 });
 
 const renderPage = () =>
@@ -232,6 +249,27 @@ describe('FinancePage', () => {
     await userEvent.click(within(dialog).getByRole('button', { name: /^eliminar$/i }));
 
     await waitFor(() => expect(remove).toHaveBeenCalledWith('E1'));
+  });
+
+  // The catalog changes perhaps twice a year, so it is managed from the breakdown header rather
+  // than from the daily expense path.
+  it('manages the categories from the breakdown header', async () => {
+    renderPage();
+
+    await userEvent.click(screen.getByRole('button', { name: 'Administrar categorías' }));
+
+    expect(screen.getByText('Categorías de gasto')).toBeInTheDocument();
+    // Usage lines and the archive arithmetic describe the register on screen, not today's month.
+    expect(mockedUseCatalog).toHaveBeenCalledWith('2026-08');
+  });
+
+  it('closes category management again', async () => {
+    renderPage();
+
+    await userEvent.click(screen.getByRole('button', { name: 'Administrar categorías' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Listo' }));
+
+    expect(screen.queryByText('Categorías de gasto')).not.toBeInTheDocument();
   });
 
   // All income is subscription revenue, created by marking a subscription paid — the asymmetry

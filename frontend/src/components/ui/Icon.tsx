@@ -347,6 +347,13 @@ export function Icon({ name, size = 16, stroke = 1.5, className }: IconProps) {
           <circle cx="18" cy="13" r="2" />
         </svg>
       );
+    case 'list-plus':
+      return (
+        <svg {...props}>
+          <path d="M4 6h16M4 12h10M4 18h7" />
+          <path d="M18 15v6M15 18h6" />
+        </svg>
+      );
     case 'settings':
       return (
         <svg {...props}>

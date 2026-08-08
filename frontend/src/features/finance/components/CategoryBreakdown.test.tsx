@@ -10,10 +10,17 @@ const categories: CategoryTotal[] = [
 ];
 
 const onPick = jest.fn();
+const onManage = jest.fn();
 
 const setup = (props: Partial<React.ComponentProps<typeof CategoryBreakdown>> = {}) =>
   render(
-    <CategoryBreakdown categories={categories} activeCategoryId="" onPick={onPick} {...props} />,
+    <CategoryBreakdown
+      categories={categories}
+      activeCategoryId=""
+      onPick={onPick}
+      onManage={onManage}
+      {...props}
+    />,
   );
 
 beforeEach(() => jest.clearAllMocks());
@@ -105,5 +112,34 @@ describe('CategoryBreakdown', () => {
     setup();
 
     expect(screen.queryByText('Archivada')).not.toBeInTheDocument();
+  });
+
+  it('sums the band beside its heading', () => {
+    setup();
+
+    expect(screen.getByText('Bs 16.350 en 3 categorías')).toBeInTheDocument();
+  });
+
+  it('reads a single category in the singular', () => {
+    setup({ categories: [categories[0]] });
+
+    expect(screen.getByText('Bs 7.300 en 1 categoría')).toBeInTheDocument();
+  });
+
+  // "Bs 0 en 0 categorías" says less than the empty state already does.
+  it('drops the summary when nothing was spent', () => {
+    setup({ categories: [] });
+
+    expect(screen.queryByText(/en 0 categorías/)).not.toBeInTheDocument();
+  });
+
+  // The category list changes perhaps twice a year, so managing it lives here rather than on the
+  // daily path — but it is reachable even in a month where nothing has been spent yet.
+  it('opens category management from the header', async () => {
+    setup({ categories: [] });
+
+    await userEvent.click(screen.getByRole('button', { name: 'Administrar categorías' }));
+
+    expect(onManage).toHaveBeenCalled();
   });
 });
