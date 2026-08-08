@@ -1,7 +1,9 @@
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
+import { format } from 'date-fns';
 import { FinancePage } from '@/pages/FinancePage';
+import { formatDayLabel } from '@/features/finance/utils/format';
 import { useFinance } from '@/features/finance/hooks/useFinance';
 import { useExpenseMutations } from '@/features/finance/hooks/useExpenses';
 import { useCategoryCatalog, useCategoryMutations } from '@/features/finance/hooks/useCategories';
@@ -285,6 +287,74 @@ describe('FinancePage', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Listo' }));
 
     expect(screen.queryByText('Categorías de gasto')).not.toBeInTheDocument();
+  });
+
+  // The open month is marked in two places, and both go away on a closed month so paging back
+  // reads as settled rather than as a marker that switched off (backlog 3.25).
+  describe('the open-month marker', () => {
+    it('marks the month still running beside the stepper and on the balance', () => {
+      renderPage();
+
+      expect(screen.getByText('Mes en curso')).toBeInTheDocument();
+      // Derived rather than written out: the cut-off is today, and a literal would go stale
+      // overnight. formatDayLabel is pinned on its own in format.test.ts.
+      expect(
+        screen.getByText(`Al ${formatDayLabel(format(new Date(), 'yyyy-MM-dd'))}`),
+      ).toBeInTheDocument();
+    });
+
+    it('drops both once a closed month is shown', async () => {
+      renderPage();
+
+      await userEvent.click(screen.getByRole('button', { name: /mes anterior/i }));
+
+      expect(screen.queryByText('Mes en curso')).not.toBeInTheDocument();
+      expect(screen.queryByText(/^Al /)).not.toBeInTheDocument();
+    });
+  });
+
+  // Filing a gasto dated in another month and leaving the view where it was would hide the row the
+  // user just entered (backlog 3.26).
+  describe('an expense dated outside the shown month', () => {
+    it('moves the view to the month it was filed in', async () => {
+      renderPage();
+
+      await userEvent.click(screen.getByRole('button', { name: /registrar gasto/i }));
+      await userEvent.type(screen.getByLabelText(/monto/i), '180');
+      await userEvent.clear(screen.getByLabelText(/fecha/i));
+      await userEvent.type(screen.getByLabelText(/fecha/i), '2026-07-30');
+      await userEvent.click(screen.getByRole('button', { name: 'Registrar' }));
+
+      await waitFor(() =>
+        expect(mockedUseFinance).toHaveBeenLastCalledWith('2026-07', expect.anything()),
+      );
+    });
+
+    it('stays put when the date is inside the shown month', async () => {
+      renderPage();
+
+      await userEvent.click(screen.getByRole('button', { name: /registrar gasto/i }));
+      await userEvent.type(screen.getByLabelText(/monto/i), '180');
+      await userEvent.click(screen.getByRole('button', { name: 'Registrar' }));
+
+      await waitFor(() => expect(create).toHaveBeenCalled());
+      expect(mockedUseFinance).toHaveBeenLastCalledWith('2026-08', expect.anything());
+    });
+
+    // An edit that moves the date is the same problem: the row leaves the month on screen.
+    it('follows an edit that moves the date to another month', async () => {
+      renderPage();
+
+      await openRowActions();
+      await userEvent.click(screen.getByText('Editar'));
+      await userEvent.clear(screen.getByLabelText(/fecha/i));
+      await userEvent.type(screen.getByLabelText(/fecha/i), '2026-07-15');
+      await userEvent.click(screen.getByRole('button', { name: 'Guardar' }));
+
+      await waitFor(() =>
+        expect(mockedUseFinance).toHaveBeenLastCalledWith('2026-07', expect.anything()),
+      );
+    });
   });
 
   // All income is subscription revenue, created by marking a subscription paid — the asymmetry
