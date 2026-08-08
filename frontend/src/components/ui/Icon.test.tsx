@@ -30,6 +30,12 @@ describe('Icon', () => {
     expect(container.querySelectorAll('circle')).toHaveLength(3);
   });
 
+  // A list with a plus: managing a catalog, not adding one more row to it.
+  it('renders stacked lines and a cross for list-plus', () => {
+    const { container } = render(<Icon name="list-plus" />);
+    expect(container.querySelectorAll('path')).toHaveLength(2);
+  });
+
   it('renders two bars for pause', () => {
     const { container } = render(<Icon name="pause" />);
     expect(container.querySelectorAll('rect')).toHaveLength(2);
