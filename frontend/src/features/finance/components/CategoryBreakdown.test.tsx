@@ -144,7 +144,7 @@ describe('CategoryBreakdown', () => {
   });
 
   // Below 900px auto-fill would drop to a single column and make the band very tall; two-up keeps
-  // the month's shape readable at a glance (backlog 3.27).
+  // the month's shape readable at a glance (business-rules.md → Finanzas).
   it('holds two columns below the compact breakpoint', () => {
     setup();
 

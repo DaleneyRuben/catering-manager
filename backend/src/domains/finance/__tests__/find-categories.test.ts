@@ -73,8 +73,8 @@ describe('findCategories', () => {
     expect(sqlOf()).toContain('e."deletedAt" IS NULL');
   });
 
-  // The chip row is ordered by the server (backlog 3.24): what the user reaches for most this
-  // month comes first, all-time breaks the tie, and alphabetical only decides the rest.
+  // The chip row is ordered by the server (business-rules.md → Finanzas): what the user reaches
+  // for most this month comes first, all-time breaks the tie, and alphabetical decides the rest.
   it('orders by use this month, then all-time, then name', async () => {
     await findCategories();
 

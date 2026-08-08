@@ -12,7 +12,7 @@ const mockMutations = useCategoryMutations as jest.MockedFunction<typeof useCate
 const mockToast = toast as unknown as { success: jest.Mock };
 
 // The server already ranks the catalog by use this month, so this order is not alphabetical on
-// purpose (backlog 3.24).
+// purpose (business-rules.md → Finanzas).
 const categories: ExpenseCategory[] = [
   { id: 'CAT2', name: 'Transporte', active: true },
   { id: 'CAT1', name: 'Insumos', active: true },

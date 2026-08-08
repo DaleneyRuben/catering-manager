@@ -7,8 +7,9 @@ import { categoryAddedMessage } from '@/features/finance/utils/categories';
 import type { ExpenseCategory } from '@/features/finance/types';
 
 interface Props {
-  // In the order the server ranked them — most used this month first (backlog 3.24). Never
-  // re-sorted here, or the form and the categories modal would disagree about the same catalog.
+  // In the order the server ranked them — most used this month first (business-rules.md →
+  // Finanzas). Never re-sorted here, or the form and the categories modal would disagree about the
+  // same catalog.
   categories: ExpenseCategory[];
   selectedId: string;
   onPick: (id: string) => void;

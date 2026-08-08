@@ -165,7 +165,7 @@ describe('MovementsFilterBar', () => {
   });
 
   // Below 900px the search box takes a row of its own rather than being squeezed between the
-  // heading and the segmented control (backlog 3.27).
+  // heading and the segmented control (business-rules.md → Finanzas).
   it('gives the search its own row below the compact breakpoint', () => {
     render(<MovementsFilterBar {...props()} />);
 

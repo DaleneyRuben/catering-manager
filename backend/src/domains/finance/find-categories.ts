@@ -27,8 +27,8 @@ export type CategoryWithUsage = Omit<CategoryRow, 'usageThisMonth' | 'usageAllTi
 // it is the one the user is about to file against. Deleted expenses are excluded in the join
 // condition rather than the WHERE, which would turn the outer join back into an inner one.
 //
-// The order is the chip row's order (backlog 3.24), decided here rather than in the client so the
-// form and the modal cannot disagree: what the user reaches for most this month comes first,
+// The order is the chip row's order (business-rules.md → Finanzas), decided here rather than in
+// the client so the form and the modal cannot disagree: what the user reaches for most comes first,
 // all-time use breaks the tie, name settles the rest. "Otros" is pinned last whatever its count —
 // it is where unclassified spending lands, so ranking it by use would float the least informative
 // chip to the front. false sorts before true in Postgres, so the equality test does the pinning.
