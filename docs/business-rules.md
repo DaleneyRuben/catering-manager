@@ -98,7 +98,9 @@ for what a client pays.
 
 ## Plan Duration
 
-Plan duration is **dynamic** — defined by the user at subscription time (new client, renewal, or reactivation) as a number of days. The API requires an explicit value (no UI default); the DB column has a fallback of 20 that never fires in practice. The system calculates `contractEndDate` automatically by adding the specified number of client-facing business days (Mon–Fri) to the start date.
+Plan duration is **dynamic** — defined by the user at subscription time (new client, renewal, or reactivation) as a number of days. The API requires an explicit value; the DB column has a fallback of 20 that never fires in practice. The system calculates `contractEndDate` automatically by adding the specified number of client-facing business days (Mon–Fri) to the start date.
+
+The **renewal and reactivation form starts from 20**, the number of delivery days a plan's price is quoted for (see Plans), and the admin edits it — a starting point, not a value the system stands behind. The **new-client wizard offers no default**: a first contract is negotiated from nothing, so there is nothing to pre-fill.
 
 - Contract date is always set to **today** at creation. (API validation of this rule is temporarily relaxed while existing clients are backfilled — see the TODO in `domains/subscription/create.ts`.)
 - Start date is set by the user and may be the same as the contract date or a future date.
@@ -147,6 +149,8 @@ When a menu is saved the system generates a **chef preparation report** — a do
 `juice` is a meal type on plans and stored on the Menu model, but it is not included in the kitchen report sections (it appears on the menu card only).
 
 Special instructions (`specialInstructions` on Subscription — a per-meal-key → label map, e.g. `{ "lunch": "DAR GRANDES" }`) are grouped by label within each meal section of the report.
+
+They are **standing dietary preferences, not terms of one contract**, so a renewal or reactivation **inherits them from the contract it follows** unless the request states its own set, which wins. A brand-new client has nothing to inherit. Without this the kitchen silently stopped preparing them the day a client renewed, with nothing on screen saying so.
 
 ---
 
