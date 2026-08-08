@@ -7,7 +7,8 @@ import { Skeleton } from '@ui/Skeleton';
 import { ConfirmModal } from '@ui/ConfirmModal';
 import { useFinance } from '@/features/finance/hooks/useFinance';
 import { useMovementFilters } from '@/features/finance/hooks/useMovementFilters';
-import { useExpenseCategories, useExpenseMutations } from '@/features/finance/hooks/useExpenses';
+import { useExpenseMutations } from '@/features/finance/hooks/useExpenses';
+import { useCategoryCatalog } from '@/features/finance/hooks/useCategories';
 import { MonthSelector } from '@/features/finance/components/MonthSelector';
 import { FinanceTiles } from '@/features/finance/components/FinanceTiles';
 import { CategoryBreakdown } from '@/features/finance/components/CategoryBreakdown';
@@ -66,7 +67,9 @@ export function FinancePage() {
     useMovementFilters();
 
   const { overview, isLoading } = useFinance(month, queryFilters);
-  const { categories } = useExpenseCategories();
+  // One catalog for the screen, read for the month on show: the form's chip order is the server's
+  // ranking of that month's use, and the filter select and categories modal read the same rows.
+  const { categories } = useCategoryCatalog(month);
   const { create, update, remove, isSaving } = useExpenseMutations();
 
   const closeForm = () => setForm(null);

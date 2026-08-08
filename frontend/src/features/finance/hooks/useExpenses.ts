@@ -1,18 +1,6 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '@/services/api';
-import type { ExpenseCategory, ExpenseInput } from '@/features/finance/types';
-
-export function useExpenseCategories() {
-  const query = useQuery({
-    queryKey: ['expense-categories'],
-    queryFn: (): Promise<ExpenseCategory[]> => api.get<ExpenseCategory[]>('/finance/categories'),
-  });
-
-  return {
-    categories: query.data ?? [],
-    isLoading: query.isLoading,
-  };
-}
+import type { ExpenseInput } from '@/features/finance/types';
 
 type UpdatePayload = { id: string; changes: Partial<ExpenseInput> };
 
