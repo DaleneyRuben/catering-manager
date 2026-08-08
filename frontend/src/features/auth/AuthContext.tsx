@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useCallback, useMemo, type ReactNode } from 'react';
 import type { UserRole } from '@/constants/roles';
+import { AUTH_TOKEN_KEY as TOKEN_KEY, AUTH_USER_KEY as USER_KEY } from '@/constants/session';
 
 export type { UserRole };
 
@@ -18,9 +19,6 @@ type AuthContextValue = AuthState & {
   setAuth: (user: AuthUser, token: string) => void;
   clearAuth: () => void;
 };
-
-const TOKEN_KEY = 'auth_token';
-const USER_KEY = 'auth_user';
 
 const loadFromStorage = (): AuthState => {
   try {
