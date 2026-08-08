@@ -4,7 +4,7 @@
 
 Implement in the catering-manager repo following `.claude/skills/project-standards/skill.md`: TDD (failing test first, always), one public function per file under `backend/src/domains/<domain>/`, feature-folder colocation on the frontend, no `../../` imports, no `import * as`, files under 400 lines, neutral Spanish copy, English identifiers. Read [`ADR-008`](../adr/008-finance-owns-payments.md), [`ADR-007`](../adr/007-domain-ownership.md), `CONTEXT.md` → "Finanzas" and [`domains.md`](../architecture/domains.md) before starting. Business logic may not be changed without asking the user.
 
-**Prerequisites: the subscription price model (backlog 0) and the plan-change control must ship first** ([`plan-change-implementation.md`](./plan-change-implementation.md)). Until it does, admins simulate plan changes by finalizing and recreating a subscription, which produces two paid subscriptions for a client who paid once — and this register would count both.
+**Prerequisites: the subscription price model (shipped first) and the plan-change control must ship first** ([`plan-change-implementation.md`](./plan-change-implementation.md)). Until it does, admins simulate plan changes by finalizing and recreating a subscription, which produces two paid subscriptions for a client who paid once — and this register would count both.
 
 ## 1. Migrations and models
 
