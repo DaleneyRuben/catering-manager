@@ -1,4 +1,5 @@
 import { render, screen, waitFor } from '@testing-library/react';
+import { addDays, format, subDays } from 'date-fns';
 import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
@@ -14,11 +15,22 @@ const mockGet = api.get as jest.Mock;
 const mockPatch = api.patch as jest.Mock;
 const mockPost = api.post as jest.Mock;
 
+// Every date here is relative to today, because the page's rules are: a renewal only counts as
+// queued while another plan still covers today, and only while its own start date is still ahead.
+// Written out as literals, half these tests passed only during August 2026.
+const asIso = (date: Date) => format(date, 'yyyy-MM-dd');
+const asShown = (date: Date) => format(date, 'dd/MM/yyyy');
+
+const runningStart = subDays(new Date(), 60);
+const runningEnd = addDays(new Date(), 5);
+const queuedStart = addDays(new Date(), 10);
+const queuedEnd = addDays(queuedStart, 25);
+
 const appointment = {
   id: 'appt-1',
   name: 'Fernando Daleney',
   phone: '76637732',
-  date: '2026-08-03',
+  date: asIso(new Date()),
   time: '09:00',
   subscriptionId: null,
   clientId: 'client-5',
@@ -47,9 +59,9 @@ const client = {
       id: 'sub-old',
       clientId: 'client-5',
       planId: 'plan-1',
-      contractDate: '2026-01-01',
-      startDate: '2026-01-02',
-      contractEndDate: '2026-08-14',
+      contractDate: asIso(runningStart),
+      startDate: asIso(runningStart),
+      contractEndDate: asIso(runningEnd),
       discount: 0,
       duration: 40,
       suspendedDates: [],
@@ -157,10 +169,12 @@ describe('EvaluationRenewalPage', () => {
 const queuedRenewal = {
   ...client.subscriptions[0],
   id: 'sub-queued',
-  startDate: '2026-08-17',
-  contractEndDate: '2026-09-11',
+  startDate: asIso(queuedStart),
+  contractEndDate: asIso(queuedEnd),
   duration: 20,
 };
+
+const queuedRenewalLine = `Completo · ${asShown(queuedStart)} → ${asShown(queuedEnd)} · 20 días hábiles`;
 
 const withQueuedRenewal = () =>
   renderPage({
@@ -181,9 +195,7 @@ describe('EvaluationRenewalPage with a renewal already registered', () => {
   it('names the renewal that is already in place', async () => {
     withQueuedRenewal();
 
-    expect(
-      await screen.findByText('Completo · 17/08/2026 → 11/09/2026 · 20 días hábiles'),
-    ).toBeInTheDocument();
+    expect(await screen.findByText(queuedRenewalLine)).toBeInTheDocument();
   });
 
   it('renders the renewal action dead instead of hiding it', async () => {
@@ -235,8 +247,6 @@ describe('EvaluationRenewalPage with an unpaid renewal already registered', () =
 
     await screen.findByRole('button', { name: /renovar plan/i });
     expect(screen.queryByText('Renovación ya registrada')).not.toBeInTheDocument();
-    expect(
-      screen.queryByText('Completo · 17/08/2026 → 11/09/2026 · 20 días hábiles'),
-    ).not.toBeInTheDocument();
+    expect(screen.queryByText(queuedRenewalLine)).not.toBeInTheDocument();
   });
 });
