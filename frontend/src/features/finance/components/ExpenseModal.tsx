@@ -49,14 +49,23 @@ export function ExpenseModal({
   const source = expense ?? duplicateOf;
 
   const [amount, setAmount] = useState(source ? String(source.amount) : '');
-  const [pickedId, setPickedId] = useState(source?.categoryId ?? defaultCategoryId ?? '');
+  const [pickedId, setPickedId] = useState(source?.categoryId ?? '');
   const [spentAt, setSpentAt] = useState(expense?.spentAt ?? today);
   const [description, setDescription] = useState(source?.description ?? '');
+
+  const active = categories.filter((category) => category.active);
+
+  // A remembered category is a convenience, not a record: archiving it stops it being offered, so a
+  // new expense must not be filed against it. The category on a row being edited is different — it
+  // is what that expense was actually filed against, and rides through in `pickedId`.
+  const remembered = active.some((category) => category.id === defaultCategoryId)
+    ? defaultCategoryId
+    : undefined;
 
   // Resolved on render rather than seeded into state: the catalog can still be in flight when the
   // form opens, and a state seeded from an empty list would stay empty after it arrived. The first
   // chip is the server's ranking — the category used most this month.
-  const categoryId = pickedId || categories.find((category) => category.active)?.id || '';
+  const categoryId = pickedId || remembered || active[0]?.id || '';
 
   useEffect(() => {
     amountRef.current?.focus();
