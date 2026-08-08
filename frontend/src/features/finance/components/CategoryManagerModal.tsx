@@ -8,6 +8,7 @@ import { inputCls } from '@ui/Field';
 import { MODAL_CONFIRM_STYLE } from '@ui/modalButtonStyles';
 import { useCategoryCatalog, useCategoryMutations } from '@/features/finance/hooks/useCategories';
 import { CategoryManagerRow } from '@/features/finance/components/CategoryManagerRow';
+import { categoryAddedMessage } from '@/features/finance/utils/categories';
 import { formatMoney, formatMonthLabel } from '@/features/finance/utils/format';
 import type { CategoryTotal, ExpenseCategoryWithUsage } from '@/features/finance/types';
 
@@ -60,15 +61,7 @@ export function CategoryManagerModal({ month, byCategory, onClose }: Props) {
     if (name === '') return;
 
     const created = await create(name);
-
-    // A duplicate name folds onto the category that already answers to it rather than erroring, so
-    // what came back may be a row that was already there — and if it was archived, the fold
-    // restored it. Comparing against the catalog as it stood says which of the three happened.
-    const known = categories.find((category) => category.id === created.id);
-    if (known === undefined) toast.success(`Categoría «${created.name}» creada`);
-    else if (known.active) toast.success(`Ya existe la categoría «${created.name}»`);
-    else toast.success(`Categoría «${created.name}» restaurada`);
-
+    toast.success(categoryAddedMessage(created, categories));
     setNewName('');
   };
 
