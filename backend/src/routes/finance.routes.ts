@@ -14,7 +14,8 @@ router.get('/', financeController.getOverview);
 router.get('/categories', financeController.getCategories);
 
 // There is no DELETE for a category: expenses already filed against one must keep naming it, so
-// the only way out is archiving it through PATCH (backlog 3.8, and deactivateCategory's comment).
+// the only way out is archiving it through PATCH (business-rules.md → Finanzas, and
+// deactivateCategory's comment).
 router.post('/categories', validate(createCategorySchema), financeController.createCategory);
 router.patch('/categories/:id', validate(updateCategorySchema), financeController.updateCategory);
 

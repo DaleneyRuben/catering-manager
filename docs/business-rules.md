@@ -203,6 +203,70 @@ The reporting layer should remain extensible — additional reports may be added
 
 ---
 
+## Finanzas (the register)
+
+One screen (sidebar item **Finanzas**, under Administración) showing a month of money in and money
+out. Visible to `admin` and `super_admin`. The vocabulary behind it — Payment, Expense, Movement,
+and the terms deliberately rejected — is recorded in [CONTEXT.md](../CONTEXT.md); the ownership of
+the tables is [ADR-008](./adr/008-finance-owns-payments.md). What follows is what the register
+must honour.
+
+**Cash basis.** Every record is dated by the day the money moved, never by the period it relates
+to: a renewal paid in July for a plan running in August is July income. There is no accrual, no
+outstanding balance, and nothing the register can say about money owed in either direction.
+
+### Income and expenses
+
+- **All income is subscription revenue.** A Payment is written only when a subscription is marked
+  paid, so there is no manual income entry and the register can never disagree with the Clientes
+  screen. The asymmetry with expenses is deliberate, not an omission.
+- **Expenses are typed by hand** — amount, category, date, optional description — and record who
+  registered them. They are editable and soft-deleted; Payments are neither, from this screen.
+- **An expense is never dated in the future**, since the money has not moved yet. It may be
+  backdated freely.
+- **Repetition is Duplicar**: an expense copied into a new one dated today. Nothing is ever
+  generated on a schedule.
+
+### Expense categories
+
+A managed catalog, chosen from a list and never free text — free text produces "Mercado",
+"mercado" and "Compras mercado" as three categories and silently breaks every total.
+
+- **Categories are archived, never deleted.** An expense already filed against one keeps naming it
+  forever, so an archived category still carries its money in the breakdown (tagged _Archivada_)
+  and stays available as a filter. Archiving only stops it being offered on a new expense.
+- **Renaming moves the label across all history.** It is a correction to a name, not a merge: a
+  name already taken is rejected rather than folded, because merging two categories would have to
+  move every expense filed against one of them. A category matching only itself is not a
+  collision, so recasing its own name is allowed.
+- **Creating folds onto an existing name** (ignoring case and accents) and returns that category
+  rather than erroring; if it was archived, the fold restores it. Asking for a category by name is
+  asking to file against it.
+- **Order is server-computed, scoped to the month on screen**: most used this month, then most used
+  all time, then alphabetical, with `Otros` pinned last however often it is used — it is where
+  unclassified spending lands, so ranking it by use would float the least informative choice to the
+  front. The expense form's chips and the management modal read the same order, so they cannot
+  disagree.
+- There are no sub-categories: if one proves too coarse, it becomes two.
+
+### What the month shows
+
+- **The three tiles are the month's truth and never narrow to a filter.** A "Balance" of one
+  category is not a balance of anything. Only the movements list, its count and its subtotal
+  respond to filters; with none active that subtotal equals the month's balance.
+- **The month still running is marked** — a _Mes en curso_ pill beside the stepper and an
+  "Al {fecha}" cut-off on the Balance tile — and both are **absent entirely** on a closed month, so
+  paging back reads as settled rather than as a marker that switched off.
+- **Saving an expense moves the view to the month it is dated in**, on an edit as much as on a
+  create. A row filed outside the month on screen would read as a save that did not happen.
+- **Search reaches an expense's description and an income row's client name**, never the category —
+  that is what the category filter and the breakdown cells are for. It ignores accents.
+- **The register starts the month Finanzas went live.** Nothing earlier is shown or navigable and
+  no backfill is performed, so the first month understates income — that and the other accepted
+  costs are recorded under Consequences in [ADR-008](./adr/008-finance-owns-payments.md).
+
+---
+
 ## Key Business Rules
 
 - A client is **active** when today's date is between `start date` and `contract end date` (inclusive) and the client is not on pause.

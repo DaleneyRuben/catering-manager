@@ -118,7 +118,7 @@ describe('ExpenseModal', () => {
   });
 
   // The labels already say what each field is, so a placeholder only adds noise to a form filled
-  // from muscle memory (backlog 3.22).
+  // from muscle memory (business-rules.md → Finanzas).
   it('prompts with nothing inside the fields', () => {
     setup();
 
@@ -137,7 +137,7 @@ describe('ExpenseModal', () => {
     );
   });
 
-  // One click on a visible list, no select to open (backlog 3.23).
+  // One click on a visible list, no select to open (business-rules.md → Finanzas).
   it('offers the categories as chips instead of a select', () => {
     setup();
 

@@ -4,7 +4,7 @@
 
 Implement in the catering-manager repo following `.claude/skills/project-standards/skill.md`: TDD (failing test first, always), feature-folder colocation, no `../../` imports (`@/` and `@ui/` aliases), files under 400 lines, neutral Spanish copy, English identifiers, `date-fns` only for date math. Domain rules are in `docs/business-rules.md` → "Change of plan" and `CONTEXT.md` → "Plan change"; read both before starting. Business logic may not be changed without asking the user — everything below is already approved, but stop and ask if you hit a case not covered.
 
-**This blocks Finanzas.** Until it ships, a simulated plan change writes two paid subscriptions for a client who paid once, which the finance register would double-count. See [`backlog.md`](../backlog.md).
+**This blocks Finanzas.** Until it ships, a simulated plan change writes two paid subscriptions for a client who paid once, which the finance register would double-count.
 
 ## 0. The backend is already done
 
@@ -50,7 +50,7 @@ Both have existing tests that will fail on the prop rename; update them in the s
 
 ## 4. Retire the workaround
 
-No code change — a documentation and behaviour one. Once this ships, admins stop finalizing-and-recreating. `business-rules.md` already marks the workaround for retirement; when the feature lands, remove that paragraph and the "not yet implemented" marker from the "Change of plan" section, and tick items 1.2/1.3 in `backlog.md`.
+No code change — a documentation and behaviour one. Once this ships, admins stop finalizing-and-recreating. `business-rules.md` already marks the workaround for retirement; when the feature lands, remove that paragraph and the "not yet implemented" marker from the "Change of plan" section.
 
 Also update the closing note of `business-rules.md` → History, which currently reads _"No screen currently sends a new plan for an existing subscription… the plan half is reachable through the API alone until a plan-change control exists."_ That statement stops being true with this feature.
 

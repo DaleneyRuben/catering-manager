@@ -74,7 +74,7 @@ describe('FinanceTiles', () => {
   });
 
   // Below 900px the three tiles stack and the balance drops a size: consulting the register on a
-  // phone is the target, recording a gasto on one is not (backlog 3.27).
+  // phone is the target, recording a gasto on one is not (business-rules.md → Finanzas).
   describe('below the compact breakpoint', () => {
     it('stacks the tiles into one column', () => {
       setup();

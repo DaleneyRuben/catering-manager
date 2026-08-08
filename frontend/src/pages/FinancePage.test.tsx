@@ -70,7 +70,7 @@ beforeEach(() => {
   mockedUseFinance.mockReturnValue({ overview, isLoading: false, error: null });
   mockedUseMutations.mockReturnValue({ create, update, remove, isSaving: false });
   // As the server sends it: ranked by use this month, so Transporte leads and nothing on this side
-  // re-sorts it (backlog 3.24).
+  // re-sorts it (business-rules.md → Finanzas).
   mockedUseCatalog.mockReturnValue({
     categories: [
       { id: 'C2', name: 'Transporte', active: true, usageThisMonth: 9, usageAllTime: 40 },
@@ -290,7 +290,7 @@ describe('FinancePage', () => {
   });
 
   // The open month is marked in two places, and both go away on a closed month so paging back
-  // reads as settled rather than as a marker that switched off (backlog 3.25).
+  // reads as settled rather than as a marker that switched off (business-rules.md → Finanzas).
   describe('the open-month marker', () => {
     it('marks the month still running beside the stepper and on the balance', () => {
       renderPage();
@@ -314,7 +314,7 @@ describe('FinancePage', () => {
   });
 
   // Filing a gasto dated in another month and leaving the view where it was would hide the row the
-  // user just entered (backlog 3.26).
+  // user just entered (business-rules.md → Finanzas).
   describe('an expense dated outside the shown month', () => {
     it('moves the view to the month it was filed in', async () => {
       renderPage();
