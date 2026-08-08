@@ -1,26 +1,51 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ExpenseModal } from '@/features/finance/components/ExpenseModal';
+import { useCategoryMutations } from '@/features/finance/hooks/useCategories';
 import type { ExpenseCategory } from '@/features/finance/types';
+
+// The chip row reaches the API to add a category; nothing else in this form does.
+jest.mock('@/features/finance/hooks/useCategories');
+
+const mockMutations = useCategoryMutations as jest.MockedFunction<typeof useCategoryMutations>;
 
 const categories: ExpenseCategory[] = [
   { id: 'CAT1', name: 'Insumos', active: true },
   { id: 'CAT2', name: 'Transporte', active: true },
 ];
 
+beforeEach(() => {
+  mockMutations.mockReturnValue({
+    create: jest.fn(),
+    rename: jest.fn(),
+    archive: jest.fn(),
+    restore: jest.fn(),
+    isSaving: false,
+  });
+});
+
+const pickCategory = (name: string) => userEvent.click(screen.getByRole('button', { name }));
+
 const setup = (props: Partial<React.ComponentProps<typeof ExpenseModal>> = {}) => {
   const onSubmit = jest.fn().mockResolvedValue(undefined);
   const onClose = jest.fn();
-  render(
+  // `categories` comes last so a rerender can replace the catalog the props opened with.
+  const ui = (catalog: ExpenseCategory[]) => (
     <ExpenseModal
-      categories={categories}
       today="2026-08-06"
       onSubmit={onSubmit}
       onClose={onClose}
       {...props}
-    />,
+      categories={catalog}
+    />
   );
-  return { onSubmit, onClose };
+  const { rerender } = render(ui(props.categories ?? categories));
+
+  return {
+    onSubmit,
+    onClose,
+    rerender: (catalog: ExpenseCategory[]) => rerender(ui(catalog)),
+  };
 };
 
 describe('ExpenseModal', () => {
@@ -28,7 +53,7 @@ describe('ExpenseModal', () => {
     const { onSubmit } = setup();
 
     await userEvent.type(screen.getByLabelText(/monto/i), '180');
-    await userEvent.selectOptions(screen.getByLabelText(/categoría/i), 'CAT2');
+    await pickCategory('Transporte');
     await userEvent.type(screen.getByLabelText(/descripción/i), 'Reparto del día');
     await userEvent.click(screen.getByRole('button', { name: 'Registrar' }));
 
@@ -92,6 +117,69 @@ describe('ExpenseModal', () => {
     expect(onSubmit).toHaveBeenCalled();
   });
 
+  // The labels already say what each field is, so a placeholder only adds noise to a form filled
+  // from muscle memory (backlog 3.22).
+  it('prompts with nothing inside the fields', () => {
+    setup();
+
+    expect(screen.getByLabelText(/monto/i)).not.toHaveAttribute('placeholder');
+    expect(screen.getByLabelText(/descripción/i)).not.toHaveAttribute('placeholder');
+  });
+
+  // Both behaviours stay; only the caption goes, replaced by a glyph on the button itself. It is
+  // decorative, so it stays out of the button's accessible name.
+  it('states Enter as a glyph on the button rather than a caption', () => {
+    setup();
+
+    expect(screen.queryByText('Enter para guardar')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Registrar' })).toContainElement(
+      screen.getByText('↵'),
+    );
+  });
+
+  // One click on a visible list, no select to open (backlog 3.23).
+  it('offers the categories as chips instead of a select', () => {
+    setup();
+
+    expect(screen.getByRole('group', { name: 'Categoría' })).toBeInTheDocument();
+    expect(screen.queryByRole('combobox')).not.toBeInTheDocument();
+  });
+
+  // The server ranks the catalog by use this month, so the first chip is the likeliest answer.
+  it('starts on the first category the server ranked', async () => {
+    const { onSubmit } = setup();
+
+    await userEvent.type(screen.getByLabelText(/monto/i), '180');
+    await userEvent.click(screen.getByRole('button', { name: 'Registrar' }));
+
+    expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({ categoryId: 'CAT1' }));
+  });
+
+  // The catalog can still be in flight when the form opens, so the fallback cannot be a one-time
+  // seed of the initial state.
+  it('falls back to the first category once the catalog arrives', async () => {
+    const { onSubmit, rerender } = setup({ categories: [] });
+
+    await userEvent.type(screen.getByLabelText(/monto/i), '180');
+    expect(screen.getByRole('button', { name: 'Registrar' })).toBeDisabled();
+
+    rerender(categories);
+    await userEvent.click(screen.getByRole('button', { name: 'Registrar' }));
+
+    expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({ categoryId: 'CAT1' }));
+  });
+
+  it('files the expense against the chip picked last', async () => {
+    const { onSubmit } = setup();
+
+    await userEvent.type(screen.getByLabelText(/monto/i), '180');
+    await pickCategory('Transporte');
+    await pickCategory('Insumos');
+    await userEvent.click(screen.getByRole('button', { name: 'Registrar' }));
+
+    expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({ categoryId: 'CAT1' }));
+  });
+
   it('edits an existing expense', async () => {
     const { onSubmit } = setup({
       expense: {
@@ -104,7 +192,10 @@ describe('ExpenseModal', () => {
     });
 
     expect(screen.getByLabelText(/monto/i)).toHaveValue('180');
-    expect(screen.getByLabelText(/categoría/i)).toHaveValue('CAT2');
+    expect(screen.getByRole('button', { name: 'Transporte' })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    );
     expect(screen.getByLabelText(/fecha/i)).toHaveValue('2026-08-04');
 
     await userEvent.clear(screen.getByLabelText(/monto/i));
@@ -132,7 +223,10 @@ describe('ExpenseModal', () => {
       setup({ duplicateOf: source });
 
       expect(screen.getByLabelText(/monto/i)).toHaveValue('180');
-      expect(screen.getByLabelText(/categoría/i)).toHaveValue('CAT2');
+      expect(screen.getByRole('button', { name: 'Transporte' })).toHaveAttribute(
+        'aria-pressed',
+        'true',
+      );
       expect(screen.getByLabelText(/descripción/i)).toHaveValue('Reparto del día');
     });
 
