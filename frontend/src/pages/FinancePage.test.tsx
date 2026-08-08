@@ -372,4 +372,14 @@ describe('FinancePage', () => {
 
     expect(screen.getByTestId('finance-skeleton')).toBeInTheDocument();
   });
+
+  // The skeleton stands in for the tiles, so it has to stack at the same width they do — otherwise
+  // the layout jumps as the month lands.
+  it('stacks the skeleton tiles at the same width the real ones do', () => {
+    mockedUseFinance.mockReturnValue({ overview: null, isLoading: true, error: null });
+
+    renderPage();
+
+    expect(screen.getByTestId('skeleton-tiles')).toHaveClass('max-compact:grid-cols-1');
+  });
 });

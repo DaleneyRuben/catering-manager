@@ -142,4 +142,12 @@ describe('CategoryBreakdown', () => {
 
     expect(onManage).toHaveBeenCalled();
   });
+
+  // Below 900px auto-fill would drop to a single column and make the band very tall; two-up keeps
+  // the month's shape readable at a glance (backlog 3.27).
+  it('holds two columns below the compact breakpoint', () => {
+    setup();
+
+    expect(screen.getByTestId('category-grid')).toHaveClass('max-compact:grid-cols-2');
+  });
 });

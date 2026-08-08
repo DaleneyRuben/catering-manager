@@ -65,6 +65,22 @@ describe('FinanceTiles', () => {
     expect(screen.queryByText(/^Al /)).not.toBeInTheDocument();
   });
 
+  // Below 900px the three tiles stack and the balance drops a size: consulting the register on a
+  // phone is the target, recording a gasto on one is not (backlog 3.27).
+  describe('below the compact breakpoint', () => {
+    it('stacks the tiles into one column', () => {
+      setup();
+
+      expect(screen.getByTestId('finance-tiles')).toHaveClass('max-compact:grid-cols-1');
+    });
+
+    it('shrinks the balance so it fits a narrow column', () => {
+      setup();
+
+      expect(screen.getByText('+13.350')).toHaveClass('max-compact:text-[46px]');
+    });
+  });
+
   // The register records money that moved; nothing on it is owed, overdue or outstanding.
   it('never speaks of debt', () => {
     const { container } = setup({ balance: -4200 });
