@@ -118,8 +118,8 @@ The screen cannot be built without these; they land first.
 | 3.17 | A soft-deleted client keeps counting: name muted, no link, mono "CLIENTE ARCHIVADO" tag. No dead link, no dead end                                                                           | ✅     |
 | 3.18 | Who-chip: 26px initials between tag and amount, **click/tap** (not hover) opens "REGISTRADO POR / nombre / el dd/mm"                                                                         | ✅     |
 | 3.19 | Category cells become filter buttons (active = olive + bold, clicking again clears); responsive `auto-fill` grid; ARCHIVADA sub-label                                                        | ✅     |
-| 3.20 | "Administrar categorías" modal: add row, ACTIVAS/ARCHIVADAS sections with usage lines, inline Renombrar, Archivar, Restaurar                                                                 | ☐      |
-| 3.21 | Archiving a category with expenses this month confirms with the arithmetic stated plainly, not a vague warning. The word is **Archivar**, never Eliminar                                     | ☐      |
+| 3.20 | "Administrar categorías" modal: add row, ACTIVAS/ARCHIVADAS sections with usage lines, inline Renombrar, Archivar, Restaurar                                                                 | ✅     |
+| 3.21 | Archiving a category with expenses this month confirms with the arithmetic stated plainly, not a vague warning. The word is **Archivar**, never Eliminar                                     | ✅     |
 | 3.22 | Expense form stripped: no placeholders, no "Enter para guardar" caption. **Both behaviours stay** — focus lands on Monto, Enter submits; the quieter affordance is a `↵` glyph in the button | ☐      |
 | 3.23 | Categoría becomes a wrapping chip row (one click, whole list visible) with a **+ Nueva** chip that creates and selects without leaving the form                                              | ☐      |
 | 3.24 | Chip order: most-used this month → most-used all-time → alphabetical, `Otros` pinned last. Alphabetical buried `Otros` and ranked `Alquiler` above `Insumos`                                 | ☐      |
