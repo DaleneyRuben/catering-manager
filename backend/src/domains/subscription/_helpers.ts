@@ -70,6 +70,23 @@ const eventTypeByRenewal = {
 export const historyEventTypeFor = (renewalType: RenewalType) =>
   renewalType ? eventTypeByRenewal[renewalType] : HISTORY_EVENTS.PLAN_ASSIGNED;
 
+// Special instructions are standing dietary preferences ("Ensalada grande", "DAR GRANDES"), not
+// terms of one contract, so a renewal inherits them from the contract it follows. Without this the
+// kitchen silently stops preparing them the day a client renews, with nothing on screen saying so.
+export const findInheritedInstructions = async (
+  clientId: number,
+  transaction?: Transaction,
+): Promise<Record<string, string> | null> => {
+  const previous = await Subscription.findOne({
+    where: { clientId },
+    order: [['createdAt', 'DESC']],
+    ...(transaction ? { transaction } : {}),
+  });
+
+  const instructions = previous?.specialInstructions;
+  return instructions && Object.keys(instructions).length > 0 ? instructions : null;
+};
+
 // A client may hold at most one upcoming subscription: one not yet started (a renewal registered
 // ahead of time) or one still waiting for a start date (a "sin fecha" renewal).
 export const findUpcomingSubscription = async (

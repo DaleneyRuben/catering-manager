@@ -119,6 +119,25 @@ describe('findRoute', () => {
       expect(centro?.singles).toEqual([]);
     });
 
+    // A token is cleared when a group is reduced to one member, but it survives when the other
+    // members' contracts simply lapse — leaving one client holding a token and rendering as a
+    // "group" of one. It is one stop either way, so it belongs with the individual rows.
+    it('renders a client left alone under a shared token as an individual stop', async () => {
+      (appToday as jest.Mock).mockReturnValue('2026-06-23');
+      (findActiveSubscriptionsForDate as jest.Mock).mockResolvedValue([
+        makeSubscription(
+          makeClient({ id: 1, name: 'Carmen Tapia', deliveryZone: 'Centro', groupToken: 'tok-1' }),
+        ),
+      ]);
+
+      const result = await findRoute();
+
+      const centro = result['2026-06-23'].zones.find((z) => z.zone === 'Centro');
+      expect(centro?.groups).toEqual([]);
+      expect(centro?.singles.map((s) => s.name)).toEqual(['Carmen Tapia']);
+      expect(centro?.deliveryCount).toBe(1);
+    });
+
     it('puts clients without a groupToken into singles', async () => {
       (appToday as jest.Mock).mockReturnValue('2026-06-23');
       (findActiveSubscriptionsForDate as jest.Mock).mockResolvedValue([

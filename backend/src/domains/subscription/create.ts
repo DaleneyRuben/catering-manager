@@ -9,7 +9,12 @@ import { ConflictError } from '../../utils/errors';
 import { record } from '../client-history';
 import { recordPayment } from '../finance';
 import { finalizeOverlappingSubscriptions } from './finalize-overlapping';
-import { applyRenewalPauseState, findUpcomingSubscription, historyEventTypeFor } from './_helpers';
+import {
+  applyRenewalPauseState,
+  findInheritedInstructions,
+  findUpcomingSubscription,
+  historyEventTypeFor,
+} from './_helpers';
 
 // TODO: restore contractDate === today validation once backfilling of existing clients is complete
 export const create = async (
@@ -41,6 +46,12 @@ export const create = async (
     await finalizeOverlappingSubscriptions(clientId, data.startDate, undefined, transaction);
   }
 
+  // A renewal or reactivation continues the same client's diet, so it inherits the instructions of
+  // the contract it follows unless this request states its own. A brand-new client has none.
+  const specialInstructions =
+    data.specialInstructions ??
+    (data.renewalType ? await findInheritedInstructions(clientId, transaction) : null);
+
   const subscriptionData = {
     planId: data.planId,
     startDate: data.startDate ?? null,
@@ -52,7 +63,7 @@ export const create = async (
     paid,
     renewalType: data.renewalType ?? null,
     appointmentId: data.appointmentId ?? null,
-    ...(data.specialInstructions ? { specialInstructions: data.specialInstructions } : {}),
+    ...(specialInstructions ? { specialInstructions } : {}),
   } as never;
   const subscription = transaction
     ? await Subscription.create(subscriptionData, { transaction })

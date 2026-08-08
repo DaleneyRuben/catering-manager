@@ -1,3 +1,4 @@
+import { AUTH_TOKEN_KEY, AUTH_USER_KEY } from '@/constants/session';
 import { API_BASE } from '@/utils/env';
 
 const BASE = API_BASE;
@@ -10,12 +11,15 @@ export interface PaginatedResponse<T> {
 }
 
 export const getAuthHeader = (): Record<string, string> => {
-  const token = localStorage.getItem('auth_token');
+  const token = localStorage.getItem(AUTH_TOKEN_KEY);
   return token ? { Authorization: `Bearer ${token}` } : {};
 };
 
+// Clears both halves of the session, matching clearAuth: dropping only the token left the cached
+// user behind on an expired session.
 function handleUnauthorized(): never {
-  localStorage.removeItem('auth_token');
+  localStorage.removeItem(AUTH_TOKEN_KEY);
+  localStorage.removeItem(AUTH_USER_KEY);
   window.location.href = '/login';
   throw new Error('Sesión expirada');
 }

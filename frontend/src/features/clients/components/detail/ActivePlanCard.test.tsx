@@ -298,3 +298,27 @@ it('right-aligns the cancelar/guardar buttons', () => {
   const cancelBtn = screen.getByRole('button', { name: /cancelar/i });
   expect(cancelBtn.parentElement).toHaveClass('justify-end');
 });
+
+// Same defect as ContractCard, and worse here: this editor writes plan, price and duration, so a
+// draft seeded at mount can put the previous contract's plan and price onto the current one.
+it('seeds the editor from the subscription as it stands, not as it was at mount', () => {
+  const { rerender } = render(<ActivePlanCard sub={sub} onUpdateTerms={onUpdateTerms} />);
+
+  const renewed = { ...sub, id: '2', planId: '2', price: 100, duration: 20 };
+  rerender(<ActivePlanCard sub={renewed} onUpdateTerms={onUpdateTerms} />);
+  fireEvent.click(screen.getByRole('button', { name: /editar/i }));
+
+  expect(screen.getByDisplayValue('100')).toBeInTheDocument();
+  expect(screen.getByDisplayValue('20')).toBeInTheDocument();
+});
+
+it('does not write the previous price onto a subscription that has changed', async () => {
+  const { rerender } = render(<ActivePlanCard sub={sub} onUpdateTerms={onUpdateTerms} />);
+
+  rerender(<ActivePlanCard sub={{ ...sub, price: 160 }} onUpdateTerms={onUpdateTerms} />);
+  fireEvent.click(screen.getByRole('button', { name: /editar/i }));
+  fireEvent.click(screen.getByRole('button', { name: /guardar/i }));
+
+  await waitFor(() => expect(onUpdateTerms).toHaveBeenCalled());
+  expect(onUpdateTerms).not.toHaveBeenCalledWith(expect.objectContaining({ price: 140 }));
+});

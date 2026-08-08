@@ -10,6 +10,22 @@ describe('api', () => {
     localStorage.clear();
   });
 
+  // A 401 ends the session, so nothing about it may survive: leaving the cached user behind is
+  // asymmetric with clearAuth and leaves the next load one guard away from rehydrating a stale
+  // identity.
+  describe('on a 401', () => {
+    it('clears the whole session, not only the token', async () => {
+      localStorage.setItem('auth_token', 'my-token');
+      localStorage.setItem('auth_user', JSON.stringify({ id: 1, username: 'ada' }));
+      mockFetch({ ok: false, status: 401, json: () => Promise.resolve({ message: 'nope' }) });
+
+      await expect(api.get('/test')).rejects.toThrow('Sesión expirada');
+
+      expect(localStorage.getItem('auth_token')).toBeNull();
+      expect(localStorage.getItem('auth_user')).toBeNull();
+    });
+  });
+
   describe('get', () => {
     it('returns the data field from a successful response', async () => {
       mockFetch({ ok: true, status: 200, json: () => Promise.resolve({ data: { id: 1 } }) });
