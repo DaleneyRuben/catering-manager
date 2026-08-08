@@ -261,6 +261,10 @@ A managed catalog, chosen from a list and never free text — free text produces
   create. A row filed outside the month on screen would read as a save that did not happen.
 - **Search reaches an expense's description and an income row's client name**, never the category —
   that is what the category filter and the breakdown cells are for. It ignores accents.
+- **Only income rows lead anywhere.** An income row links to the client who paid; an expense is not
+  attached to anyone, so it links nowhere — the asymmetry is the point, not an inconsistency. The
+  register keeps counting a soft-deleted client's payments, so that name is marked and leads
+  nowhere rather than pointing at a client who is no longer in the directory.
 - **The register starts the month Finanzas went live.** Nothing earlier is shown or navigable and
   no backfill is performed, so the first month understates income — that and the other accepted
   costs are recorded under Consequences in [ADR-008](./adr/008-finance-owns-payments.md).
