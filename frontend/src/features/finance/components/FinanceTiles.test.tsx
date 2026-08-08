@@ -43,6 +43,14 @@ describe('FinanceTiles', () => {
     expect(screen.getByText('1 gasto')).toBeInTheDocument();
   });
 
+  // A month with one row read "1 movimientos" — the count beside the balance was the one caption
+  // not going through the plural helper.
+  it('counts a lone movement in the singular beside the balance', () => {
+    setup({ incomeCount: 0, expenseCount: 1 });
+
+    expect(screen.getByText('1 movimiento')).toBeInTheDocument();
+  });
+
   it('labels the balance with its month', () => {
     setup();
 
