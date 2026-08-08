@@ -111,3 +111,41 @@ it('right-aligns the cancelar/guardar buttons', () => {
   const cancelBtn = screen.getByRole('button', { name: /cancelar/i });
   expect(cancelBtn.parentElement).toHaveClass('justify-end');
 });
+
+// The card is not remounted when the subscription it shows changes — a renewal swaps which one is
+// current, and a sibling card's save changes this one underneath us. Seeding the editor at mount
+// meant it offered stale values, and saving wrote them onto whatever subscription is now current.
+it('seeds the editor from the subscription as it stands, not as it was at mount', () => {
+  const { rerender } = render(
+    <ContractCard sub={sub} remaining={25} onUpdateContract={onUpdateContract} />,
+  );
+
+  const renewed = {
+    ...sub,
+    id: '2',
+    contractDate: '2026-04-01',
+    startDate: '2026-04-06',
+    duration: 20,
+  };
+  rerender(<ContractCard sub={renewed} remaining={20} onUpdateContract={onUpdateContract} />);
+  fireEvent.click(screen.getByRole('button', { name: /editar/i }));
+
+  expect(screen.getByDisplayValue('20')).toBeInTheDocument();
+  expect(screen.getByDisplayValue('01/04/2026')).toBeInTheDocument();
+  expect(screen.getByDisplayValue('06/04/2026')).toBeInTheDocument();
+});
+
+it('saves the values the editor was seeded with after the subscription changed', async () => {
+  const { rerender } = render(
+    <ContractCard sub={sub} remaining={25} onUpdateContract={onUpdateContract} />,
+  );
+
+  const changed = { ...sub, duration: 21 };
+  rerender(<ContractCard sub={changed} remaining={25} onUpdateContract={onUpdateContract} />);
+  fireEvent.click(screen.getByRole('button', { name: /editar/i }));
+  fireEvent.click(screen.getByRole('button', { name: /guardar/i }));
+
+  await waitFor(() =>
+    expect(onUpdateContract).toHaveBeenCalledWith(expect.objectContaining({ duration: 21 })),
+  );
+});
