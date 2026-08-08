@@ -1,4 +1,5 @@
 import Sqids from 'sqids';
+import { badRequestError } from './errors';
 
 const options = process.env.SQIDS_ALPHABET
   ? { alphabet: process.env.SQIDS_ALPHABET, minLength: 6 }
@@ -7,9 +8,12 @@ const sqids = new Sqids(options);
 
 export const encodeId = (n: number): string => sqids.encode([n]);
 
+// A string the alphabet cannot represent is a malformed request, not a server fault — it must not
+// reach the handler as a 500, where it would be logged as an unexpected failure and sent to Sentry.
+// An id that decodes but matches nothing is a different case and still 404s at the lookup.
 export const decodeId = (s: string): number => {
   const nums = sqids.decode(s);
-  if (nums.length === 0) throw new Error(`Invalid encoded ID: ${s}`);
+  if (nums.length === 0) throw badRequestError(`Invalid encoded ID: ${s}`);
   return nums[0];
 };
 
