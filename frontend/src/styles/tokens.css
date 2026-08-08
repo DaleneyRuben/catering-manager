@@ -220,6 +220,12 @@
   --color-open-month-text: #8a7a4e;
   --color-open-month-dot: #c9a227;
 
+  /* The width Finanzas reflows at. Its own breakpoint rather than Tailwind's `lg` (1024px), which
+     stacked the tiles while there was still room, or `md` (768px), which left the filter bar
+     cramped for 130px. Consulting the register on a narrow screen is the target; recording a gasto
+     on one is not. */
+  --breakpoint-compact: 900px;
+
   /* Fonts */
   --font-sans: 'Manrope', system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, monospace;

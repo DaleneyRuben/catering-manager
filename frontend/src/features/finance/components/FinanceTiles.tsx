@@ -58,7 +58,10 @@ export function FinanceTiles({
   const up = balance >= 0;
 
   return (
-    <div className="grid grid-cols-[1fr_1fr_2fr] gap-4 max-lg:grid-cols-1">
+    <div
+      data-testid="finance-tiles"
+      className="grid grid-cols-[1fr_1fr_2fr] gap-4 max-compact:grid-cols-1"
+    >
       <Tile
         icon="arrow-up"
         iconCls="bg-olive-100 text-olive-700"
@@ -86,7 +89,7 @@ export function FinanceTiles({
             Balance
           </div>
           <div
-            className={`font-serif font-semibold text-[66px] leading-[.85] tracking-[-.01em] ${
+            className={`font-serif font-semibold text-[66px] max-compact:text-[46px] leading-[.85] tracking-[-.01em] ${
               up ? 'text-olive-700' : 'text-danger'
             }`}
           >

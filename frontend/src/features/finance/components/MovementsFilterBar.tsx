@@ -77,7 +77,10 @@ export function MovementsFilterBar({
       <div className="flex items-center gap-3 flex-wrap">
         <h2 className="font-serif font-semibold text-[21px] text-ink shrink-0">Movimientos</h2>
 
-        <div className="relative flex-1 min-w-[170px] max-w-[280px] ml-auto max-md:ml-0 max-md:max-w-none max-md:basis-full">
+        <div
+          data-testid="movements-search"
+          className="relative flex-1 min-w-[170px] max-w-[280px] ml-auto max-compact:ml-0 max-compact:max-w-none max-compact:basis-full"
+        >
           <Icon
             name="search"
             size={14}

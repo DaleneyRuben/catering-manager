@@ -51,8 +51,12 @@ export function CategoryBreakdown({ categories, activeCategoryId, onPick, onMana
           Todavía no hay gastos este mes.
         </p>
       ) : (
-        // Full width across the band, so the columns follow the viewport rather than a fixed count.
-        <div className="grid grid-cols-[repeat(auto-fill,minmax(215px,1fr))] gap-x-[26px] gap-y-3.5">
+        // Full width across the band, so the columns follow the viewport rather than a fixed count —
+        // except at the narrow end, where auto-fill would drop to one very tall column.
+        <div
+          data-testid="category-grid"
+          className="grid grid-cols-[repeat(auto-fill,minmax(215px,1fr))] max-compact:grid-cols-2 gap-x-[26px] gap-y-3.5"
+        >
           {sorted.map((category) => {
             const on = category.categoryId === activeCategoryId;
             return (

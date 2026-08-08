@@ -23,7 +23,10 @@ import type { ExpenseInput, Movement } from '@/features/finance/types';
 function FinanceSkeleton() {
   return (
     <div data-testid="finance-skeleton" className="flex flex-col gap-6">
-      <div className="grid grid-cols-[1fr_1fr_2fr] gap-4 max-lg:grid-cols-1">
+      <div
+        data-testid="skeleton-tiles"
+        className="grid grid-cols-[1fr_1fr_2fr] gap-4 max-compact:grid-cols-1"
+      >
         {['income', 'expenses', 'balance'].map((key) => (
           <Skeleton key={key} className="h-[148px] rounded-[13px]" />
         ))}
@@ -104,7 +107,7 @@ export function FinancePage() {
   };
 
   return (
-    <div className="px-4 py-5 lg:px-[44px] lg:pt-[34px] lg:pb-[48px]">
+    <div className="px-4 py-5 compact:px-[44px] compact:pt-[34px] compact:pb-[48px]">
       <PageHeader label="Administración" title="Finanzas" />
 
       <div className="flex items-center justify-between gap-5 flex-wrap mb-5">
