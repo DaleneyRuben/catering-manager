@@ -46,10 +46,23 @@ export function ContractCard({ sub, remaining, onUpdateContract }: Props) {
     }
   };
 
-  const handleCancel = () => {
+  // Seeded when the editor opens, not at mount: this card is never remounted when the subscription
+  // it shows changes — a renewal swaps which one is current, and a sibling card's save changes this
+  // one underneath us — so a draft from mount time would offer stale values and, on save, write
+  // them onto whatever subscription is now current.
+  const seedFromSub = () => {
     setContractDate(sub.contractDate);
     setStartDate(sub.startDate ?? '');
     setDurationStr(String(sub.duration));
+  };
+
+  const handleEdit = () => {
+    seedFromSub();
+    setEditing(true);
+  };
+
+  const handleCancel = () => {
+    seedFromSub();
     setEditing(false);
   };
 
@@ -64,7 +77,7 @@ export function ContractCard({ sub, remaining, onUpdateContract }: Props) {
           <IconButton
             icon="pencil"
             label="Editar"
-            onClick={() => setEditing(true)}
+            onClick={handleEdit}
             size={15}
             stroke={1.7}
             className="ml-auto text-olive-700 hover:opacity-70 transition-opacity p-[3px]"

@@ -69,10 +69,22 @@ export function ActivePlanCard({ sub, onUpdateTerms, onUpdateInstructions }: Pro
     }
   };
 
-  const handleCancel = () => {
+  // Seeded when the editor opens, not at mount: this card is never remounted when the subscription
+  // it shows changes, so a draft from mount time would offer the previous contract's plan and price
+  // and write them onto the current one — a wrong total, recorded as if it were deliberate.
+  const seedFromSub = () => {
     setPlanId(sub.planId);
     setDurationStr(String(sub.duration));
     setPriceStr(String(Number(sub.price)));
+  };
+
+  const handleEdit = () => {
+    seedFromSub();
+    setEditing(true);
+  };
+
+  const handleCancel = () => {
+    seedFromSub();
     setEditing(false);
   };
 
@@ -135,7 +147,7 @@ export function ActivePlanCard({ sub, onUpdateTerms, onUpdateInstructions }: Pro
           <IconButton
             icon="pencil"
             label="Editar"
-            onClick={() => setEditing(true)}
+            onClick={handleEdit}
             size={15}
             stroke={1.7}
             className="ml-auto text-olive-700 hover:opacity-70 transition-opacity p-[3px]"
