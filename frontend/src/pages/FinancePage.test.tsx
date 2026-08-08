@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { format } from 'date-fns';
 import { FinancePage } from '@/pages/FinancePage';
-import { formatDayLabel } from '@/features/finance/utils/format';
+import { formatDayLabel, shiftMonth } from '@/features/finance/utils/format';
 import { useFinance } from '@/features/finance/hooks/useFinance';
 import { useExpenseMutations } from '@/features/finance/hooks/useExpenses';
 import { useCategoryCatalog, useCategoryMutations } from '@/features/finance/hooks/useCategories';
@@ -20,9 +20,15 @@ const mockedUseCategoryMutations = useCategoryMutations as jest.MockedFunction<
   typeof useCategoryMutations
 >;
 
+// The page opens on the current month and reads the clock for its own state, so every month in
+// here is relative to today. Written out as literals, this file passed only during August 2026.
+const today = format(new Date(), 'yyyy-MM-dd');
+const thisMonth = today.slice(0, 7);
+const lastMonth = shiftMonth(thisMonth, -1);
+
 const overview: FinanceOverview = {
-  month: '2026-08',
-  earliestMonth: '2026-07',
+  month: thisMonth,
+  earliestMonth: lastMonth,
   income: 34800,
   expenses: 21450,
   balance: 13350,
@@ -35,7 +41,7 @@ const overview: FinanceOverview = {
     {
       kind: 'income',
       id: 'P1',
-      date: '2026-08-05',
+      date: today,
       amount: 1550,
       label: 'Marcela Ríos',
       description: null,
@@ -43,12 +49,12 @@ const overview: FinanceOverview = {
       clientArchived: false,
       categoryId: null,
       registeredByName: 'Daleney',
-      registeredAt: '2026-08-05T09:30:00.000Z',
+      registeredAt: `${today}T09:30:00.000Z`,
     },
     {
       kind: 'expense',
       id: 'E1',
-      date: '2026-08-04',
+      date: today,
       amount: 180,
       label: 'Transporte',
       description: 'Reparto del día',
@@ -56,7 +62,7 @@ const overview: FinanceOverview = {
       clientArchived: false,
       categoryId: 'C1',
       registeredByName: 'Gilian',
-      registeredAt: '2026-08-04T18:05:00.000Z',
+      registeredAt: `${today}T18:05:00.000Z`,
     },
   ],
 };
@@ -113,7 +119,7 @@ describe('FinancePage', () => {
     await userEvent.click(screen.getByRole('button', { name: /mes anterior/i }));
 
     await waitFor(() =>
-      expect(mockedUseFinance).toHaveBeenLastCalledWith('2026-07', expect.anything()),
+      expect(mockedUseFinance).toHaveBeenLastCalledWith(lastMonth, expect.anything()),
     );
   });
 
@@ -124,7 +130,7 @@ describe('FinancePage', () => {
 
     await waitFor(() =>
       expect(mockedUseFinance).toHaveBeenLastCalledWith(
-        '2026-08',
+        thisMonth,
         expect.objectContaining({ direction: 'expense' }),
       ),
     );
@@ -140,7 +146,7 @@ describe('FinancePage', () => {
 
     await waitFor(() =>
       expect(mockedUseFinance).toHaveBeenLastCalledWith(
-        '2026-07',
+        lastMonth,
         expect.objectContaining({ direction: 'expense' }),
       ),
     );
@@ -154,7 +160,7 @@ describe('FinancePage', () => {
 
     await waitFor(() =>
       expect(mockedUseFinance).toHaveBeenLastCalledWith(
-        '2026-08',
+        thisMonth,
         expect.objectContaining({ categoryId: 'C1', direction: 'expense' }),
       ),
     );
@@ -196,7 +202,7 @@ describe('FinancePage', () => {
 
     const chips = within(screen.getByRole('group', { name: 'Categoría' })).getAllByRole('button');
     expect(chips.map((chip) => chip.textContent)).toEqual(['Transporte', 'Insumos', 'Nueva']);
-    expect(mockedUseCatalog).toHaveBeenCalledWith('2026-08');
+    expect(mockedUseCatalog).toHaveBeenCalledWith(thisMonth);
   });
 
   it('reads the catalog for the month the selector moves to', async () => {
@@ -204,7 +210,7 @@ describe('FinancePage', () => {
 
     await userEvent.click(screen.getByRole('button', { name: /mes anterior/i }));
 
-    await waitFor(() => expect(mockedUseCatalog).toHaveBeenLastCalledWith('2026-07'));
+    await waitFor(() => expect(mockedUseCatalog).toHaveBeenLastCalledWith(lastMonth));
   });
 
   it('edits an expense from its row', async () => {
@@ -277,7 +283,7 @@ describe('FinancePage', () => {
 
     expect(screen.getByText('Categorías de gasto')).toBeInTheDocument();
     // Usage lines and the archive arithmetic describe the register on screen, not today's month.
-    expect(mockedUseCatalog).toHaveBeenCalledWith('2026-08');
+    expect(mockedUseCatalog).toHaveBeenCalledWith(thisMonth);
   });
 
   it('closes category management again', async () => {
@@ -322,11 +328,12 @@ describe('FinancePage', () => {
       await userEvent.click(screen.getByRole('button', { name: /registrar gasto/i }));
       await userEvent.type(screen.getByLabelText(/monto/i), '180');
       await userEvent.clear(screen.getByLabelText(/fecha/i));
-      await userEvent.type(screen.getByLabelText(/fecha/i), '2026-07-30');
+      // Day 28: the date is relative to today, and any later day is missing from February.
+      await userEvent.type(screen.getByLabelText(/fecha/i), `${lastMonth}-28`);
       await userEvent.click(screen.getByRole('button', { name: 'Registrar' }));
 
       await waitFor(() =>
-        expect(mockedUseFinance).toHaveBeenLastCalledWith('2026-07', expect.anything()),
+        expect(mockedUseFinance).toHaveBeenLastCalledWith(lastMonth, expect.anything()),
       );
     });
 
@@ -338,7 +345,7 @@ describe('FinancePage', () => {
       await userEvent.click(screen.getByRole('button', { name: 'Registrar' }));
 
       await waitFor(() => expect(create).toHaveBeenCalled());
-      expect(mockedUseFinance).toHaveBeenLastCalledWith('2026-08', expect.anything());
+      expect(mockedUseFinance).toHaveBeenLastCalledWith(thisMonth, expect.anything());
     });
 
     // An edit that moves the date is the same problem: the row leaves the month on screen.
@@ -348,11 +355,11 @@ describe('FinancePage', () => {
       await openRowActions();
       await userEvent.click(screen.getByText('Editar'));
       await userEvent.clear(screen.getByLabelText(/fecha/i));
-      await userEvent.type(screen.getByLabelText(/fecha/i), '2026-07-15');
+      await userEvent.type(screen.getByLabelText(/fecha/i), `${lastMonth}-15`);
       await userEvent.click(screen.getByRole('button', { name: 'Guardar' }));
 
       await waitFor(() =>
-        expect(mockedUseFinance).toHaveBeenLastCalledWith('2026-07', expect.anything()),
+        expect(mockedUseFinance).toHaveBeenLastCalledWith(lastMonth, expect.anything()),
       );
     });
   });
