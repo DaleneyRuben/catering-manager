@@ -2,7 +2,7 @@
 
 > Scope is one card on one screen: `ActivePlanCard` inside `ClienteDetalle.dc.html`'s plan tab. No new screen, no new route, no modal.
 >
-> Read [`business-rules.md`](../business-rules.md) → "Change of plan" and [`CONTEXT.md`](../../CONTEXT.md) → "Plan change" first. They are the source of truth for the rules; this prompt covers only what the user sees. Work breakdown lives in [`plan-change-implementation.md`](../implementation-prompts/plan-change-implementation.md).
+> Read [`business-rules.md`](../business-rules.md) → "Change of plan" and [`CONTEXT.md`](../../CONTEXT.md) → "Plan change" first. They are the source of truth for the rules; this prompt covers only what the user sees.
 
 ## What's being added
 

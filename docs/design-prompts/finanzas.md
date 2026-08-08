@@ -2,7 +2,7 @@
 
 > New screen. Sidebar item **Finanzas**, in the **Administración** section next to Usuarios. Visible to `admin` and `super_admin`.
 >
-> Read [`CONTEXT.md`](../../CONTEXT.md) → "Finanzas" and [`ADR-008`](../adr/008-finance-owns-payments.md) first — they define every term used here and, just as importantly, what was deliberately left out. Work breakdown lives in [`finanzas-implementation.md`](../implementation-prompts/finanzas-implementation.md).
+> Read [`CONTEXT.md`](../../CONTEXT.md) → "Finanzas" and [`ADR-008`](../adr/008-finance-owns-payments.md) first — they define every term used here and, just as importantly, what was deliberately left out.
 
 ## What this is
 
