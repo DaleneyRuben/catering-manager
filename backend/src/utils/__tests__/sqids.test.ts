@@ -8,6 +8,14 @@ describe('decodeId', () => {
   it('throws on an invalid encoded string', () => {
     expect(() => decodeId('!!!invalid!!!')).toThrow('Invalid encoded ID');
   });
+
+  // An id the alphabet cannot represent is a malformed request, not a server fault: left as a bare
+  // Error it reached the handler as a 500, which buries real failures in the logs.
+  it('marks an unparseable id as a client error', () => {
+    expect(() => decodeId('!!!')).toThrow(
+      expect.objectContaining({ statusCode: 400, name: 'BadRequestError' }),
+    );
+  });
 });
 
 describe('encodeIds', () => {
