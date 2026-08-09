@@ -113,7 +113,7 @@ export function ContractCard({ sub, remaining, onUpdateContract }: Props) {
                 inputMode="numeric"
                 value={durationStr}
                 onChange={(e) => setDurationStr(e.target.value.replace(/\D/g, ''))}
-                className="w-full px-2.5 py-1.5 text-[13px] font-mono border border-rule rounded-md bg-cream focus:outline-none focus:border-olive-600"
+                className="w-full px-2.5 py-1.5 text-[13px] font-sans tabular-nums border border-rule rounded-md bg-cream focus:outline-none focus:border-olive-600"
               />
             </div>
             <div>
@@ -140,7 +140,7 @@ export function ContractCard({ sub, remaining, onUpdateContract }: Props) {
                 Días restantes
               </Label>
               <div className="flex items-baseline gap-[7px]">
-                <span className="font-serif font-semibold text-[40px] leading-[.85] text-olive-700">
+                <span className="font-sans font-semibold tabular-nums text-[26px] leading-[.85] text-olive-700">
                   {remaining}
                 </span>
                 <span className="font-mono text-[12px] text-muted">días hábiles</span>
@@ -189,7 +189,7 @@ export function ContractCard({ sub, remaining, onUpdateContract }: Props) {
             </div>
             <div>
               <Label variant="field">Duración</Label>
-              <p className="font-mono text-[13px]">{sub.duration} días hábiles</p>
+              <p className="font-sans tabular-nums text-[13px]">{sub.duration} días hábiles</p>
             </div>
           </div>
         </div>

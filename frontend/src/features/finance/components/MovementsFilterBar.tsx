@@ -195,14 +195,14 @@ export function MovementsFilterBar({
           )}
         </div>
 
-        <div className="flex items-baseline gap-3 font-mono text-[11px] text-muted">
-          <span>{count === 1 ? '1 movimiento' : `${count} movimientos`}</span>
+        <div className="flex items-baseline gap-3 text-[11px] text-muted">
+          <span className="font-mono">{count === 1 ? '1 movimiento' : `${count} movimientos`}</span>
           <span className="text-rule-2">·</span>
-          <span className="tracking-[.1em] uppercase text-[9.5px] text-faint">
+          <span className="font-mono tracking-[.1em] uppercase text-[9.5px] text-faint">
             {anyFilter ? 'Subtotal' : 'Neto del mes'}
           </span>
           <span
-            className={`text-[13.5px] font-semibold tabular-nums ${up ? 'text-olive-700' : 'text-danger'}`}
+            className={`font-sans text-[13.5px] font-bold tabular-nums ${up ? 'text-olive-700' : 'text-danger'}`}
           >
             {up ? '+' : '−'}
             {formatMoney(subtotal)}

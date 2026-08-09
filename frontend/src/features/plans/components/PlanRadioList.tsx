@@ -73,7 +73,7 @@ export function PlanRadioList({ plans, selectedId, onSelect, size = 'md' }: Prop
               </div>
             </div>
             <div className="flex items-baseline gap-[5px]">
-              <span className={`font-serif font-semibold ${cls.price} text-ink tabular-nums`}>
+              <span className={`font-sans font-bold ${cls.price} text-ink tabular-nums`}>
                 {p.price.toLocaleString('es-BO')}
               </span>
               <span className={`font-mono ${cls.suffix} text-faint`}>/mes</span>

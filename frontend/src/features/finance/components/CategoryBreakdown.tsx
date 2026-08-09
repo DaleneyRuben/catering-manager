@@ -79,7 +79,7 @@ export function CategoryBreakdown({ categories, activeCategoryId, onPick, onMana
                   >
                     {category.categoryName}
                   </span>
-                  <span className="font-mono text-[12px] text-ink-2 tabular-nums shrink-0">
+                  <span className="font-sans font-semibold text-[12px] text-ink-2 tabular-nums shrink-0">
                     {formatMoney(category.total)}
                   </span>
                 </div>

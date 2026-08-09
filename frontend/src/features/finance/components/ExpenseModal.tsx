@@ -124,7 +124,7 @@ export function ExpenseModal({
               value={amount}
               onChange={(e) => setAmount(e.target.value.replace(/[^0-9.]/g, ''))}
               inputMode="decimal"
-              className={`${inputCls()} pl-10 font-mono text-[17px]`}
+              className={`${inputCls()} pl-10 font-sans tabular-nums text-[17px]`}
             />
           </div>
         </Field>

@@ -102,13 +102,13 @@ export function DeliveryCalendarCard({
 
       <div className="flex gap-[26px] mb-5 pb-[18px] border-b border-cream-2">
         <div>
-          <p className="font-serif text-[30px] font-semibold leading-none text-olive-700">
+          <p className="font-sans text-[20px] font-semibold tabular-nums leading-none text-olive-700">
             {deliveredCount}
           </p>
           <p className="text-[11.5px] text-faint mt-1">entregas realizadas</p>
         </div>
         <div>
-          <p className="font-serif text-[30px] font-semibold leading-none text-danger">
+          <p className="font-sans text-[20px] font-semibold tabular-nums leading-none text-danger">
             {suspendedCount}
           </p>
           <p className="text-[11.5px] text-faint mt-1">días suspendidos</p>

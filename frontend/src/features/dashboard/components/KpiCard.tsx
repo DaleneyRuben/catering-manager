@@ -42,7 +42,9 @@ export function KpiCard({
 
       {tomorrow === undefined ? (
         <div className="flex flex-col items-center gap-[9px]">
-          <span className={`font-serif font-semibold text-[46px] leading-[.85] ${todayColor}`}>
+          <span
+            className={`font-sans font-semibold tabular-nums text-[28px] leading-[.85] ${todayColor}`}
+          >
             {today}
           </span>
           <span className="font-mono text-[9.5px] tracking-[.1em] uppercase text-faint">
@@ -52,7 +54,9 @@ export function KpiCard({
       ) : (
         <div className="flex items-end justify-center gap-[30px]">
           <div className="flex flex-col items-center gap-[9px]">
-            <span className={`font-serif font-semibold text-[46px] leading-[.85] ${todayColor}`}>
+            <span
+              className={`font-sans font-semibold tabular-nums text-[28px] leading-[.85] ${todayColor}`}
+            >
               {today}
             </span>
             <span className="font-mono text-[9.5px] tracking-[.1em] uppercase text-faint">
@@ -61,7 +65,9 @@ export function KpiCard({
           </div>
           <div className="w-px self-stretch bg-hairline my-0.5" />
           <div className="flex flex-col items-center gap-[9px]">
-            <span className={`font-serif font-semibold text-[46px] leading-[.85] ${tomorrowColor}`}>
+            <span
+              className={`font-sans font-semibold tabular-nums text-[28px] leading-[.85] ${tomorrowColor}`}
+            >
               {tomorrow}
             </span>
             <span className="font-mono text-[9.5px] tracking-[.1em] uppercase text-faint">

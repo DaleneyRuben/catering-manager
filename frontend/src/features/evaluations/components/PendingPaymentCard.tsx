@@ -32,7 +32,7 @@ export function PendingPaymentCard({ client, onMarkPaid, onDelete }: Props) {
         </div>
         <div className="flex items-baseline gap-[6px] mb-3">
           <span className="font-mono text-[12px] text-faint">Bs</span>
-          <span className="font-serif font-semibold text-[30px] leading-none text-ink tabular-nums">
+          <span className="font-sans font-semibold text-[20px] leading-none text-ink tabular-nums">
             {total.toLocaleString('es-BO')}
           </span>
           <span className="font-mono text-[11px] text-faint">/mes</span>

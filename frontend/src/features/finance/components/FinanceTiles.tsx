@@ -40,7 +40,9 @@ function Tile({
           {label}
         </span>
       </div>
-      <div className="font-serif font-semibold text-[44px] leading-[.9] text-ink">{value}</div>
+      <div className="font-sans font-semibold tabular-nums tracking-[-.015em] text-[26px] leading-[.9] text-ink">
+        {value}
+      </div>
       <div className="font-mono text-[10.5px] text-faint mt-[9px]">{caption}</div>
     </div>
   );
@@ -85,11 +87,11 @@ export function FinanceTiles({
         }`}
       >
         <div>
-          <div className="font-mono text-[10px] tracking-[.14em] uppercase text-muted font-semibold mb-3">
+          <div className="h-[30px] flex items-center font-mono text-[10px] tracking-[.14em] uppercase text-muted font-semibold mb-3.5">
             Balance
           </div>
           <div
-            className={`font-serif font-semibold text-[66px] max-compact:text-[46px] leading-[.85] tracking-[-.01em] ${
+            className={`font-sans font-semibold tabular-nums text-[32px] max-compact:text-[24px] leading-[.85] tracking-[-.015em] ${
               up ? 'text-olive-700' : 'text-danger'
             }`}
           >
