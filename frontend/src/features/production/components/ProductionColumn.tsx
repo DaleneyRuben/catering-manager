@@ -10,7 +10,7 @@ export function ProductionColumn({ label, names }: Props) {
         <span className="font-mono text-[10px] tracking-[.11em] uppercase text-chip-text font-semibold">
           {label}
         </span>
-        <span className="font-mono text-[11px] font-semibold text-olive-700 bg-olive-100 border border-count-chip-border rounded-full min-w-6 text-center px-2 py-0.5 shrink-0">
+        <span className="font-sans tabular-nums text-[11px] font-bold text-olive-700 bg-olive-100 border border-count-chip-border rounded-full min-w-6 text-center px-2 py-0.5 shrink-0">
           {names.length}
         </span>
       </div>

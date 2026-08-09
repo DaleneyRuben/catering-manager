@@ -85,7 +85,7 @@ describe('FinanceTiles', () => {
     it('shrinks the balance so it fits a narrow column', () => {
       setup();
 
-      expect(screen.getByText('+13.350')).toHaveClass('max-compact:text-[46px]');
+      expect(screen.getByText('+13.350')).toHaveClass('max-compact:text-[24px]');
     });
   });
 

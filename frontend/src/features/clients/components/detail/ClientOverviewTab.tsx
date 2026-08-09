@@ -33,7 +33,7 @@ export function ClientOverviewTab({ client, sub, remaining }: Props) {
                   </p>
                 </div>
                 <div className="text-right shrink-0 whitespace-nowrap">
-                  <span className="font-mono font-semibold text-[21px] text-ink">
+                  <span className="font-sans tabular-nums font-semibold text-[16px] text-ink">
                     {Number(sub.price).toLocaleString('es-BO')}
                   </span>
                   <span className="font-mono text-[11px] text-faint"> /mes</span>
@@ -141,7 +141,9 @@ export function ClientOverviewTab({ client, sub, remaining }: Props) {
         <Card>
           <div className="flex items-center justify-between mb-[18px]">
             <h2 className="font-serif text-[20px] font-semibold text-ink">Restricciones</h2>
-            <span className="font-mono text-[12px] text-faint">{client.restrictions.length}</span>
+            <span className="font-sans tabular-nums text-[12px] font-semibold text-faint">
+              {client.restrictions.length}
+            </span>
           </div>
           {client.underlyingDiseases.length === 0 && client.restrictions.length === 0 ? (
             <p className="font-mono text-[12px] text-muted">Sin restricciones registradas.</p>

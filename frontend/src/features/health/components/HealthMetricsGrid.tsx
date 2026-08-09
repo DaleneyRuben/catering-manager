@@ -24,7 +24,7 @@ export function HealthMetricsGrid({
       <div className="bg-paper border border-rule rounded-[14px] px-5 py-[18px]">
         <p className="font-mono text-[10px] tracking-[.1em] text-faint uppercase mb-[11px]">API</p>
         <p className="flex items-baseline gap-1.5">
-          <span className="font-serif font-semibold text-[30px] leading-none text-ink tabular-nums">
+          <span className="font-sans font-semibold text-[20px] leading-none text-ink tabular-nums">
             {apiLatencyMs ?? '—'}
           </span>
           <span className="font-mono text-[11px] text-faint">ms</span>
@@ -35,7 +35,7 @@ export function HealthMetricsGrid({
           Base de datos
         </p>
         <p className="flex items-baseline gap-1.5">
-          <span className="font-serif font-semibold text-[30px] leading-none text-ink tabular-nums">
+          <span className="font-sans font-semibold text-[20px] leading-none text-ink tabular-nums">
             {dbLatencyMs ?? '—'}
           </span>
           <span className="font-mono text-[11px] text-faint">ms</span>
@@ -46,7 +46,7 @@ export function HealthMetricsGrid({
           Memoria
         </p>
         <p className="flex items-baseline gap-1.5">
-          <span className="font-serif font-semibold text-[30px] leading-none text-ink tabular-nums">
+          <span className="font-sans font-semibold text-[20px] leading-none text-ink tabular-nums">
             {memoryUsedMb}
           </span>
           <span className="font-mono text-[11px] text-faint">MB</span>
@@ -57,7 +57,7 @@ export function HealthMetricsGrid({
           Tiempo activo
         </p>
         <p className="flex items-baseline gap-1.5">
-          <span className="font-serif font-semibold text-[30px] leading-none text-ink tabular-nums">
+          <span className="font-sans font-semibold text-[20px] leading-none text-ink tabular-nums">
             {formatUptime(uptimeSeconds)}
           </span>
         </p>

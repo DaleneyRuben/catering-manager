@@ -24,13 +24,13 @@ export function ContractSummaryCard({
 
       <div className="flex items-center justify-between pt-[14px] pb-3 border-b border-cream-2 mt-3">
         <span className="text-[12.5px] text-muted">Entregas realizadas</span>
-        <span className="font-serif text-[26px] font-semibold leading-none text-olive-700">
+        <span className="font-sans text-[18px] font-semibold tabular-nums leading-none text-olive-700">
           {deliveredCount}
         </span>
       </div>
       <div className="flex items-center justify-between pt-3 pb-[18px]">
         <span className="text-[12.5px] text-muted">Días suspendidos</span>
-        <span className="font-serif text-[26px] font-semibold leading-none text-danger">
+        <span className="font-sans text-[18px] font-semibold tabular-nums leading-none text-danger">
           {suspendedCount}
         </span>
       </div>

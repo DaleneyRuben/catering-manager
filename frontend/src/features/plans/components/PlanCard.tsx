@@ -38,7 +38,7 @@ export function PlanCard({
             {plan.name}
           </h3>
           <div className="flex items-baseline gap-1 shrink-0">
-            <span className="font-serif font-semibold text-[30px] leading-none text-ink tabular-nums">
+            <span className="font-sans font-semibold text-[20px] leading-none text-ink tabular-nums">
               {plan.price.toLocaleString('es-BO')}
             </span>
             <span className="font-mono text-[11px] text-faint">/mes</span>

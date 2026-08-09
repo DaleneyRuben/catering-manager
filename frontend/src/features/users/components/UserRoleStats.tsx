@@ -38,7 +38,7 @@ export function UserRoleStats({ users }: Props) {
             <Icon name={ROLE_ICONS[role]} size={19} stroke={1.6} />
           </span>
           <div>
-            <p className="font-serif font-semibold text-[26px] leading-none text-ink">
+            <p className="font-sans font-semibold tabular-nums text-[18px] leading-none text-ink">
               {users.filter((u) => u.role === role).length}
             </p>
             <p className="text-[12px] text-muted mt-1">{ROLE_LABELS[role]}</p>

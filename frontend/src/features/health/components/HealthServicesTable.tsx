@@ -57,7 +57,7 @@ export function HealthServicesTable({ services }: Props) {
                       <span className="text-[14px] font-semibold text-ink">{service.name}</span>
                     </div>
                   </td>
-                  <td className="px-[24px] py-[14px] font-mono text-[12.5px] text-ink-2 tabular-nums">
+                  <td className="px-[24px] py-[14px] font-sans font-semibold text-[12.5px] text-ink-2 tabular-nums">
                     {service.latencyMs} ms
                   </td>
                   <td className="px-[24px] py-[14px] text-right">

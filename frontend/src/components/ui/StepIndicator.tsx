@@ -25,7 +25,7 @@ export function StepIndicator({ steps, current }: { steps: string[]; current: nu
           <Fragment key={label}>
             <div className="flex items-center gap-[11px] shrink-0">
               <div
-                className={`w-[30px] h-[30px] rounded-full flex items-center justify-center text-[13px] font-mono font-semibold border-[1.5px] shrink-0 ${stepCircleClass(isActive, isDone)}`}
+                className={`w-[30px] h-[30px] rounded-full flex items-center justify-center text-[13px] font-sans tabular-nums font-semibold border-[1.5px] shrink-0 ${stepCircleClass(isActive, isDone)}`}
               >
                 {isDone ? <Icon name="check" size={13} stroke={2} /> : n}
               </div>

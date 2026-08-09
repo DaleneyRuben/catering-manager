@@ -99,7 +99,7 @@ export function ActivePlanCard({ sub, onUpdateTerms, onUpdateInstructions }: Pro
         </div>
         <div className="ml-auto text-right">
           <Label variant="field">Total mensual</Label>
-          <p className="font-serif text-[40px] font-semibold leading-[1.05] text-olive-700 tabular-nums">
+          <p className="font-sans text-[26px] font-semibold leading-[1.05] text-olive-700 tabular-nums">
             {Number(sub.price).toLocaleString('es-BO')}
           </p>
         </div>
@@ -184,7 +184,7 @@ export function ActivePlanCard({ sub, onUpdateTerms, onUpdateInstructions }: Pro
                   inputMode="numeric"
                   value={durationStr}
                   onChange={(e) => setDurationStr(e.target.value)}
-                  className={`${inputCls()} font-mono pr-[46px]`}
+                  className={`${inputCls()} font-sans tabular-nums pr-[46px]`}
                 />
                 <span className="absolute right-3 top-1/2 -translate-y-1/2 font-mono text-[11.5px] text-faint pointer-events-none">
                   días
@@ -198,7 +198,7 @@ export function ActivePlanCard({ sub, onUpdateTerms, onUpdateInstructions }: Pro
                 Precio
               </Label>
               {planChanged ? (
-                <p className="font-mono text-[15px] font-semibold text-ink py-2">
+                <p className="font-sans tabular-nums text-[15px] font-bold text-ink py-2">
                   {!Number.isNaN(enteredPrice) ? enteredPrice.toLocaleString('es-BO') : '—'}
                 </p>
               ) : (
@@ -208,7 +208,7 @@ export function ActivePlanCard({ sub, onUpdateTerms, onUpdateInstructions }: Pro
                   min={0}
                   value={priceStr}
                   onChange={(e) => setPriceStr(e.target.value)}
-                  className={`${inputCls()} font-mono`}
+                  className={`${inputCls()} font-sans tabular-nums`}
                 />
               )}
             </div>
@@ -216,7 +216,7 @@ export function ActivePlanCard({ sub, onUpdateTerms, onUpdateInstructions }: Pro
               <Label variant="field" className="mb-1.5">
                 {gap < 0 ? 'Recargo' : 'Descuento'}
               </Label>
-              <p className="font-mono text-[15px] font-semibold text-warn py-2">
+              <p className="font-sans tabular-nums text-[15px] font-bold text-warn py-2">
                 {!Number.isNaN(enteredPrice) ? Math.abs(gap).toLocaleString('es-BO') : '—'}
               </p>
             </div>
@@ -224,7 +224,7 @@ export function ActivePlanCard({ sub, onUpdateTerms, onUpdateInstructions }: Pro
               <Label variant="field" className="mb-1.5">
                 Total
               </Label>
-              <p className="font-mono text-[15px] font-semibold text-olive-700 bg-olive-100 rounded-[7px] py-[9px] px-[10px] text-center">
+              <p className="font-sans tabular-nums text-[15px] font-bold text-olive-700 bg-olive-100 rounded-[7px] py-[9px] px-[10px] text-center">
                 {!Number.isNaN(enteredPrice) ? enteredPrice.toLocaleString('es-BO') : '—'}
               </p>
             </div>
@@ -266,7 +266,7 @@ export function ActivePlanCard({ sub, onUpdateTerms, onUpdateInstructions }: Pro
             <Label variant="field" className="mb-1">
               Precio
             </Label>
-            <p className="font-mono text-[16px] font-semibold text-ink">
+            <p className="font-sans tabular-nums text-[16px] font-bold text-ink">
               {assignedPlanPrice.toLocaleString('es-BO')}
             </p>
           </div>
@@ -274,7 +274,7 @@ export function ActivePlanCard({ sub, onUpdateTerms, onUpdateInstructions }: Pro
             <Label variant="field" className="mb-1">
               {storedGap < 0 ? 'Recargo' : 'Descuento'}
             </Label>
-            <p className="font-mono text-[16px] font-semibold text-warn">
+            <p className="font-sans tabular-nums text-[16px] font-bold text-warn">
               {storedGap !== 0 ? Math.abs(storedGap).toLocaleString('es-BO') : '—'}
             </p>
           </div>
@@ -282,7 +282,7 @@ export function ActivePlanCard({ sub, onUpdateTerms, onUpdateInstructions }: Pro
             <Label variant="field" className="mb-1">
               Total
             </Label>
-            <p className="font-mono text-[16px] font-semibold text-olive-700">
+            <p className="font-sans tabular-nums text-[16px] font-bold text-olive-700">
               {Number(sub.price).toLocaleString('es-BO')}
             </p>
           </div>

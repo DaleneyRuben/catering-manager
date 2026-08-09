@@ -16,9 +16,9 @@ const deliveryCountTotal = (route: DeliveryDayRoute | undefined): number =>
 const TAB_ON = 'bg-paper border border-rule text-ink shadow-[var(--shadow-tab)] font-semibold';
 const TAB_OFF = 'border border-transparent text-muted font-semibold';
 const BADGE_ON =
-  'font-mono text-[10.5px] font-semibold text-olive-700 bg-olive-100 rounded-full px-[7px] py-px';
+  'font-sans tabular-nums text-[10.5px] font-bold text-olive-700 bg-olive-100 rounded-full px-[7px] py-px';
 const BADGE_OFF =
-  'font-mono text-[10.5px] font-semibold text-faint bg-hairline rounded-full px-[7px] py-px';
+  'font-sans tabular-nums text-[10.5px] font-bold text-faint bg-hairline rounded-full px-[7px] py-px';
 
 export function DeliveryPage() {
   const [day, setDay] = useState<Day>('today');

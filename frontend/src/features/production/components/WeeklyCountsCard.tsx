@@ -60,7 +60,7 @@ function DayCellContent({ day, isToday, dateLabel }: DayCellContentProps) {
       </div>
       <div className="flex items-baseline gap-1">
         <span
-          className={`font-serif font-semibold text-[38px] leading-[.9] ${
+          className={`font-sans font-semibold tabular-nums text-[24px] leading-[.9] ${
             isToday ? 'text-week-count-today' : 'text-ink'
           }`}
         >

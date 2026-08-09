@@ -96,7 +96,7 @@ export function MovementRow({ movement, isLast, onEdit, onDuplicate, onDelete }:
       <WhoChip name={movement.registeredByName} registeredAt={movement.registeredAt} />
 
       <span
-        className={`font-mono text-[13px] font-semibold w-[92px] text-right shrink-0 tabular-nums ${
+        className={`font-sans text-[13px] font-bold w-[92px] text-right shrink-0 tabular-nums ${
           isIncome ? 'text-olive-700' : 'text-danger'
         }`}
       >

@@ -92,7 +92,7 @@ export function ClientPreviewCard({ formValues, restrictions, plans }: Props) {
         <span className="font-mono text-[11px] tracking-[.08em] uppercase text-muted">
           Total mensual
         </span>
-        <span className="font-serif text-[28px] font-semibold text-ink tabular-nums">
+        <span className="font-sans text-[18px] font-semibold tabular-nums text-ink">
           {selectedPlan ? fmt(total) : '—'}
         </span>
       </div>

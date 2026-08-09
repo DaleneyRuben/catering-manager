@@ -167,7 +167,7 @@ export function ClientHistoryTab({
                         <span className="font-mono text-[11px] text-faint">{changeLine}</span>
                       ) : (
                         total !== null && (
-                          <span className="font-mono text-[11px] text-faint">
+                          <span className="font-sans tabular-nums text-[11px] text-faint">
                             {total.toLocaleString('es-BO')}/mes
                           </span>
                         )

@@ -142,7 +142,7 @@ export function ClientTable({
                         {STATUS_LABELS[status]}
                       </span>
                     </td>
-                    <td className="px-5 py-[13px] text-right font-mono text-[13px] font-medium tabular-nums whitespace-nowrap">
+                    <td className="px-5 py-[13px] text-right font-sans text-[13px] font-bold tabular-nums whitespace-nowrap">
                       {price > 0 ? (
                         price.toLocaleString('es-BO')
                       ) : (

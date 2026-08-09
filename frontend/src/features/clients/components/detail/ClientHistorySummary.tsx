@@ -27,7 +27,9 @@ export function ClientHistorySummary({ eventCount, planName, clientSince }: Prop
       <div className="flex flex-col border-t border-hairline">
         <div className="flex items-center justify-between py-[13px] border-b border-cream-2">
           <span className="text-[13px] text-muted">Eventos registrados</span>
-          <span className="font-mono text-[14px] font-semibold text-ink">{eventCount}</span>
+          <span className="font-sans tabular-nums text-[14px] font-bold text-ink">
+            {eventCount}
+          </span>
         </div>
         <div className="flex items-center justify-between py-[13px] border-b border-cream-2">
           <span className="text-[13px] text-muted">Plan actual</span>

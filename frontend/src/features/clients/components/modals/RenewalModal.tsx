@@ -88,7 +88,7 @@ export function RenewalModal({
                 <span className="px-2 py-0.5 rounded-[5px] text-[10.5px] font-mono bg-muted text-olive-50">
                   {sub.plan.name}
                 </span>
-                <span className="font-mono text-[11px] text-faint">
+                <span className="font-sans tabular-nums text-[11px] text-faint">
                   {Number(sub.price).toLocaleString('es-BO')}/mes
                 </span>
               </div>
@@ -104,7 +104,7 @@ export function RenewalModal({
                 <span className="px-2 py-0.5 rounded-[5px] text-[10.5px] font-mono bg-olive-800 text-olive-50">
                   {form.newPlan.name}
                 </span>
-                <span className="font-mono text-[11px] text-success-text">
+                <span className="font-sans tabular-nums text-[11px] text-success-text">
                   {form.precioNum !== undefined ? `${form.total.toLocaleString('es-BO')}/mes` : '—'}
                 </span>
               </div>
@@ -240,7 +240,7 @@ export function RenewalModal({
           </div>
           <div>
             <p className={plainLabelCls}>{form.discount < 0 ? 'Recargo' : 'Descuento'}</p>
-            <p className="font-mono text-[14px] text-warn py-[9px]">
+            <p className="font-sans tabular-nums text-[14px] text-warn py-[9px]">
               {form.newPlan && form.precioNum !== undefined
                 ? Math.abs(form.discount).toLocaleString('es-BO')
                 : '—'}
@@ -248,7 +248,7 @@ export function RenewalModal({
           </div>
           <div>
             <p className={plainLabelCls}>Total</p>
-            <p className="font-mono text-[14px] font-semibold text-olive-700 bg-olive-100 rounded-[7px] py-[9px] px-[10px] text-center">
+            <p className="font-sans tabular-nums text-[14px] font-bold text-olive-700 bg-olive-100 rounded-[7px] py-[9px] px-[10px] text-center">
               {form.precioNum !== undefined ? form.total.toLocaleString('es-BO') : '—'}
             </p>
           </div>

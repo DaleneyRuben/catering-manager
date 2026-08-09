@@ -53,7 +53,7 @@ export function BillingRow({ setValue, planPrice, price }: Props) {
         <Field label="Precio base" htmlFor="base-price">
           <p
             id="base-price"
-            className="font-mono text-[14px] text-muted bg-empty-bg border border-hairline rounded-[9px] py-[11px] px-[14px]"
+            className="font-sans tabular-nums text-[14px] text-muted bg-empty-bg border border-hairline rounded-[9px] py-[11px] px-[14px]"
           >
             {planPrice !== undefined ? planPrice.toLocaleString('es-BO') : '—'}
           </p>
@@ -73,7 +73,7 @@ export function BillingRow({ setValue, planPrice, price }: Props) {
         <Field label={isSurcharge ? 'Recargo' : 'Descuento'} htmlFor="price-gap">
           <p
             id="price-gap"
-            className="font-mono text-[14px] text-warn bg-warn-bg border border-warn-border rounded-[9px] py-[11px] px-[14px]"
+            className="font-sans tabular-nums text-[14px] text-warn bg-warn-bg border border-warn-border rounded-[9px] py-[11px] px-[14px]"
           >
             {gap !== undefined ? Math.abs(gap).toLocaleString('es-BO') : '—'}
           </p>
@@ -83,7 +83,7 @@ export function BillingRow({ setValue, planPrice, price }: Props) {
         <span className="font-mono text-[11px] tracking-[.08em] uppercase text-muted">
           Total mensual
         </span>
-        <span className="font-serif text-[30px] font-semibold text-olive-700 tabular-nums">
+        <span className="font-sans text-[20px] font-semibold tabular-nums text-olive-700">
           {clientPriceNum !== undefined ? clientPriceNum.toLocaleString('es-BO') : '—'}
         </span>
       </div>
