@@ -1,5 +1,10 @@
 import { render, screen, act } from '@testing-library/react';
 import { AuthProvider, useAuth } from '@/features/auth/AuthContext';
+import { queryClient } from '@/services/queryClient';
+
+jest.mock('@/services/queryClient', () => ({
+  queryClient: { clear: jest.fn() },
+}));
 
 const TOKEN_KEY = 'auth_token';
 const USER_KEY = 'auth_user';
@@ -32,6 +37,7 @@ function renderWithProvider() {
 
 beforeEach(() => {
   localStorage.clear();
+  jest.mocked(queryClient.clear).mockClear();
 });
 
 describe('AuthContext', () => {
@@ -77,6 +83,16 @@ describe('AuthContext', () => {
     expect(screen.getByTestId('token').textContent).toBe('none');
     expect(localStorage.getItem(TOKEN_KEY)).toBeNull();
     expect(localStorage.getItem(USER_KEY)).toBeNull();
+  });
+
+  it('clearAuth clears the TanStack Query cache', () => {
+    localStorage.setItem(TOKEN_KEY, 'existing-token');
+    localStorage.setItem(USER_KEY, JSON.stringify(mockUser));
+    renderWithProvider();
+    act(() => {
+      screen.getByRole('button', { name: 'logout' }).click();
+    });
+    expect(queryClient.clear).toHaveBeenCalledTimes(1);
   });
 
   it('starts with no user when localStorage contains corrupted data', () => {
